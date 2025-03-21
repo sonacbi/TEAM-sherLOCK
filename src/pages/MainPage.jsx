@@ -5,6 +5,7 @@ function MainPage() {
   return (
     <div className='MainPage-wrap'>
       <h1>히히 하이요!!!!</h1>
+      <h1>히히 하이요!!!!</h1>
     </div>
   );
 }
