@@ -1,0 +1,57 @@
+.IntroPage-wrap {
+  min-height: 100vh;
+  background-color: #363535;
+}
+
+.intro {
+  position: absolute;
+  width: 374px;
+  height: 204px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(50px);
+  animation: fadeUp 1.5s ease-out forwards;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+}
+
+#shel {
+  position: absolute;
+}
+
+#lock {
+  position: absolute;
+  height: 165px;
+  left: 195px;
+  top: 10px;
+}
+
+.site-description {
+  position: absolute;
+  bottom: 10px;
+  left: 90px;
+  color: #D3D3D3;
+  font-family: 'Gugi', sans-serif;
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}
+
+.site-description.show {
+  opacity: 1;
+}
+
+@font-face {
+  font-family: 'Gugi';
+  src: url('../assets/fonts/Gugi/Gugi-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

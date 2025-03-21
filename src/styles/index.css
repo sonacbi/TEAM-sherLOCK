@@ -1,0 +1,6 @@
+* {margin: 0; padding: 0; box-sizing: border-box;}
+li {list-style: none;}
+a {text-decoration: none; color: inherit;}
+img {max-width: 100%; vertical-align: top;}
+table {width: 100%; border-collapse: collapse;}
+button {cursor: pointer;}
