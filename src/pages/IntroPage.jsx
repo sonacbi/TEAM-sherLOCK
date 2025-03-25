@@ -8,6 +8,7 @@ import lockImage from '../assets/images/lock/자물쇠.png';
 import lockGif from '../assets/images/lock/자물쇠.gif';
 import magnifier from '../assets/images/Intro-Img/magnifier.png';
 import key from '../assets/images/Intro-Img/key.png';
+import Intro_background from '../assets/images/Intro-Img/Intro-background.png';
 
 function IntroPage() {
   // 상태 변수 초기화
@@ -78,6 +79,12 @@ function IntroPage() {
 
   return (
     <div className='IntroPage-wrap'>
+      <img
+        id='Intro_background'
+        src={Intro_background}
+        alt='Intro_background'
+      />
+
       <div className='intro'>
         {/* Sherlock 로고: opacity 변화로 천천히 사라짐 */}
         <img 

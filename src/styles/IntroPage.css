@@ -3,6 +3,10 @@
   background-color: #363535;
 }
 
+#Intro_background {
+  min-height: 100vh;
+}
+
 .intro {
   position: absolute;
   width: 336px;
