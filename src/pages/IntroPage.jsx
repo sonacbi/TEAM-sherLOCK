@@ -6,8 +6,6 @@ import '../styles/IntroPage.css';
 import sherlockLogo from '../assets/images/logo/Sherlocklogo_bi.png';
 import lockImage from '../assets/images/lock/자물쇠.png';
 import lockGif from '../assets/images/lock/자물쇠.gif';
-import magnifier from '../assets/images/Intro-Img/magnifier.png';
-import key from '../assets/images/Intro-Img/key.png';
 import Intro_background from '../assets/images/Intro-Img/Intro-background.png';
 
 function IntroPage() {
@@ -18,8 +16,6 @@ function IntroPage() {
   const [clicked, setClicked] = useState(false); // 자물쇠 클릭 여부 상태
   const navigate = useNavigate(); // 페이지 전환을 위한 navigate 함수
   const [showDescription, setShowDescription] = useState(false); // 사이트 설명의 표시 여부
-  const [showMagnifier, setShowMagnifier] = useState(false); // magnifier 이미지 표시 여부
-  const [showKey, setShowKey] = useState(false); // key 이미지 표시 여부
 
   const lockRef = useRef(null); // 자물쇠 이미지에 대한 ref
 
@@ -66,17 +62,6 @@ function IntroPage() {
     return () => clearTimeout(timer);
   }, []); // 이 effect는 컴포넌트가 마운트 될 때만 실행됨
 
-  // 컴포넌트 마운트 후 3초 뒤에 magnifier, key을 표시
-  useEffect(() => {
-    const timer2 = setTimeout(() => {
-      setShowMagnifier(true); // magnifier 이미지가 보이게 설정
-      setShowKey(true); // key 이미지가 보이게 설정
-    }, 3000); // 3000ms = 3초 후에 사이트 설명 표시
-
-    // 컴포넌트 언마운트 시 타이머 정리
-    return () => clearTimeout(timer2);
-  }, []); // 이 effect는 컴포넌트가 마운트 될 때만 실행됨
-
   return (
     <div className='IntroPage-wrap'>
       <img
@@ -112,24 +97,6 @@ function IntroPage() {
           <p>방탈출 창작 & 공유 플랫폼</p>
         </div>
       </div>
-
-      {/* magnifier 이미지가 나타날 조건 */}
-      {showMagnifier && (
-        <img
-          id="magnifier"
-          src={magnifier}
-          alt="magnifier"
-        />
-      )}
-
-      {/* key 이미지가 나타날 조건 */}
-      {showKey && (
-        <img
-          id="key"
-          src={key}
-          alt="key"
-        />
-      )}
     </div>
   );
 }
