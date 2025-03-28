@@ -141,7 +141,7 @@ class Game {
         this.title = title;
         this.thumbnailURL = thumbnailURL;
         this.theme = theme;
-        this.stage.push(new Stage("오프닝"));
+        Game.stage.push(new Stage("오프닝"));
     }
 
     // 업적 생성
@@ -294,4 +294,4 @@ class Transition {
 
 
 // 모듈 내보내기
-export { GameData, Game, Stage, Cut }
+// export { GameData, Game, Stage, Cut }
