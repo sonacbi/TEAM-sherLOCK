@@ -69,4 +69,5 @@ function SaveCreatingGameData (game) {
     inventory: Game,
     stage
   }
+  return()
 }
