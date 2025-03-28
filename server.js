@@ -23,9 +23,20 @@ db.connect((err) => {
   }
 });
 
+
+app.post("/data", (req, res) => {
+  const sql = req.body.query;
+  db.query(sql, (err, results) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.json(results);
+    }
+  });
+});
 // 데이터 가져오는 API
-app.get("/data", (req, res) => {
-  db.query(req, (err, results) => {
+app.get("/data1", (req, res) => {
+  db.query('SELECT * FROM game;', (err, results) => {
     if (err) {
       res.status(500).send(err);
     } else {

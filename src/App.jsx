@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/Intro" element={<IntroPage />} />
         <Route path="/Main" element={<MainPage />} />
-        <Route path='/Sql' element={<SqlPage/>}></Route>
+        <Route path='/Sql' element={<SqlPage/>}/>
       </Routes>
     </Router>
   );
