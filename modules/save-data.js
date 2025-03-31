@@ -1,5 +1,5 @@
 import { version } from "react";
-
+/**
 class World {
     constructor(id, title, theme, visibility, func) {
       this.id = id;
@@ -39,19 +39,20 @@ console.log(jsonStr); // JSON 문자열로 변환
 
 const restoredWorld = World.fromJSON(jsonStr);
 console.log(restoredWorld); // "살인자를 찾아라"
+*/
 
 
-
-function SaveCreatingGameData (GameData, Game, game, ClassVersion) {
+function SaveCreatingGameData (ClassVersion, GameData, Game, game) {
   const classVersion = ClassVersion;
-  const GameDataToSave = {
+  const gameDataToSave = {
+    id: GameData.id,
     item: GameData.item,
     intVar: GameData.intVar,
     floatVar: GameData.floatVar,
     strVar: GameData.strVar,
     boolVar: GameData.boolVar
   }
-  const GameToSave = {
+  const gameToSave = {
     id: game.id,
     version: game.version,
     title: game.title,
@@ -59,13 +60,18 @@ function SaveCreatingGameData (GameData, Game, game, ClassVersion) {
     description: game.description,
     theme: game.theme,
     tag: game.tag,
-    postscript: game.postscript,
     playTime: game.playTime,
     visibility: game.visibility,
     isRanking: game.isRanking,
     isHiddenStage: game.isHiddenStage,
-    achievement: Game.achievement,
+    achievement: game.achievement,
+    inventory: game.inventory,
     stage: Game.stage
   }
-  return(classVersion, GameDataToSave, GameToSave);
+  console.log(ClassVersion.version)
+
+  return({classVersion, gameDataToSave, gameToSave});
 }
+
+
+export { SaveCreatingGameData }

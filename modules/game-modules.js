@@ -8,6 +8,7 @@ class ClassVersion {
  * 게임데이터
  */
 class GameData extends ClassVersion {
+    static id = 0;
     static item = [];           // 아이템 리스트
     static intVar = [];         // 정수형 변수
     static floatVar = [];       // 실수형 변수
@@ -17,15 +18,6 @@ class GameData extends ClassVersion {
     // 생성
     createItem() {
         this.item.push(new Item());
-    }
-    createIntVar() {
-        this.intVar.push(new IntVar());
-    }
-    createStrVar() {
-        this.strVar.push(new StrVar());
-    }
-    createBoolVar() {
-        this.boolVar.push(new BoolVar());
     }
     // 변수 조작
     static getIntVar() {}
@@ -55,6 +47,7 @@ class Item extends ClassVersion {
     // 합칠 수 있는 아이템 여부
 
     constructor(name, description, type, iconURL, imgURL, quantity, getItemMessage) {
+        super()
     }
 }
 
@@ -80,6 +73,7 @@ class StrVar extends ClassVersion {
     value;  // 값
 
     constructor(name, value) {
+        super()
         this.name = name;
         if(typeof value == 'string') this.value = value;
         else {
@@ -92,6 +86,7 @@ class BoolVar extends ClassVersion {
     value;  // 값
 
     constructor(name, value) {
+        super()
         this.name = name;
         if(typeof value == 'boolean') this.value = value;
         else {
@@ -121,7 +116,6 @@ class Game extends ClassVersion {
     }
     theme;                      // 테마    h(호러)·a(어드벤쳐)·m(미스터리)
     tag = [];                   // 태그
-    postscript;                 // 후기
     difficulty;                 // 난이도
     playTime;                   // 소요 시간
     visibility = "public";      // 공개 여부 public(공개)·unlisted(일부공개)·private(비공개)
@@ -131,16 +125,18 @@ class Game extends ClassVersion {
     static inventory = [];      // 인벤토리
     static stage = [];          // 스테이지
 
-    /**
-     * 방탈출 월드 생성
-     * @param {문자} title 제목
-     * @param {문자} thumbnailURL 썸네일URL
-     * @param {문자} theme h(호러)·a(어드벤쳐)·m(미스터리)
-     */
-    constructor(title, thumbnailURL, theme) {
+    constructor(title, thumbnailURL, description, theme, tag, difficulty, playTime, visibility, isRanking, isHiddenStage) {
+        super()
         this.title = title;
         this.thumbnailURL = thumbnailURL;
+        this.description = description;
         this.theme = theme;
+        this.tag = tag;
+        this.difficulty = difficulty;
+        this.playTime = playTime;
+        this.visibility = visibility;
+        this.isRanking = isRanking;
+        this.isHiddenStage = isHiddenStage;
         Game.stage.push(new Stage("오프닝"));
     }
 
@@ -178,6 +174,7 @@ class Achievement extends ClassVersion {
     name;
 
     constructor(name) {
+        super()
     }
 }
 
@@ -197,6 +194,7 @@ class Stage extends ClassVersion {
     cut = [];           // 컷
 
     constructor(name, type, imgURL, description, timeLimit, gateOpen, closedGateMessage) {
+        super()
         this.cut.push(new Cut());
     }
 
@@ -233,6 +231,7 @@ class Cut extends ClassVersion {
     // direction;  // 방향: 상·하·동·서·남·북 (유저가 직접 별명 지을 수 있음)
 
     constructor() {
+        super()
     }
     setVar() {}
     // 컷 연결하기
@@ -255,6 +254,7 @@ class Puzzle extends ClassVersion {
     chance = 0;
     hint;
     constructor() {
+        super()
         this.transition = new Transition();
     }
     createPuzzle() {
@@ -289,4 +289,4 @@ class Transition extends ClassVersion {
 
 
 // 모듈 내보내기
-// export { GameData, Game, Stage, Cut }
+export { ClassVersion, GameData, Game, Stage, Cut }
