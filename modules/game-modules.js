@@ -1,8 +1,13 @@
+class ClassVersion {
+    static version = "0.0.1";
+}
+
+
+
 /**
  * 게임데이터
  */
-class GameData {
-    static class_version = "0.0.1";
+class GameData extends ClassVersion {
     static item = [];           // 아이템 리스트
     static intVar = [];         // 정수형 변수
     static floatVar = [];       // 실수형 변수
@@ -39,8 +44,7 @@ class GameData {
 /**
  * 아이템 생성기
  */
-class Item {
-    static class_version = "0.0.1";
+class Item extends ClassVersion {
     name;
     description;
     type;
@@ -59,8 +63,7 @@ class Item {
 /**
  * 변수 생성기
  */
-class IntVar {
-    static class_version = "0.0.1";
+class IntVar extends ClassVersion {
     name;   // 변수명
     value;  // 값
     
@@ -72,8 +75,7 @@ class IntVar {
         };
     }
 }
-class StrVar {
-    static class_version = "0.0.1";
+class StrVar extends ClassVersion {
     name;   // 변수명
     value;  // 값
 
@@ -85,8 +87,7 @@ class StrVar {
         };
     }
 }
-class BoolVar {
-    static class_version = "0.0.1";
+class BoolVar extends ClassVersion {
     name;   // 변수명
     value;  // 값
 
@@ -104,8 +105,7 @@ class BoolVar {
 /**
  * 게임 생성기
  */
-class Game {
-    static class_version = "0.0.1";
+class Game extends ClassVersion {
     id = Math.floor(Math.random() * 100000000); // DB와 연동
     version;                    // 유저가 자신의 월드를 버전관리한다? 넣기 애매함
     title;                      // 제목
@@ -174,8 +174,7 @@ class Game {
 /**
  * 업적 생성기
  */
-class Achievement {
-    static class_version = "0.0.1";
+class Achievement extends ClassVersion {
     name;
 
     constructor(name) {
@@ -187,8 +186,7 @@ class Achievement {
 /**
  * 스테이지 생성기
  */
-class Stage {
-    static class_version = "0.0.1";
+class Stage extends ClassVersion {
     name;
     type;               // n(노말)·d(죽음)·e(엔딩)·h(히든)
     imgURL;             // 이미지 경로
@@ -226,8 +224,7 @@ class Stage {
 /**
  * 컷 생성기
  */
-class Cut {
-    static class_version = "0.0.1";
+class Cut extends ClassVersion {
     name;           // 상하·동서남북으로도 이름지을 수 있겠다
     type;           // n(노말)·p(퍼즐)·m(스테이지 이동)·f(실패)·
     imgURL;         // 이미지 url
@@ -250,8 +247,7 @@ class Cut {
 
 
 
-class Puzzle {
-    static class_version = "0.0.1";
+class Puzzle extends ClassVersion {
     name;
     type;
     answer;
@@ -282,8 +278,7 @@ class Puzzle {
 /**
  * 생성기
  */
-class Transition {
-    static class_version = "0.0.1";
+class Transition extends ClassVersion {
     id;
     time;
     condition;  // 조건

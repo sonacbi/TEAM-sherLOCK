@@ -42,27 +42,16 @@ console.log(restoredWorld); // "살인자를 찾아라"
 
 
 
-function SaveCreatingGameData (GameData, Game, game, Stage, Cut, Item, IntVar, StrVar, BoolVar, Achievement, Puzzle) {
-  const classVersion = {
-    GameData: GameData.class_version,
-    Game: Game.class_version,
-    Stage: Stage.class_version,
-    Cut: Cut.class_version,
-    Item: Item.class_version,
-    IntVar: IntVar.class_version,
-    StrVar: StrVar.class_version,
-    BoolVar: BoolVar.class_version,
-    Achievement: Achievement.class_version,
-    Puzzl: Puzzle.class_version
-  }
-  const GameData = {
+function SaveCreatingGameData (GameData, Game, game, ClassVersion) {
+  const classVersion = ClassVersion;
+  const GameDataToSave = {
     item: GameData.item,
     intVar: GameData.intVar,
     floatVar: GameData.floatVar,
     strVar: GameData.strVar,
     boolVar: GameData.boolVar
   }
-  const Game = {
+  const GameToSave = {
     id: game.id,
     version: game.version,
     title: game.title,
@@ -78,5 +67,5 @@ function SaveCreatingGameData (GameData, Game, game, Stage, Cut, Item, IntVar, S
     achievement: Game.achievement,
     stage: Game.stage
   }
-  return(classVersion, GameData, Game);
+  return(classVersion, GameDataToSave, GameToSave);
 }
