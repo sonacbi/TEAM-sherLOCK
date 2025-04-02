@@ -1,10 +1,40 @@
 .IntroPage-wrap {
-  min-height: 100vh;
+  height: 100dvh;
+  width: 100dvw;
   background-color: #363535;
 }
 
 #Intro_background {
-  min-height: 100vh;
+  height: 100dvh;
+  width: 100dvw;
+}
+
+.hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  font-family: 'Gugi', sans-serif;
+  color: #7e7e7e;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  animation: hintUpDown 1.5s ease-in-out infinite;
+}
+
+.hint.show2 {
+  opacity: 1;
+}
+
+@keyframes hintUpDown {
+  0% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -10px);
+  }
+  100% {
+    transform: translate(-50%, 0);
+  }
 }
 
 .intro {

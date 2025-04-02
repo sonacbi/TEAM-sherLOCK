@@ -16,6 +16,7 @@ function IntroPage() {
   const [clicked, setClicked] = useState(false); // 자물쇠 클릭 여부 상태
   const navigate = useNavigate(); // 페이지 전환을 위한 navigate 함수
   const [showDescription, setShowDescription] = useState(false); // 사이트 설명의 표시 여부
+  const [showHint, setShowHint] = useState(false); // 힌트 표시 여부
 
   const lockRef = useRef(null); // 자물쇠 이미지에 대한 ref
 
@@ -62,6 +63,16 @@ function IntroPage() {
     return () => clearTimeout(timer);
   }, []); // 이 effect는 컴포넌트가 마운트 될 때만 실행됨
 
+  // 컴포넌트 마운트 후 10초 뒤에 hint을 표시
+  useEffect(() => {
+    const timer2 = setTimeout(() => {
+      setShowHint(true); // 힌트를 보이게 설정
+    }, 10000); // 10000ms = 10초 후에 힌트트 표시
+
+    // 컴포넌트 언마운트 시 타이머 정리
+    return () => clearTimeout(timer2);
+  }, []); // 이 effect는 컴포넌트가 마운트 될 때만 실행됨
+
   return (
     <div className='IntroPage-wrap'>
       <img
@@ -69,6 +80,10 @@ function IntroPage() {
         src={Intro_background}
         alt='Intro_background'
       />
+
+      <div className={`hint ${showHint ? "show2" : ""}`}>
+        <p>! 자물쇠 클릭 !</p>
+      </div>
 
       <div className='intro'>
         {/* Sherlock 로고: opacity 변화로 천천히 사라짐 */}
