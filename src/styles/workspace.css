@@ -1,0 +1,13 @@
+table td:nth-child(1) {
+    /* border: 1px solid black; */
+    padding-right: 100px;
+}
+/* #stage td {
+    width: 200px;
+} */
+
+.cut {
+    margin: 10px 0;
+    margin-left: 50px;
+    background-color: #bbefff;
+}

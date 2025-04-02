@@ -102,7 +102,7 @@ class BoolVar extends ClassVersion {
  */
 class Game extends ClassVersion {
     id = Math.floor(Math.random() * 100000000); // DB와 연동
-    version;                    // 유저가 자신의 월드를 버전관리한다? 넣기 애매함
+    // version;                    // 유저가 자신의 월드를 버전관리한다? 넣기 애매함
     title;                      // 제목
     thumbnailURL;               // 게임 썸네일 URL
     description;                // 설명
@@ -122,8 +122,8 @@ class Game extends ClassVersion {
     isRanking = false;          // 랭킹 표시 여부
     isHiddenStage = false;      // 히든 스테이지 여부
     achievement = [];           // 업적
-    static inventory = [];      // 인벤토리
-    static stage = [];          // 스테이지
+    inventory = [];      // 인벤토리
+    stage = [];          // 스테이지
 
     constructor(title, thumbnailURL, description, theme, tag, difficulty, playTime, visibility, isRanking, isHiddenStage) {
         super()
@@ -137,7 +137,7 @@ class Game extends ClassVersion {
         this.visibility = visibility;
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
-        Game.stage.push(new Stage("오프닝"));
+        this.stage.push(new Stage("오프닝"));
     }
 
     // 업적 생성
@@ -145,11 +145,12 @@ class Game extends ClassVersion {
         this.achievement.push(new Achievement());
     }
     // 스테이지 생성
-    createStage() {
-        this.stage.push(new Stage());
+    createStage(name, type, imgURL, description, timeLimit, gateOpen, closedGateMessage) {
+        this.stage.push(new Stage(name, type, imgURL, description, timeLimit, gateOpen, closedGateMessage));
     }
     // 스테이지 수정
-    updateStage(i) {
+    updateStage(index, name, type, imgURL, description, timeLimit, gate) {
+        // this.stage[index].name =  
     }
     // 스테이지 삭제
     deleteStage(i) {
