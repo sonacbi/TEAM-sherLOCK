@@ -42,15 +42,15 @@ console.log(restoredWorld); // "살인자를 찾아라"
 */
 
 
-function SaveCreatingGameData (ClassVersion, GameData, Game, game) {
+function SaveCreatingGameData (ClassVersion, GameSource, Game, game) {
   const classVersion = ClassVersion;
   const gameDataToSave = {
-    id: GameData.id,
-    item: GameData.item,
-    intVar: GameData.intVar,
-    floatVar: GameData.floatVar,
-    strVar: GameData.strVar,
-    boolVar: GameData.boolVar
+    id: GameSource.id,
+    item: GameSource.item,
+    intVar: GameSource.intVar,
+    floatVar: GameSource.floatVar,
+    strVar: GameSource.strVar,
+    boolVar: GameSource.boolVar
   }
   const gameToSave = {
     id: game.id,
