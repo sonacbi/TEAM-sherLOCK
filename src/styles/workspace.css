@@ -6,8 +6,15 @@ table td:nth-child(1) {
     width: 200px;
 } */
 
-.cut {
-    margin: 10px 0;
+#game {
+    background-color: #aeecff;
+}
+.stage {
     margin-left: 50px;
-    background-color: #bbefff;
+    background-color: rgb(166, 213, 255)
+}
+.cut {
+    padding: 10px 0;
+    margin-left: 50px;
+    background-color: #00c3ff;
 }

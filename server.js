@@ -1,4 +1,5 @@
 // require("dotenv").config();
+// import 'dotenv/config'
 import express from 'express'
 import mysql from 'mysql2'
 import cors from 'cors'
@@ -11,7 +12,7 @@ app.use(express.json()); // JSON 요청 처리
 const db = mysql.createConnection({
   host: "127.0.0.1",
   user: "root",
-  password: "0000",
+  password: "025712",
   database: "sherlock",
 });
 
@@ -24,9 +25,14 @@ db.connect((err) => {
 });
 
 
-app.post("/data", (req, res) => {
-  const sql = req.body.query;
-  db.query(sql, (err, results) => {
+
+// 게임 테이블 조회
+app.get("/game/:num", (req, res) => {
+  console.log("게임 아이디:", req.params.num);
+  const num = Number(req.params.num);
+  console.log(num)
+  db.query(`SELECT * FROM game WHERE game_id = ?;`, [num], (err, results) => {
+    console.log('results: ', results)
     if (err) {
       res.status(500).send(err);
     } else {
@@ -34,9 +40,10 @@ app.post("/data", (req, res) => {
     }
   });
 });
-// 데이터 가져오는 API
-app.get("/data1", (req, res) => {
-  db.query('SELECT * FROM game;', (err, results) => {
+
+app.post("/data", (req, res) => {
+  const sql = req.body.query;
+  db.query(sql, (err, results) => {
     if (err) {
       res.status(500).send(err);
     } else {

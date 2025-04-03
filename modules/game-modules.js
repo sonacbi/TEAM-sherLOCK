@@ -1,5 +1,6 @@
 class ClassVersion {
-    static version = "0.0.1";
+    static this_version = "0.0.1";
+    version = "0.0.1";
 }
 
 
@@ -7,7 +8,7 @@ class ClassVersion {
 /**
  * 게임데이터
  */
-class GameData extends ClassVersion {
+class GameSource extends ClassVersion {
     static id = 0;
     static item = [];           // 아이템 리스트
     static intVar = [];         // 정수형 변수
@@ -290,4 +291,4 @@ class Transition extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, GameData, Game, Stage, Cut }
+export { ClassVersion, GameSource, Game, Stage, Cut }
