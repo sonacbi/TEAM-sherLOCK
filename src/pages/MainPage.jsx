@@ -1,12 +1,31 @@
 import React from 'react';
+
+import Header_Logo from '../components/Header_Logo/Header_Logo';
 import '../styles/MainPage.css';
-import Scroll from '../components/Scroll/Scroll';
+
+import background from '../assets/images/default_background.png';
+import notice from '../assets/images/MainPage_img/notice.png';
 
 function MainPage() {
   return (
     <div className='MainPage-wrap'>
-      <h1>히히 하이요!!!!</h1>
-      <Scroll />
+      <img
+        id='Main_background'
+        src={background}
+        alt='Main_background'
+      />
+
+      <header>
+        <img
+          id='notice'
+          src={notice}
+          alt='notice'
+        />
+
+        <Header_Logo />
+
+        
+      </header>
     </div>
   );
 }

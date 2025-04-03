@@ -6,6 +6,7 @@
     border: 2px solid #ddd;
     padding: 10px;
 }
+
 /* 스크롤바 숨기기 */
 .scroll-container::-webkit-scrollbar {
     display: none; /* 웹킷 기반 브라우저에서 스크롤바 숨기기 */

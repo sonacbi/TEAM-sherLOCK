@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/IntroPage.css';
 
 // 이미지 import
-import sherlockLogo from '../assets/images/logo/Sherlocklogo_bi.png';
-import lockImage from '../assets/images/lock/자물쇠.png';
-import lockGif from '../assets/images/lock/자물쇠.gif';
-import Intro_background from '../assets/images/Intro-Img/Intro-background.png';
+import sherlockLogo from '../assets/images/IntroPage_img/Intro_sher.png';
+import lockImage from '../assets/images/IntroPage_img/lock/lock.png';
+import lockGif from '../assets/images/IntroPage_img/lock/lock.gif';
+import background from '../assets/images/default_background.png';
 
 function IntroPage() {
   // 상태 변수 초기화
@@ -77,7 +77,7 @@ function IntroPage() {
     <div className='IntroPage-wrap'>
       <img
         id='Intro_background'
-        src={Intro_background}
+        src={background}
         alt='Intro_background'
       />
 

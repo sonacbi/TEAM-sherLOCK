@@ -1,4 +1,26 @@
 .MainPage-wrap {
+    height: 100dvh;
+    width: 100dvw;
     background-color: #363535;
-    min-height: 100vh;
+}
+
+#Main_background {
+    height: 100dvh;
+    width: 100dvw;
+}
+
+header {
+    width: 100%;
+    top: 5%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+}
+
+#notice {
+    position: absolute;
+    width: 46px;
+    height: 50px;
+    left: 3%;
+    top: 20%;
 }
