@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
+import Sign from '../components/Sign/Sign_outside/Sign_outside';
 import '../styles/MainPage.css';
 
 import background from '../assets/images/default_background.png';
@@ -23,8 +24,7 @@ function MainPage() {
         />
 
         <Header_Logo />
-
-        
+        <Sign />
       </header>
     </div>
   );

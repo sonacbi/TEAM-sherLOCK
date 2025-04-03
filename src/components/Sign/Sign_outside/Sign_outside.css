@@ -1,0 +1,11 @@
+.Sign {
+    display: flex;
+    position: absolute;
+    gap: 10px;
+    right: 3%;
+    top: 20%;
+}
+
+#sign_in, #sign_up {
+    width: 50px;
+}

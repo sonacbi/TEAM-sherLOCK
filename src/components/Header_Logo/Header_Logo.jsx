@@ -26,7 +26,6 @@ function Header_Logo({onClick}) {
         if (e.key === 'Enter') handleClick();
       }}
     >
-
       <img
         id='sherlock'
         src={header_logo}
