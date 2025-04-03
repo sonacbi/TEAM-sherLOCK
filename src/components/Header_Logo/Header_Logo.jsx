@@ -5,7 +5,7 @@ import './Header_Logo.css';
 
 import header_logo from '../../assets/images/logo/header_logo.png';
 
-function Header_Logo({onClick}) {
+function Header_Logo() {
   const navigate = useNavigate();
   const location = useLocation();
 

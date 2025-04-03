@@ -69,7 +69,7 @@
   top: 10px;
 }
 
-.site-description {
+.site_description {
   position: absolute;
   bottom: 10px;
   left: 90px;
@@ -79,7 +79,7 @@
   transition: opacity 1s ease-out;
 }
 
-.site-description.show {
+.site_description.show {
   opacity: 1;
 }
 

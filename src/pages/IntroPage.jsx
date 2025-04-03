@@ -74,7 +74,7 @@ function IntroPage() {
   }, []); // 이 effect는 컴포넌트가 마운트 될 때만 실행됨
 
   return (
-    <div className='IntroPage-wrap'>
+    <div className='IntroPage_wrap'>
       <img
         id='Intro_background'
         src={background}
@@ -108,7 +108,7 @@ function IntroPage() {
         />
 
         {/* site-description: 초기에는 보이지 않다가 일정 시간 후에 표시됨 */}
-        <div className={`site-description ${showDescription ? 'show' : ''}`}>
+        <div className={`site_description ${showDescription ? 'show' : ''}`}>
           <p>방탈출 창작 & 공유 플랫폼</p>
         </div>
       </div>

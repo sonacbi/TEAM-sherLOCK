@@ -7,5 +7,6 @@
 }
 
 #sign_in, #sign_up {
+    cursor: pointer;
     width: 50px;
 }
