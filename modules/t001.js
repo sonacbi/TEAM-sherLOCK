@@ -1,5 +1,8 @@
-import { ClassVersion, GameData, Game, Stage, Cut } from "./game-modules.js";
+// import { ClassVersion, GameSource, Game, Stage, Cut } from "./game-modules.js";
+import { Game } from "./game-modules.js";
 import { SaveCreatingGameData } from "./save-data.js";
+
+new Game
 
 const t001 = new Game(
     /* 제목 */          "살찾",
@@ -11,14 +14,18 @@ const t001 = new Game(
     /* 시간 */          10,
     /* 공개 */          0,
     /* 랭킹표시여부 */  false,
-    /* 히든여부부 */    false
+    /* 히든여부 */      false
 );
 
 // console.log("🚀 ~ t001:", Game.version)
 
 // console.log(t001)
+t001.createStage()
+t001.stage[0].type = "n"
+t001.stage[0].cut[0].type = "p"
 
-const a = SaveCreatingGameData(ClassVersion, GameData, Game, t001)
+const a = SaveCreatingGameData(ClassVersion, GameSource, Game, t001)
+
 
 // console.log(Game)
 
