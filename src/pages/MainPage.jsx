@@ -76,7 +76,7 @@ function MainPage() {
       </div>
 
       <Footer />
-      <Sign_in />
+      {/* <Sign_in /> */}
     </div>
   );
 }
