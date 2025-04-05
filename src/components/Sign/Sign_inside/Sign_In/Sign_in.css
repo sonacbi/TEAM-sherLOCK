@@ -5,6 +5,7 @@
     width: 100dvw;
     height: 100dvh;
     background-color: rgba(0, 0, 0, 0.671);
+    z-index: 999;
 }
 
 .Sign_content {
@@ -18,10 +19,24 @@
     transform: translate(-50%, -50%);
 }
 
+#X {
+    position: absolute;
+    width: 15px;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+#X:hover {
+    opacity: 0.5;
+}
+
 .Sign_in .Sign_content .header_logo {
     display: flex;
     justify-content: center;
     margin: 20px 10px;
+    pointer-events: none;
 }
 
 .login {
@@ -29,4 +44,57 @@
     margin: 20px 40px;
     border-top: 2px solid #fff;
     border-bottom: 2px solid #fff;
+}
+
+.hidden {
+    height: 100%;
+    display: flex;
+    flex-direction: column;   
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.kakao_login, .sherlock_login {
+    width: 212px;
+    height: 40px;
+    border-radius: 3px;
+    padding: 10px;
+}
+
+.kakao_login {
+    background-color: #ffea62;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    gap: 20px;
+    cursor: pointer;
+}
+
+#kakao {
+    width: 30px;
+    height: 30px;
+}
+
+.sherlock_login {
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.sherlock_login p {
+    text-align: center;
+    font-weight: bold;
+}
+
+.Sign_up_img {
+    display: flex;
+    justify-content: center;
+    height: 20%;
+    align-items: center;
+}
+
+#Sign_up {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
 }

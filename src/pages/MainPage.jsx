@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Sign from '../components/Sign/Sign_outside/Sign_outside';
-import Footer from '../components/Footer/Footer';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
+import Footer from '../components/Footer/Footer';
 import '../styles/MainPage.css';
 
 import background from '../assets/images/default_background.png';
@@ -23,6 +23,23 @@ const themes = [
 
 function MainPage() {
   const articlesRef = useRef([]);
+  const [showSignIn, setShowSignIn] = useState(false);
+
+  const handleSignInClick = () => {
+    setShowSignIn(true);
+  };
+
+  const handleCloseSignIn = () => {
+    setShowSignIn(false);
+  };
+
+  useEffect(() => {
+    if (showSignIn) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [showSignIn]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -45,6 +62,35 @@ function MainPage() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (showSignIn) {
+        e.preventDefault();
+        return;
+      }
+  
+      e.preventDefault();
+  
+      if (e.deltaY > 0) {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth',
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      }
+    };
+  
+    window.addEventListener('wheel', handleWheel, { passive: false });
+  
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, [showSignIn]);
+
   return (
     <div className='MainPage_wrap'>
       <div className='MainPage_content'>
@@ -53,7 +99,7 @@ function MainPage() {
         <header>
           <img id='notice' src={notice} alt='notice' />
           <Header_Logo />
-          <Sign />
+          <Sign onSignInClick={handleSignInClick}/>
         </header>
 
         <div className="theme">
@@ -76,7 +122,7 @@ function MainPage() {
       </div>
 
       <Footer />
-      {/* <Sign_in /> */}
+      {showSignIn && <Sign_in onClose={handleCloseSignIn} />}
     </div>
   );
 }
