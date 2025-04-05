@@ -1,0 +1,32 @@
+.Sign_in {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.671);
+}
+
+.Sign_content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 2 / 2.3;
+    width: 20%;
+    background-color: #272727;
+    border-radius: 20px;
+    transform: translate(-50%, -50%);
+}
+
+.Sign_in .Sign_content .header_logo {
+    display: flex;
+    justify-content: center;
+    margin: 20px 10px;
+}
+
+.login {
+    height: 40%;
+    margin: 20px 40px;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}

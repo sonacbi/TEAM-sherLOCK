@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Sign from '../components/Sign/Sign_outside/Sign_outside';
 import Footer from '../components/Footer/Footer';
+import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import '../styles/MainPage.css';
 
 import background from '../assets/images/default_background.png';
@@ -75,6 +76,7 @@ function MainPage() {
       </div>
 
       <Footer />
+      <Sign_in />
     </div>
   );
 }
