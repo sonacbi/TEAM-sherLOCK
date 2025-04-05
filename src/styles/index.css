@@ -4,3 +4,4 @@ a {text-decoration: none; color: inherit;}
 img {max-width: 100%; vertical-align: top;}
 table {width: 100%; border-collapse: collapse;}
 button {cursor: pointer;}
+body::-webkit-scrollbar {display: none;}

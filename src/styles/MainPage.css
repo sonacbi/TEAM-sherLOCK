@@ -48,28 +48,51 @@ header {
     width: 23%;
     height: 100%;
     border-radius: 20px;
-    opacity: 0.6;
+    opacity: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    transition: opacity 0.3s ease;
+    transform: translateY(50px);
+    cursor: pointer;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    pointer-events: none;
+}
+
+.theme article.show {
+    pointer-events: auto;
+    opacity: 0.6;
+    transform: translateY(0);
 }
 
 .theme article:hover {
     opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(-20px);
 }
 
 #horror {
     background-color: #b22222;
 }
 
+#horror:hover {
+    box-shadow: 0 0 20px #b22222;
+}
+
 #adventure {
     background-color: #e4c590;
 }
 
+#adventure:hover {
+    box-shadow: 0 0 20px #e4c590;
+}
+
 #crime {
     background-color: #4f4f4f;
+}
+
+#crime:hover {
+    box-shadow: 0 0 20px #4f4f4f;
 }
 
 #horror_outline, #adventure_outline, #crime_outline {
@@ -84,11 +107,25 @@ header {
 }
 
 .horror_icon p, .adventure_icon p, .crime_icon p {
-    margin-top: 20%;
+    margin-top: 10%;
     color: #fff;
     font-size: 50px;
     font-family: 'Warhaven', sans-serif;
     display: none;
+}
+
+.theme_icon {
+    transition: transform 0.5s ease;
+}
+  
+.theme article:hover .horror_icon p,
+.theme article:hover .adventure_icon p,
+.theme article:hover .crime_icon p {
+    display: block;
+}
+
+.theme article:hover .theme_icon {
+    transform: translateY(-10px);
 }
 
 @font-face {

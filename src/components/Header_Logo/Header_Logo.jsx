@@ -20,11 +20,7 @@ function Header_Logo() {
   return (
     <div 
       className='header_logo'
-      tabIndex="0"
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') handleClick();
-      }}
     >
       <img
         id='sherlock'
