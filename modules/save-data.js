@@ -1,4 +1,5 @@
 import { version } from "react";
+import fs from 'fs'
 /**
 class World {
     constructor(id, title, theme, visibility, func) {
@@ -42,36 +43,36 @@ console.log(restoredWorld); // "살인자를 찾아라"
 */
 
 
-function SaveCreatingGameData (ClassVersion, GameSource, Game, game) {
+function SaveGame (ClassVersion, GameSource, game) {
   const classVersion = ClassVersion;
-  const gameDataToSave = {
+  const gameSource = {
     id: GameSource.id,
     item: GameSource.item,
     intVar: GameSource.intVar,
-    floatVar: GameSource.floatVar,
     strVar: GameSource.strVar,
     boolVar: GameSource.boolVar
   }
-  const gameToSave = {
+  const gameData = {
     id: game.id,
-    version: game.version,
     title: game.title,
     thumbnailURL: game.thumbnailURL,
     description: game.description,
+    role: game.role,
     theme: game.theme,
     tag: game.tag,
+    difficulty: game.difficulty,
     playTime: game.playTime,
     visibility: game.visibility,
     isRanking: game.isRanking,
     isHiddenStage: game.isHiddenStage,
     achievement: game.achievement,
     inventory: game.inventory,
-    stage: Game.stage
+    stage: game.stage
   }
-  console.log(ClassVersion.version)
+  console.log('세이브 게임', {classVersion, gameSource, gameData})
 
-  return({classVersion, gameDataToSave, gameToSave});
+  return({classVersion, gameSource, gameData});
 }
 
 
-export { SaveCreatingGameData }
+export { SaveGame }

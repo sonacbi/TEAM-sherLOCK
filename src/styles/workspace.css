@@ -18,3 +18,12 @@ table td:nth-child(1) {
     margin-left: 50px;
     background-color: #00c3ff;
 }
+
+section>div {
+    display:inline-flex;
+    margin-right: 50px;
+}
+
+input {
+    margin-left: 10px;
+}

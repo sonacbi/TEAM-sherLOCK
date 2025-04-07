@@ -18,26 +18,26 @@ type Variable = {
  * 게임소스
  */
 class GameSource extends ClassVersion {
-    static game_id:     number;
-    static item:        Item[]      =  [];   // 아이템 리스트
-    static intVar:      Variable[]  =  [];   // 숫자형 변수
-    static strVar:      Variable[]  =  [];   // 문자형 변수
-    static boolVar:     Variable[]  =  [];   // 논리형 변수
+    game_id:     number      =  null;
+    item:        Item[]      =  [];   // 아이템 리스트
+    intVar:      Variable[]  =  [];   // 숫자형 변수
+    strVar:      Variable[]  =  [];   // 문자형 변수
+    boolVar:     Variable[]  =  [];   // 논리형 변수
 
     // 생성
     createItem() {
-        GameSource.item.push(new Item());
+        // GameSource.item.push(new Item());
     }
     // 변수 조작
-    static getIntVar() {}
-    static getStrVar() {}
-    static getBoolVar() {}
-    static setIntVar() {}
-    static setStrVar() {}
-    static setBoolVar() {}
-    static putIntVar() {}
-    static putStrVar() {}
-    static putBoolVar() {}
+    getIntVar() {}
+    getStrVar() {}
+    getBoolVar() {}
+    setIntVar() {}
+    setStrVar() {}
+    setBoolVar() {}
+    putIntVar() {}
+    putStrVar() {}
+    putBoolVar() {}
 }
 
 
@@ -46,14 +46,14 @@ class GameSource extends ClassVersion {
  * 아이템 생성기
  */
 class Item extends ClassVersion {
-    name:               string;                 // 아이템 이름
-    description:        string;                 // 아이템 설명
-    type:               string;                 // 아이템 타입 (고민 중...)
-    iconURL:            string;                 // 아이템 아이콘 url
-    imgURL:             string;                 // 아이템 상세 이미지 url
-    quantity:           number = 1;             // 수량
-    getItemMessage:     string;                 // 아이템 획득 시 뜨는 메세지. 값이 비어 있으면 메시지가 안 뜨게
-    uniteItem:          string | null;          // 합칠 수 있는 아이템의 이름으로 받음
+    name:               string  = '';           // 아이템 이름
+    description:        string  = '';           // 아이템 설명
+    type:               string  = '';           // 아이템 타입 (고민 중...)
+    iconURL:            string  = '';           // 아이템 아이콘 url
+    imgURL:             string  = '';           // 아이템 상세 이미지 url
+    quantity:           number  =  1;           // 수량
+    getItemMessage:     string  =  null;        // 아이템 획득 시 뜨는 메세지. 값이 비어 있으면 메시지가 안 뜨게
+    uniteItem:          string  =  null;        // 합칠 수 있는 아이템의 이름으로 받음
 
     constructor() {
         super()
@@ -63,24 +63,24 @@ class Item extends ClassVersion {
  * 변수 생성기
  */
 class IntVar extends ClassVersion {
-    name:   string;     // 변수명
-    value:  number;     // 값
+    name:   string = '';     // 변수명
+    value:  number = 0;     // 값
     
     constructor() {
         super()
     }
 }
 class StrVar extends ClassVersion {
-    name:   string;     // 변수명
-    value:  string;     // 값
+    name:   string = '';     // 변수명
+    value:  string = '';     // 값
 
     constructor() {
         super()
     }
 }
 class BoolVar extends ClassVersion {
-    name:   string;     // 변수명
-    value:  boolean;    // 값
+    name:   string  = '';     // 변수명
+    value:  boolean = true;    // 값
 
     constructor() {
         super()
@@ -98,23 +98,28 @@ type Role = {
     support:    string[]
 }
 enum Theme {
-    horror    = "horror",
+    horror = "horror",
     adventure = "adventure",
-    crime     = "crime",
+    crime = "crime",
+}
+enum Difficulty {
+    easy = "easy",
+    medium = "medium",
+    hard = "hard",
 }
 enum Visibility {
-    public    = "public",
-    unlisted  = "unlisted",
-    private   = "private",
+    public = "public",
+    unlisted = "unlisted",
+    private = "private",
 }
 /**
  * 게임 생성기
  */
-class Game extends ClassVersion {
+class GameData extends ClassVersion {
     id:             number;                             // MySQL과 연동해서 얻음
-    title:          string;                             // 제목
-    thumbnailURL:   string;                             // 게임 썸네일 URL
-    description:    string;                             // 설명
+    title:          string      =  '';                  // 제목
+    thumbnailURL:   string      =  '';                  // 게임 썸네일 URL
+    description:    string      =  '';                  // 설명
     role:           Role = {                            // 각 제작자가 맡은 역할
         planning: [],     // 기획
         art: [],          // 그림
@@ -123,10 +128,10 @@ class Game extends ClassVersion {
         mechanic: [],     // 기능
         support: []       // 도움
     }
-    theme:          Theme;                              // 테마
-    tag:            string;                             // 태그
-    difficulty:     number;                             // 난이도
-    playTime:       number;                             // 예상 소요 시간
+    theme:          Theme       =  Theme.horror;        // 테마
+    tag:            string      =  '';                  // 태그
+    difficulty:     Difficulty  =  Difficulty.medium;   // 난이도
+    playTime:       number      =  10;                  // 예상 소요 시간
     visibility:     Visibility  =  Visibility.public;   // 공개 여부
     isRanking:      boolean     =  false;               // 랭킹 표시 여부
     isHiddenStage:  boolean     =  false;               // 히든 스테이지 여부
@@ -180,7 +185,7 @@ class Achievement extends ClassVersion {
 
 enum StageType {
     normal = "normal",
-    death  = "death",
+    death = "death",
     ending = "ending",
     hidden = "hidden",
 }
@@ -188,15 +193,15 @@ enum StageType {
  * 스테이지 생성기
  */
 class Stage extends ClassVersion {
-    name:               string;
-    type:               StageType  =  StageType.normal;   // 스테이지 타입
-    imgURL:             string;                           // 이미지 경로
-    description:        string;                           // 설명
-    timeLimit:          number;                           // 스테이지 시간제한
-    gateOpen:           boolean    =  true;               // 들어올 수 있는지 여부
-    closedGateMessage:  string;                           // 진입불가 게이트로 진입 시 뜨는 메시지. 예시: "${Stage.name}이(가) 잠겼습니다."
-    connectedStage:     number[];                         // 스테이지 인덱스로 연결한다
-    cut:                Cut[]      =  [];                 // 컷
+    name:               string     =  '';
+    type:               StageType  =  StageType.normal;     // 스테이지 타입
+    imgURL:             string     =  '';                   // 이미지 경로
+    description:        string     =  '';                   // 설명
+    timeLimit:          number     =  0;                    // 스테이지 시간제한
+    gateOpen:           boolean    =  true;                 // 들어올 수 있는지 여부
+    closedGateMessage:  string     =  null;                 // 진입불가 게이트로 진입 시 뜨는 메시지. 예시: "${Stage.name}이(가) 잠겼습니다."
+    connectedStage:     number[]   =  [];                   // 스테이지 인덱스로 연결한다
+    cut:                Cut[]      =  [];                   // 컷
 
     constructor() {
         super()
@@ -222,18 +227,18 @@ enum CutType {
     normal = "normal",
     puzzle = "puzzle",
     moving = "moving",
-    fail   = "fail",
+    fail = "fail",
 }
 /**
  * 컷 생성기
  */
 class Cut extends ClassVersion {
-    name:           string;                         // 상하·동서남북으로도 이름지을 수 있겠다
-    type:           CutType  =  CutType.normal;     // 컷 타입
-    imgURL:         string;                         // 이미지 url
-    timeLimit:      number;                         // 컷 시간제한
-    puzzle:         Puzzle;                         // 퍼즐
-    connectedCut:   number[];                       // 컷 인덱스와 연결한다
+    name:           string    =  '';                // 상하·동서남북으로도 이름지을 수 있겠다
+    type:           CutType   =  CutType.normal;    // 컷 타입
+    imgURL:         string    =  '';                // 이미지 url
+    timeLimit:      number    =  null;              // 컷 시간제한
+    puzzle:         Puzzle    =  null;              // 퍼즐
+    connectedCut:   number[]  =  [];                // 컷 인덱스와 연결한다
 
     constructor() {
         super()
@@ -252,19 +257,19 @@ class Cut extends ClassVersion {
 
 enum PuzzleType {
     choice = "choice",
-    form   = "form",
-    dial   = "dial",
+    form = "form",
+    dial = "dial",
 }
 /**
  * 퍼즐 생성기
  */
 class Puzzle extends ClassVersion {
-    name:               string;
-    type:               PuzzleType;
-    chance:             number | null;
-    answer:             any[] = [];
-    correct_answer:     any[] = [];
-    hint:               any[] = [];
+    name:               string      =  '';
+    type:               PuzzleType  =  PuzzleType.choice;
+    chance:             number      =  null;
+    answer:             any[]       =  [];
+    correct_answer:     any[]       =  [];
+    hint:               any[]       =  [];
     constructor() {
         super()
         // this.transition = new Transition();
@@ -301,4 +306,4 @@ class Transition extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, GameSource, Game, Stage, Cut }
+export { ClassVersion, GameSource, GameData, Stage, Cut }
