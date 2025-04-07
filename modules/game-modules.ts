@@ -46,11 +46,11 @@ class GameSource extends ClassVersion {
  * 아이템 생성기
  */
 class Item extends ClassVersion {
-    name:               string  = '';           // 아이템 이름
-    description:        string  = '';           // 아이템 설명
-    type:               string  = '';           // 아이템 타입 (고민 중...)
-    iconURL:            string  = '';           // 아이템 아이콘 url
-    imgURL:             string  = '';           // 아이템 상세 이미지 url
+    name:               string  =  '';          // 아이템 이름
+    description:        string  =  '';          // 아이템 설명
+    type:               string  =  '';          // 아이템 타입 (고민 중...)
+    iconURL:            string  =  '';          // 아이템 아이콘 url
+    imgURL:             string  =  '';          // 아이템 상세 이미지 url
     quantity:           number  =  1;           // 수량
     getItemMessage:     string  =  null;        // 아이템 획득 시 뜨는 메세지. 값이 비어 있으면 메시지가 안 뜨게
     uniteItem:          string  =  null;        // 합칠 수 있는 아이템의 이름으로 받음
@@ -63,7 +63,7 @@ class Item extends ClassVersion {
  * 변수 생성기
  */
 class IntVar extends ClassVersion {
-    name:   string = '';     // 변수명
+    name:   string = '';    // 변수명
     value:  number = 0;     // 값
     
     constructor() {
@@ -80,7 +80,7 @@ class StrVar extends ClassVersion {
 }
 class BoolVar extends ClassVersion {
     name:   string  = '';     // 변수명
-    value:  boolean = true;    // 값
+    value:  boolean = true;   // 값
 
     constructor() {
         super()
@@ -98,19 +98,19 @@ type Role = {
     support:    string[]
 }
 enum Theme {
-    horror = "horror",
+    horror    = "horror",
     adventure = "adventure",
-    crime = "crime",
+    crime     = "crime",
 }
 enum Difficulty {
-    easy = "easy",
+    easy   = "easy",
     medium = "medium",
-    hard = "hard",
+    hard   = "hard",
 }
 enum Visibility {
-    public = "public",
+    public   = "public",
     unlisted = "unlisted",
-    private = "private",
+    private  = "private",
 }
 /**
  * 게임 생성기
@@ -185,7 +185,7 @@ class Achievement extends ClassVersion {
 
 enum StageType {
     normal = "normal",
-    death = "death",
+    death  = "death",
     ending = "ending",
     hidden = "hidden",
 }
@@ -227,7 +227,7 @@ enum CutType {
     normal = "normal",
     puzzle = "puzzle",
     moving = "moving",
-    fail = "fail",
+    fail   = "fail",
 }
 /**
  * 컷 생성기
