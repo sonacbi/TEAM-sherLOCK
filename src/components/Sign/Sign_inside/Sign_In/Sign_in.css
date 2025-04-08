@@ -115,6 +115,15 @@
     font-size: 15px;
 } 
 
+/* ------------------------추가------------------------ */
+.sherlock .id, .sherlock .password{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* 가로 가운데 정렬 추가 */
+}
+/* ------------------------추가------------------------ */
+
 .sherlock input::placeholder {
     color: rgba(0, 0, 0, 0.3);
     font-weight: bold;
@@ -165,3 +174,16 @@
 #Sign_up:hover {
     opacity: 0.5;
 }
+
+/* ---------------추가---------------- */
+.input-error {
+    border: 1px solid red;
+    outline: none;
+  }
+  
+  .error-text {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+/* ---------------추가---------------- */
