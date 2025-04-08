@@ -2,11 +2,13 @@ import { useState } from 'react';
 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css';
+import signSubmit from './sign_submit'; // 상대경로 확인
 
 import Sign_in from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
 
 function Sign_up({ onClose, onSignInClick }) {
+    /* -----(기존) 회원가입 화면 기본값 세팅----- */
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: currentYear - 1899 }, (_, i) => 1900 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -29,6 +31,36 @@ function Sign_up({ onClose, onSignInClick }) {
         onSignInClick();
     };
 
+    /* -----(추가) 회원가입 폼 객체 생성 ----- */
+
+    const [userId, setUserId] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordCheck, setPasswordCheck] = useState('');
+    const [email, setEmail] = useState('');
+    const [domain, setDomain] = useState('');
+    const [nickname, setNickname] = useState('');
+    // 생일은 위에서 이미 선언됨
+
+    /* -----(추가) 회원가입 폼 제출 액션 ----- */
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        if (password !== passwordCheck) {
+          alert('비밀번호가 일치하지 않습니다.');
+          return;
+        }
+        
+        const result = await signSubmit({ userId, password, nickname, email, domain, birth });
+    
+        if (result.success) {
+          alert('회원가입 성공!');
+          onSignInClick();
+        } else {
+          alert(result.message || '회원가입 실패!');
+        }
+      };
+    /* -------------------------------------- */
+
     return (
         <div className='Sign_up'>
             <div className='Sign_up_content'>
@@ -40,32 +72,61 @@ function Sign_up({ onClose, onSignInClick }) {
                     <div className='sherlock'>
                         <form>
                             <div className='id'>
-                                <input type='text' placeholder="셜LOCK ID" />
+                                <input
+                                    type='text'
+                                    placeholder="셜LOCK ID"
+                                    value = {userId}
+                                    onChange={(e) => setUserId(e.target.value)}
+                                />
                             </div>
 
                             <div className='password'>
-                                <input type='password' placeholder="비밀번호" />
+                                <input
+                                    type='password'
+                                    placeholder="비밀번호"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
                             </div>
 
                             <div className='password_check'>
-                                <input type='password' placeholder="비밀번호 확인" />
+                                <input
+                                    type='password'
+                                    placeholder="비밀번호 확인"
+                                    value={passwordCheck}
+                                    onChange={(e) => setPasswordCheck(e.target.value)}
+                                />
                             </div>
 
                             <div className='email'>
-                                <input type='text' placeholder="email" />
+                                <input
+                                    type='text'
+                                    placeholder="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
 
                                 <p>@</p>
 
-                                <select name="domain">
+                                <select
+                                    name="domain"
+                                    value={domain}
+                                    onChange={(e) => setDomain(e.target.value)}
+                                >
                                     <option value="" selected disabled>선택</option>
-                                    <option value="google">gmail.com</option>
-                                    <option value="naver">naver.com</option>
-                                    <option value="daum">daum.net</option>
+                                    <option value="google.com">gmail.com</option>
+                                    <option value="naver.com">naver.com</option>
+                                    <option value="daum.com">daum.net</option>
                                 </select>
                             </div>
 
                             <div className='nickname'>
-                                <input type='text' placeholder="닉네임" />
+                                <input
+                                    type='text'
+                                    placeholder="닉네임"
+                                    value={nickname}
+                                    onChange={(e) => setNickname(e.target.value)}
+                                />
                             </div>
 
                             <div className="birth">
@@ -94,7 +155,7 @@ function Sign_up({ onClose, onSignInClick }) {
                             </div>
 
                             <div className='button'>
-                                <button>회원가입</button>
+                                <button type="submit" onClick={handleSubmit}>회원가입</button>
                             </div>
                         </form>
                     </div>
