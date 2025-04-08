@@ -1,7 +1,7 @@
 * {margin: 0; padding: 0; box-sizing: border-box;}
 li {list-style: none;}
 a {text-decoration: none; color: inherit;}
-img {max-width: 100%; vertical-align: top;}
+img {max-width: 100%; vertical-align: top; -webkit-user-drag: none;}
 table {width: 100%; border-collapse: collapse;}
 button {cursor: pointer;}
 body::-webkit-scrollbar {display: none;}
