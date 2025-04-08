@@ -9,8 +9,6 @@ import X from '../../../../assets/images/Sign/X.png';
 
 import { validateId, validatePassword } from './validated.jsx';
 
-import { validateId, validatePassword } from './validated.jsx';
-
 function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
 
