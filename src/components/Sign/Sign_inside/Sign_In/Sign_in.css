@@ -4,7 +4,7 @@
     left: 0;
     width: 100dvw;
     height: 100dvh;
-    background-color: rgba(0, 0, 0, 0.671);
+    background-color: rgba(0, 0, 0, 0.62);
     z-index: 999;
 }
 
@@ -12,18 +12,18 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    aspect-ratio: 2 / 2.3;
+    aspect-ratio: 2 / 2.5;
     width: 20%;
-    background-color: #272727;
-    border-radius: 20px;
+    border-radius: 10px;
     transform: translate(-50%, -50%);
+    background-color: #272727;
 }
 
 #X {
     position: absolute;
     width: 15px;
-    right: 20px;
-    top: 20px;
+    right: 3%;
+    top: 3%;
     cursor: pointer;
     transition: opacity 0.3s ease;
 }
@@ -35,7 +35,7 @@
 .Sign_in .Sign_content .header_logo {
     display: flex;
     justify-content: center;
-    margin: 20px 10px;
+    margin: 30px 10px;
     pointer-events: none;
 }
 
@@ -46,7 +46,7 @@
     border-bottom: 2px solid #fff;
 }
 
-.hidden {
+.kakao_sherlock {
     height: 100%;
     display: flex;
     flex-direction: column;   
@@ -55,20 +55,21 @@
     gap: 30px;
 }
 
-.kakao_login, .sherlock_login {
+.kakao_login, .sherlock_login, .kakao_login2 {
     width: 212px;
     height: 40px;
     border-radius: 3px;
     padding: 10px;
 }
 
-.kakao_login {
+.kakao_login, .kakao_login2 {
     background-color: #ffea62;
     display: flex;
     align-items: center;
     font-weight: bold;
     gap: 20px;
     cursor: pointer;
+    transition: opacity 0.3s ease;
 }
 
 #kakao {
@@ -79,6 +80,7 @@
 .sherlock_login {
     background-color: #fff;
     cursor: pointer;
+    transition: opacity 0.3s ease;
 }
 
 .sherlock_login p {
@@ -86,15 +88,80 @@
     font-weight: bold;
 }
 
+.sherlock_login:hover, .kakao_login:hover, .kakao_login2:hover {
+    opacity: 0.5;
+}
+
+.sherlock {
+    height: 100%;
+}
+
+.sherlock form {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sherlock .id input, .sherlock .password input {
+    width: 212px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 15px;
+} 
+
+.sherlock input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.sherlock .button button {
+    background-color: black;
+    color: #fff;
+    border: none;
+    padding: 5px 15px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: opacity 0.3s ease;
+}
+
+.sherlock .button button:hover {
+    opacity: 0.5;
+}
+
+.kakao_hidden {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+}
+
 .Sign_up_img {
     display: flex;
     justify-content: center;
-    height: 20%;
+    height: 15%;
     align-items: center;
+    margin-bottom: 10px;
+}
+
+.move-down {
+    margin-top: 20%;
 }
 
 #Sign_up {
     width: 50px;
-    height: 50px;
+    height: 60px;
     cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+#Sign_up:hover {
+    opacity: 0.5;
 }

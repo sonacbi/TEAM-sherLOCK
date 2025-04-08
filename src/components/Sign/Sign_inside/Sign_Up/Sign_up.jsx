@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import Logo from '../../../Header_Logo/Header_Logo';
-import './Sign_in.css';
+import './Sign_up.css';
 
-import kakao from '../../../../assets/images/Sign/Kakao.png';
-import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
+import Sign_up from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
 
-function Sign_in({ onClose }) {
-  const [showSherlockLogin, setShowSherlockLogin] = useState(false);
-
-  const handleSherlockLoginClick = () => {
-    setShowSherlockLogin(true);
-  };
+function Sign_up() {
 
   return (
     <div className='Sign_in'>
@@ -71,4 +65,4 @@ function Sign_in({ onClose }) {
   );
 }
 
-export default Sign_in;
+export default Sign_up;
