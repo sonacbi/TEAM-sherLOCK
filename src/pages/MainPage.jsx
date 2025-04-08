@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Sign from '../components/Sign/Sign_outside/Sign_outside';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
+import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
 import Footer from '../components/Footer/Footer';
 import '../styles/MainPage.css';
 
@@ -24,22 +25,33 @@ const themes = [
 function MainPage() {
   const articlesRef = useRef([]);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
 
   const handleSignInClick = () => {
     setShowSignIn(true);
+    setShowSignUp(false);
   };
 
   const handleCloseSignIn = () => {
     setShowSignIn(false);
   };
 
+  const handleSignUpClick = () => {
+    setShowSignIn(false);
+    setShowSignUp(true);
+  };
+  
+  const handleCloseSignUp = () => {
+    setShowSignUp(false);
+  };
+
   useEffect(() => {
-    if (showSignIn) {
+    if (showSignIn || showSignUp) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
     }
-  }, [showSignIn]);
+  }, [showSignIn, showSignUp]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,7 +76,7 @@ function MainPage() {
 
   useEffect(() => {
     const handleWheel = (e) => {
-      if (showSignIn) {
+      if (showSignIn || showSignUp) {
         e.preventDefault();
         return;
       }
@@ -89,7 +101,7 @@ function MainPage() {
     return () => {
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [showSignIn]);
+  }, [showSignIn, showSignUp]);
 
   return (
     <div className='MainPage_wrap'>
@@ -99,7 +111,7 @@ function MainPage() {
         <header>
           <img id='notice' src={notice} alt='notice' />
           <Header_Logo />
-          <Sign onSignInClick={handleSignInClick}/>
+          <Sign onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick}/>
         </header>
 
         <div className="theme">
@@ -122,7 +134,8 @@ function MainPage() {
       </div>
 
       <Footer />
-      {showSignIn && <Sign_in onClose={handleCloseSignIn} />}
+      {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick}/>}
+      {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick}/>}
     </div>
   );
 }

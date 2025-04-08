@@ -1,0 +1,165 @@
+.Sign_up {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.62);
+    z-index: 999;
+}
+
+.Sign_up_content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 2 / 4;
+    width: 20%;
+    border-radius: 10px;
+    transform: translate(-50%, -50%);
+    background-color: #272727;
+}
+
+#X {
+    position: absolute;
+    width: 15px;
+    right: 3%;
+    top: 3%;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+#X:hover {
+    opacity: 0.5;
+}
+
+.Sign_up .Sign_up_content .header_logo {
+    display: flex;
+    justify-content: center;
+    margin: 30px 10px;
+    pointer-events: none;
+}
+
+.information {
+    height: 60%;
+    margin: 20px 40px;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}
+
+.sherlock {
+    height: 100%;
+}
+
+.sherlock form {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sherlock .id input, .sherlock .password input,
+.sherlock .password_check input, .sherlock .nickname input {
+    width: 212px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 15px;
+}
+
+.sherlock .email {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.sherlock .email input {
+    width: 87px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 15px;
+}
+
+.sherlock .email p {
+    color: white;
+    font-weight: bold;
+}
+
+.sherlock .email select {
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    padding: 10px 1px;
+    font-size: 13px;
+    width: 90px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.3);
+}
+
+.sherlock .birth {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.sherlock .birth select {
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    padding: 10px 1px;
+    font-size: 13px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.3);
+}
+
+.sherlock .birth p {
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.sherlock input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.sherlock .button button {
+    background-color: black;
+    color: #fff;
+    border: none;
+    padding: 5px 15px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: opacity 0.3s ease;
+}
+
+.sherlock .button button:hover {
+    opacity: 0.5;
+}
+
+.Sign_in_img {
+    display: flex;
+    justify-content: center;
+    height: 15%;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#Sign_in {
+    width: 50px;
+    height: 60px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+#Sign_in:hover {
+    opacity: 0.5;
+}

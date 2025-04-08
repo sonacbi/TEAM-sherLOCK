@@ -7,11 +7,15 @@ import kakao from '../../../../assets/images/Sign/Kakao.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
-function Sign_in({ onClose }) {
+function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
 
   const handleSherlockLoginClick = () => {
     setShowSherlockLogin(true);
+  };
+
+  const handleSignUpClick = () => {
+    onSignUpClick();
   };
 
   return (
@@ -64,7 +68,7 @@ function Sign_in({ onClose }) {
         </div>
 
         <div className={`Sign_up_img ${showSherlockLogin ? 'move-down' : ''}`}>
-          <img id='Sign_up' src={Sign_up} alt='Sign_up' />
+          <img id='Sign_up' src={Sign_up} alt='Sign_up' onClick={handleSignUpClick}/>
         </div>
       </div>
     </div>
