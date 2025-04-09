@@ -8,7 +8,8 @@ import Footer from '../components/Footer/Footer';
 import '../styles/MainPage.css';
 
 import background from '../assets/images/default_background.png';
-import notice from '../assets/images/MainPage_img/notice.png';
+import notice_img from '../assets/images/MainPage_img/notice.png';
+import notice_speech_bubble from '../assets/images/MainPage_img/notice_speech_bubble.png';
 import horror_outline from '../assets/images/MainPage_img/horror_outline.png';
 import horror_icon from '../assets/images/MainPage_img/horror_icon.png';
 import adventure_outline from '../assets/images/MainPage_img/adventure_outline.png';
@@ -109,7 +110,12 @@ function MainPage() {
         <img id='Main_background' src={background} alt='Main_background' />
 
         <header>
-          <img id='notice' src={notice} alt='notice' />
+          <div className="notice">
+            <img id='notice_img' src={notice_img} alt='notice_img' />
+            <div className="notice_content">
+              <img id='notice_speech_bubble' src={notice_speech_bubble} alt='notice_speech_bubble' />
+            </div>
+          </div>
           <Header_Logo />
           <Sign onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick}/>
         </header>
