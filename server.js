@@ -12,7 +12,7 @@ app.use(express.json()); // JSON 요청 처리
 const db = mysql.createConnection({
   host: "127.0.0.1",
   user: "root",
-  password: "0000",
+  password: "025712",
   database: "sherlock",
 });
 
