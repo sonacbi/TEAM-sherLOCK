@@ -6,73 +6,6 @@ class ClassVersion {
     }
 }
 ClassVersion.this_version = "0.0.1"; // 버전
-/**
- * 게임소스
- */
-class GameSource extends ClassVersion {
-    constructor() {
-        super(...arguments);
-        this.game_id = null;
-        this.item = []; // 아이템 리스트
-        this.intVar = []; // 숫자형 변수
-        this.strVar = []; // 문자형 변수
-        this.boolVar = []; // 논리형 변수
-    }
-    // 생성
-    createItem() {
-        // GameSource.item.push(new Item());
-    }
-    // 변수 조작
-    getIntVar() { }
-    getStrVar() { }
-    getBoolVar() { }
-    setIntVar() { }
-    setStrVar() { }
-    setBoolVar() { }
-    putIntVar() { }
-    putStrVar() { }
-    putBoolVar() { }
-}
-/**
- * 아이템 생성기
- */
-class Item extends ClassVersion {
-    constructor() {
-        super();
-        this.name = ''; // 아이템 이름
-        this.description = ''; // 아이템 설명
-        this.type = ''; // 아이템 타입 (고민 중...)
-        this.iconURL = ''; // 아이템 아이콘 url
-        this.imgURL = ''; // 아이템 상세 이미지 url
-        this.quantity = 1; // 수량
-        this.getItemMessage = null; // 아이템 획득 시 뜨는 메세지. 값이 비어 있으면 메시지가 안 뜨게
-        this.uniteItem = null; // 합칠 수 있는 아이템의 이름으로 받음
-    }
-}
-/**
- * 변수 생성기
- */
-class IntVar extends ClassVersion {
-    constructor() {
-        super();
-        this.name = ''; // 변수명
-        this.value = 0; // 값
-    }
-}
-class StrVar extends ClassVersion {
-    constructor() {
-        super();
-        this.name = ''; // 변수명
-        this.value = ''; // 값
-    }
-}
-class BoolVar extends ClassVersion {
-    constructor() {
-        super();
-        this.name = ''; // 변수명
-        this.value = true; // 값
-    }
-}
 var Theme;
 (function (Theme) {
     Theme["horror"] = "horror";
@@ -94,33 +27,32 @@ var Visibility;
 /**
  * 게임 생성기
  */
-class GameData extends ClassVersion {
-    constructor() {
+class Game extends ClassVersion {
+    constructor({ id = null, title = '', thumbnailURL = '', description = '', role = {
+        planning: [], // 기획
+        art: [], // 그림
+        story: [], // 스토리
+        puzzle: [], // 퍼즐
+        mechanic: [], // 기능
+        support: [] // 도움
+    }, theme = Theme.horror, tag = '', difficulty = Difficulty.medium, playTime = 10, visibility = Visibility.public, isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), inventory = [], stage = [new Stage({})] }) {
         super();
-        this.title = ''; // 제목
-        this.thumbnailURL = ''; // 게임 썸네일 URL
-        this.description = ''; // 설명
-        this.role = {
-            planning: [], // 기획
-            art: [], // 그림
-            story: [], // 스토리
-            puzzle: [], // 퍼즐
-            mechanic: [], // 기능
-            support: [] // 도움
-        };
-        this.theme = Theme.horror; // 테마
-        this.tag = ''; // 태그
-        this.difficulty = Difficulty.medium; // 난이도
-        this.playTime = 10; // 예상 소요 시간
-        this.visibility = Visibility.public; // 공개 여부
-        this.isRanking = false; // 랭킹 표시 여부
-        this.isHiddenStage = false; // 히든 스테이지 여부
-        this.achievement = []; // 업적
-        this.inventory = []; // 인벤토리
-        this.stage = []; // 스테이지
-        this.stage.push(new Stage());
-        // this.id = Math.floor(Math.random() * 100000000); 
-        // MySQL과 연동하고 아이디가 겹치지 않게 생성해야 돼서, 아이디 생성은 클래스 내에서 하면 안 된다
+        this.id = id;
+        this.title = title;
+        this.thumbnailURL = thumbnailURL;
+        this.description = description;
+        this.role = role;
+        this.theme = theme;
+        this.tag = tag;
+        this.difficulty = difficulty;
+        this.playTime = playTime;
+        this.visibility = visibility;
+        this.isRanking = isRanking;
+        this.isHiddenStage = isHiddenStage;
+        this.achievement = achievement;
+        this.source = source;
+        this.inventory = inventory;
+        this.stage = stage;
     }
     // 업적 생성
     createAchievement() {
@@ -128,7 +60,7 @@ class GameData extends ClassVersion {
     }
     // 스테이지 생성
     createStage() {
-        this.stage.push(new Stage());
+        this.stage.push(new Stage({}));
     }
     // 스테이지 수정
     updateStage() { }
@@ -142,6 +74,76 @@ class GameData extends ClassVersion {
         this.inventory[i];
     }
     putItem() { }
+}
+/**
+ * 게임소스
+ */
+class Source extends ClassVersion {
+    constructor({ item = [], intVar = [], strVar = [], boolVar = [] }) {
+        super();
+        this.item = []; // 아이템 리스트
+        this.intVar = []; // 숫자형 변수
+        this.strVar = []; // 문자형 변수
+        this.boolVar = []; // 논리형 변수
+        this.item = item;
+        this.intVar = intVar;
+        this.strVar = strVar;
+        this.boolVar = boolVar;
+    }
+    // 생성
+    createItem() {
+        // GameSource.item.push(new Item());
+    }
+    // 변수 조작
+    getIntVar() { }
+    getStrVar() { }
+    getBoolVar() { }
+    setIntVar() { }
+    setStrVar() { }
+    setBoolVar() { }
+    putIntVar() { }
+    putStrVar() { }
+    putBoolVar() { }
+}
+/**
+ * 아이템 생성기
+ */
+class Item extends ClassVersion {
+    constructor({ name = '', description = '', type = '', iconURL = '', imgURL = '', quantity = 1, getItemMessage = null, uniteItem = [] }) {
+        super();
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.iconURL = iconURL;
+        this.imgURL = imgURL;
+        this.quantity = quantity;
+        this.getItemMessage = getItemMessage;
+        this.uniteItem = uniteItem;
+    }
+}
+/**
+ * 변수 생성기
+ */
+class IntVar extends ClassVersion {
+    constructor({ name = '', value = 0 }) {
+        super();
+        this.name = name;
+        this.value = value;
+    }
+}
+class StrVar extends ClassVersion {
+    constructor({ name = '', value = '' }) {
+        super();
+        this.name = name;
+        this.value = value;
+    }
+}
+class BoolVar extends ClassVersion {
+    constructor({ name = '', value = true }) {
+        super();
+        this.name = name;
+        this.value = value;
+    }
 }
 /**
  * 업적 생성기
@@ -162,22 +164,21 @@ var StageType;
  * 스테이지 생성기
  */
 class Stage extends ClassVersion {
-    constructor() {
+    constructor({ name = '', type = StageType.normal, imgURL = '', description = '', timeLimit = 0, gateOpen = true, closedGateMessage = null, connectedStage = [], cut = [new Cut({})], }) {
         super();
-        this.name = '';
-        this.type = StageType.normal; // 스테이지 타입
-        this.imgURL = ''; // 이미지 경로
-        this.description = ''; // 설명
-        this.timeLimit = 0; // 스테이지 시간제한
-        this.gateOpen = true; // 들어올 수 있는지 여부
-        this.closedGateMessage = null; // 진입불가 게이트로 진입 시 뜨는 메시지. 예시: "${Stage.name}이(가) 잠겼습니다."
-        this.connectedStage = []; // 스테이지 인덱스로 연결한다
-        this.cut = []; // 컷
-        this.cut.push(new Cut());
+        this.name = name;
+        this.type = type;
+        this.imgURL = imgURL;
+        this.description = description;
+        this.timeLimit = timeLimit;
+        this.gateOpen = gateOpen;
+        this.closedGateMessage = closedGateMessage;
+        this.connectedStage = connectedStage;
+        this.cut = cut;
     }
     // 컷 생성
     createCut() {
-        this.cut.push(new Cut());
+        this.cut.push(new Cut({}));
     }
     // 컷 수정
     updateCut() { }
@@ -199,14 +200,14 @@ var CutType;
  * 컷 생성기
  */
 class Cut extends ClassVersion {
-    constructor() {
+    constructor({ name = '', type = CutType.normal, imgURL = '', timeLimit = null, puzzle = null, connectedCut = [], }) {
         super();
-        this.name = ''; // 상하·동서남북으로도 이름지을 수 있겠다
-        this.type = CutType.normal; // 컷 타입
-        this.imgURL = ''; // 이미지 url
-        this.timeLimit = null; // 컷 시간제한
-        this.puzzle = null; // 퍼즐
-        this.connectedCut = []; // 컷 인덱스와 연결한다
+        this.name = name;
+        this.type = type;
+        this.imgURL = imgURL;
+        this.timeLimit = timeLimit;
+        this.puzzle = puzzle;
+        this.connectedCut = connectedCut;
     }
     setVar() { }
     // 컷 연결하기
@@ -214,7 +215,7 @@ class Cut extends ClassVersion {
         this.connectedCut.push(i);
     }
     createPuzzle() {
-        this.puzzle = new Puzzle();
+        this.puzzle = new Puzzle({});
     }
 }
 var PuzzleType;
@@ -227,15 +228,14 @@ var PuzzleType;
  * 퍼즐 생성기
  */
 class Puzzle extends ClassVersion {
-    constructor() {
+    constructor({ name = '', type = PuzzleType.choice, chance = null, answer = [], correct_answer = [], hint = [], }) {
         super();
-        this.name = '';
-        this.type = PuzzleType.choice;
-        this.chance = null;
-        this.answer = [];
-        this.correct_answer = [];
-        this.hint = [];
-        // this.transition = new Transition();
+        this.name = name;
+        this.type = type;
+        this.chance = chance;
+        this.answer = answer;
+        this.correct_answer = correct_answer;
+        this.hint = hint;
     }
     createPuzzle() {
         switch (this.type) {
@@ -260,4 +260,4 @@ class Transition extends ClassVersion {
     static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, GameSource, GameData, Stage, Cut };
+export { ClassVersion, Source, Game, Stage, Cut };

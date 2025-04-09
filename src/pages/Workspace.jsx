@@ -1,13 +1,44 @@
 import { useState } from "react";
-import { GameSource, GameData, Stage, Cut  } from "../../modules/game-modules"
+import { Game, Source, Stage, Cut  } from "../../modules/game-modules"
 import "../styles/workspace.css"
+import LocalSaveGamePage from "../components/Workspace/LocalSaveGamePage";
+import ServerSaveGamePage from "../components/Workspace/ServerSaveGamePage";
 
 export default function Workspace() {
-    const [gameData, setGameData] = useState(new GameData());
-    const [gameSource, setGameSource] = useState(new GameSource());
+    const [game, setGame] = useState(new Game({}));
+    const [file, setFile] = useState();
+    console.log('게임데이터:', game)
+
+    function uploadFile(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target)
+        const jsonFile = formData.get("file")
+        console.log('파일',jsonFile)
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            try {
+                const parsed = JSON.parse(event.target.result);
+                setFile(parsed)
+                console.log('parsed: ', parsed)
+            } catch (error) {
+                console.log('JSON 파싱 오류', err)
+            }
+        }
+        reader.readAsText(jsonFile)
+
+        // console.log('파싱된 파일',file)
+    }
+
+    function fileToGame() {
+        setGame(()=> new Game(file.game) ) 
+    }
+
+    // console.log('파싱된 파일2',file)
     
     // 게임 데이터 수정하는 함수
-    function updateGameData(event) {
+    function updateGame(event) {
         event.preventDefault();
         const formData = new FormData(event.target)
         const title = formData.get("game_title")
@@ -33,8 +64,8 @@ export default function Workspace() {
             isHiddenStage
         ]
         console.log("데이터", data)
-        setGameData(prev => {
-            const newGameData = {
+        setGame(prev => {
+            const newGame = {
                 ...prev,
                 title: title,
                 thumbnailURL: thumbnailURL,
@@ -47,31 +78,31 @@ export default function Workspace() {
                 isRanking: isRanking,
                 isHiddenStage: isHiddenStage
             }
-            return newGameData;
+            return newGame;
         })
     }
 
     // 새로운 스테이지 생성하는 함수
     function createGameStage() {
-        setGameData(prev => {
-            const newGameData = { ...prev, stage: [...prev.stage, new Stage()] };
-            return newGameData;
+        setGame(prev => {
+            const newGame = { ...prev, stage: [...prev.stage, new Stage({})] };
+            return newGame;
         });
     }
     // 새로운 컷 생성하는 함수
     function createGameCut(index) {
-        setGameData(prev => {
-            const newGameData = { ...prev };
+        setGame(prev => {
+            const newGame = { ...prev };
             // stage 배열도 복사
-            newGameData.stage = [...prev.stage];
+            newGame.stage = [...prev.stage];
             // 해당 스테이지가 존재하는지 확인
-            if (!newGameData.stage[index]) return prev;
+            if (!newGame.stage[index]) return prev;
             // 해당 스테이지의 cut을 새로운 Cut으로 설정
-            newGameData.stage[index] = { 
-                ...newGameData.stage[index], 
-                cut: [...(newGameData.stage[index].cut || []), new Cut()] 
+            newGame.stage[index] = { 
+                ...newGame.stage[index], 
+                cut: [...(newGame.stage[index].cut || []), new Cut({})] 
             };
-            return newGameData;
+            return newGame;
         });
     }
 
@@ -88,10 +119,10 @@ export default function Workspace() {
         const gateOpen = fromData.get("stage_gateOpen") ? true : false;
         const closedGateMessage = fromData.get("stage_closedGateMessage");
         const connectedStage = fromData.get("stage_connectedStage");
-        setGameData(prev => {
-            const newGameData = { ...prev };
-            newGameData.stage = [...prev.stage]
-            newGameData.stage[index] = {
+        setGame(prev => {
+            const newGame = { ...prev };
+            newGame.stage = [...prev.stage]
+            newGame.stage[index] = {
                 name,
                 type,
                 imgURL,
@@ -100,31 +131,26 @@ export default function Workspace() {
                 gateOpen,
                 closedGateMessage,
                 connectedStage,
-                cut: newGameData.stage[index].cut
+                cut: newGame.stage[index].cut
             }
-            // newGameData.stage = [ ...prev.stage ];
-            // newGameData.stage
-            return newGameData;
+            // newGame.stage = [ ...prev.stage ];
+            // newGame.stage
+            return newGame;
         })
-    }
-
-    function downloadGame(gameData, gameSource) {
-        const data = { gameSource, gameData }
-        console.log("0", data)
-        const datastr = JSON.stringify(data, null, 2);
-        console.log("1", datastr)
-        const datablob = new Blob([datastr], {type: "application/json"});
-        console.log("2", datablob)
-        const dataurl = URL.createObjectURL(datablob);
-        console.log("3", dataurl)
-        return dataurl;
     }
 
     return(
         <>
         <section>
+            <form onSubmit={uploadFile}>
+                <input type="file" name="file" accept=".json"/>
+                <button type="submit">업로드</button>
+            </form>
+            <button onClick={fileToGame}>업로드된 파일 적용</button>
+        </section>
+        <section>
             <div>
-                <form onSubmit={updateGameData}>
+                <form onSubmit={updateGame}>
                     <div>
                         <label>제목
                             <input type="text" name="game_title" />
@@ -247,50 +273,50 @@ export default function Workspace() {
             </div>
         </section>
         <div id="game">
-            <h1>게임 제목: "{gameData.title}"</h1>
+            <h1>게임 제목: "{game.title}"</h1>
             <table>
                 <tbody>
                     <tr>
                         <td>썸네일 경로: </td>
-                        <td>{gameData.thumbnailURL}</td>
+                        <td>{game.thumbnailURL}</td>
                     </tr>
                     <tr>
                         <td>설명: </td>
-                        <td>{gameData.description}</td>
+                        <td>{game.description}</td>
                     </tr>
                     <tr>
                         <td>테마: </td>
-                        <td>{gameData.theme}</td>
+                        <td>{game.theme}</td>
                     </tr>
                     <tr>
                         <td>태그: </td>
-                        <td>{gameData.tag}</td>
+                        <td>{game.tag}</td>
                     </tr>
                     <tr>
                         <td>소요시간: </td>
-                        <td>{gameData.playTime}</td>
+                        <td>{game.playTime}</td>
                     </tr>
                     <tr>
                         <td>공개: </td>
-                        <td>{gameData.visibility}</td>
+                        <td>{game.visibility}</td>
                     </tr>
                     <tr>
                         <td>랭킹?: </td>
-                        <td>{gameData.isRanking ? '있음' : '없음'}</td>
+                        <td>{game.isRanking ? '있음' : '없음'}</td>
                     </tr>
                     <tr>
                         <td>히든?: </td>
-                        <td>{gameData.isHiddenStage ? '있음' : '없음'}</td>
+                        <td>{game.isHiddenStage ? '있음' : '없음'}</td>
                     </tr>
                     <tr>
                         <td>인벤토리: </td>
-                        <td>{gameData.inventory ? '있음': '없음'}</td>
+                        <td>{game.inventory ? '있음': '없음'}</td>
                     </tr>
                 </tbody>
             </table>
             <button onClick={createGameStage}>스테이지 추가하기</button>
             <div className="stage">
-                {gameData.stage.map((data, index)=>(
+                {game.stage.map((data, index)=>(
                 <>
                 <h2>스테이지 {index}</h2>
                 <table id="stage">
@@ -359,7 +385,10 @@ export default function Workspace() {
             ))}
             </div>
         </div>
-        <a href={downloadGame(gameData, gameSource)} download="data.json">게임데이터 다운로드</a>
+        <div>
+            <LocalSaveGamePage game={game}/>
+            <ServerSaveGamePage game={game} setGame={setGame}/>
+        </div>
         </>
     )
 }
