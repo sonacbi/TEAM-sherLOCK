@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { validateId, validatePassword } from './validated';
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_in.css';
 
@@ -7,10 +8,9 @@ import kakao from '../../../../assets/images/Sign/Kakao.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
-import { validateId, validatePassword } from './validated.jsx';
-
 function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
+  const [showKakaoLogin, setShowKakaoLogin] = useState(false);
 
   // 유효성 검사 관련 상태 ---------------------------//
   const [user_id, setUserId] = useState('');
@@ -21,6 +21,7 @@ function Sign_in({ onClose, onSignUpClick }) {
 
   const handleSherlockLoginClick = () => {
     setShowSherlockLogin(true);
+    setShowKakaoLogin(true);
   };
 
   const handleSubmit = (e) => {
@@ -37,7 +38,6 @@ function Sign_in({ onClose, onSignUpClick }) {
       // TODO: 실제 로그인 처리 로직 (백엔드용 코드) (추가예정) -----------//
     }
   };
-
 
   const handleSignUpClick = () => {
     onSignUpClick();
@@ -109,18 +109,20 @@ function Sign_in({ onClose, onSignUpClick }) {
                   </div>
                 </form>
               </div>
-
-              <div className='kakao_hidden'>
-                <div className='kakao_login2'>
-                  <img id='kakao' src={kakao} alt='kakao' />
-                  <p>Kakao로 로그인</p>
-                </div>
-              </div>
             </>
           )}
         </div>
 
-        <div className={`Sign_up_img ${showSherlockLogin ? 'move-down' : ''}`}>
+        {showKakaoLogin && (
+          <div className='kakao_hidden'>
+            <div className='kakao_login2'>
+              <img id='kakao' src={kakao} alt='kakao' />
+              <p>Kakao로 로그인</p>
+            </div>
+          </div>
+        )}
+
+        <div className='Sign_up_img'>
           <img id='Sign_up' src={Sign_up} alt='Sign_up' onClick={handleSignUpClick}/>
         </div>
       </div>

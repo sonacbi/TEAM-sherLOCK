@@ -12,7 +12,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    aspect-ratio: 2 / 4;
+    aspect-ratio: 2 / 3.8;
     width: 20%;
     border-radius: 10px;
     transform: translate(-50%, -50%);
@@ -40,10 +40,10 @@
 }
 
 .information {
-    height: 60%;
     margin: 20px 40px;
     border-top: 2px solid #fff;
     border-bottom: 2px solid #fff;
+    padding: 30px;
 }
 
 .sherlock {
@@ -148,7 +148,7 @@
 .Sign_in_img {
     display: flex;
     justify-content: center;
-    height: 15%;
+    height: 10%;
     align-items: center;
     margin-bottom: 10px;
 }
