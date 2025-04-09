@@ -3,6 +3,7 @@
 import express from 'express'
 import mysql from 'mysql2'
 import cors from 'cors'
+import fs from 'fs'
 
 const app = express();
 app.use(cors()); // CORS 허용
@@ -51,17 +52,44 @@ app.post("/data", (req, res) => {
     }
   });
 });
-app.post("/create_game", (req, res) => {
+app.post("/workspace", (req, res) => {
   console.log('게임 db req: ',req.body)
   const game_id = req.body.game_id;
   const user_id = req.body.user_id;
-  const sql = `INSERT INTO game (game_id, user_id) VALUES ('${game_id}', ${user_id});`
-  console.log('sql: ', sql)
-  db.query(sql, (err, results) => {
+  db.query(`INSERT INTO game (game_id, user_id) VALUES (?, ?);`, [game_id, user_id], (err, results) => {
     if (err) {
       res.status(500).send(err);
     } else {
       res.json(results);
+      const game = req.body.game;
+      const path = `serverDB/games/${game_id}.json`;
+      const data = JSON.stringify({game}, null, 2);
+      fs.writeFileSync(path, data, (err) => {
+        if(err) {
+          console.error('파일 쓰기 실패: ', err);
+          return;
+        } else console.log('파일 쓰기 완료')
+      })
+    }
+  });
+});
+app.put("/workspace", (req, res) => {
+  console.log('게임 db req: ',req.body)
+  const game_id = req.body.game.id;
+  db.query(`UPDATE game SET updated_at = CURRENT_TIMESTAMP WHERE game_id = ?;`, [game_id], (err, results) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.json(results);
+      const game = req.body.game;
+      const path = `serverDB/games/${game_id}.json`;
+      const data = JSON.stringify({game}, null, 2);
+      fs.writeFileSync(path, data, (err) => {
+        if(err) {
+          console.error('파일 쓰기 실패: ', err);
+          return;
+        } else console.log('파일 수정 완료')
+      })
     }
   });
 });

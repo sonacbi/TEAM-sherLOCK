@@ -260,4 +260,4 @@ class Transition extends ClassVersion {
     static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut };
+export { ClassVersion, Game, Source, Stage, Cut };
