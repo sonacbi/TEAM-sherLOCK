@@ -51,6 +51,20 @@ app.post("/data", (req, res) => {
     }
   });
 });
+app.post("/create_game", (req, res) => {
+  console.log('게임 db req: ',req.body)
+  const game_id = req.body.game_id;
+  const user_id = req.body.user_id;
+  const sql = `INSERT INTO game (game_id, user_id) VALUES ('${game_id}', ${user_id});`
+  console.log('sql: ', sql)
+  db.query(sql, (err, results) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.json(results);
+    }
+  });
+});
 
 app.listen(5000, () => {
   console.log("서버 실행 중 (포트 5000)");

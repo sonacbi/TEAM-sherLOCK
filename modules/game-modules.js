@@ -6,17 +6,85 @@ class ClassVersion {
     }
 }
 ClassVersion.this_version = "0.0.1"; // 버전
+var Theme;
+(function (Theme) {
+    Theme["horror"] = "horror";
+    Theme["adventure"] = "adventure";
+    Theme["crime"] = "crime";
+})(Theme || (Theme = {}));
+var Difficulty;
+(function (Difficulty) {
+    Difficulty["easy"] = "easy";
+    Difficulty["medium"] = "medium";
+    Difficulty["hard"] = "hard";
+})(Difficulty || (Difficulty = {}));
+var Visibility;
+(function (Visibility) {
+    Visibility["public"] = "public";
+    Visibility["unlisted"] = "unlisted";
+    Visibility["private"] = "private";
+})(Visibility || (Visibility = {}));
+/**
+ * 게임 생성기
+ */
+class Game extends ClassVersion {
+    constructor({ id = null, title = '', thumbnailURL = '', description = '', role = {
+        planning: [], // 기획
+        art: [], // 그림
+        story: [], // 스토리
+        puzzle: [], // 퍼즐
+        mechanic: [], // 기능
+        support: [] // 도움
+    }, theme = Theme.horror, tag = '', difficulty = Difficulty.medium, playTime = 10, visibility = Visibility.public, isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), inventory = [], stage = [new Stage({})] }) {
+        super();
+        this.id = id;
+        this.title = title;
+        this.thumbnailURL = thumbnailURL;
+        this.description = description;
+        this.role = role;
+        this.theme = theme;
+        this.tag = tag;
+        this.difficulty = difficulty;
+        this.playTime = playTime;
+        this.visibility = visibility;
+        this.isRanking = isRanking;
+        this.isHiddenStage = isHiddenStage;
+        this.achievement = achievement;
+        this.source = source;
+        this.inventory = inventory;
+        this.stage = stage;
+    }
+    // 업적 생성
+    createAchievement() {
+        this.achievement.push(new Achievement());
+    }
+    // 스테이지 생성
+    createStage() {
+        this.stage.push(new Stage({}));
+    }
+    // 스테이지 수정
+    updateStage() { }
+    // 스테이지 삭제
+    deleteStage() { }
+    // 인벤토리 조작
+    getItem(item) {
+        this.inventory.push(item);
+    }
+    setItem(i) {
+        this.inventory[i];
+    }
+    putItem() { }
+}
 /**
  * 게임소스
  */
-class GameSource extends ClassVersion {
-    constructor({ game_id = null, item = [], intVar = [], strVar = [], boolVar = [] }) {
+class Source extends ClassVersion {
+    constructor({ item = [], intVar = [], strVar = [], boolVar = [] }) {
         super();
         this.item = []; // 아이템 리스트
         this.intVar = []; // 숫자형 변수
         this.strVar = []; // 문자형 변수
         this.boolVar = []; // 논리형 변수
-        this.game_id = game_id;
         this.item = item;
         this.intVar = intVar;
         this.strVar = strVar;
@@ -76,76 +144,6 @@ class BoolVar extends ClassVersion {
         this.name = name;
         this.value = value;
     }
-}
-var Theme;
-(function (Theme) {
-    Theme["horror"] = "horror";
-    Theme["adventure"] = "adventure";
-    Theme["crime"] = "crime";
-})(Theme || (Theme = {}));
-var Difficulty;
-(function (Difficulty) {
-    Difficulty["easy"] = "easy";
-    Difficulty["medium"] = "medium";
-    Difficulty["hard"] = "hard";
-})(Difficulty || (Difficulty = {}));
-var Visibility;
-(function (Visibility) {
-    Visibility["public"] = "public";
-    Visibility["unlisted"] = "unlisted";
-    Visibility["private"] = "private";
-})(Visibility || (Visibility = {}));
-/**
- * 게임 생성기
- */
-class GameData extends ClassVersion {
-    constructor({ id = null, title = '', thumbnailURL = '', description = '', role = {
-        planning: [], // 기획
-        art: [], // 그림
-        story: [], // 스토리
-        puzzle: [], // 퍼즐
-        mechanic: [], // 기능
-        support: [] // 도움
-    }, theme = Theme.horror, tag = '', difficulty = Difficulty.medium, playTime = 10, visibility = Visibility.public, isRanking = false, isHiddenStage = false, achievement = [], inventory = [], stage = [new Stage({})] }) {
-        super();
-        // this.id = Math.floor(Math.random() * 100000000); 
-        // MySQL과 연동하고 아이디가 겹치지 않게 생성해야 돼서, 아이디 생성은 클래스 내에서 하면 안 된다
-        this.id = id;
-        this.title = title;
-        this.thumbnailURL = thumbnailURL;
-        this.description = description;
-        this.role = role;
-        this.theme = theme;
-        this.tag = tag;
-        this.difficulty = difficulty;
-        this.playTime = playTime;
-        this.visibility = visibility;
-        this.isRanking = isRanking;
-        this.isHiddenStage = isHiddenStage;
-        this.achievement = achievement;
-        this.inventory = inventory;
-        this.stage = stage;
-    }
-    // 업적 생성
-    createAchievement() {
-        this.achievement.push(new Achievement());
-    }
-    // 스테이지 생성
-    createStage() {
-        this.stage.push(new Stage({}));
-    }
-    // 스테이지 수정
-    updateStage() { }
-    // 스테이지 삭제
-    deleteStage() { }
-    // 인벤토리 조작
-    getItem(item) {
-        this.inventory.push(item);
-    }
-    setItem(i) {
-        this.inventory[i];
-    }
-    putItem() { }
 }
 /**
  * 업적 생성기
@@ -262,4 +260,4 @@ class Transition extends ClassVersion {
     static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, GameSource, GameData, Stage, Cut };
+export { ClassVersion, Source, Game, Stage, Cut };

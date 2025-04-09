@@ -10,6 +10,119 @@ class ClassVersion {
 
 
 
+type Role = {
+    planning:   string[],
+    art:        string[],
+    story:      string[],
+    puzzle:     string[],
+    mechanic:   string[],
+    support:    string[]
+}
+enum Theme {
+    horror    = "horror",
+    adventure = "adventure",
+    crime     = "crime",
+}
+enum Difficulty {
+    easy   = "easy",
+    medium = "medium",
+    hard   = "hard",
+}
+enum Visibility {
+    public   = "public",
+    unlisted = "unlisted",
+    private  = "private",
+}
+/**
+ * 게임 생성기
+ */
+class Game extends ClassVersion {
+    id:             number;         // MySQL과 연동해서 얻음
+    title:          string;         // 제목
+    thumbnailURL:   string;         // 게임 썸네일 URL
+    description:    string;         // 설명
+    role:           Role;           // 각 제작자가 맡은 역할
+    theme:          Theme;          // 테마
+    tag:            string;         // 태그
+    difficulty:     Difficulty;     // 난이도
+    playTime:       number;         // 예상 소요 시간
+    visibility:     Visibility;     // 공개 여부
+    isRanking:      boolean;        // 랭킹 표시 여부
+    isHiddenStage:  boolean;        // 히든 스테이지 여부
+    achievement:    Achievement[];  // 업적
+    source:         Source;         // 게임소스
+    inventory:      Item[];         // 인벤토리
+    stage:          Stage[];        // 스테이지
+    
+    constructor({
+        id = null,
+        title = '',
+        thumbnailURL = '',
+        description = '',
+        role = {
+            planning: [],     // 기획
+            art: [],          // 그림
+            story: [],        // 스토리
+            puzzle: [],       // 퍼즐
+            mechanic: [],     // 기능
+            support: []       // 도움
+        },
+        theme = Theme.horror,
+        tag = '',
+        difficulty = Difficulty.medium,
+        playTime = 10,
+        visibility = Visibility.public,
+        isRanking = false,
+        isHiddenStage = false,
+        achievement = [],
+        source = new Source({}),
+        inventory = [],
+        stage = [new Stage({})]
+    }) {
+        super()
+        this.id = id;
+        this.title = title;
+        this.thumbnailURL = thumbnailURL;
+        this.description = description;
+        this.role = role;
+        this.theme = theme;
+        this.tag = tag;
+        this.difficulty = difficulty;
+        this.playTime = playTime;
+        this.visibility = visibility;
+        this.isRanking = isRanking;
+        this.isHiddenStage = isHiddenStage;
+        this.achievement = achievement;
+        this.source = source;
+        this.inventory = inventory;
+        this.stage = stage;
+    }
+
+    // 업적 생성
+    createAchievement() {
+        this.achievement.push(new Achievement());
+    }
+    // 스테이지 생성
+    createStage() {
+        this.stage.push(new Stage({}));
+    }
+    // 스테이지 수정
+    updateStage() {}
+    // 스테이지 삭제
+    deleteStage() {}
+    
+    // 인벤토리 조작
+    getItem(item) {
+        this.inventory.push(item);
+    }
+    setItem(i) {
+        this.inventory[i];
+    }
+    putItem() {}
+}
+
+
+
 type Variable = {
     name:   string,
     value:  number | string | boolean,
@@ -17,22 +130,19 @@ type Variable = {
 /**
  * 게임소스
  */
-class GameSource extends ClassVersion {
-    game_id:     number;
+class Source extends ClassVersion {
     item:        Item[]      =  [];   // 아이템 리스트
     intVar:      Variable[]  =  [];   // 숫자형 변수
     strVar:      Variable[]  =  [];   // 문자형 변수
     boolVar:     Variable[]  =  [];   // 논리형 변수
 
     constructor({
-        game_id = null,
         item = [],
         intVar = [],
         strVar = [],
         boolVar = []
     }) {
         super();
-        this.game_id = game_id;
         this.item = item;
         this.intVar = intVar;
         this.strVar = strVar;
@@ -122,118 +232,6 @@ class BoolVar extends ClassVersion {
         this.name = name;
         this.value = value;
     }
-}
-
-
-
-type Role = {
-    planning:   string[],
-    art:        string[],
-    story:      string[],
-    puzzle:     string[],
-    mechanic:   string[],
-    support:    string[]
-}
-enum Theme {
-    horror    = "horror",
-    adventure = "adventure",
-    crime     = "crime",
-}
-enum Difficulty {
-    easy   = "easy",
-    medium = "medium",
-    hard   = "hard",
-}
-enum Visibility {
-    public   = "public",
-    unlisted = "unlisted",
-    private  = "private",
-}
-/**
- * 게임 생성기
- */
-class GameData extends ClassVersion {
-    id:             number;         // MySQL과 연동해서 얻음
-    title:          string;         // 제목
-    thumbnailURL:   string;         // 게임 썸네일 URL
-    description:    string;         // 설명
-    role:           Role;           // 각 제작자가 맡은 역할
-    theme:          Theme;          // 테마
-    tag:            string;         // 태그
-    difficulty:     Difficulty;     // 난이도
-    playTime:       number;         // 예상 소요 시간
-    visibility:     Visibility;     // 공개 여부
-    isRanking:      boolean;        // 랭킹 표시 여부
-    isHiddenStage:  boolean;        // 히든 스테이지 여부
-    achievement:    Achievement[];  // 업적
-    inventory:      Item[];         // 인벤토리
-    stage:          Stage[];        // 스테이지
-    
-    constructor({
-        id = null,
-        title = '',
-        thumbnailURL = '',
-        description = '',
-        role = {
-            planning: [],     // 기획
-            art: [],          // 그림
-            story: [],        // 스토리
-            puzzle: [],       // 퍼즐
-            mechanic: [],     // 기능
-            support: []       // 도움
-        },
-        theme = Theme.horror,
-        tag = '',
-        difficulty = Difficulty.medium,
-        playTime = 10,
-        visibility = Visibility.public,
-        isRanking = false,
-        isHiddenStage = false,
-        achievement = [],
-        inventory = [],
-        stage = [new Stage({})]
-    }) {
-        super()
-        // this.id = Math.floor(Math.random() * 100000000); 
-        // MySQL과 연동하고 아이디가 겹치지 않게 생성해야 돼서, 아이디 생성은 클래스 내에서 하면 안 된다
-        this.id = id;
-        this.title = title;
-        this.thumbnailURL = thumbnailURL;
-        this.description = description;
-        this.role = role;
-        this.theme = theme;
-        this.tag = tag;
-        this.difficulty = difficulty;
-        this.playTime = playTime;
-        this.visibility = visibility;
-        this.isRanking = isRanking;
-        this.isHiddenStage = isHiddenStage;
-        this.achievement = achievement;
-        this.inventory = inventory;
-        this.stage = stage;
-    }
-
-    // 업적 생성
-    createAchievement() {
-        this.achievement.push(new Achievement());
-    }
-    // 스테이지 생성
-    createStage() {
-        this.stage.push(new Stage({}));
-    }
-    // 스테이지 수정
-    updateStage() {}
-    // 스테이지 삭제
-    deleteStage() {}
-    
-    // 인벤토리 조작
-    getItem(item) {
-        this.inventory.push(item);
-    }
-    setItem(i) {
-        this.inventory[i];
-    }
-    putItem() {}
 }
 
 
@@ -416,4 +414,4 @@ class Transition extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, GameSource, GameData, Stage, Cut }
+export { ClassVersion, Source, Game, Stage, Cut }
