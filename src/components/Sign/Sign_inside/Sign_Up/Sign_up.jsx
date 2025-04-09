@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css';
-import signSubmit from './sign_submit'; // 상대경로 확인
+import handleSubmitFunc from './validateSubmit'; // 분리된 유효성검사 로직
 
 import Sign_in from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
@@ -42,23 +42,21 @@ function Sign_up({ onClose, onSignInClick }) {
     // 생일은 위에서 이미 선언됨
 
     /* -----(추가) 회원가입 폼 제출 액션 ----- */
-    const handleSubmit = async (e) => {
-        e.preventDefault();
     
-        if (password !== passwordCheck) {
-          alert('비밀번호가 일치하지 않습니다.');
-          return;
-        }
-        
-        const result = await signSubmit({ userId, password, nickname, email, domain, birth });
-    
-        if (result.success) {
-          alert('회원가입 성공!');
-          onSignInClick();
-        } else {
-          alert(result.message || '회원가입 실패!');
-        }
-      };
+    // (유효성 검사 로직 분리)
+
+    const handleSubmit = (e) => { // 임포트한 코드 객체 생성
+        handleSubmitFunc(e, {
+            userId,
+            password,
+            passwordCheck,
+            nickname,
+            email,
+            domain,
+            birth
+        }, onSignInClick);
+    };
+
     /* -------------------------------------- */
 
     return (
