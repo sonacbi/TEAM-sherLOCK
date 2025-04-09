@@ -6,6 +6,8 @@ import UserDAO from './modules/DAO/userDAO.js'
 import dotenv from 'dotenv';
 dotenv.config({ path: './modules/db/.env' });
 import bcrypt from 'bcrypt'; // 추가
+import jwt from 'jsonwebtoken';
+import authMiddleware from './modules/middlewares/authMiddleware.js';
 
 const app = express();
 app.use(express.json());
@@ -42,6 +44,56 @@ app.post('/auth/signup', async (req, res) => {
 
 });
 
+/* --------------------------- 로그인 토큰 발급 --------------------------- */
+// 로그인 API
+app.post('/auth/login', async (req, res) => {
+  const { user_id, user_pw } = req.body;
+  console.log('📥 로그인 요청 도착:', req.body);
+
+  try {
+    const user = await UserDAO.findById(user_id);
+    console.log('🔍 사용자 조회 결과:', user);
+
+    if (!user) {
+      console.log('❌ 사용자 없음');
+      return res.status(401).json({ success: false, message: '존재하지 않는 사용자입니다.' });
+    }
+
+    const isMatch = await bcrypt.compare(user_pw, user.user_pw);
+    console.log('🔐 비밀번호 비교 결과:', isMatch);
+
+    if (!isMatch) {
+      console.log('❌ 비밀번호 불일치');
+      return res.status(401).json({ success: false, message: '비밀번호가 일치하지 않습니다.' });
+    }
+    console.log('🧪 user 객체 전체 확인:', user); // <- 여기에 user_name 있는지 다시 확인
+    console.log('🧪 JWT에 넣을 user_id:', user.user_id);
+    console.log('🧪 JWT에 넣을 user_name:', user.user_name); // 여기서 undefined면 문제임
+
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        user_name: user.user_name  // 이게 undefined면 프론트에서 안 뜸!
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+
+    console.log('✅ 로그인 성공, 토큰 발급:', token);
+    return res.json({ success: true, token });
+
+  } catch (err) {
+    console.error('💥 서버 오류:', err);
+    res.status(500).json({ error: '로그인 중 서버 오류 발생' });
+  }
+});
+
+
+/* --------------------------- 로그인 인증 절차 --------------------------- */
+app.get('/Main', authMiddleware, (req, res) => {
+  res.json({ message: `안녕하세요, ${req.user.user_id}님!` });
+});
 /* ---------------------------------------------------------------------- */
 
 // 라우트 연결

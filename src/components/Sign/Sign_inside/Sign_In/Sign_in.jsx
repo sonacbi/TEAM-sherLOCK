@@ -23,7 +23,7 @@ function Sign_in({ onClose, onSignUpClick }) {
     setShowSherlockLogin(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const idMsg = validateId(user_id);
@@ -33,8 +33,35 @@ function Sign_in({ onClose, onSignUpClick }) {
     setUserPwError(pwMsg);
 
     if (!idMsg && !pwMsg) {
-      console.log('로그인 시도!');
+      console.log("로그인 시도");
       // TODO: 실제 로그인 처리 로직 (백엔드용 코드) (추가예정) -----------//
+      try {
+        const response = await fetch('http://localhost:5000/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: user_id,
+            user_pw: user_pw,
+          }),
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok && data.token) {
+          localStorage.setItem('token', data.token); // 토큰 저장
+          alert('로그인 성공!');
+          // 페이지 이동 등 처리
+          // 로그인 후 리디렉션 (예: 홈 페이지로 이동)
+          window.location.href = '/Main';
+        } else {
+          alert(data.message || '로그인 실패!');
+        }
+      } catch (err) {
+        console.error('로그인 에러:', err);
+        alert('서버 오류 발생');
+      }
     }
   };
 
