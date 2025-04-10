@@ -7,7 +7,7 @@ import kakao from '../../../../assets/images/Sign/Kakao.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
-import { validateId, validatePassword } from './validated.jsx';
+import { validateId, validatePassword } from './Sign_in_validateSubmit.jsx'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
 
 function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
@@ -32,9 +32,10 @@ function Sign_in({ onClose, onSignUpClick }) {
     setUserIdError(idMsg);
     setUserPwError(pwMsg);
 
+    // ./Sign_in_submit.jsx 로 분리하시오.
     if (!idMsg && !pwMsg) {
       console.log("로그인 시도");
-      // TODO: 실제 로그인 처리 로직 (백엔드용 코드) (추가예정) -----------//
+      // TODO: 실제 로그인 처리 로직 (백엔드용 코드) (분리예정) -----------//
       try {
         const response = await fetch('http://localhost:5000/auth/login', {
           method: 'POST',

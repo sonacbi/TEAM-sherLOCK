@@ -2,7 +2,8 @@ import { useState } from 'react';
 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css';
-import handleSubmitFunc from './validateSubmit'; // 분리된 유효성검사 로직
+import handleSubmitFunc from './Sign_up_validateSubmit'; // 분리된 유효성검사 로직 → Sign_up_submit.js (프론트 제출폼) 연동
+import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit'; 
 
 import Sign_in from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
@@ -41,6 +42,16 @@ function Sign_up({ onClose, onSignInClick }) {
     const [nickname, setNickname] = useState('');
     // 생일은 위에서 이미 선언됨
 
+    /* -----(추가) 회원가입 폼 프론트 유효성 검사 ----- */
+    const [errors, setErrors] = useState({
+        userId: '',
+        password: '',
+        passwordCheck: '',
+        nickname: '',
+        email: '',
+        birth: ''
+      });
+
     /* -----(추가) 회원가입 폼 제출 액션 ----- */
     
     // (유효성 검사 로직 분리)
@@ -54,8 +65,9 @@ function Sign_up({ onClose, onSignInClick }) {
             email,
             domain,
             birth
-        }, onSignInClick);
+        }, setErrors, onSignInClick);
     };
+
 
     /* -------------------------------------- */
 
@@ -74,8 +86,18 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='text'
                                     placeholder="셜LOCK ID"
                                     value = {userId}
-                                    onChange={(e) => setUserId(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setUserId(value);
+
+                                        const errorMessage = validateId(value);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        userId: errorMessage
+                                        }));
+                                    }}
                                 />
+                                    {errors.userId && <p className="error">{errors.userId}</p>}
                             </div>
 
                             <div className='password'>
@@ -83,8 +105,18 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='password'
                                     placeholder="비밀번호"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setPassword(value);
+
+                                        const errorMessage = validatePassword(value);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        password: errorMessage
+                                        }));
+                                    }}
                                 />
+                                {errors.password && <p className="error">{errors.password}</p>}
                             </div>
 
                             <div className='password_check'>
@@ -92,8 +124,18 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='password'
                                     placeholder="비밀번호 확인"
                                     value={passwordCheck}
-                                    onChange={(e) => setPasswordCheck(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setPasswordCheck(value);
+
+                                        const errorMessage = validatePasswordCheck(password, value);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        passwordCheck: errorMessage
+                                        }));
+                                        }}
                                 />
+                                {errors.passwordCheck && <p className="error">{errors.passwordCheck}</p>}
                             </div>
 
                             <div className='email'>
@@ -109,13 +151,24 @@ function Sign_up({ onClose, onSignInClick }) {
                                 <select
                                     name="domain"
                                     value={domain}
-                                    onChange={(e) => setDomain(e.target.value)}
+                                    onChange={(e) => {
+                                            const value = e.target.value;
+                                            setDomain(value);
+    
+                                            const errorMessage = validateEmail(value);
+                                            setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            email: errorMessage
+                                            }));
+                                        }}
                                 >
-                                    <option value="" selected disabled>선택</option>
+                                    <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
                                     <option value="google.com">gmail.com</option>
                                     <option value="naver.com">naver.com</option>
                                     <option value="daum.com">daum.net</option>
                                 </select>
+                                {errors.email && <p className="error">{errors.email}</p>}
+    
                             </div>
 
                             <div className='nickname'>
@@ -123,33 +176,81 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='text'
                                     placeholder="닉네임"
                                     value={nickname}
-                                    onChange={(e) => setNickname(e.target.value)}
+                                    onChange={(e) => 
+                                        {
+                                            const value = e.target.value;
+                                            setNickname(value);
+    
+                                            const errorMessage = validateNickname(value);
+                                            setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            nickname: errorMessage
+                                            }));
+                                        }}
                                 />
+                                {errors.nickname && <p className="error">{errors.nickname}</p>}
                             </div>
 
                             <div className="birth">
                                 <p>생년월일</p>
 
-                                <select name="year" value={birth.year} onChange={handleChange}>
+                                <select name="year" value={birth.year}
+                                    onChange={(e) => {
+                                        handleChange(e);
+                                        const newBirth = {
+                                            ...birth,
+                                            [e.target.name]: e.target.value
+                                        };
+                                        const errorMessage = validateBirth(newBirth);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            birth: errorMessage
+                                        }));
+                                    }}>
                                     <option value="" disabled>연도</option>
                                     {years.map((year) => (
-                                    <option key={year} value={year}>{year}</option>
+                                        <option key={year} value={year}>{year}</option>
                                     ))}
                                 </select>
 
-                                <select name="month" value={birth.month} onChange={handleChange}>
+                                <select name="month" value={birth.month}
+                                    onChange={(e) => {
+                                        handleChange(e);
+                                        const newBirth = {
+                                            ...birth,
+                                            [e.target.name]: e.target.value
+                                        };
+                                        const errorMessage = validateBirth(newBirth);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            birth: errorMessage
+                                        }));
+                                    }}>
                                     <option value="" disabled>월</option>
                                     {months.map((month) => (
-                                    <option key={month} value={month}>{month}</option>
+                                        <option key={month} value={month}>{month}</option>
                                     ))}
                                 </select>
 
-                                <select name="day" value={birth.day} onChange={handleChange}>
+                                <select name="day" value={birth.day}
+                                    onChange={(e) => {
+                                        handleChange(e);
+                                        const newBirth = {
+                                            ...birth,
+                                            [e.target.name]: e.target.value
+                                        };
+                                        const errorMessage = validateBirth(newBirth);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            birth: errorMessage
+                                        }));
+                                    }}>
                                     <option value="" disabled>일</option>
                                     {days.map((day) => (
-                                    <option key={day} value={day}>{day}</option>
+                                        <option key={day} value={day}>{day}</option>
                                     ))}
                                 </select>
+                                {errors.birth && <p className="error">{errors.birth}</p>}
                             </div>
 
                             <div className='button'>
