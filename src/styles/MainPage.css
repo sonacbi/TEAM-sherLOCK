@@ -23,7 +23,6 @@ header {
     height: 200px;
     left: 3%;
     top: 20%;
-    cursor: pointer;
     display: flex;
     z-index: 999;
     gap: 10px;
@@ -32,11 +31,51 @@ header {
 .notice_content {
     height: 100%;
     width: 100%;
+    position: relative;
+}
+
+.notice_table {
+    height: 100%;
+    width: 90%;
+    position: absolute;
+    top: 0;
+    right: 2%;
+    padding: 0 5px;
+    padding-top: 10px;
+    overflow-y: auto;
+}
+
+.notice_table::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notice_table::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.notice_table::-webkit-scrollbar-track {
+    background-color: transparent;
+    margin: 10px 0;
+}
+
+.notice_table_text {
+    width: 100%;
+    height: 20%;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #ddd;
+    margin-bottom: 10px;
+}
+
+.notice_table_text:hover {
+    background-color: #ccc;
 }
 
 #notice_img {
     width: 46px;
     height: 50px;
+    cursor: pointer;
 }
 
 #notice_img, #sign_in, #sign_up {

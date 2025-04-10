@@ -27,6 +27,11 @@ function MainPage() {
   const articlesRef = useRef([]);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [items, setItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
+  const [isNoticeOpen, setIsNoticeOpen] = useState(false);
 
   const handleSignInClick = () => {
     setShowSignIn(true);
@@ -81,9 +86,14 @@ function MainPage() {
         e.preventDefault();
         return;
       }
-  
+    
+      const noticeTable = document.querySelector('.notice_table');
+      if (noticeTable && noticeTable.contains(e.target)) {
+        return;
+      }
+    
       e.preventDefault();
-  
+    
       if (e.deltaY > 0) {
         window.scrollTo({
           top: document.body.scrollHeight,
@@ -93,7 +103,7 @@ function MainPage() {
         window.scrollTo({
           top: 0,
           behavior: 'smooth',
-        });
+        });.1  
       }
     };
   
@@ -104,6 +114,49 @@ function MainPage() {
     };
   }, [showSignIn, showSignUp]);
 
+  useEffect(() => {
+    const loadMore = async () => {
+      const newItems = Array.from({ length: 10 }, (_, i) => `Notice ${(page - 1) * 10 + i + 1}`);
+      setItems((prev) => [...prev, ...newItems]);
+  
+      if (page >= 5) {
+        setHasMore(false);
+      }
+    };
+  
+    if (page !== 1 && hasMore) {
+      loadMore();
+    }
+  }, [page]);
+  
+  useEffect(() => {
+    const initialItems = Array.from({ length: 10 }, (_, i) => `Notice ${i + 1}`);
+    setItems(initialItems);
+  }, []);
+  
+  useEffect(() => {
+    if (!loader.current || !isNoticeOpen) return;
+  
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasMore) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }, { 
+      threshold: 0, 
+      rootMargin: '0px 0px 200px 0px'
+    });
+  
+    observer.observe(loader.current);
+  
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, isNoticeOpen]);
+
+  const handleNoticeClick = () => {
+    setIsNoticeOpen((prev) => !prev);
+  };
+
   return (
     <div className='MainPage_wrap'>
       <div className='MainPage_content'>
@@ -111,10 +164,21 @@ function MainPage() {
 
         <header>
           <div className="notice">
-            <img id='notice_img' src={notice_img} alt='notice_img' />
-            <div className="notice_content">
-              <img id='notice_speech_bubble' src={notice_speech_bubble} alt='notice_speech_bubble' />
-            </div>
+            <img id='notice_img' src={notice_img} alt='notice_img' onClick={handleNoticeClick} />
+
+            {isNoticeOpen && (
+              <div className="notice_content">
+                <img id="notice_speech_bubble" src={notice_speech_bubble} alt="notice_speech_bubble" />
+                <div className="notice_table">
+                  {items.map((item, index) => (
+                    <div key={index} className="notice_table_text">
+                      {item}
+                    </div>
+                  ))}
+                  {hasMore && <div ref={loader} style={{ height: '10px' }} />}
+                </div>
+              </div>
+            )}
           </div>
           <Header_Logo />
           <Sign onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick}/>
