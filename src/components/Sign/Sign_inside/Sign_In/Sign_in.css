@@ -172,13 +172,8 @@
     opacity: 0.5;
 }
 
-/* ---------------추가---------------- */
-.input-error {
-    border: 1px solid red;
-    outline: none;
-}
-  
-.error-text, .warning-text {
+/* ---------------추가---------------- */  
+.error_text, .warning_text {
     color: white;
     font-size: 0.8rem;
     margin-top: 4px;

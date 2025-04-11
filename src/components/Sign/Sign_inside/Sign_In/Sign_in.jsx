@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { validateId, validatePassword } from './Sign_in_validateSubmit'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
-import { submitLogin } from './Sign_in_submit'; // 새로 분리된 함수 import
+import { validateId, validatePassword } from './Sign_in_validateSubmit.js'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
+import { submitLogin } from './Sign_in_submit.js'; // 새로 분리된 함수 import
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_in.css';
 
@@ -88,12 +88,13 @@ function Sign_in({ onClose, onSignUpClick }) {
                       setUserId(value);                   // 입력된 값을 상태로 저장하고
                       setUserIdError(validateId(value)); // 동시에 validation도 실행
                     }}
-                    onFocus={() => setUserIdError('')}    // 포커스 시 에러 초기화
-                    className={idError ? 'input-error' : ''}
+                    onFocus={() => setUserIdError(validateId(user_id))}    // 포커스 시 에러 검증
+                    onBlur={() =>
+                      setUserIdError('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                    }
                     // 수정 ------------------------------------------------//
                     />
-
-                    {idError && <p className='error-text'>{idError}</p>}
+                    {idError && <p className='error_text'>{idError}</p>}
                     
                   </div>
 
@@ -111,18 +112,19 @@ function Sign_in({ onClose, onSignUpClick }) {
                     onKeyDown={(e) =>                   // capslock 버튼 감지
                       setCapsLockOn((prev) => ({ ...prev, password: e.getModifierState("CapsLock") }))
                     }
-                    onBlur={() =>
-                      setCapsLockOn((prev) => ({ ...prev, password: false }))
+                    onBlur={() =>{
+                      setCapsLockOn((prev) => ({ ...prev, password: false }));
+                      setUserPwError(''); // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
                     }
-                    className = {passwordError ? 'input-error' : ''}
+                    }
                     // 수정 ------------------------------------------------//
                     />
                     {!capsLockOn.password && passwordError && (
-                      <p className='error-text'>{passwordError}</p>
+                      <p className='error_text'>{passwordError}</p>
                     )}
 
                     {capsLockOn.password && (
-                      <p className="warning-text">CapsLock이 켜져 있습니다!</p>
+                      <p className="warning_text">CapsLock이 켜져 있습니다!</p>
                     )}
                   </div>
 

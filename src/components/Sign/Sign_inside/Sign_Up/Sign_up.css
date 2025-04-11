@@ -125,7 +125,7 @@
     font-weight: bold;
 }
 
-.error {
+.error_text, .warning_text {
     color: white;
     font-size: 0.8rem;
     margin-top: 4px;

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-import Logo from '../../../Header_Logo/Header_Logo';
-import './Sign_up.css';
-
 import handleSubmitFunc from './Sign_up_validateSubmit'; // 분리된 유효성검사 로직 → Sign_up_submit.js (프론트 제출폼) 연동
-import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit'; 
+import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit';
+
+import Logo from '../../../Header_Logo/Header_Logo';
+import './Sign_up.css'; 
 
 import Sign_in from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
@@ -52,7 +52,10 @@ function Sign_up({ onClose, onSignInClick }) {
         email: '',
         birth: ''
     });      
-
+    const [capsLockOn, setCapsLockOn] = useState({ // capslock on/off
+        password: false,
+        passwordCheck: false
+      });
     /* -----(추가) 회원가입 폼 제출 액션 ----- */
     
     // (유효성 검사 로직 분리)
@@ -97,8 +100,18 @@ function Sign_up({ onClose, onSignInClick }) {
                                         userId: errorMessage
                                         }));
                                     }}
+                                    onFocus={() => {
+                                        const errorMessage = validateId(userId);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        userId: errorMessage
+                                        }));
+                                    }}    // 포커스 시 에러 검증
+                                    onBlur={() =>
+                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                                    }
                                 />
-                                    {errors.userId && <p className="error">{errors.userId}</p>}
+                                    {errors.userId && <p className="error_text">{errors.userId}</p>}
                             </div>
 
                             <div className='password'>
@@ -116,8 +129,29 @@ function Sign_up({ onClose, onSignInClick }) {
                                         password: errorMessage
                                         }));
                                     }}
+                                    onFocus={() => {
+                                        const errorMessage = validatePassword(password);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        password: errorMessage
+                                        }));
+                                    }}    // 포커스 시 에러 검증
+                                    onKeyDown={(e) =>                   // capslock 버튼 감지
+                                        setCapsLockOn((prev) => ({ ...prev, password: e.getModifierState("CapsLock") }))
+                                    }
+                                    onBlur={() =>{
+                                        setCapsLockOn((prev) => ({ ...prev, password: false }));
+                                        setErrors(''); // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                                    }}
                                 />
-                                {errors.password && <p className="error">{errors.password}</p>}
+                                {!capsLockOn.password && errors.password && (
+                                <p className="error_text">{errors.password}</p>
+                                )}
+
+                                {capsLockOn.password && (
+                                <p className="warning_text">CapsLock이 켜져 있습니다!</p>
+                                )}
+
                             </div>
 
                             <div className='password_check'>
@@ -135,8 +169,29 @@ function Sign_up({ onClose, onSignInClick }) {
                                         passwordCheck: errorMessage
                                         }));
                                         }}
+                                    onFocus={() => {
+                                        const errorMessage = validatePasswordCheck(passwordCheck);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        passwordCheck: errorMessage
+                                        }));
+                                    }}    // 포커스 시 에러 검증
+                                    onKeyDown={(e) =>                   // capslock 버튼 감지
+                                        setCapsLockOn((prev) => ({ ...prev, passwordCheck: e.getModifierState("CapsLock") }))
+                                    }
+                                    onBlur={() =>{
+                                        setCapsLockOn((prev) => ({ ...prev, passwordCheck: false }));
+                                        setErrors('');} // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+
+                                    }
                                 />
-                                {errors.passwordCheck && <p className="error">{errors.passwordCheck}</p>}
+                                {!capsLockOn.passwordCheck && errors.passwordCheck && (
+                                <p className="error_text">{errors.passwordCheck}</p>
+                                )}
+
+                                {capsLockOn.passwordCheck && (
+                                <p className="warning_text">CapsLock이 켜져 있습니다!</p>
+                                )}
                             </div>
 
                             <div className='email'>
@@ -156,12 +211,22 @@ function Sign_up({ onClose, onSignInClick }) {
                                             const value = e.target.value;
                                             setDomain(value);
     
-                                            const errorMessage = validateEmail(value);
+                                            const errorMessage = validateEmail(email, value);
                                             setErrors((prevErrors) => ({
                                             ...prevErrors,
                                             email: errorMessage
                                             }));
                                         }}
+                                    onFocus={() => {
+                                        const errorMessage = validateEmail(email, domain);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        email: errorMessage
+                                        }));
+                                    }}    // 포커스 시 에러 검증
+                                    onBlur={() =>
+                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                                    }
                                 >
                                     <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
                                     <option value="google.com">gmail.com</option>
@@ -170,7 +235,7 @@ function Sign_up({ onClose, onSignInClick }) {
                                 </select>
 
                                 
-                                {errors.email && <p className="error">{errors.email}</p>}
+                                {errors.email && <p className="error_text">{errors.email}</p>}
     
                             </div>
 
@@ -190,8 +255,18 @@ function Sign_up({ onClose, onSignInClick }) {
                                             nickname: errorMessage
                                             }));
                                         }}
+                                    onFocus={() => {
+                                        const errorMessage = validateNickname(nickname);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        nickname: errorMessage
+                                        }));
+                                    }}    // 포커스 시 에러 검증
+                                    onBlur={() =>
+                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                                    }
                                 />
-                                {errors.nickname && <p className="error">{errors.nickname}</p>}
+                                {errors.nickname && <p className="error_text">{errors.nickname}</p>}
                             </div>
 
                             <div className="birth">
@@ -209,7 +284,18 @@ function Sign_up({ onClose, onSignInClick }) {
                                             ...prevErrors,
                                             birth: errorMessage
                                         }));
-                                    }}>
+                                    }}
+                                    onFocus={() => {
+                                        const errorMessage = validateBirth(newBirth);
+                                        setErrors((prevErrors) => ({
+                                        ...prevErrors,
+                                        birth: errorMessage
+                                        }));
+                                    }}    // 포커스 시 에러 검증
+                                    onBlur={() =>
+                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                                    }
+                                    >
                                     <option value="" disabled>연도</option>
                                     {years.map((year) => (
                                         <option key={year} value={year}>{year}</option>
@@ -253,7 +339,7 @@ function Sign_up({ onClose, onSignInClick }) {
                                         <option key={day} value={day}>{day}</option>
                                     ))}
                                 </select>
-                                {errors.birth && <p className="error">{errors.birth}</p>}
+                                {errors.birth && <p className="error_text">{errors.birth}</p>}
                             </div>
 
                             <div className='button'>
