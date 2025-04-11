@@ -195,28 +195,29 @@ function Sign_up({ onClose, onSignInClick }) {
                             </div>
 
                             <div className='email'>
-                                <input
-                                    type='text'
-                                    placeholder="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
+                                <div className='email_input'>
+                                    <input
+                                        type='text'
+                                        placeholder="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
 
-                                <p>@</p>
+                                    <p>@</p>
 
-                                <select
-                                    name="domain"
-                                    value={domain}
-                                    onChange={(e) => {
-                                            const value = e.target.value;
-                                            setDomain(value);
-    
-                                            const errorMessage = validateEmail(email, value);
-                                            setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            email: errorMessage
-                                            }));
-                                        }}
+                                    <select
+                                        name="domain"
+                                        value={domain}
+                                        onChange={(e) => {
+                                                const value = e.target.value;
+                                                setDomain(value);
+        
+                                                const errorMessage = validateEmail(email, value);
+                                                setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                email: errorMessage
+                                                }));
+                                            }}
                                     onFocus={() => {
                                         const errorMessage = validateEmail(email, domain);
                                         setErrors((prevErrors) => ({
@@ -227,13 +228,13 @@ function Sign_up({ onClose, onSignInClick }) {
                                     onBlur={() =>
                                         setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
                                     }
-                                >
-                                    <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
-                                    <option value="google.com">gmail.com</option>
-                                    <option value="naver.com">naver.com</option>
-                                    <option value="daum.com">daum.net</option>
-                                </select>
-
+                                    >
+                                        <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
+                                        <option value="google.com">gmail.com</option>
+                                        <option value="naver.com">naver.com</option>
+                                        <option value="daum.com">daum.net</option>
+                                    </select>
+                                </div>
                                 
                                 {errors.email && <p className="error_text">{errors.email}</p>}
     
@@ -270,7 +271,8 @@ function Sign_up({ onClose, onSignInClick }) {
                             </div>
 
                             <div className="birth">
-                                <p>생년월일</p>
+                                <div className='birth_input'>
+                                    <p>생년월일</p>
 
                                 <select name="year" value={birth.year}
                                     onChange={(e) => {
@@ -302,24 +304,24 @@ function Sign_up({ onClose, onSignInClick }) {
                                     ))}
                                 </select>
 
-                                <select name="month" value={birth.month}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const newBirth = {
-                                            ...birth,
-                                            [e.target.name]: e.target.value
-                                        };
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            birth: errorMessage
-                                        }));
-                                    }}>
-                                    <option value="" disabled>월</option>
-                                    {months.map((month) => (
-                                        <option key={month} value={month}>{month}</option>
-                                    ))}
-                                </select>
+                                    <select name="month" value={birth.month}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            const newBirth = {
+                                                ...birth,
+                                                [e.target.name]: e.target.value
+                                            };
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                birth: errorMessage
+                                            }));
+                                        }}>
+                                        <option value="" disabled>월</option>
+                                        {months.map((month) => (
+                                            <option key={month} value={month}>{month}</option>
+                                        ))}
+                                    </select>
 
                                 <select name="day" value={birth.day}
                                     onChange={(e) => {

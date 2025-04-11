@@ -133,8 +133,13 @@
     font-weight: bold;
 }
 
+<<<<<<< HEAD
 .error_text, .warning_text {
     color: white;
+=======
+.error {
+    color: #bbb;
+>>>>>>> 309b794a38e291d8a1aa62677e1c4374dc1806a3
     font-size: 0.8rem;
     margin-top: 4px;
     width: 212px;
