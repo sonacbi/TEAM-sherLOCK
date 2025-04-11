@@ -14,7 +14,7 @@ function App() {
         <Route path="/Intro" element={<IntroPage />} />
         <Route path="/Main" element={<MainPage />} />
         <Route path='/Sql' element={<SqlPage/>} />
-        <Route path='/Work' element={<Workspace/>} />
+        <Route path='/Workspace' element={<Workspace/>} />
         <Route path='/Game/:id' element={<Game/>} />
         <Route path='/theme/:theme' element={<ThemePage/>} />
       </Routes>

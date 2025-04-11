@@ -95,6 +95,10 @@ class Game extends ClassVersion {
         this.achievement = achievement;
         this.source = source;
         this.inventory = inventory;
+        this.stage = [];
+        stage.map((data)=>{
+            this.stage.push(new Stage(data));
+        })
         this.stage = stage;
     }
 

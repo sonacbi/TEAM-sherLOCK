@@ -9,11 +9,11 @@ export default function Workspace() {
     const [file, setFile] = useState();
     console.log('게임데이터:', game)
 
-    function uploadFile(event) {
+    function uploadJSON(event) {
         event.preventDefault();
         const formData = new FormData(event.target)
         const jsonFile = formData.get("file")
-        console.log('파일',jsonFile)
+        console.log('업로드된 게임 JSON: ',jsonFile)
 
         const reader = new FileReader();
 
@@ -21,9 +21,9 @@ export default function Workspace() {
             try {
                 const parsed = JSON.parse(event.target.result);
                 setFile(parsed)
-                console.log('parsed: ', parsed)
+                console.log('게임 JSON 파싱됨: ', parsed)
             } catch (error) {
-                console.log('JSON 파싱 오류', err)
+                console.log('게임 JSON 파싱 오류:', err)
             }
         }
         reader.readAsText(jsonFile)
@@ -31,8 +31,8 @@ export default function Workspace() {
         // console.log('파싱된 파일',file)
     }
 
-    function fileToGame() {
-        setGame(()=> new Game(file.game) ) 
+    function JSONToGame() {
+        setGame(()=> new Game(file.game ?? undefined) ) 
     }
 
     // console.log('파싱된 파일2',file)
@@ -142,11 +142,11 @@ export default function Workspace() {
     return(
         <>
         <section>
-            <form onSubmit={uploadFile}>
+            <form onSubmit={uploadJSON}>
                 <input type="file" name="file" accept=".json"/>
                 <button type="submit">업로드</button>
             </form>
-            <button onClick={fileToGame}>업로드된 파일 적용</button>
+            <button onClick={JSONToGame}>업로드된 파일 적용</button>
         </section>
         <section>
             <div>
