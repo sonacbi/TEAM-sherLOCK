@@ -125,6 +125,13 @@
     font-weight: bold;
 }
 
+.error {
+    color: white;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    width: 212px;
+}
+
 .sherlock input::placeholder {
     color: rgba(0, 0, 0, 0.3);
     font-weight: bold;

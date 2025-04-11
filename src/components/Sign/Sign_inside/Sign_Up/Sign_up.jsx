@@ -168,6 +168,8 @@ function Sign_up({ onClose, onSignInClick }) {
                                     <option value="naver.com">naver.com</option>
                                     <option value="daum.com">daum.net</option>
                                 </select>
+
+                                
                                 {errors.email && <p className="error">{errors.email}</p>}
     
                             </div>

@@ -176,11 +176,12 @@
 .input-error {
     border: 1px solid red;
     outline: none;
-  }
+}
   
-  .error-text {
-    color: red;
+.error-text, .warning-text {
+    color: white;
     font-size: 0.8rem;
     margin-top: 4px;
+    width: 212px;
 }
 /* ---------------추가---------------- */
