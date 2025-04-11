@@ -8,6 +8,9 @@ import kakao from '../../../../assets/images/Sign/Kakao.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
+import { validateId, validatePassword } from './Sign_in_validateSubmit.jsx'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
+import { submitLogin } from './Sign_in_submit.jsx'; // 새로 분리된 함수 import
+
 function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
   const [showKakaoLogin, setShowKakaoLogin] = useState(false);
@@ -24,20 +27,29 @@ function Sign_in({ onClose, onSignUpClick }) {
     setShowKakaoLogin(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
 
+    // 유효성 검사
     const idMsg = validateId(user_id);
     const pwMsg = validatePassword(user_pw);
-
+  
     setUserIdError(idMsg);
     setUserPwError(pwMsg);
-
+  
     if (!idMsg && !pwMsg) {
-      console.log('로그인 시도!');
-      // TODO: 실제 로그인 처리 로직 (백엔드용 코드) (추가예정) -----------//
+      console.log("로그인 시도");
+      await submitLogin(user_id, user_pw); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.jsx)
     }
   };
+
+  const [capsLockOn, setCapsLockOn] = useState({ // capslock on/off
+    password: false,
+    passwordCheck: false
+  });
+  
+
 
   const handleSignUpClick = () => {
     onSignUpClick();
@@ -79,12 +91,12 @@ function Sign_in({ onClose, onSignUpClick }) {
                       setUserIdError(validateId(value)); // 동시에 validation도 실행
                     }}
                     onFocus={() => setUserIdError('')}    // 포커스 시 에러 초기화
-                    
                     className={idError ? 'input-error' : ''}
                     // 수정 ------------------------------------------------//
                     />
 
                     {idError && <p className='error-text'>{idError}</p>}
+                    
                   </div>
 
                   <div className='password'>
@@ -98,10 +110,22 @@ function Sign_in({ onClose, onSignUpClick }) {
                       setUserPwError(validatePassword(value)); // 동시에 validation도 실행
                     }}
                     onFocus={() => setUserPwError(validatePassword(user_pw))}
+                    onKeyDown={(e) =>                   // capslock 버튼 감지
+                      setCapsLockOn((prev) => ({ ...prev, password: e.getModifierState("CapsLock") }))
+                    }
+                    onBlur={() =>
+                      setCapsLockOn((prev) => ({ ...prev, password: false }))
+                    }
                     className = {passwordError ? 'input-error' : ''}
                     // 수정 ------------------------------------------------//
                     />
-                    {passwordError && <p className='error-text'>{passwordError}</p>}
+                    {!capsLockOn.password && passwordError && (
+                      <p className='error-text'>{passwordError}</p>
+                    )}
+
+                    {capsLockOn.password && (
+                      <p className="warning-text">CapsLock이 켜져 있습니다!</p>
+                    )}
                   </div>
 
                   <div className='button'>
