@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 
-import { validateId, validatePassword } from './validated';
+import { validateId, validatePassword } from './Sign_in_validateSubmit'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
+import { submitLogin } from './Sign_in_submit'; // 새로 분리된 함수 import
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_in.css';
 
 import kakao from '../../../../assets/images/Sign/Kakao.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
-
-import { validateId, validatePassword } from './Sign_in_validateSubmit.jsx'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
-import { submitLogin } from './Sign_in_submit.jsx'; // 새로 분리된 함수 import
 
 function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
