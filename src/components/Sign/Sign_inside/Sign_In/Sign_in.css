@@ -115,20 +115,25 @@
     font-size: 15px;
 } 
 
-/* ------------------------추가------------------------ */
 .sherlock .id, .sherlock .password{
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center; /* 가로 가운데 정렬 추가 */
 }
-/* ------------------------추가------------------------ */
 
 .sherlock input::placeholder {
     color: rgba(0, 0, 0, 0.3);
     font-weight: bold;
     font-size: 15px;
 }
+
+/* Sign_up 컴포넌트 공통 css */
+.error_text, .warning_text {
+    color: #bbb;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    width: 212px;
+}
+/* ------------------------- */
 
 .sherlock .button button {
     background-color: black;
@@ -171,12 +176,3 @@
 #Sign_up:hover {
     opacity: 0.5;
 }
-
-/* ---------------추가---------------- */  
-.error_text, .warning_text {
-    color: white;
-    font-size: 0.8rem;
-    margin-top: 4px;
-    width: 212px;
-}
-/* ---------------추가---------------- */

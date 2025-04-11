@@ -134,7 +134,7 @@
 }
 
 .error_text, .warning_text {
-    color: white;
+    color: #bbb;
     font-size: 0.8rem;
     margin-top: 4px;
     width: 212px;

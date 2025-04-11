@@ -271,38 +271,38 @@ function Sign_up({ onClose, onSignInClick }) {
                             </div>
                             <div className="birth">
                                 <div className='birth_input'>
-                                <p>생년월일</p>
-                                <select name="year" value={birth.year}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const newBirth = {
-                                            ...birth,
-                                            [e.target.name]: e.target.value
-                                        };
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
+                                    <p>생년월일</p>
+                                    <select name="year" value={birth.year}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            const newBirth = {
+                                                ...birth,
+                                                [e.target.name]: e.target.value
+                                            };
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                birth: errorMessage
+                                            }));
+                                        }}
+                                        onFocus={() => {
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
                                             ...prevErrors,
                                             birth: errorMessage
-                                        }));
-                                    }}
-                                    onFocus={() => {
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        birth: errorMessage
-                                        }));
-                                    }}    // 포커스 시 에러 검증
-                                    onBlur={() =>
-                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                                    }
-                                    >
-                                    <option value="" disabled>연도</option>
-                                    {years.map((year) => (
-                                        <option key={year} value={year}>{year}</option>
-                                    ))}
-                                </select>
+                                            }));
+                                        }}    // 포커스 시 에러 검증
+                                        onBlur={() =>
+                                            setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
+                                        }
+                                        >
+                                        <option value="" disabled>연도</option>
+                                        {years.map((year) => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </select>
 
-                                <select name="month" value={birth.month}
+                                    <select name="month" value={birth.month}
                                         onChange={(e) => {
                                             handleChange(e);
                                             const newBirth = {
@@ -319,28 +319,29 @@ function Sign_up({ onClose, onSignInClick }) {
                                         {months.map((month) => (
                                             <option key={month} value={month}>{month}</option>
                                         ))}
-                                </select>
+                                    </select>
 
-                                <select name="day" value={birth.day}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const newBirth = {
-                                            ...birth,
-                                            [e.target.name]: e.target.value
-                                        };
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            birth: errorMessage
-                                        }));
-                                    }}>
-                                    <option value="" disabled>일</option>
-                                    {days.map((day) => (
-                                        <option key={day} value={day}>{day}</option>
-                                    ))}
-                                </select>
-                                {errors.birth && <p className="error_text">{errors.birth}</p>}
+                                    <select name="day" value={birth.day}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            const newBirth = {
+                                                ...birth,
+                                                [e.target.name]: e.target.value
+                                            };
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                birth: errorMessage
+                                            }));
+                                        }}>
+                                        <option value="" disabled>일</option>
+                                        {days.map((day) => (
+                                            <option key={day} value={day}>{day}</option>
+                                        ))}
+                                    </select>
                                 </div>
+
+                                {errors.birth && <p className="error_text">{errors.birth}</p>}
                             </div>
                             <div className='button'>
                                 <button type="submit" onClick={handleSubmit}>회원가입</button>

@@ -7,8 +7,8 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
   /* (1) 포커싱했는데 아이디 입력칸이 비워짐 */
   /* (2) 6자 이상 20자 미만으로 입력 */
   export const validateId = (id) => {
-    if (!id) return '아이디를 입력해주세요';
-    if (id.length < 6 || id.length >= 20) return '6자 이상 20자 미만으로 입력해주세요';
+    if (!id) return '! 아이디를 입력해주세요';
+    if (id.length < 6 || id.length >= 20) return '! 6자 이상 20자 미만으로 입력해주세요';
     return '';
   };
   /* (3) DB에 이미 입력된 id일 때 '이미 사용 중인 아이디입니다' (백↓)  */ 
@@ -17,18 +17,18 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
     /* (1) 포커싱했는데 비밀번호 입력칸이 비워짐 */
     /* (2) 영문, 숫자, 특수문자를 포함해 8자 이상 입력 */
     export const validatePassword = (pw) => {
-      if (!pw) return '비밀번호를 입력해주세요';
+      if (!pw) return '! 비밀번호를 입력해주세요';
       const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
       if (!pwRegex.test(pw)) {
-        return '영문, 숫자, 특수문자를 포함해 8자 이상 입력해주세요';
+        return '! 영문, 숫자, 특수문자를 포함해 8자 이상 입력해주세요';
       }
       return '';
     };
 
   // 비밀번호check 유효성 검사
     export const validatePasswordCheck = (pw, pwCheck) => {
-      if (!pwCheck) return '비밀번호 확인을 입력해주세요';
-      if (pw !== pwCheck) return '비밀번호가 일치하지 않습니다';
+      if (!pwCheck) return '! 비밀번호 확인을 입력해주세요';
+      if (pw !== pwCheck) return '! 비밀번호가 일치하지 않습니다';
       return '';
     };
   
@@ -36,9 +36,9 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
   const forbiddenWords = ['admin', '운영자', '관리자'];
     /* 부적절한 단어가 들어갈 경우 거르는 유효성 검사. 필터용 단어는 별도 []로 정리 */
     export const validateNickname = (nickname) => {
-      if (!nickname) return '닉네임을 입력해주세요';
+      if (!nickname) return '! 닉네임을 입력해주세요';
       if (forbiddenWords.some(word => nickname.includes(word))) {
-        return '부적절한 단어가 포함되어 있습니다';
+        return '! 부적절한 단어가 포함되어 있습니다';
       }
       return '';
     };
@@ -46,8 +46,8 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
 
     // 이메일 유효성 검사 (unique key 세팅)
     export const validateEmail = (email, domain) => {
-      if (!email) return '이메일을 입력해주세요';
-      if (!domain) return '도메인을 선택해주세요';
+      if (!email) return '! 이메일을 입력해주세요';
+      if (!domain) return '! 도메인을 선택해주세요';
       return '';
     };    
 
@@ -56,7 +56,7 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
       const selected = new Date(`${year}-${month}-${day}`);
       const today = new Date();
     
-      if (selected > today) return '미래 날짜는 선택할 수 없습니다';
+      if (selected > today) return '! 미래 날짜는 선택할 수 없습니다';
       return '';
     };
 

@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import Sign from '../Sign/Sign_outside/Sign_outside';
 import './Profile.css';
 
-import default_profile from '../../assets/images/Profile/default_profile.png';
+import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png';
 
 const Profile = ({ onSignInClick, onSignUpClick }) => {
   const [userNickname, setUserNickname] = useState(null);
@@ -38,12 +38,14 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
       {userNickname ? (
         <div className='profile'>
             <img 
-                id='default_profile'
-                src={default_profile}
-                alt='default_profile'
+                id='ex_user_profile'
+                src={ex_user_profile}
+                alt='ex_user_profile'
             />
 
-            <p className='nickname'>닉네임</p>
+            <p className='profile_nickname'>{userNickname}</p>
+
+            <button onClick={handleLogout}>로그아웃</button>
         </div>
       ) : (
         <Sign onSignInClick={onSignInClick} onSignUpClick={onSignUpClick} />
