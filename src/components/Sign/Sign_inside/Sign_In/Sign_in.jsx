@@ -47,6 +47,11 @@ function Sign_in({ onClose, onSignUpClick }) {
     passwordCheck: false
   });
   
+  const handleSocial = async (e) => {
+    
+    e.preventDefault();
+
+  }
 
 
   const handleSignUpClick = () => {

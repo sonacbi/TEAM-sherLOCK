@@ -89,7 +89,24 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+/* ------------------- 소셜 로그인 (현재 카카오만 지원) ------------------- */
+router.get('/auth/:provider/login', async (req, res) => {
+  const { provider } = req.params; // 'kakao' or 'naver' etc.
+  const { code } = req.query;
 
+  if (!code) return res.status(400).send("인가 코드 없음");
+
+  switch (provider) {
+    case 'kakao':
+      // 카카오 로그인 로직
+      break;
+    case 'naver':
+      // 네이버 로그인 로직
+      break;
+    default:
+      return res.status(400).send("지원하지 않는 소셜 로그인입니다.");
+  }
+});
 /* --------------------------- 로그인 인증 절차 --------------------------- */
 app.get('/Main', authMiddleware, (req, res) => {
   res.json({ message: `안녕하세요, ${req.user.user_id}님!` });
