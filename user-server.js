@@ -43,6 +43,34 @@ app.post('/auth/signup', async (req, res) => {
   }
 
 });
+/* ------------------------- 회원가입 유효성 검사 ------------------------- */
+app.post('/auth/duplicated', async (req, res) => {
+  const { user_id, user_name, user_email, duple_type } = req.body;
+  let user = '';
+  try{
+    switch(duple_type) {
+      case 'userId' :
+        user = await UserDAO.findById(user_id);
+        if (user) return res.status(409).json({ success: false, message: '! 이미 사용 중인 아이디입니다' });
+        break;
+      case 'nickname' :
+        user = await UserDAO.findByName(user_name);
+        if (user?.i > 0) return res.status(409).json({ success: false, message: '! 이미 사용 중인 닉네임입니다\n 이대로 진행할 시 고유번호가 붙습니다.' });
+        // 위는 디버깅용 코드. (유저가 위의 경고문을 보고도 진행한다면 변경함)
+        break;
+      case 'email' :
+        user = await UserDAO.findByEmail(user_email);
+        if (user) return res.status(409).json({ success: false, message: '! 이미 사용 중인 이메일입니다' });
+        break;
+      default:
+        return res.status(400).json({ success: false, message: '잘못된 요청 유형입니다.' });
+    }
+    return res.json({ success: true, message: '사용 가능' });
+  }catch (err) {
+    console.error('💥 서버 오류:', err);
+    res.status(500).json({ error: '로그인 중 서버 오류 발생' });
+  }
+});
 
 /* --------------------------- 로그인 토큰 발급 --------------------------- */
 // 로그인 API
@@ -88,6 +116,24 @@ app.post('/auth/login', async (req, res) => {
     res.status(500).json({ error: '로그인 중 서버 오류 발생' });
   }
 });
+
+// 아이디 존재 확인 API (로그인용)
+app.post('/auth/check-id', async (req, res) => {
+  const { user_id } = req.body;
+
+  try {
+    const user = await UserDAO.findById(user_id);
+    if (user) {
+      return res.json({ exists: true });
+    } else {
+      return res.json({ exists: false });
+    }
+  } catch (err) {
+    console.error('❌ 아이디 확인 중 에러:', err);
+    return res.status(500).json({ exists: false });
+  }
+});
+
 
 
 /* --------------------------- 로그인 인증 절차 --------------------------- */

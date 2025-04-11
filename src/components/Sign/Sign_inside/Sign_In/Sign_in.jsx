@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import axios from 'axios';
+
 
 import { validateId, validatePassword } from './Sign_in_validateSubmit.js'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
 import { submitLogin } from './Sign_in_submit.js'; // 새로 분리된 함수 import
@@ -39,6 +41,23 @@ function Sign_in({ onClose, onSignUpClick }) {
     if (!idMsg && !pwMsg) {
       console.log("로그인 시도");
       await submitLogin(user_id, user_pw); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.jsx)
+    }
+  };
+
+  const checkLoginUserId = async (id) => {
+ 
+    try {
+      const res = await axios.post('http://localhost:5000/auth/check-id', { user_id: id });
+      const { exists } = res.data;
+  
+      if (!exists) {
+        setUserIdError('아이디가 존재하지 않습니다.');
+      } else {
+        setUserIdError('');
+      }
+    } catch (err) {
+      console.error('❌ 로그인 아이디 검사 에러:', err);
+      setUserIdError('서버 오류가 발생했습니다.');
     }
   };
 
@@ -83,12 +102,20 @@ function Sign_in({ onClose, onSignUpClick }) {
                     type='text'
                     placeholder="셜LOCK ID"
                     value={user_id}
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const value = e.target.value;
-                      setUserId(value);                   // 입력된 값을 상태로 저장하고
-                      setUserIdError(validateId(value)); // 동시에 validation도 실행
+                      setUserId(value); // 상태 저장
+                  
+                      const idValidationMsg = await validateId(value); // 비동기 유효성 검사
+                      setUserIdError(idValidationMsg); // 결과 반영
+                  
+                      await checkLoginUserId(value); // 존재하는 아이디인지 백엔드로 체크
                     }}
-                    onFocus={() => setUserIdError(validateId(user_id))}    // 포커스 시 에러 검증
+                    onFocus={async () => {
+                      const idValidationMsg = await validateId(user_id);
+                      setUserIdError(idValidationMsg);
+                      await checkLoginUserId(user_id);
+                    }}
                     onBlur={() =>
                       setUserIdError('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
                     }

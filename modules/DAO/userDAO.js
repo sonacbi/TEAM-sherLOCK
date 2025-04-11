@@ -6,6 +6,19 @@ class UserDAO {
     const [rows] = await pool.query('SELECT * FROM userinfo WHERE user_id = ? AND deleted = 0', [user_id]);
     return rows[0];
   }
+  /* 닉네임이 실제로 있는지 검증 있으면 자동으로 #001, #002 등의 번호 부여 */
+  static async findByName(user_name) { 
+    const [rows] = await pool.query('SELECT count(*) as i FROM userinfo WHERE user_name = ?', [user_name]);
+    return rows[0];
+  }
+
+  /* 이미 사용 중인 이메일인지 검증  */
+  static async findByEmail(user_email) { 
+    const [rows] = await pool.query('SELECT * FROM userinfo WHERE user_email = ?', [user_email]);
+    return rows[0];
+  }
+
+    
 
   /* 입력받은 데이터 객체를 기반으로 db에 넣음 */
   static async insertUser(user) {

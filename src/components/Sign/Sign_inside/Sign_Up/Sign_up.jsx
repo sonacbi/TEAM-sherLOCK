@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import handleSubmitFunc from './Sign_up_validateSubmit.js'; // 분리된 유효성검사 로직 → Sign_up_submit.js (프론트 제출폼) 연동
 import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit.js';
@@ -71,7 +71,51 @@ function Sign_up({ onClose, onSignInClick }) {
             birth
         }, setErrors, onSignInClick);
     };
+    /* -----(추가) 닉네임 입력칸 버그 픽스 ----- */
+    /* 닉네임 입력칸 버그 픽스 */
+    const [isComposing, setIsComposing] = useState(false);
+    const debounceTimer = useRef(null);
 
+    const handleChange_nick = (e) => {
+        setNickname(e.target.value); // 상태 업데이트
+    };
+
+    const handleCompositionStart = () => {
+        setIsComposing(true);
+    };
+
+    const handleCompositionEnd = (e) => {
+        setIsComposing(false);
+
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(async () => {
+            await checkNickname(e.target.value);
+        }, 150);
+        
+    };
+
+    useEffect(() => {
+        if (isComposing) return;
+
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(async () => {
+            await checkNickname(nickname);
+        }, 300);
+        
+    }, [nickname]);
+
+    const checkNickname = async (value) => {
+        if (!value) return;
+
+        console.log("닉네임 검사 실행:", value);
+        const errorMessage = await validateNickname(value); // ← 최신값 반영
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            nickname: errorMessage,
+        }));
+    };
+
+      
 
     /* -------------------------------------- */
 
@@ -170,7 +214,7 @@ function Sign_up({ onClose, onSignInClick }) {
                                         }));
                                         }}
                                     onFocus={() => {
-                                        const errorMessage = validatePasswordCheck(passwordCheck);
+                                        const errorMessage = validatePasswordCheck(password, passwordCheck);
                                         setErrors((prevErrors) => ({
                                         ...prevErrors,
                                         passwordCheck: errorMessage
@@ -245,27 +289,9 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='text'
                                     placeholder="닉네임"
                                     value={nickname}
-                                    onChange={(e) => 
-                                        {
-                                            const value = e.target.value;
-                                            setNickname(value);
-    
-                                            const errorMessage = validateNickname(value);
-                                            setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            nickname: errorMessage
-                                            }));
-                                        }}
-                                    onFocus={() => {
-                                        const errorMessage = validateNickname(nickname);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        nickname: errorMessage
-                                        }));
-                                    }}    // 포커스 시 에러 검증
-                                    onBlur={() =>
-                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                                    }
+                                    onChange={handleChange_nick}
+                                    onCompositionStart={handleCompositionStart}
+                                    onCompositionEnd={handleCompositionEnd}
                                 />
                                 {errors.nickname && <p className="error_text">{errors.nickname}</p>}
                             </div>

@@ -6,9 +6,13 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
 // 아이디 유효성 검사
   /* (1) 포커싱했는데 아이디 입력칸이 비워짐 */
   /* (2) 6자 이상 20자 미만으로 입력 */
-  export const validateId = (id) => {
+  export const validateId = async (id) => {
     if (!id) return '! 아이디를 입력해주세요';
     if (id.length < 6 || id.length >= 20) return '! 6자 이상 20자 미만으로 입력해주세요';
+    
+    const { success, message } = await checkDuplicated(id, 'userId');
+    if (!success) return message;
+    
     return '';
   };
   /* (3) DB에 이미 입력된 id일 때 '이미 사용 중인 아이디입니다' (백↓)  */ 
@@ -35,19 +39,29 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
   // 닉네임 유효성 검사 
   const forbiddenWords = ['admin', '운영자', '관리자'];
     /* 부적절한 단어가 들어갈 경우 거르는 유효성 검사. 필터용 단어는 별도 []로 정리 */
-    export const validateNickname = (nickname) => {
+    export const validateNickname = async (nickname) => {
       if (!nickname) return '! 닉네임을 입력해주세요';
+      if (nickname.length < 2 || nickname.length >= 12) return '! 2자 이상 12자 미만으로 입력해주세요';
       if (forbiddenWords.some(word => nickname.includes(word))) {
         return '! 부적절한 단어가 포함되어 있습니다';
       }
+
+      const { success, message } = await checkDuplicated(nickname, 'nickname');
+      if (!success) return message;
+
       return '';
     };
     /* (백↓) */
 
     // 이메일 유효성 검사 (unique key 세팅)
-    export const validateEmail = (email, domain) => {
+    export const validateEmail = async (email, domain) => {
       if (!email) return '! 이메일을 입력해주세요';
       if (!domain) return '! 도메인을 선택해주세요';
+
+      const fullEmail = email + '@' + domain
+      const { success, message } = await checkDuplicated(fullEmail, 'email');
+      if (!success) return message;
+
       return '';
     };    
 
@@ -78,6 +92,8 @@ const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure) => {
     };
 
     setErrors(errors); // 각 입력 필드에 에러 메시지 출력되도록
+
+
 
 
     // 하나라도 에러가 있으면 중단
@@ -115,6 +131,47 @@ const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure) => {
         alert(result.message || '회원가입 실패!');
         if (onFailure) onFailure(result);
     }
+};
+
+
+const checkDuplicated = async (value, type) => {
+  let user = {}
+
+  switch (type) {
+    case 'userId' :
+      user.user_id = value;
+      break;
+    case 'nickname' :
+      user.user_name = value;
+      break;
+    case 'email' :
+      user.user_email = value;
+      break;
+    default :
+      console.log("! 타입 미지정! ");
+  }
+
+  user.duple_type = type;
+
+  try {
+    const res = await fetch('http://localhost:5000/auth/duplicated', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    });
+
+    const result = await res.json(); // 이 안에서만 써야 함
+
+    if (res.ok) {
+      return { success: true };
+    } else {
+      return { success: false, message: result.message || '중복 오류' };
+    }
+  } catch (error) {
+    // 네트워크 오류나 서버 자체가 응답 안했을 경우
+    console.error("❗에러 내용:", error);
+    return { success: false, message: '서버 연결 오류', error: error.message };
+  }
 };
   
 
