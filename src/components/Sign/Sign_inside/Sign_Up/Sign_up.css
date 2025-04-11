@@ -70,13 +70,15 @@
     font-size: 15px;
 }
 
-.sherlock .email {
+.sherlock .email_input {
+    width: 212px;
+    height: 40px;
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-.sherlock .email input {
+.sherlock .email_input input {
     width: 87px;
     height: 40px;
     border-radius: 5px;
@@ -86,12 +88,12 @@
     font-size: 15px;
 }
 
-.sherlock .email p {
+.sherlock .email_input p {
     color: white;
     font-weight: bold;
 }
 
-.sherlock .email select {
+.sherlock .email_input select {
     height: 40px;
     border-radius: 5px;
     border: none;
@@ -103,13 +105,15 @@
     color: rgba(0, 0, 0, 0.3);
 }
 
-.sherlock .birth {
+.sherlock .birth_input {
     display: flex;
     gap: 10px;
     align-items: center;
+    width: 212px;
+    height: 40px;
 }
 
-.sherlock .birth select {
+.sherlock .birth_input select {
     border-radius: 5px;
     border: none;
     outline: none;
@@ -119,14 +123,18 @@
     color: rgba(0, 0, 0, 0.3);
 }
 
-.sherlock .birth p {
+.sherlock .birth_input select:nth-child(2) {
+    width: 56px;
+}
+
+.sherlock .birth_input p {
     color: white;
     font-size: 14px;
     font-weight: bold;
 }
 
 .error {
-    color: white;
+    color: #bbb;
     font-size: 0.8rem;
     margin-top: 4px;
     width: 212px;

@@ -140,38 +140,38 @@ function Sign_up({ onClose, onSignInClick }) {
                             </div>
 
                             <div className='email'>
-                                <input
-                                    type='text'
-                                    placeholder="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
+                                <div className='email_input'>
+                                    <input
+                                        type='text'
+                                        placeholder="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
 
-                                <p>@</p>
+                                    <p>@</p>
 
-                                <select
-                                    name="domain"
-                                    value={domain}
-                                    onChange={(e) => {
-                                            const value = e.target.value;
-                                            setDomain(value);
-    
-                                            const errorMessage = validateEmail(value);
-                                            setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            email: errorMessage
-                                            }));
-                                        }}
-                                >
-                                    <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
-                                    <option value="google.com">gmail.com</option>
-                                    <option value="naver.com">naver.com</option>
-                                    <option value="daum.com">daum.net</option>
-                                </select>
-
+                                    <select
+                                        name="domain"
+                                        value={domain}
+                                        onChange={(e) => {
+                                                const value = e.target.value;
+                                                setDomain(value);
+        
+                                                const errorMessage = validateEmail(value);
+                                                setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                email: errorMessage
+                                                }));
+                                            }}
+                                    >
+                                        <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
+                                        <option value="google.com">gmail.com</option>
+                                        <option value="naver.com">naver.com</option>
+                                        <option value="daum.com">daum.net</option>
+                                    </select>
+                                </div>
                                 
                                 {errors.email && <p className="error">{errors.email}</p>}
-    
                             </div>
 
                             <div className='nickname'>
@@ -195,64 +195,67 @@ function Sign_up({ onClose, onSignInClick }) {
                             </div>
 
                             <div className="birth">
-                                <p>생년월일</p>
+                                <div className='birth_input'>
+                                    <p>생년월일</p>
 
-                                <select name="year" value={birth.year}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const newBirth = {
-                                            ...birth,
-                                            [e.target.name]: e.target.value
-                                        };
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            birth: errorMessage
-                                        }));
-                                    }}>
-                                    <option value="" disabled>연도</option>
-                                    {years.map((year) => (
-                                        <option key={year} value={year}>{year}</option>
-                                    ))}
-                                </select>
+                                    <select name="year" value={birth.year}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            const newBirth = {
+                                                ...birth,
+                                                [e.target.name]: e.target.value
+                                            };
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                birth: errorMessage
+                                            }));
+                                        }}>
+                                        <option value="" disabled>연도</option>
+                                        {years.map((year) => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </select>
 
-                                <select name="month" value={birth.month}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const newBirth = {
-                                            ...birth,
-                                            [e.target.name]: e.target.value
-                                        };
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            birth: errorMessage
-                                        }));
-                                    }}>
-                                    <option value="" disabled>월</option>
-                                    {months.map((month) => (
-                                        <option key={month} value={month}>{month}</option>
-                                    ))}
-                                </select>
+                                    <select name="month" value={birth.month}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            const newBirth = {
+                                                ...birth,
+                                                [e.target.name]: e.target.value
+                                            };
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                birth: errorMessage
+                                            }));
+                                        }}>
+                                        <option value="" disabled>월</option>
+                                        {months.map((month) => (
+                                            <option key={month} value={month}>{month}</option>
+                                        ))}
+                                    </select>
 
-                                <select name="day" value={birth.day}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const newBirth = {
-                                            ...birth,
-                                            [e.target.name]: e.target.value
-                                        };
-                                        const errorMessage = validateBirth(newBirth);
-                                        setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            birth: errorMessage
-                                        }));
-                                    }}>
-                                    <option value="" disabled>일</option>
-                                    {days.map((day) => (
-                                        <option key={day} value={day}>{day}</option>
-                                    ))}
-                                </select>
+                                    <select name="day" value={birth.day}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            const newBirth = {
+                                                ...birth,
+                                                [e.target.name]: e.target.value
+                                            };
+                                            const errorMessage = validateBirth(newBirth);
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                birth: errorMessage
+                                            }));
+                                        }}>
+                                        <option value="" disabled>일</option>
+                                        {days.map((day) => (
+                                            <option key={day} value={day}>{day}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 {errors.birth && <p className="error">{errors.birth}</p>}
                             </div>
 
