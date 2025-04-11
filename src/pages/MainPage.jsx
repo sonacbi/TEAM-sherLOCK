@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-/* -------------------------- (추가) ------------------------------ */
-// 클라이언트가 jwt가 유효한 정보인지 해독하기 위한 라이브러리
-import { jwtDecode } from "jwt-decode";
-/* --------------------------------------------------------------- */
-
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
-import Sign from '../components/Sign/Sign_outside/Sign_outside';
+import Profile from '../components/Profile/Profile';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
 import Footer from '../components/Footer/Footer';
@@ -37,11 +32,6 @@ function MainPage() {
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef(null);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-
-  /* -------------------------- (추가) ------------------------------ */
-  // 로그인 성공한 유저가 메인페이지로 들어왔을 때 '인증된 사용자'임을 확인하고 필요한 데이터를 불러옴
-  const [userNickname, setUserNickname] = useState(null); 
-  /* --------------------------------------------------------------- */
 
   const handleSignInClick = () => {
     setShowSignIn(true);
@@ -167,41 +157,6 @@ function MainPage() {
     setIsNoticeOpen((prev) => !prev);
   };
 
-  /* -------------------------- (추가) ------------------------------ */
-  // 로그인 여부 확인용 (디버깅 로그)
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-  
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        console.log("🧾 디코딩된 결과:", decoded);
-        console.log(JSON.stringify(decoded, null, 2));
-        setUserNickname(decoded.user_name);
-      } catch (error) {
-        console.error("❌ 토큰 디코딩 실패:", error);
-        setUserNickname(null);
-      }
-    } else {
-      console.warn("⚠️ 토큰 없음: 로그인하지 않았거나 삭제됨");
-      setUserNickname(null);
-    }
-  }, []);
-  // 로그아웃 임시 구현
-  const handleLogout = () => {
-    // localStorage에서 토큰 삭제
-    localStorage.removeItem('token');
-  
-    // 사용자 닉네임 초기화
-    setUserNickname(null);
-  
-    // 로그아웃 후 리디렉션 (예: 홈 페이지로 이동)
-    window.location.href = '/Main';
-  };
-  
-  
-  /* --------------------------------------------------------------- */
-
   return (
     <div className='MainPage_wrap'>
       <div className='MainPage_content'>
@@ -226,19 +181,7 @@ function MainPage() {
             )}
           </div>
           <Header_Logo />
-          {/* -------------------------- (추가) ------------------------------ */
-          // 유효한 토큰을 갖고있는 사용자에게만 보이는 화면 (임시 - 편하게 수정하세요)
-          }
-          {userNickname ? (
-            <p>환영합니다! {userNickname}님! &nbsp;
-            <a href="/mypage">마이페이지</a>
-            {/* 로그아웃 버튼 */}
-            <button onClick={handleLogout}>로그아웃</button>
-            </p>
-          ) : (
-            <Sign onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick}/>
-          )}
-          {/* --------------------------------------------------------------- */}
+          <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
         </header>
 
         <div className="theme">
