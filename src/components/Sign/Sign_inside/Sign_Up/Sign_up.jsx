@@ -269,11 +269,9 @@ function Sign_up({ onClose, onSignInClick }) {
                                 />
                                 {errors.nickname && <p className="error_text">{errors.nickname}</p>}
                             </div>
-
                             <div className="birth">
                                 <div className='birth_input'>
-                                    <p>생년월일</p>
-
+                                <p>생년월일</p>
                                 <select name="year" value={birth.year}
                                     onChange={(e) => {
                                         handleChange(e);
@@ -304,7 +302,7 @@ function Sign_up({ onClose, onSignInClick }) {
                                     ))}
                                 </select>
 
-                                    <select name="month" value={birth.month}
+                                <select name="month" value={birth.month}
                                         onChange={(e) => {
                                             handleChange(e);
                                             const newBirth = {
@@ -321,7 +319,7 @@ function Sign_up({ onClose, onSignInClick }) {
                                         {months.map((month) => (
                                             <option key={month} value={month}>{month}</option>
                                         ))}
-                                    </select>
+                                </select>
 
                                 <select name="day" value={birth.day}
                                     onChange={(e) => {
@@ -342,8 +340,8 @@ function Sign_up({ onClose, onSignInClick }) {
                                     ))}
                                 </select>
                                 {errors.birth && <p className="error_text">{errors.birth}</p>}
+                                </div>
                             </div>
-
                             <div className='button'>
                                 <button type="submit" onClick={handleSubmit}>회원가입</button>
                             </div>
