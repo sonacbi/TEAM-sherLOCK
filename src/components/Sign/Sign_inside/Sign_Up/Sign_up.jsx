@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import handleSubmitFunc from './Sign_up_validateSubmit'; // 분리된 유효성검사 로직 → Sign_up_submit.js (프론트 제출폼) 연동
-import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit';
+import handleSubmitFunc from './Sign_up_validateSubmit.js'; // 분리된 유효성검사 로직 → Sign_up_submit.js (프론트 제출폼) 연동
+import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit.js';
 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css'; 

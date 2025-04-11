@@ -1,6 +1,6 @@
 // Sign_in_validateSubmit.js
 // 유효성 검사 시행 후 폼 제출 액션 시행 (Sign_up_submit)
-import signSubmit from './Sign_up_submit'; // → Sign_up_submit.jsx (프론트폼 제출)
+import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론트폼 제출)
 
 /* ------------------------------- 프론트 유효성 검사 -------------------------------*/
 // 아이디 유효성 검사
