@@ -1,3 +1,4 @@
+// ./Sign_in_validateSubmit.jsx
 // 아이디 , 비밀번호 유효성 검사
 export const validateId = (id) => {
   if (!id) return '아이디를 입력해주세요';
