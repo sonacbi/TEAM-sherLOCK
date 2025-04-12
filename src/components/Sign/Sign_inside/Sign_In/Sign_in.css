@@ -4,9 +4,16 @@
     left: 0;
     width: 100dvw;
     height: 100dvh;
-    background-color: rgba(0, 0, 0, 0.62);
+    background-color: rgb(0, 0, 0);
     z-index: 999;
 }
+
+/* Sign_up 컴포넌트 공통 css */
+#Sign_background {
+    width: 100dvw;
+    height: 100dvh;
+}
+/* ------------------------- */
 
 .Sign_content {
     position: absolute;

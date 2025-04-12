@@ -20,7 +20,7 @@ header {
 .notice {
     position: absolute;
     width: 400px;
-    height: 200px;
+    height: 150px;
     left: 3%;
     top: 20%;
     display: flex;
@@ -32,6 +32,19 @@ header {
     height: 100%;
     width: 100%;
     position: relative;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.notice_content.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+  
+.notice_content.hide {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .notice_table {
@@ -41,7 +54,7 @@ header {
     top: 0;
     right: 2%;
     padding: 0 5px;
-    padding-top: 10px;
+    padding-top: 12px;
     overflow-y: auto;
 }
 
@@ -54,22 +67,29 @@ header {
     border-radius: 10px;
 }
 
+.notice_table::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
 .notice_table::-webkit-scrollbar-track {
     background-color: transparent;
-    margin: 10px 0;
+    margin: 12px 0;
 }
 
 .notice_table_text {
     width: 100%;
-    height: 20%;
+    height: 25%;
     border-radius: 5px;
     padding: 5px;
-    background-color: #ddd;
-    margin-bottom: 10px;
+    background-color: #eee;
+    margin-bottom: 12px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
 }
 
 .notice_table_text:hover {
-    background-color: #ccc;
+    background-color: #ddd;
 }
 
 #notice_img {

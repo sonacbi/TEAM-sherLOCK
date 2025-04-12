@@ -37,6 +37,7 @@
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
+    z-index: 999;
 }
 
 .profile_setup.show {

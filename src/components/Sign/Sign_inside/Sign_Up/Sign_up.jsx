@@ -6,6 +6,7 @@ import { validateId, validatePassword, validatePasswordCheck, validateNickname, 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css'; 
 
+import Sign_background from '../../../../assets/images/Sign/Sign_background.png';
 import Sign_in from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
 
@@ -148,6 +149,8 @@ function Sign_up({ onClose, onSignInClick }) {
 
     return (
         <div className='Sign_up'>
+            <img id='Sign_background' src={Sign_background} alt='Sign_background' />
+
             <div className='Sign_up_content'>
                 <img id='X' src={X} alt='X' onClick={onClose} />
 

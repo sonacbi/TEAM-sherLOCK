@@ -7,6 +7,7 @@ import { submitLogin } from './Sign_in_submit.js'; // 새로 분리된 함수 im
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_in.css';
 
+import Sign_background from '../../../../assets/images/Sign/Sign_background.png';
 import kakao from '../../../../assets/images/Sign/Kakao.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
@@ -74,6 +75,8 @@ function Sign_in({ onClose, onSignUpClick }) {
 
   return (
     <div className='Sign_in'>
+      <img id='Sign_background' src={Sign_background} alt='Sign_background' />
+
       <div className='Sign_content'>
         <img id='X' src={X} alt='X' onClick={onClose} />
 
