@@ -1,11 +1,15 @@
 .profile {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: absolute;
     right: 3%;
     top: 20%;
+}
+
+.profile_outside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 10px;
+    margin-bottom: 8px;
 }
 
 #ex_user_profile {
@@ -25,4 +29,45 @@
 
 .profile_nickname:hover {
     color: rgba(0, 0, 0, 0.3);
+}
+
+.profile_setup {
+    position: absolute;
+    left: -25px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.profile_setup.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.profile_setup.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.logout_mypage {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.logout_mypage p {
+    padding: 5px 10px;
+    background-color: #eee;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout_mypage p:hover {
+    background-color: #ddd;
 }

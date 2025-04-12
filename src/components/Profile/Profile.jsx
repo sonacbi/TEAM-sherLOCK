@@ -5,9 +5,11 @@ import Sign from '../Sign/Sign_outside/Sign_outside';
 import './Profile.css';
 
 import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png';
+import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubble.png'
 
 const Profile = ({ onSignInClick, onSignUpClick }) => {
   const [userNickname, setUserNickname] = useState(null);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -33,19 +35,42 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
     window.location.href = '/Main'; // 필요에 따라 다른 경로로 수정 가능
   };
 
+  const handleNicknameClick = () => {
+    setShowProfileSetup(true);
+    // 3초(3000ms) 뒤에 자동으로 숨기기
+    setTimeout(() => {
+      setShowProfileSetup(false);
+    }, 3000);
+  };
+
   return (
     <>
       {userNickname ? (
         <div className='profile'>
+          <div className='profile_outside'>
             <img 
-                id='ex_user_profile'
-                src={ex_user_profile}
-                alt='ex_user_profile'
+              id='ex_user_profile'
+              src={ex_user_profile}
+              alt='ex_user_profile'
             />
 
-            <p className='profile_nickname'>{userNickname}</p>
+            <p className='profile_nickname' onClick={handleNicknameClick}>{userNickname}</p>
+          </div>
 
-            <button onClick={handleLogout}>로그아웃</button>
+          <div className={`profile_setup ${showProfileSetup ? 'show' : 'hide'}`}>
+            <div className='profile_setup_inside'>
+              <img 
+                id='profile_setup_bubble'
+                src={profile_setup_bubble}
+                alt='profile_setup_bubble'
+              />
+
+              <div className='logout_mypage'>
+                <p className='mypage'>MY페이지</p>
+                <p className='logout' onClick={handleLogout}>로그아웃</p>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <Sign onSignInClick={onSignInClick} onSignUpClick={onSignUpClick} />
