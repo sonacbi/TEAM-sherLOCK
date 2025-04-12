@@ -34,6 +34,19 @@ function MainPage() {
     { id: "crime", label: "범죄", outline: crime_outline, icon: crime_icon }
   ];
 
+  const exampleNotices = [
+    '서버 점검 안내',
+    '신규 기능 업데이트',
+    '이벤트 공지사항',
+    '시스템 긴급 점검',
+    '이용 약관 변경 안내',
+    '개인정보 처리방침 변경',
+    '신년 이벤트 진행 중',
+    '설문조사 참여 이벤트',
+    '로그인 오류 수정 완료',
+    '서비스 개선사항 안내'
+  ];
+
   const handleSignInClick = () => {
     setShowSignIn(true);
     setShowSignUp(false);
@@ -117,10 +130,13 @@ function MainPage() {
 
   useEffect(() => {
     const loadMore = async () => {
-      const newItems = Array.from({ length: 10 }, (_, i) => `Notice ${(page - 1) * 10 + i + 1}`);
+      const startIndex = (page - 1) * 10;
+      const endIndex = startIndex + 10;
+      const newItems = exampleNotices.slice(startIndex, endIndex);
+  
       setItems((prev) => [...prev, ...newItems]);
   
-      if (page >= 5) {
+      if (endIndex >= exampleNotices.length) {
         setHasMore(false);
       }
     };
@@ -131,7 +147,7 @@ function MainPage() {
   }, [page]);
   
   useEffect(() => {
-    const initialItems = Array.from({ length: 10 }, (_, i) => `Notice ${i + 1}`);
+    const initialItems = exampleNotices.slice(0, 10);
     setItems(initialItems);
   }, []);
   
