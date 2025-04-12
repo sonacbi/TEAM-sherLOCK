@@ -19,7 +19,7 @@ export async function submitLogin(user_id, user_pw) {
       alert('로그인 성공!');
       window.location.href = '/Main';
     } else {
-      alert(data.message || '로그인 실패!');
+      
     }
   } catch (err) {
     console.error('로그인 에러:', err);
