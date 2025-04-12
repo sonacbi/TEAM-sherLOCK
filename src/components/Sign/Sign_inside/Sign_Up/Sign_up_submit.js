@@ -1,6 +1,9 @@
 // 회원가입 관련 (front)
 const signSubmit = async ({ userId, password, nickname, email, domain, birth }) => {
-  const birthDate = `${birth.year}-${birth.month}-${birth.day}`;
+  const birthDate = 
+  birth?.year && birth?.month && birth?.day
+    ? `${birth.year}-${birth.month}-${birth.day}`
+    : null;
   const fullEmail = `${email}@${domain}`;
 
   const user = {

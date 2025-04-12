@@ -22,12 +22,38 @@ function Sign_up({ onClose, onSignInClick }) {
         day: ''
     });
 
-    const handleChange = (e) => {
-        setBirth({
-        ...birth,
-        [e.target.name]: e.target.value
-        });
+    // 생일 input 처리 통합 함수
+    const handleBirthChange = (e) => {
+        const updatedBirth = {
+            ...birth,
+            [e.target.name]: e.target.value
+        };
+        setBirth(updatedBirth);
+
+        const errorMessage = validateBirth(updatedBirth);
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            birth: errorMessage
+        }));
     };
+
+    // 생일 focus 시 처리 함수
+    const handleBirthFocus = () => {
+        const errorMessage = validateBirth(birth);
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            birth: errorMessage
+        }));
+    };
+
+    // 생일 blur 처리 함수
+    const handleBirthBlur = () => {
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            birth: ''
+        }));
+    };
+
 
     const handleSignInClick = () => {
         onSignInClick();
@@ -61,6 +87,7 @@ function Sign_up({ onClose, onSignInClick }) {
     // (유효성 검사 로직 분리)
 
     const handleSubmit = (e) => { // 임포트한 코드 객체 생성
+        console.log("회원가입 시도!");
         handleSubmitFunc(e, {
             userId,
             password,
@@ -298,68 +325,40 @@ function Sign_up({ onClose, onSignInClick }) {
                             <div className="birth">
                                 <div className='birth_input'>
                                     <p>생년월일</p>
-                                    <select name="year" value={birth.year}
-                                        onChange={(e) => {
-                                            handleChange(e);
-                                            const newBirth = {
-                                                ...birth,
-                                                [e.target.name]: e.target.value
-                                            };
-                                            const errorMessage = validateBirth(newBirth);
-                                            setErrors((prevErrors) => ({
-                                                ...prevErrors,
-                                                birth: errorMessage
-                                            }));
-                                        }}
-                                        onFocus={() => {
-                                            const errorMessage = validateBirth(newBirth);
-                                            setErrors((prevErrors) => ({
-                                            ...prevErrors,
-                                            birth: errorMessage
-                                            }));
-                                        }}    // 포커스 시 에러 검증
-                                        onBlur={() =>
-                                            setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                                        }
-                                        >
+
+                                    <select
+                                        name="year"
+                                        value={birth.year}
+                                        onChange={handleBirthChange}
+                                        onFocus={handleBirthFocus}
+                                        onBlur={handleBirthBlur}
+                                    >
                                         <option value="" disabled>연도</option>
                                         {years.map((year) => (
                                             <option key={year} value={year}>{year}</option>
                                         ))}
                                     </select>
 
-                                    <select name="month" value={birth.month}
-                                        onChange={(e) => {
-                                            handleChange(e);
-                                            const newBirth = {
-                                                ...birth,
-                                                [e.target.name]: e.target.value
-                                            };
-                                            const errorMessage = validateBirth(newBirth);
-                                            setErrors((prevErrors) => ({
-                                                ...prevErrors,
-                                                birth: errorMessage
-                                            }));
-                                        }}>
+                                    <select
+                                        name="month"
+                                        value={birth.month}
+                                        onChange={handleBirthChange}
+                                        onFocus={handleBirthFocus}
+                                        onBlur={handleBirthBlur}
+                                    >
                                         <option value="" disabled>월</option>
                                         {months.map((month) => (
                                             <option key={month} value={month}>{month}</option>
                                         ))}
                                     </select>
 
-                                    <select name="day" value={birth.day}
-                                        onChange={(e) => {
-                                            handleChange(e);
-                                            const newBirth = {
-                                                ...birth,
-                                                [e.target.name]: e.target.value
-                                            };
-                                            const errorMessage = validateBirth(newBirth);
-                                            setErrors((prevErrors) => ({
-                                                ...prevErrors,
-                                                birth: errorMessage
-                                            }));
-                                        }}>
+                                    <select
+                                        name="day"
+                                        value={birth.day}
+                                        onChange={handleBirthChange}
+                                        onFocus={handleBirthFocus}
+                                        onBlur={handleBirthBlur}
+                                    >
                                         <option value="" disabled>일</option>
                                         {days.map((day) => (
                                             <option key={day} value={day}>{day}</option>
