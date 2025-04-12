@@ -13,7 +13,7 @@ import X from '../../../../assets/images/Sign/X.png';
 function Sign_up({ onClose, onSignInClick }) {
     /* -----(기존) 회원가입 화면 기본값 세팅----- */
     const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: currentYear - 1899 }, (_, i) => 1900 + i);
+    const years = Array.from({ length: 101 }, (_, i) => currentYear - i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
