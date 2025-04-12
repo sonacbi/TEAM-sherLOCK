@@ -48,12 +48,13 @@ function Sign_in({ onClose, onSignUpClick }) {
   });
   
   const KAKAO_REST_API_KEY = 'f6372d1dc197e39ed6c42d524e310b68';
-  const REDIRECT_URI = 'http://localhost:5173/auth/kakao/login';
+  const REDIRECT_URI = 'http://localhost:5173/auth/kakao';
 
   const handleSocial = (e) => {
     e.preventDefault();
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
     window.location.href = kakaoAuthUrl;
+    console.log("에러 검증");
   };
 
 

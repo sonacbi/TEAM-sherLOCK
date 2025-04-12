@@ -11,8 +11,8 @@ function App() {
         <Route path="/Intro" element={<IntroPage />} />
         <Route path="/Main" element={<MainPage />} />
         {/* 카카오/네이버 로그인용 path (추가) */}
-        <Route path="/auth/kakao/login" element={<SocialAuthHandler />} />
-        <Route path="/auth/naver/login" element={<SocialAuthHandler />} />
+        <Route path="/auth/kakao" element={<SocialAuthHandler />} />
+        <Route path="/auth/naver" element={<SocialAuthHandler />} />
       </Routes>
     </Router>
   );
