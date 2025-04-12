@@ -17,12 +17,6 @@ import adventure_icon from '../assets/images/MainPage_img/adventure_icon.png';
 import crime_outline from '../assets/images/MainPage_img/crime_outline.png';
 import crime_icon from '../assets/images/MainPage_img/crime_icon.png';
 
-const themes = [
-  { id: "horror", label: "호러", outline: horror_outline, icon: horror_icon },
-  { id: "adventure", label: "모험", outline: adventure_outline, icon: adventure_icon },
-  { id: "crime", label: "범죄", outline: crime_outline, icon: crime_icon }
-];
-
 function MainPage() {
   const articlesRef = useRef([]);
   const [showSignIn, setShowSignIn] = useState(false);
@@ -32,6 +26,13 @@ function MainPage() {
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef(null);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+  const noticeRef = useRef(null);
+
+  const themes = [
+    { id: "horror", label: "호러", outline: horror_outline, icon: horror_icon },
+    { id: "adventure", label: "모험", outline: adventure_outline, icon: adventure_icon },
+    { id: "crime", label: "범죄", outline: crime_outline, icon: crime_icon }
+  ];
 
   const handleSignInClick = () => {
     setShowSignIn(true);
@@ -153,7 +154,26 @@ function MainPage() {
     };
   }, [hasMore, isNoticeOpen]);
 
-  const handleNoticeClick = () => {
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        noticeRef.current &&
+        !noticeRef.current.contains(event.target) &&
+        event.target.id !== 'notice_img'
+      ) {
+        setIsNoticeOpen(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+  
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleNoticeClick = (e) => {
+    e.stopPropagation();
     setIsNoticeOpen((prev) => !prev);
   };
 
@@ -166,7 +186,7 @@ function MainPage() {
           <div className="notice">
             <img id='notice_img' src={notice_img} alt='notice_img' onClick={handleNoticeClick} />
 
-            <div className={`notice_content ${isNoticeOpen ? 'show' : 'hide'}`}>
+            <div ref={noticeRef} className={`notice_content ${isNoticeOpen ? 'show' : 'hide'}`}>
               <img id="notice_speech_bubble" src={notice_speech_bubble} alt="notice_speech_bubble" />
               <div className="notice_table">
                 {items.map((item, index) => (
