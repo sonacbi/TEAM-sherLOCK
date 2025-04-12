@@ -67,6 +67,15 @@ function Sign_in({ onClose, onSignUpClick }) {
     passwordCheck: false
   });
   
+  const KAKAO_REST_API_KEY = 'f6372d1dc197e39ed6c42d524e310b68';
+  const REDIRECT_URI = 'http://localhost:5173/auth/kakao';
+
+  const handleSocial = (e) => {
+    e.preventDefault();
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+    window.location.href = kakaoAuthUrl;
+    console.log("에러 검증");
+  };
 
 
   const handleSignUpClick = () => {
@@ -85,7 +94,7 @@ function Sign_in({ onClose, onSignUpClick }) {
         <div className='login'>
           {!showSherlockLogin && (
             <div className='kakao_sherlock'>
-              <div className='kakao_login'>
+              <div className='kakao_login' onClick={handleSocial}>
                 <img id='kakao' src={kakao} alt='kakao' />
                 <p>Kakao로 로그인</p>
               </div>
@@ -169,7 +178,7 @@ function Sign_in({ onClose, onSignUpClick }) {
 
         {showKakaoLogin && (
           <div className='kakao_hidden'>
-            <div className='kakao_login2'>
+            <div className='kakao_login2' onClick={handleSocial}>
               <img id='kakao' src={kakao} alt='kakao' />
               <p>Kakao로 로그인</p>
             </div>

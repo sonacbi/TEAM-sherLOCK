@@ -8,11 +8,21 @@ dotenv.config({ path: './modules/db/.env' });
 import bcrypt from 'bcrypt'; // 추가
 import jwt from 'jsonwebtoken';
 import authMiddleware from './modules/middlewares/authMiddleware.js';
+import axios from 'axios';
 
 const app = express();
 app.use(express.json());
 
-app.use(cors()); // 모든 포트에서 요청을 받음
+const corsOptions = {
+  origin: 'http://localhost:5173', // 허용할 origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // 요청 헤더에 대한 허용
+  credentials: true, // 필요 시 추가
+};
+
+app.use(cors(corsOptions)); // CORS 설정 추가
+
+// app.use(cors()); // 모든 포트에서 요청을 받음
 app.use(bodyParser.json()); // post 해석
 
 /* ------------------회원가입 정보를 서버에서 받는 코드------------------ */
@@ -136,7 +146,76 @@ app.post('/auth/check-id', async (req, res) => {
 });
 
 
+/* ------------------- 소셜 로그인 (현재 카카오만 지원) ------------------- */
+// 카카오
+const KAKAO_CLIENT_ID = 'f6372d1dc197e39ed6c42d524e310b68';
+const KAKAO_REDIRECT_URI = 'http://localhost:5173/auth/kakao';
 
+app.post('/auth/:provider', async (req, res) => {
+  const { provider } = req.params; // 'kakao' or 'naver' etc.
+  const { code } = req.body;
+  console.log(`Received ${provider} login code: ${code}`);
+  if (!code) return res.status(400).send("인가 코드 없음");
+
+  switch (provider) {
+    case 'kakao':
+      // 카카오 로그인 로직
+      try {
+        // 1. 인가 코드로 access_token 요청
+        const tokenRes = await axios.post(
+          `https://kauth.kakao.com/oauth/token`,
+          new URLSearchParams({
+            grant_type: 'authorization_code',
+            client_id: KAKAO_CLIENT_ID,
+            redirect_uri: KAKAO_REDIRECT_URI,
+            code,
+          }).toString(),
+          {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          }
+        );
+
+        const { access_token } = tokenRes.data;
+
+        // 2. access_token으로 사용자 정보 요청
+        const userRes = await axios.get(`https://kapi.kakao.com/v2/user/me`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
+
+        const kakaoAccount = userRes.data.kakao_account;
+        const user_id = 'kakao_' + userRes.data.id;
+        const email = kakaoAccount.email;
+
+        console.log(user_id, email);   // 여기서 user_id 값을 확인
+
+        // 3. 여기서 DB에 사용자 정보 확인/등록
+        const user = await UserDAO.registerUser(user_id, email, kakaoAccount);
+        
+
+        // 카카오 로그인 후 JWT 발급
+        const token = jwt.sign(
+          { user_id: user.user_id, user_name: user.user_name },
+          process.env.JWT_SECRET,
+          { expiresIn: '1h' }
+        );
+        res.status(200).json({ token });
+
+
+      } catch (err) {
+        console.error(err);
+        console.log("카카오 토큰 요청 실패:", err.response?.data || err.message);
+        res.status(500).send("카카오 로그인 실패");
+      }
+      break;
+    case 'naver':
+      // 네이버 로그인 로직
+      break;
+    default:
+      return res.status(400).send("지원하지 않는 소셜 로그인입니다.");
+  }
+});
 /* --------------------------- 로그인 인증 절차 --------------------------- */
 app.get('/Main', authMiddleware, (req, res) => {
   res.json({ message: `안녕하세요, ${req.user.user_id}님!` });
