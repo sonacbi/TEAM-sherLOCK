@@ -79,6 +79,7 @@ app.post('/auth/login', async (req, res) => {
   console.log('📥 로그인 요청 도착:', req.body);
 
   try {
+    console.log('📦 받은 회원 정보:', req.body);  // ★ 이거 추가
     const user = await UserDAO.findById(user_id);
     console.log('🔍 사용자 조회 결과:', user);
 

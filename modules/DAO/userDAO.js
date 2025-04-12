@@ -9,6 +9,9 @@ class UserDAO {
   /* 닉네임이 실제로 있는지 검증 있으면 자동으로 #001, #002 등의 번호 부여 */
   static async findByName(user_name) { 
     const [rows] = await pool.query('SELECT count(*) as i FROM userinfo WHERE user_name = ?', [user_name]);
+    const user = rows[0];
+    console.log('닉네임 검사 결과:', user);
+
     return rows[0];
   }
 

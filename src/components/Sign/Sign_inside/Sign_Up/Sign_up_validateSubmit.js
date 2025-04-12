@@ -78,26 +78,26 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
 
 const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure) => {
     e.preventDefault();
-
+    
     const { userId, password, passwordCheck, nickname, email, domain, birth } = formData;
-
+    const userIdError = await validateId(userId);
+    const nicknameError = await validateNickname(nickname);
+    const emailError = await validateEmail(email, domain);
 
     const errors = {
-      userId: validateId(userId),
+      userId: userIdError,
       password: validatePassword(password),
       passwordCheck: validatePasswordCheck(password, passwordCheck),
-      nickname: validateNickname(nickname),
-      email: validateEmail(email, domain),
+      nickname: nicknameError,
+      email: emailError,
       birth: validateBirth(birth)
     };
-
+    console.log(errors);
     setErrors(errors); // 각 입력 필드에 에러 메시지 출력되도록
-
-
-
 
     // 하나라도 에러가 있으면 중단
     const hasError = Object.values(errors).some(err => err !== '');
+    console.log(hasError);
     if (hasError) return;
 
     // 아이디 유효성 검사
