@@ -7,6 +7,27 @@ class UserDAO {
     return rows[0];
   }
 
+  /* 소셜 회원가입용 검증 로직 */
+  static async checkDuplicateSocial(user_id, email) {
+    const [rows] = await pool.query(`
+      SELECT COUNT(*) AS count
+      FROM userinfo
+      WHERE user_id = ?
+         OR user_email = ?
+         OR (
+              JSON_CONTAINS_PATH(user_social, 'one', '$.kakao.email')
+              AND JSON_UNQUOTE(JSON_EXTRACT(user_social, '$.kakao.email')) = ?
+            )
+         OR (
+              JSON_CONTAINS_PATH(user_social, 'one', '$.naver.email')
+              AND JSON_UNQUOTE(JSON_EXTRACT(user_social, '$.naver.email')) = ?
+            )
+    `, [user_id, email, email, email]);
+  
+    return rows[0].count > 0;
+  }
+  
+
   /* 입력받은 데이터 객체를 기반으로 db에 넣음 */
   static async insertUser(user) {
     try {

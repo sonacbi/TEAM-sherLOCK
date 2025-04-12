@@ -90,6 +90,14 @@ app.post('/auth/login', async (req, res) => {
 });
 
 /* ------------------- 소셜 로그인 (현재 카카오만 지원) ------------------- */
+const express = require('express');
+const axios = require('axios');
+const router = express.Router();
+
+// 카카오
+const KAKAO_CLIENT_ID = 'f6372d1dc197e39ed6c42d524e310b68';
+const KAKAO_REDIRECT_URI = 'http://localhost:5173/auth/kakao/login';
+
 router.get('/auth/:provider/login', async (req, res) => {
   const { provider } = req.params; // 'kakao' or 'naver' etc.
   const { code } = req.query;
@@ -99,6 +107,43 @@ router.get('/auth/:provider/login', async (req, res) => {
   switch (provider) {
     case 'kakao':
       // 카카오 로그인 로직
+      try {
+        // 1. 인가 코드로 access_token 요청
+        const tokenRes = await axios.post(
+          `https://kauth.kakao.com/oauth/token`,
+          new URLSearchParams({
+            grant_type: 'authorization_code',
+            client_id: KAKAO_CLIENT_ID,
+            redirect_uri: KAKAO_REDIRECT_URI,
+            code,
+          }).toString(),
+          {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          }
+        );
+
+        const { access_token } = tokenRes.data;
+
+        // 2. access_token으로 사용자 정보 요청
+        const userRes = await axios.get(`https://kapi.kakao.com/v2/user/me`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
+
+        const kakaoAccount = userRes.data.kakao_account;
+        const kakaoId = userRes.data.id;
+        const email = kakaoAccount.email;
+
+        // 3. 여기서 DB에 사용자 정보 확인/등록
+        const user = await checkDuplicateSocial(user_id, email);
+
+        res.status(200).json(user); // 사용자 정보 리턴
+
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("카카오 로그인 실패");
+      }
       break;
     case 'naver':
       // 네이버 로그인 로직

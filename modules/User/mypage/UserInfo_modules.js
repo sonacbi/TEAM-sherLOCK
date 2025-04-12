@@ -72,16 +72,18 @@ class User extends ClassVersion {
   /* 프론트 : 수정 가능하게 할지, 불가능하게 할지 */
   user_type;    // 0 'admin', 1 'general', 2 'kakao', 3 'naver' -- 유저 유형 구분
   user_email;   // 소셜은 자동 입력, 일반 회원은 회원가입시 입력 (비밀번호 찾기 지원용) !!중복불가!!
+  user_social; // 일반 회원은 null 상태. 소셜 로그인은 {'kakao' : {"email" : 'abc123@kakao.com', "linked_at" : "2025-04-12T14:00:00", "active" : true } 'naver' : {"email" ... } 식으로 추가
   /* 백 : 간편회원가입할 때 이메일 정보받아오기, 일반회원가입시 '이메일 인증'으로 회원가입 유도 */
   membership;   // active '활성화', inactive '비활성화', pending '결제 보류'. default 'inactive'
   birth_date;   // 필수 입력 아님 . 로그와 함께 마케팅용 자료
   /* 프론트 : 오늘 이후의 날짜를 입력할 수 없도록 유효성 검사 추가 */
   created_at;   // 계정 생성 일시 
   updated_at;   // 계정 수정 일시
+  profile_url;  // 처음 생성할 때 프로필 사진 받지 않음. 자동으로 기본 프로필 사진 정보가 입력
   deleted;      // 탈퇴 여부 체크 (0 : 활성, 1 : 탈퇴처리)
 
 
-  constructor(user_id, user_pw, user_name, user_type, user_email, membership, birth_date, created_at, updated_at, deleted) {
+  constructor(user_id, user_pw, user_name, user_type, user_email, membership, user_social, birth_date, created_at, updated_at, profile_url, deleted) {
       super()
   }
 }
