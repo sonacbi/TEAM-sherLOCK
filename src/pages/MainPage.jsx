@@ -27,6 +27,7 @@ function MainPage() {
   const loader = useRef(null);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const noticeRef = useRef(null);
+  const [showNotice, setShowNotice] = useState(false);
 
   const themes = [
     { id: "horror", label: "호러", outline: horror_outline, icon: horror_icon },
@@ -44,7 +45,8 @@ function MainPage() {
     '신년 이벤트 진행 중',
     '설문조사 참여 이벤트',
     '로그인 오류 수정 완료',
-    '서비스 개선사항 안내'
+    '서비스 개선사항 안내',
+    '히히 방구발싸'
   ];
 
   const handleSignInClick = () => {
@@ -102,7 +104,11 @@ function MainPage() {
       }
     
       const noticeTable = document.querySelector('.notice_table');
-      if (noticeTable && noticeTable.contains(e.target)) {
+      const noticeText = document.querySelector('.notice_text');
+      if (
+        (noticeTable && noticeTable.contains(e.target)) ||
+        (noticeText && noticeText.contains(e.target))
+      ) {
         return;
       }
     
@@ -193,6 +199,10 @@ function MainPage() {
     setIsNoticeOpen((prev) => !prev);
   };
 
+  const handleItemClick = (index) => {
+    setShowNotice(true);
+  };
+
   return (
     <div className='MainPage_wrap'>
       <div className='MainPage_content'>
@@ -204,14 +214,38 @@ function MainPage() {
 
             <div ref={noticeRef} className={`notice_content ${isNoticeOpen ? 'show' : 'hide'}`}>
               <img id="notice_speech_bubble" src={notice_speech_bubble} alt="notice_speech_bubble" />
-              <div className="notice_table">
-                {items.map((item, index) => (
-                  <div key={index} className="notice_table_text">
-                    {item}
+              {!showNotice && (
+                <div className="notice_table">
+                  {items.map((item, index) => (
+                    <div key={index} className="notice_table_text" onClick={() => handleItemClick(index)}>
+                      {item}
+                    </div>
+                  ))}
+                  {hasMore && <div ref={loader} style={{ height: '10px' }} />}
+                </div>
+              )}
+
+              {showNotice && (
+                <div className="notice_text">
+                  <div className="title">
+                    서버 점검 안내
                   </div>
-                ))}
-                {hasMore && <div ref={loader} style={{ height: '10px' }} />}
-              </div>
+
+                  <div className="text">
+                    안녕하세요, [셜LOCK] 운영팀입니다.<br/><br/>
+                    보다 나은 서비스 제공을 위해 서버 점검이 예정되어 있어 안내드립니다.<br/><br/>
+                    * 점검 일시: 2025년 4월 15일(화) 02:00 ~ 06:00 (약 4시간 예정)<br/><br/>
+                    * 점검 내용: 서버 안정화 및 성능 개선 작업<br/><br/>
+                    * 영향 범위: 점검 시간 동안 [웹사이트/앱] 이용이 일시적으로 제한됩니다.<br/><br/>
+                    감사합니다.
+                  </div>
+
+                  <div className="exit_day">
+                    <p className="exit" onClick={() => setShowNotice(false)}>나가기</p>
+                    <p className="day">2025-04-13</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <Header_Logo />
