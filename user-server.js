@@ -65,7 +65,7 @@ app.post('/auth/duplicated', async (req, res) => {
         break;
       case 'nickname' :
         user = await UserDAO.findByName(user_name);
-        if (user?.i > 0) return res.status(409).json({ success: false, message: '! 이미 사용 중인 닉네임입니다\n 이대로 진행할 시 고유번호가 붙습니다.' });
+        if (user?.i > 0) return res.status(409).json({ success: false, message: '! 이미 사용 중인 닉네임입니다' });
         // 위는 디버깅용 코드. (유저가 위의 경고문을 보고도 진행한다면 변경함)
         break;
       case 'email' :
@@ -147,14 +147,30 @@ app.post('/auth/check-id', async (req, res) => {
 
 
 /* ------------------- 소셜 로그인 (현재 카카오만 지원) ------------------- */
-// 카카오
+// 카카오 
 const KAKAO_CLIENT_ID = 'f6372d1dc197e39ed6c42d524e310b68';
 const KAKAO_REDIRECT_URI = 'http://localhost:5173/auth/kakao';
 
+// 📞 소셜 로그인 요청 (프론트에서 온 연락) ----- //
+app.get("/auth/kakao/login", (req, res) => {
+  const redirectUri = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
+  console.log("에러 검증");
+  res.redirect(redirectUri);
+  // 프론트에서 클라이언트가 정보 제공 동의하면 SocialAuthHandler.jsx에서 처리
+  // <Route path="/auth/kakao" element={<SocialAuthHandler />} />
+  // <Route path="/auth/naver" element={<SocialAuthHandler />} />
+});
+
+// 📞 api 제공업체가 돌려주는 응답을  ---------- //
+// SocialAuthHandler.jsx가 받아서 해독하고(미들웨어)
+//     각각의 경우의 수(provider)에 따라 처리 --- //
 app.post('/auth/:provider', async (req, res) => {
   const { provider } = req.params; // 'kakao' or 'naver' etc.
   const { code } = req.body;
+
   console.log(`Received ${provider} login code: ${code}`);
+
+  // ☠️ 응답을 제대로 받지 못함  --------------- //
   if (!code) return res.status(400).send("인가 코드 없음");
 
   switch (provider) {
@@ -185,13 +201,12 @@ app.post('/auth/:provider', async (req, res) => {
         });
 
         const kakaoAccount = userRes.data.kakao_account;
-        const user_id = 'kakao_' + userRes.data.id;
+        const user_id = 'kakao_' + userRes.data.id; // 카카오 결합
         const email = kakaoAccount.email;
-
-        console.log(user_id, email);   // 여기서 user_id 값을 확인
+        const social_id = userRes.data.id; // 결합하지 않음
 
         // 3. 여기서 DB에 사용자 정보 확인/등록
-        const user = await UserDAO.registerUser(user_id, email, kakaoAccount);
+        const user = await UserDAO.registerUser(user_id, email, social_id);
         
 
         // 카카오 로그인 후 JWT 발급
@@ -205,7 +220,7 @@ app.post('/auth/:provider', async (req, res) => {
 
       } catch (err) {
         console.error(err);
-        console.log("카카오 토큰 요청 실패:", err.response?.data || err.message);
+        // console.log("카카오 토큰 요청 실패:", err.response?.data || err.message);
         res.status(500).send("카카오 로그인 실패");
       }
       break;

@@ -1,15 +1,19 @@
 // 카카오, 네이버 api 로그인 처리용 페이지 (추가)
-
-import React, { useEffect } from 'react';
+// 어디서 들어온 응답인지(path) 확인하고 유형에 맞게 처리
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 function SocialAuthHandler() {
   const navigate = useNavigate();
   const location = useLocation();
+  const called = useRef(false); // ✅ 중복 방지용 플래그
 
   useEffect(() => {
     // URL에서 code 값 추출
+    if (called.current) return; // ❌ 이미 호출했으면 더 이상 실행하지 않음
+    called.current = true;      // ✅ 첫 실행이면 true로 바꿈
+
     const queryParams = new URLSearchParams(location.search);
     const code = queryParams.get('code');
 

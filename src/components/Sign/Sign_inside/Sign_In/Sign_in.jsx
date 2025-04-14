@@ -14,57 +14,63 @@ function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
   const [showKakaoLogin, setShowKakaoLogin] = useState(false);
 
-  // 유효성 검사 관련 상태 ---------------------------//
+  // ⚙️ 유효성 검사 관련 상태 ---------------------------//
   const [user_id, setUserId] = useState('');
   const [user_pw, setUserPw] = useState('');
   const [idError, setUserIdError] = useState('');
   const [passwordError, setUserPwError] = useState('');
-  // -------------------------------------------------//  
 
+  // ⚙️ 로그인 버튼 세팅 --------------------------------//
   const handleSherlockLoginClick = () => {
     setShowSherlockLogin(true);
     setShowKakaoLogin(true);
   };
-
+  // 👁️ 일괄적으로 유효성 검사 실시 → 📓로그인 폼 제출 -// 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 유효성 검사
+    // 1️⃣ (프론트) 아이디 형식 먼저 검사 (Msg = Message)
     const idMsg = validateId(user_id);
+    if (idMsg) {
+      setUserIdError(idMsg);
+      setUserPwError('');
+      return; // ❌ 형식 안 맞으면 그만
+    }
+
+    // 2️⃣ 서버에 아이디 존재 여부 확인
+    let userExists = true;
+    await checkLoginUserId(user_id, (msg) => {
+      setUserIdError(msg);
+      if (msg) userExists = false; // ❌ "존재하지 않습니다" 메시지 뜨면 검사 중단
+      setUserPwError('');
+    });
+
+    if (!userExists) return; // ❌ 백엔드 검사 탈락 시 종료
+
+    // 3️⃣ 아이디가 유효하니까 이제 비밀번호 검사
     const pwMsg = validatePassword(user_pw);
-  
-    setUserIdError(idMsg);
     setUserPwError(pwMsg);
 
-    // 아이디 존재 여부 서버 체크
-    await checkLoginUserId(user_id, setUserIdError);
-
-    
-  
     if (!idMsg && !pwMsg) {
       console.log("로그인 시도");
-      await submitLogin(user_id, user_pw); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.jsx)
+      await submitLogin(user_id, user_pw, setUserPwError); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.js)
+      // 로그인이 실패할 경우 '비밀번호가 일치하지 않았습니다' 메세지 리턴턴
     }
   };
 
-
-
-  const [capsLockOn, setCapsLockOn] = useState({ // capslock on/off
+  // ⚙️ capslock on/off 상태 검증 -------------------//
+  const [capsLockOn, setCapsLockOn] = useState({ 
     password: false,
     passwordCheck: false
   });
   
-  const KAKAO_REST_API_KEY = 'f6372d1dc197e39ed6c42d524e310b68';
-  const REDIRECT_URI = 'http://localhost:5173/auth/kakao';
-
-  const handleSocial = (e) => {
+  // 🔗 소셜 로그인 요청 (→ 백엔드로) ------------- //
+  const handleSocial = (e) => {  
     e.preventDefault();
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
-    window.location.href = kakaoAuthUrl;
-    console.log("에러 검증");
+    window.location.href = "http://localhost:5000/auth/kakao/login"; // ← 백엔드로 넘김
+    // 이후 로그는 app.get("/auth/kakao/login", (req, res) 으로 경로 진행
   };
-
-
+  
   const handleSignUpClick = () => {
     onSignUpClick();
   };

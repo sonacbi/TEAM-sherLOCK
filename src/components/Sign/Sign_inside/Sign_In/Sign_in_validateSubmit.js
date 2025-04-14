@@ -10,11 +10,12 @@ export const validateId = (id) => {
 };
 
 export const validatePassword = (pw) => {
+  console.log("pw"+pw);
   if (!pw) return '! 비밀번호를 입력해주세요';
-  const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
   if (!pwRegex.test(pw)) {
-    return '! 영문, 숫자, 특수문자를 포함해 8자 이상 입력해주세요';
-  }
+  return '! 영문, 숫자, 특수문자를 포함해 8자 이상 입력해주세요';
+  }   
   return '';
 };
 
