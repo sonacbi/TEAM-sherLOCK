@@ -83,15 +83,37 @@ class User extends ClassVersion {
   deleted;      // 탈퇴 여부 체크 (0 : 활성, 1 : 탈퇴처리)
 
 
-  constructor(user_id, user_pw, user_name, user_type, user_email, membership, user_social, birth_date, created_at, updated_at, profile_url, deleted) {
-      super()
+  constructor({
+    user_id,
+    user_pw,
+    user_name,
+    user_type,
+    user_email,
+    user_social = null,
+    membership = 'inactive',
+    birth_date = null,
+    created_at = new Date(),
+    updated_at = new Date(),
+    profile_url = 'default',
+    deleted = 0,
+    user_social_stringified = null,
+  }) {
+    super();
+    this.user_id = user_id;
+    this.user_pw = user_pw;
+    this.user_name = user_name;
+    this.user_type = user_type;
+    this.user_email = user_email;
+    this.user_social = user_social;
+    this.membership = membership;
+    this.birth_date = birth_date;
+    this.created_at = created_at;
+    this.updated_at = updated_at;
+    this.profile_url = profile_url;
+    this.deleted = deleted;
+    this.user_social_stringified = user_social_stringified;
   }
 }
-
-
-
-
-
 
 // 모듈 내보내기
 export { ClassVersion, UserSource, User }

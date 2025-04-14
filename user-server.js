@@ -20,6 +20,8 @@ const corsOptions = {
   credentials: true, // 필요 시 추가
 };
 
+import { User } from 'modules/user/mypage/userinfo_modules.js'; // 유저 객체 생성용 임포트
+
 app.use(cors(corsOptions)); // CORS 설정 추가
 
 // app.use(cors()); // 모든 포트에서 요청을 받음
@@ -41,7 +43,9 @@ app.post('/auth/signup', async (req, res) => {
       user_pw: hashedPassword,  // 해시된 비밀번호로 대체
       created_at: new Date(),
       updated_at: new Date(),
-      deleted: 0
+      deleted: 0,
+      user_social_stringified : null,
+      profile_url : 'default'
     };
 
     await UserDAO.insertUser(user);
