@@ -1,6 +1,6 @@
 .profile {
     position: absolute;
-    right: 3%;
+    right: 1%;
     top: 20%;
 }
 
@@ -16,24 +16,16 @@
     width: 50px;
     object-fit: cover;
     border-radius: 50%;
-}
-
-.profile_nickname {
-    background-color: #ddd;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: bold;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: opacity 0.3s ease;
 }
 
-.profile_nickname:hover {
-    color: rgba(0, 0, 0, 0.3);
+#ex_user_profile:hover {
+    opacity: 0.5;
 }
 
 .profile_setup {
-    position: absolute;
-    left: -25px;
+    position: relative;
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -48,6 +40,11 @@
 .profile_setup.hide {
     opacity: 0;
     pointer-events: none;
+}
+
+.profile_setup_inside {
+    position: relative;
+    z-index: 999;
 }
 
 .logout_mypage {

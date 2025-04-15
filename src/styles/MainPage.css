@@ -275,6 +275,10 @@ header {
         top: -50%;
     }
 
+    header .profile {
+        top: -50%;
+    }
+
     .theme {
         top: 30%;
         flex-wrap: wrap;
@@ -303,6 +307,10 @@ header {
     }
 
     header .Sign {
+        top: -100%;
+    }
+
+    header .profile {
         top: -100%;
     }
 

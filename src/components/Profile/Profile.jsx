@@ -8,7 +8,7 @@ import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png';
 import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubble.png'
 
 const Profile = ({ onSignInClick, onSignUpClick }) => {
-  const [userNickname, setUserNickname] = useState(null);
+  const [userToken, setUserToken] = useState(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   useEffect(() => {
@@ -18,24 +18,24 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
       try {
         const decoded = jwtDecode(token);
         console.log("🧾 디코딩된 결과:", decoded);
-        setUserNickname(decoded.user_name);
+        setUserToken(decoded.user_name);
       } catch (error) {
         console.error("❌ 토큰 디코딩 실패:", error);
-        setUserNickname(null);
+        setUserToken(null);
       }
     } else {
       console.warn("⚠️ 토큰 없음: 로그인하지 않았거나 삭제됨");
-      setUserNickname(null);
+      setUserToken(null);
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setUserNickname(null);
+    setUserToken(null);
     window.location.href = '/Main'; // 필요에 따라 다른 경로로 수정 가능
   };
 
-  const handleNicknameClick = () => {
+  const handleProfileClick = () => {
     setShowProfileSetup(true);
     // 3초(3000ms) 뒤에 자동으로 숨기기
     setTimeout(() => {
@@ -45,16 +45,15 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
 
   return (
     <>
-      {userNickname ? (
+      {userToken ? (
         <div className='profile'>
           <div className='profile_outside'>
             <img 
               id='ex_user_profile'
               src={ex_user_profile}
               alt='ex_user_profile'
+              onClick={handleProfileClick}
             />
-
-            <p className='profile_nickname' onClick={handleNicknameClick}>{userNickname}</p>
           </div>
 
           <div className={`profile_setup ${showProfileSetup ? 'show' : 'hide'}`}>
