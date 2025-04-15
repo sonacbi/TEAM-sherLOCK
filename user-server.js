@@ -95,7 +95,7 @@ app.post('/auth/login', async (req, res) => {
   try {
     console.log('📦 받은 회원 정보:', req.body);  // ★ 이거 추가
     const user = await UserDAO.findById(user_id);
-    console.log('🔍 사용자 조회 결과:', user);
+    // console.log('🔍 사용자 조회 결과:', user);
 
     if (!user) {
       console.log('❌ 사용자 없음');
@@ -109,14 +109,52 @@ app.post('/auth/login', async (req, res) => {
       console.log('❌ 비밀번호 불일치');
       return res.status(401).json({ success: false, message: '! 비밀번호가 일치하지 않습니다' });
     }
-    console.log('🧪 user 객체 전체 확인:', user); // <- 여기에 user_name 있는지 다시 확인
+    // console.log('🧪 user 객체 전체 확인:', user); // <- 여기에 user_name 있는지 다시 확인
     console.log('🧪 JWT에 넣을 user_id:', user.user_id);
     console.log('🧪 JWT에 넣을 user_name:', user.user_name); // 여기서 undefined면 문제임
+    switch(user.user_type) {
+      case 0 :
+        console.log('🧪 JWT에 넣을 user_type: 0 관리자');
+        break;
+      case 1 :
+        console.log('🧪 JWT에 넣을 user_type: 1 일반');
+        break;
+      case 2 :
+        console.log('🧪 JWT에 넣을 user_type: 2 카카오');
+        break;
+      case 3 :
+        console.log('🧪 JWT에 넣을 user_type: 3 네이버');
+        break;
+    }
+    console.log('🧪 JWT에 넣을 user_email:', user.user_email);
+    console.log('🧪 JWT에 넣을 user_social:', user.user_social);
+    switch(user.membership) {
+      case 'inactive' :
+        console.log('🧪 JWT에 넣을 membership: inactive비활성화');break;
+      case 'active' :
+        console.log('🧪 JWT에 넣을 membership: active활성화');break;
+      case 'pending' :
+        console.log('🧪 JWT에 넣을 membership: pending결제 보류');break;
+    }
+    console.log('🧪 JWT에 넣을 birth_date:', user.birth_date);
+    console.log('🧪 JWT에 넣을 created_at:', user.created_at);
+    console.log('🧪 JWT에 넣을 updated_at:', user.updated_at);
+    console.log('🧪 JWT에 넣을 profile_url:', user.profile_url);
+
+
 
     const token = jwt.sign(
       {
         user_id: user.user_id,
-        user_name: user.user_name  // 이게 undefined면 프론트에서 안 뜸!
+        user_name: user.user_name,  // 이게 undefined면 프론트에서 안 뜸!
+        user_type: user.user_type,
+        user_email: user.user_email,
+        user_social: user.user_social,
+        membership: user.membership,
+        birth_date: user.birth_date,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        profile_url: user.profile_url
       },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
@@ -215,13 +253,20 @@ app.post('/auth/:provider', async (req, res) => {
 
         // 카카오 로그인 후 JWT 발급
         const token = jwt.sign(
-          { user_id: user.user_id, user_name: user.user_name },
+          { user_id: user.user_id,
+            user_name: user.user_name,  // 이게 undefined면 프론트에서 안 뜸!
+            user_type: user.user_type,
+            user_email: user.user_email,
+            user_social: user.user_social,
+            membership: user.membership,
+            birth_date: user.birth_date,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            profile_url: user.profile_url},
           process.env.JWT_SECRET,
           { expiresIn: '1h' }
         );
         res.status(200).json({ token });
-
-
       } catch (err) {
         console.error(err);
         // console.log("카카오 토큰 요청 실패:", err.response?.data || err.message);
