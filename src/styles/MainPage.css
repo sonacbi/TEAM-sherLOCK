@@ -157,12 +157,15 @@ header {
     position: absolute;
     top: 25%;
     display: flex;
-    gap: 150px;
+    gap: 8vw;
     justify-content: center;
+    flex-wrap: nowrap;
+    padding: 0 2vw;
 }
 
 .theme article {
-    width: 23%;
+    width: calc((100% - 4vw) / 3);
+    max-width: 450px;
     aspect-ratio: 3/4;
     border-radius: 20px;
     opacity: 0;
@@ -227,12 +230,13 @@ header {
 .horror_icon p, .adventure_icon p, .crime_icon p {
     margin-top: 10%;
     color: #fff;
-    font-size: 50px;
     font-family: 'Warhaven', sans-serif;
     display: none;
+    font-size: 3vw;
 }
 
 .theme_icon {
+    width: 10vw;
     transition: transform 0.5s ease;
 }
   
@@ -244,6 +248,67 @@ header {
 
 .theme article:hover .theme_icon {
     transform: translateY(-10px);
+}
+
+@media (max-width: 1350px) {
+    .theme {
+        top: 30%;
+    }
+}
+
+@media (max-width: 1100px) {
+    .theme {
+        top: 35%;
+    }
+}
+
+@media (max-width: 700px) {
+    header {
+        top: 10%;
+    }
+
+    .notice {
+        top: -50%;
+    }
+
+    header .Sign {
+        top: -50%;
+    }
+
+    .theme {
+        top: 30%;
+        flex-wrap: wrap;
+    }
+
+    .theme article {
+        border-radius: 10px !important;
+    }
+
+    .theme_icon {
+        width: 15vw !important;
+    }
+
+    .horror_icon p, .adventure_icon p, .crime_icon p {
+        font-size: 4vw !important;
+    }
+}
+
+@media (max-width: 550px) {
+    header {
+        top: 15%;
+    }
+
+    .notice {
+        top: -100%;
+    }
+
+    header .Sign {
+        top: -100%;
+    }
+
+    .theme {
+        top: 35%;
+    }
 }
 
 @font-face {
