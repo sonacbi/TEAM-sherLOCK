@@ -26,7 +26,7 @@ const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
       const { exists } = res.data;
   
       if (!exists) {
-        setUserIdError('아이디가 존재하지 않습니다.');
+        setUserIdError('! 아이디가 존재하지 않습니다');
       } else {
         setUserIdError('');
       }
