@@ -20,7 +20,7 @@ const corsOptions = {
   credentials: true, // 필요 시 추가
 };
 
-import { User } from 'modules/user/mypage/userinfo_modules.js'; // 유저 객체 생성용 임포트
+import { User } from './modules/user/mypage/userinfo_modules.js'; // 유저 객체 생성용 임포트
 
 app.use(cors(corsOptions)); // CORS 설정 추가
 
