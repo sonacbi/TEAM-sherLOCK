@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
 
-
-import { validateId, validatePassword } from './Sign_in_validateSubmit.js'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
+import { validateId, validatePassword, checkLoginUserId } from './Sign_in_validateSubmit.js'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
 import { submitLogin } from './Sign_in_submit.js'; // 새로 분리된 함수 import
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_in.css';
@@ -16,68 +14,63 @@ function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
   const [showKakaoLogin, setShowKakaoLogin] = useState(false);
 
-  // 유효성 검사 관련 상태 ---------------------------//
+  // ⚙️ 유효성 검사 관련 상태 ---------------------------//
   const [user_id, setUserId] = useState('');
   const [user_pw, setUserPw] = useState('');
   const [idError, setUserIdError] = useState('');
   const [passwordError, setUserPwError] = useState('');
-  // -------------------------------------------------//  
 
+  // ⚙️ 로그인 버튼 세팅 --------------------------------//
   const handleSherlockLoginClick = () => {
     setShowSherlockLogin(true);
     setShowKakaoLogin(true);
   };
-
+  // 👁️ 일괄적으로 유효성 검사 실시 → 📓로그인 폼 제출 -// 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-
-    // 유효성 검사
+    // 1️⃣ (프론트) 아이디 형식 먼저 검사 (Msg = Message)
     const idMsg = validateId(user_id);
+    if (idMsg) {
+      setUserIdError(idMsg);
+      setUserPwError('');
+      return; // ❌ 형식 안 맞으면 그만
+    }
+
+    // 2️⃣ 서버에 아이디 존재 여부 확인
+    let userExists = true;
+    await checkLoginUserId(user_id, (msg) => {
+      setUserIdError(msg);
+      if (msg) userExists = false; // ❌ "존재하지 않습니다" 메시지 뜨면 검사 중단
+      setUserPwError('');
+    });
+
+    if (!userExists) return; // ❌ 백엔드 검사 탈락 시 종료
+
+    // 3️⃣ 아이디가 유효하니까 이제 비밀번호 검사
     const pwMsg = validatePassword(user_pw);
-  
-    setUserIdError(idMsg);
     setUserPwError(pwMsg);
-  
+
     if (!idMsg && !pwMsg) {
       console.log("로그인 시도");
-      await submitLogin(user_id, user_pw); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.jsx)
+      await submitLogin(user_id, user_pw, setUserPwError); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.js)
+      // 로그인이 실패할 경우 '비밀번호가 일치하지 않았습니다' 메세지 리턴턴
     }
   };
 
-  const checkLoginUserId = async (id) => {
- 
-    try {
-      const res = await axios.post('http://localhost:5000/auth/check-id', { user_id: id });
-      const { exists } = res.data;
-  
-      if (!exists) {
-        setUserIdError('아이디가 존재하지 않습니다.');
-      } else {
-        setUserIdError('');
-      }
-    } catch (err) {
-      console.error('❌ 로그인 아이디 검사 에러:', err);
-      setUserIdError('서버 오류가 발생했습니다.');
-    }
-  };
-
-  const [capsLockOn, setCapsLockOn] = useState({ // capslock on/off
+  // ⚙️ capslock on/off 상태 검증 -------------------//
+  const [capsLockOn, setCapsLockOn] = useState({ 
     password: false,
     passwordCheck: false
   });
   
-  const KAKAO_REST_API_KEY = 'f6372d1dc197e39ed6c42d524e310b68';
-  const REDIRECT_URI = 'http://localhost:5173/auth/kakao';
-
-  const handleSocial = (e) => {
+  // 🔗 소셜 로그인 요청 (→ 백엔드로) ------------- //
+  const handleSocial = (e) => {  
     e.preventDefault();
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
-    window.location.href = kakaoAuthUrl;
-    console.log("에러 검증");
+    window.location.href = "http://localhost:5000/auth/kakao/login"; // ← 백엔드로 넘김
+    // 이후 로그는 app.get("/auth/kakao/login", (req, res) 으로 경로 진행
   };
-
-
+  
   const handleSignUpClick = () => {
     onSignUpClick();
   };
@@ -121,16 +114,17 @@ function Sign_in({ onClose, onSignUpClick }) {
                       const idValidationMsg = await validateId(value); // 비동기 유효성 검사
                       setUserIdError(idValidationMsg); // 결과 반영
                   
-                      await checkLoginUserId(value); // 존재하는 아이디인지 백엔드로 체크
                     }}
                     onFocus={async () => {
                       const idValidationMsg = await validateId(user_id);
                       setUserIdError(idValidationMsg);
-                      await checkLoginUserId(user_id);
+
                     }}
-                    onBlur={() =>
-                      setUserIdError('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                    }
+                    onBlur={async () => {
+                      const idValidationMsg = validateId(user_id);
+                      setUserIdError(idValidationMsg);
+
+                    }}
                     // 수정 ------------------------------------------------//
                     />
                     {idError && <p className='error_text'>{idError}</p>}

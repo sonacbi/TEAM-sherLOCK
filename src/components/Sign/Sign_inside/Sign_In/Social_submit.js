@@ -1,11 +1,10 @@
 // ./Social_submit.js
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const KakaoCallback = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate();  
 
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");

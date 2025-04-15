@@ -6,7 +6,7 @@ class UserDAO {
     const [rows] = await pool.query('SELECT * FROM userinfo WHERE user_id = ? AND deleted = 0', [user_id]);
     return rows[0];
   }
-  /* 닉네임이 실제로 있는지 검증 있으면 자동으로 #001, #002 등의 번호 부여 */
+  /* 닉네임이 실제로 있는지 검증 */
   static async findByName(user_name) { 
     const [rows] = await pool.query('SELECT count(*) as i FROM userinfo WHERE user_name = ?', [user_name]);
     const user = rows[0];
@@ -23,7 +23,7 @@ class UserDAO {
 
     
  // 소셜 회원가입 로직 추가 (중복 확인 후)
-  static async registerUser(user_id, user_email, kakaoAccount) {
+  static async registerUser(user_id, user_email, social_id) {
     // 카카오 사용자 정보로부터 필요한 값 추출
     const user_pw = null; // 카카오는 비밀번호가 없으므로 null 처리
     const user_name = user_email.split('@')[0]; // 카카오에서 닉네임 가져오기
@@ -33,15 +33,15 @@ class UserDAO {
     const created_at = new Date(); // 현재 시간으로 설정
     const updated_at = new Date(); // 현재 시간으로 설정
     const deleted = 0; // 삭제되지 않은 사용자로 설정
-    const user_social = { kakao : kakaoAccount.id }; // 소셜 로그인 정보
-    const profile_url = 'dafault'; // 카카오 프로필 이미지 URL
+    const user_social = { kakao : social_id }; // 소셜 로그인 정보
+    const profile_url = 'default'; // 카카오 프로필 이미지 URL
 
     // user_social 객체를 문자열로 변환하여 저장
     const user_social_stringified = JSON.stringify(user_social);
 
-
+    console.log ("user_social_stringified :"+ user_social_stringified );
     // 먼저 user_id가 중복되는지 확인 (이메일 또는 소셜 정보도 중복될 수 있음)
-    const existingUser = await this.checkDuplicateSocial(user_id, user_email,user_social_stringified);
+    const existingUser = await this.checkDuplicateSocial(user_id, user_email, user_social_stringified);
     
     console.log("로그인 에러 체크");
     if (existingUser) {
@@ -63,6 +63,7 @@ class UserDAO {
       user_social_stringified,
       profile_url
     }
+
     // 사용자 정보 저장 로직
     await this.insertUser(user);  // 'this'로 호출, 정적 메소드에서 사용
     return user;
@@ -90,14 +91,15 @@ class UserDAO {
     // user_id, email, user_social의 중복 여부를 확인
     // JSON 타입 필드 중복 검사도 수정 필요
     const [rows] = await pool.query(`
-      SELECT COUNT(*) AS count
+      SELECT *
       FROM userinfo
       WHERE user_email = ?
         OR JSON_UNQUOTE(JSON_EXTRACT(user_social, '$.kakao')) = ?
         OR JSON_UNQUOTE(JSON_EXTRACT(user_social, '$.naver')) = ?
+      LIMIT 1
     `, [email, kakaoEmail, naverEmail]); // ← 여기도 구조 맞게 넘겨야 함
 
-      if (rows[0].count > 0) {
+    if (rows.length > 0) {
       console.log("소셜 중복 유저 발견:", rows[0]);
       return rows[0]; // 중복된 유저 반환
     }
@@ -112,18 +114,16 @@ class UserDAO {
   static async insertUser(user) {
     try {
       const {
-        user_id, user_pw, user_name, user_type, user_email, user_social,
+        user_id, user_pw, user_name, user_type, user_email, user_social_stringified,
         membership, birth_date, created_at, updated_at, profile_url, deleted
       } = user;
 
-      // user_social이 null이 아니면 처리
-      const social = user_social ? JSON.stringify(user_social) : null; // null 처리 추가
   
       await pool.query(
         `INSERT INTO userinfo 
           (user_id, user_pw, user_name, user_type, user_email, user_social, membership, birth_date, created_at, updated_at, profile_url, deleted) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [user_id, user_pw, user_name, user_type, user_email, social, membership, birth_date, created_at, updated_at, profile_url, deleted]
+        [user_id, user_pw, user_name, user_type, user_email, user_social_stringified, membership, birth_date, created_at, updated_at, profile_url, deleted]
       );
     } catch (err) {
       console.error("User insert failed:", err);

@@ -1,5 +1,5 @@
-// Sign_in_submit.jsx
-export async function submitLogin(user_id, user_pw) {
+// Sign_in_submit.js 
+export async function submitLogin(user_id, user_pw, setUserPwError) {
   try {
     const response = await fetch('http://localhost:5000/auth/login', {
       method: 'POST',
@@ -19,7 +19,9 @@ export async function submitLogin(user_id, user_pw) {
       alert('로그인 성공!');
       window.location.href = '/Main';
     } else {
-      alert(data.message || '로그인 실패!');
+      // ❗ 비밀번호 에러 메시지 전달
+      if (data.message === '! 비밀번호가 일치하지 않습니다') {
+        setUserPwError('! 비밀번호가 일치하지 않습니다');}
     }
   } catch (err) {
     console.error('로그인 에러:', err);

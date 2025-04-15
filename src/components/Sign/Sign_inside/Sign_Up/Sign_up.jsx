@@ -274,7 +274,16 @@ function Sign_up({ onClose, onSignInClick }) {
                                         type='text'
                                         placeholder="email"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setEmail(value);
+                                            
+                                            const errorMessage = validateEmail(value, domain);
+                                                setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                email: errorMessage
+                                            }));
+                                        }}
                                     />
 
                                     <p>@</p>
