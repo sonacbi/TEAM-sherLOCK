@@ -20,8 +20,8 @@ export async function submitLogin(user_id, user_pw, setUserPwError) {
       window.location.href = '/Main';
     } else {
       // ❗ 비밀번호 에러 메시지 전달
-      if (data.message === '비밀번호가 일치하지 않습니다.') {
-        setUserPwError('비밀번호가 일치하지 않습니다.');}
+      if (data.message === '! 비밀번호가 일치하지 않습니다') {
+        setUserPwError('! 비밀번호가 일치하지 않습니다');}
     }
   } catch (err) {
     console.error('로그인 에러:', err);

@@ -107,7 +107,7 @@ app.post('/auth/login', async (req, res) => {
 
     if (!isMatch) {
       console.log('❌ 비밀번호 불일치');
-      return res.status(401).json({ success: false, message: '비밀번호가 일치하지 않습니다.' });
+      return res.status(401).json({ success: false, message: '! 비밀번호가 일치하지 않습니다' });
     }
     console.log('🧪 user 객체 전체 확인:', user); // <- 여기에 user_name 있는지 다시 확인
     console.log('🧪 JWT에 넣을 user_id:', user.user_id);
