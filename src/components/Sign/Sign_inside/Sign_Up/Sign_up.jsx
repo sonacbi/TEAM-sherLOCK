@@ -1,7 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import handleSubmitFunc from './Sign_up_validateSubmit.js'; // 분리된 유효성검사 로직 → Sign_up_submit.js (프론트 제출폼) 연동
-import { validateId, validatePassword, validatePasswordCheck, validateNickname, validateEmail, validateBirth} from './Sign_up_validateSubmit.js';
+import { validateId, validatePassword, validatePasswordCheck, validateEmail, validateBirth, 
+    handleInputChange, handlePasswordCheckChange, handleEmailInputChange, handleDomainChange, handleBlurClear,
+    handleFocus, handlePasswordCheckFocus, handleEmailFocus} from './Sign_up_validateSubmit.js';
+import { useNicknameValidator } from './useNicknameValidator'; // 경로 맞춰서!
+
 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css'; 
@@ -99,51 +103,14 @@ function Sign_up({ onClose, onSignInClick }) {
             birth
         }, setErrors, onSignInClick);
     };
-    /* -----(추가) 닉네임 입력칸 버그 픽스 ----- */
-    /* 닉네임 입력칸 버그 픽스 */
-    const [isComposing, setIsComposing] = useState(false);
-    const debounceTimer = useRef(null);
 
-    const handleChange_nick = (e) => {
-        setNickname(e.target.value); // 상태 업데이트
-    };
-
-    const handleCompositionStart = () => {
-        setIsComposing(true);
-    };
-
-    const handleCompositionEnd = (e) => {
-        setIsComposing(false);
-
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(async () => {
-            await checkNickname(e.target.value);
-        }, 150);
-        
-    };
+    /* -----(추가) 닉네임 실시간 검사 분리 ----- */
+    
+    const { error,handleChange } = useNicknameValidator();
 
     useEffect(() => {
-        if (isComposing) return;
-
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(async () => {
-            await checkNickname(nickname);
-        }, 300);
-        
-    }, [nickname]);
-
-    const checkNickname = async (value) => {
-        if (!value) return;
-
-        console.log("닉네임 검사 실행:", value);
-        const errorMessage = await validateNickname(value); // ← 최신값 반영
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            nickname: errorMessage,
-        }));
-    };
-
-      
+        setErrors(prev => ({ ...prev, nickname: error }));
+    }, [error]);
 
     /* -------------------------------------- */
 
@@ -164,26 +131,9 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='text'
                                     placeholder="셜LOCK ID"
                                     value = {userId}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        setUserId(value);
-
-                                        const errorMessage = validateId(value);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        userId: errorMessage
-                                        }));
-                                    }}
-                                    onFocus={() => {
-                                        const errorMessage = validateId(userId);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        userId: errorMessage
-                                        }));
-                                    }}    // 포커스 시 에러 검증
-                                    onBlur={() =>
-                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                                    }
+                                    onChange={handleInputChange(setUserId, validateId, setErrors, 'userId')}
+                                    onFocus={handleFocus(validateId, userId, setErrors, 'userId')}
+                                    onBlur={handleBlurClear(setErrors)}
                                 />
                                     {errors.userId && <p className="error_text">{errors.userId}</p>}
                             </div>
@@ -193,30 +143,12 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='password'
                                     placeholder="비밀번호"
                                     value={password}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        setPassword(value);
-
-                                        const errorMessage = validatePassword(value);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        password: errorMessage
-                                        }));
-                                    }}
-                                    onFocus={() => {
-                                        const errorMessage = validatePassword(password);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        password: errorMessage
-                                        }));
-                                    }}    // 포커스 시 에러 검증
+                                    onChange={handleInputChange(setPassword, validatePassword, setErrors, 'password')}
+                                    onFocus={handleFocus(validatePassword, password, setErrors, 'password')}
+                                    onBlur={handleBlurClear(setErrors)}
                                     onKeyDown={(e) =>                   // capslock 버튼 감지
                                         setCapsLockOn((prev) => ({ ...prev, password: e.getModifierState("CapsLock") }))
                                     }
-                                    onBlur={() =>{
-                                        setCapsLockOn((prev) => ({ ...prev, password: false }));
-                                        setErrors(''); // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                                    }}
                                 />
                                 {!capsLockOn.password && errors.password && (
                                 <p className="error_text">{errors.password}</p>
@@ -233,30 +165,11 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='password'
                                     placeholder="비밀번호 확인"
                                     value={passwordCheck}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        setPasswordCheck(value);
-
-                                        const errorMessage = validatePasswordCheck(password, value);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        passwordCheck: errorMessage
-                                        }));
-                                        }}
-                                    onFocus={() => {
-                                        const errorMessage = validatePasswordCheck(password, passwordCheck);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        passwordCheck: errorMessage
-                                        }));
-                                    }}    // 포커스 시 에러 검증
+                                    onChange={handlePasswordCheckChange(setPasswordCheck, validatePasswordCheck, setErrors, 'passwordCheck', password)}
+                                    onFocus={handlePasswordCheckFocus(validatePasswordCheck, passwordCheck, setErrors, 'passwordCheck', password)}  // 포커스 시 에러 검증
+                                    onBlur={handleBlurClear(setErrors)}
                                     onKeyDown={(e) =>                   // capslock 버튼 감지
                                         setCapsLockOn((prev) => ({ ...prev, passwordCheck: e.getModifierState("CapsLock") }))
-                                    }
-                                    onBlur={() =>{
-                                        setCapsLockOn((prev) => ({ ...prev, passwordCheck: false }));
-                                        setErrors('');} // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-
                                     }
                                 />
                                 {!capsLockOn.passwordCheck && errors.passwordCheck && (
@@ -274,16 +187,7 @@ function Sign_up({ onClose, onSignInClick }) {
                                         type='text'
                                         placeholder="email"
                                         value={email}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setEmail(value);
-                                            
-                                            const errorMessage = validateEmail(value, domain);
-                                                setErrors((prevErrors) => ({
-                                                ...prevErrors,
-                                                email: errorMessage
-                                            }));
-                                        }}
+                                        onChange={handleEmailInputChange(setEmail, validateEmail, setErrors, domain)}  // 이메일 입력 시 처리
                                     />
 
                                     <p>@</p>
@@ -291,26 +195,9 @@ function Sign_up({ onClose, onSignInClick }) {
                                     <select
                                         name="domain"
                                         value={domain}
-                                        onChange={(e) => {
-                                                const value = e.target.value;
-                                                setDomain(value);
-        
-                                                const errorMessage = validateEmail(email, value);
-                                                setErrors((prevErrors) => ({
-                                                ...prevErrors,
-                                                email: errorMessage
-                                                }));
-                                            }}
-                                    onFocus={() => {
-                                        const errorMessage = validateEmail(email, domain);
-                                        setErrors((prevErrors) => ({
-                                        ...prevErrors,
-                                        email: errorMessage
-                                        }));
-                                    }}    // 포커스 시 에러 검증
-                                    onBlur={() =>
-                                        setErrors('') // ← 이 줄 추가하면 blur 시 에러 메시지 제거됨
-                                    }
+                                        onChange={handleDomainChange(setDomain, validateEmail, setErrors, email)}  // 도메인 변경 시 처리
+                                        onFocus={handleEmailFocus(validateEmail, email, domain, setErrors)}  // 포커스 시 에러 검증
+                                        onBlur={handleBlurClear(setErrors)}  // 블러 시 에러 초기화
                                     >
                                         <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
                                         <option value="google.com">gmail.com</option>
@@ -328,9 +215,12 @@ function Sign_up({ onClose, onSignInClick }) {
                                     type='text'
                                     placeholder="닉네임"
                                     value={nickname}
-                                    onChange={handleChange_nick}
-                                    onCompositionStart={handleCompositionStart}
-                                    onCompositionEnd={handleCompositionEnd}
+                                    onChange={(e) => {
+                                        setNickname(e.target.value);
+                                        handleChange(e.target.value);
+                                    }}
+                                    // onCompositionStart={handleCompositionStart}
+                                    // onCompositionEnd={(e) => handleCompositionEnd(e.target.value)}
                                 />
                                 {errors.nickname && <p className="error_text">{errors.nickname}</p>}
                             </div>
