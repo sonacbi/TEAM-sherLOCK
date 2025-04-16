@@ -131,8 +131,55 @@ const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure) => {
     }
 };
 
+/* ------------------------- 각 입력 필드 공통 이벤트 핸들러 --------------------------*/
+export const handleInputChange = (setter, validator, errorSetter, key) => (e) => {
+  const value = e.target.value;
+  setter(value);
+  const error = validator(value);
+  errorSetter(prev => ({ ...prev, [key]: error }));
+};
 
-const checkDuplicated = async (value, type) => {
+export const handleEmailInputChange = (setEmail, validateEmail, setErrors, domain) => (e) => {
+  const value = e.target.value;
+  setEmail(value);
+  const error = validateEmail(value, domain);
+  setErrors(prev => ({ ...prev, email: error }));
+};
+
+export const handleDomainChange = (setDomain, validateEmail, setErrors, email) => (e) => {
+  const value = e.target.value;
+  setDomain(value);
+  const error = validateEmail(email, value);
+  setErrors(prev => ({ ...prev, email: error }));
+};
+
+export const handlePasswordCheckChange = (setPasswordCheck, validatePasswordCheck, setErrors, key, password) => (e) => {
+  const value = e.target.value;
+  setPasswordCheck(value);
+  const error = validatePasswordCheck(password, value);
+  setErrors(prev => ({ ...prev, [key]: error }));
+};
+
+export const handleFocus = (validator, value, setErrors, key) => () => {
+  const error = validator(value);
+  setErrors(prev => ({ ...prev, [key]: error }));
+};
+export const handlePasswordCheckFocus = (validator, value, setErrors, key, password) => () => {
+  const error = validator(password, value);  // 비밀번호 확인 시 비교
+  setErrors(prev => ({ ...prev, [key]: error }));
+};
+
+export const handleEmailFocus = (validator, email, domain, setErrors) => () => {
+  const error = validator(email, domain);  // 비밀번호 확인 시 비교
+  setErrors(prev => ({ ...prev, email: error }));
+};
+
+export const handleBlurClear = (setErrors) => () => {
+  setErrors('');
+};
+/* ----------------------------- 백엔드 중복 검사 이벤트  -----------------------------*/
+
+export const checkDuplicated = async (value, type) => {
   let user = {}
 
   switch (type) {
@@ -171,6 +218,5 @@ const checkDuplicated = async (value, type) => {
     return { success: false, message: '서버 연결 오류', error: error.message };
   }
 };
-  
 
 export default handleSubmit;
