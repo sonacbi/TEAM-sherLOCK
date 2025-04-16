@@ -93,13 +93,13 @@ class Game extends ClassVersion {
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
         this.achievement = achievement;
-        this.source = source;
+        this.source = new Source(source);
         this.inventory = inventory;
         this.stage = [];
         stage.map((data)=>{
             this.stage.push(new Stage(data));
         })
-        this.stage = stage;
+        // this.stage = stage;
     }
 
     // 업적 생성
@@ -292,7 +292,10 @@ class Stage extends ClassVersion {
         this.gateOpen = gateOpen;
         this.closedGateMessage = closedGateMessage;
         this.connectedStage = connectedStage;
-        this.cut = cut;
+        this.cut = [];
+        cut.map((data) => {
+            this.cut.push(new Cut(data));
+        })
     }
 
     // 컷 생성

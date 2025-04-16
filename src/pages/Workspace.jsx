@@ -6,10 +6,13 @@ import ServerSaveGamePage from "../components/Workspace/ServerSaveGamePage";
 
 export default function Workspace() {
     const [game, setGame] = useState(new Game({}));
-    const [file, setFile] = useState();
+    const [file, setFile] = useState({});
+    const [imgs, setImgs] = useState([]);
+    const [index, setIndex] = useState(0);
     console.log('게임데이터:', game)
 
-    function uploadJSON(event) {
+    // 사용자 게임파일 불러오기
+    function uploadGameFile(event) {
         event.preventDefault();
         const formData = new FormData(event.target)
         const jsonFile = formData.get("file")
@@ -23,7 +26,7 @@ export default function Workspace() {
                 setFile(parsed)
                 console.log('게임 JSON 파싱됨: ', parsed)
             } catch (error) {
-                console.log('게임 JSON 파싱 오류:', err)
+                console.log('게임 JSON 파싱 오류\n', error)
             }
         }
         reader.readAsText(jsonFile)
@@ -31,8 +34,16 @@ export default function Workspace() {
         // console.log('파싱된 파일',file)
     }
 
-    function JSONToGame() {
-        setGame(()=> new Game(file.game ?? undefined) ) 
+    // 게임파일 에디터에 적용하기
+    function fileToGame() {
+        setGame((prev)=> {
+            try {
+                return new Game(file.game);
+            } catch(error) {
+                console.log('업로드 오류\n', error);
+                return new Game(prev);
+            }
+        }) 
     }
 
     // console.log('파싱된 파일2',file)
@@ -63,7 +74,7 @@ export default function Workspace() {
             isRanking,
             isHiddenStage
         ]
-        console.log("데이터", data)
+        console.log("수정된 게임 데이터: ", data)
         setGame(prev => {
             const newGame = {
                 ...prev,
@@ -110,7 +121,7 @@ export default function Workspace() {
     function setGameStage(event) {
         event.preventDefault();
         const fromData = new FormData(event.target);
-        const index = fromData.get("stage_index") ? fromData.get("stage_index") : 0;
+        // const index = fromData.get("stage_index") ? fromData.get("stage_index") : 0;
         const name = fromData.get("stage_name");
         const type = fromData.get("stage_type");
         const imgURL = fromData.get("stage_imgURL");
@@ -139,36 +150,48 @@ export default function Workspace() {
         })
     }
 
+    function chooseStageIndex(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const index = formData.get("stage_index");
+        if (game.stage[index]) {
+            setIndex(index);
+        } else {
+            console.log("게임에 해당 스테이지가 없습니다.")
+        }
+    }
+
     return(
         <>
         <section>
-            <form onSubmit={uploadJSON}>
+            <form onSubmit={uploadGameFile}>
                 <input type="file" name="file" accept=".json"/>
                 <button type="submit">업로드</button>
             </form>
-            <button onClick={JSONToGame}>업로드된 파일 적용</button>
+            <button onClick={fileToGame}>업로드된 파일 적용</button>
         </section>
         <section>
             <div>
                 <form onSubmit={updateGame}>
                     <div>
                         <label>제목
-                            <input type="text" name="game_title" />
+                            <input type="text" name="game_title" defaultValue={game.title} key={game.title}/>
                         </label>
                     </div>
                     <div>
                         <label>썸네일
-                            <input type="text" name="game_thumbnailURL" />
+                            <input type="text" name="game_thumbnailURL" value={game.thumbnailURL} key={game.thumbnailURL} readOnly/>
+                            <input type="file"/>
                         </label>
                     </div>
                     <div>
                         <label>설명
-                            <textarea type="text" name="game_description" />
+                            <textarea type="text" name="game_description" defaultValue={game.description} key={game.description}/>
                         </label>
                     </div>
                     <div>
                         <label>테마
-                            <select name="game_theme" id="">
+                            <select name="game_theme" id="" defaultValue={game.theme}>
                                 <option value="horror">호러</option>
                                 <option value="adventure">모험</option>
                                 <option value="criminal">추리</option>
@@ -177,12 +200,12 @@ export default function Workspace() {
                     </div>
                     <div>
                         <label>태그
-                            <input type="text" name="game_tag" />
+                            <input type="text" name="game_tag" defaultValue={game.tag} key={game.tag}/>
                         </label>
                     </div>
                     <div>
                         <label>난이도
-                            <select name="game_difficulty" id="">
+                            <select name="game_difficulty" id="" defaultValue={game.difficulty}>
                                 <option value="easy">쉬움</option>
                                 <option value="middle">보통</option>
                                 <option value="hard">어려움</option>
@@ -191,12 +214,12 @@ export default function Workspace() {
                     </div>
                     <div>
                         <label>예상소요시간
-                            <input type="number" name="game_playTime" step={10}/>
+                            <input type="number" name="game_playTime" step={10} defaultValue={game.playTime} key={game.playTime}/>
                         </label>
                     </div>
                     <div>
                         <label>공개 여부
-                            <select name="game_visibility" id="">
+                            <select name="game_visibility" id="" defaultValue={game.visibility}>
                                 <option value="public">공개</option>
                                 <option value="unlisted">일부공개</option>
                                 <option value="private">비공개</option>
@@ -205,27 +228,34 @@ export default function Workspace() {
                     </div>
                     <div>
                         <label>랭킹 여부
-                            <input type="checkbox" name="game_isRanking" />
+                            <input type="checkbox" name="game_isRanking" defaultChecked={game.isRanking} key={game.isRanking}/>
                         </label>
                     </div>
                     <div>
                         <label>히든 여부
-                            <input type="checkbox" name="game_isHiddenStage" />
+                            <input type="checkbox" name="game_isHiddenStage" defaultChecked={game.isHiddenStage} key={game.isHiddenStage}/>
                         </label>
                     </div>
                     <button type="submit">게임데이터 수정</button>
                 </form>
             </div>
             <div>
+                <form onSubmit={chooseStageIndex} on>
+                    <label>스테이지 인덱스
+                        <input type="number" name="stage_index"/>
+                    </label>
+                    <button type="submit">조회</button>
+                </form>
                 <form onSubmit={setGameStage}>
                     <div>
-                        <label>스테이지 인덱스
-                            <input type="number" name="stage_index"/>
-                        </label>
+                        <h3>스테이지 번호: {index}</h3>
+                        {/* <label>스테이지 인덱스
+                            <input type="number" name="stage_index" value={index} readOnly/>
+                        </label> */}
                     </div>
                     <div>
                         <label>스테이지 이름
-                            <input type="text" name="stage_name"/>
+                            <input type="text" name="stage_name" defaultValue={game.stage[index].name} key={game.stage[index].name}/>
                         </label>
                     </div>
                     <div>
@@ -240,32 +270,32 @@ export default function Workspace() {
                     </div>
                     <div>
                         <label>사진
-                            <input type="text" name="stage_imgURL"/>
+                            <input type="text" name="stage_imgURL" defaultValue={game.stage[index].imgURL} key={game.stage[index].imgURL}/>
                         </label>
                     </div>
                     <div>
                         <label>설명
-                            <textarea type="text" name="stage_description"/>
+                            <textarea type="text" name="stage_description" defaultValue={game.stage[index].description} key={game.stage[index].description}/>
                         </label>
                     </div>
                     <div>
                         <label>시간제한
-                            <input type="number" name="stage_timeLimit"/>
+                            <input type="number" name="stage_timeLimit" defaultValue={game.stage[index].timeLimit} key={game.stage[index].timeLimit}/>
                         </label>
                     </div>
                     <div>
                         <label>출입여부
-                            <input type="checkbox" name="stage_gateOpen"/>
+                            <input type="checkbox" name="stage_gateOpen" defaultChecked={game.stage[index].gateOpen} key={game.stage[index].gateOpen}/>
                         </label>
                     </div>
                     <div>
                         <label>닫힘메세지
-                            <input type="text" name="stage_closedGateMessage"/>
+                            <input type="text" name="stage_closedGateMessage" defaultValue={game.stage[index].closedGateMessage} key={game.stage[index].closedGateMessage}/>
                         </label>
                     </div>
                     <div>
                         <label>연결된 스테이지
-                            <input type="number" name="stage_connectedStage"/>
+                            <input type="number" name="stage_connectedStage" defaultValue={game.stage[index].connectedStage} key={game.stage[index].connectedStage}/>
                         </label>
                     </div>
                     <button type="submit">스테이지 수정하기</button>
@@ -293,7 +323,11 @@ export default function Workspace() {
                         <td>{game.tag}</td>
                     </tr>
                     <tr>
-                        <td>소요시간: </td>
+                        <td>난이도: </td>
+                        <td>{game.difficulty}</td>
+                    </tr>
+                    <tr>
+                        <td>예상소요시간: </td>
                         <td>{game.playTime}</td>
                     </tr>
                     <tr>
@@ -343,15 +377,15 @@ export default function Workspace() {
                     </tr>
                     <tr>
                         <td>출입여부</td>
-                        <td>{data.gateOpen}</td>
+                        <td>{data.gateOpen ? "열림" : "닫힘"}</td>
                     </tr>
                     <tr>
                         <td>닫힘메세지</td>
-                        <td>{data.closedGateMessage}</td>
+                        <td>{data.closedGateMessage ?? "없음"}</td>
                     </tr>
                     <tr>
                         <td>연결된 스테이지</td>
-                        <td>{data.connectedStage}</td>
+                        <td>{JSON.stringify(data.connectedStage)}</td>
                     </tr>
                 </tbody>
                 </table>

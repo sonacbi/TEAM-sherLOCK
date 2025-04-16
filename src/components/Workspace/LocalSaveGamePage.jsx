@@ -13,6 +13,6 @@ export default function LocalSaveGamePage(props) {
     }
 
     return(
-        <a href={downloadGame()} download="sherlock-game.json">게임데이터 다운로드</a>
+        <a href={downloadGame()} download={`sherlock-game(${game.title}).json`}>게임데이터 다운로드</a>
     )
 }

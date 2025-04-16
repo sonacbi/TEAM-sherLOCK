@@ -50,9 +50,13 @@ class Game extends ClassVersion {
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
         this.achievement = achievement;
-        this.source = source;
+        this.source = new Source(source);
         this.inventory = inventory;
-        this.stage = stage;
+        this.stage = [];
+        stage.map((data) => {
+            this.stage.push(new Stage(data));
+        });
+        // this.stage = stage;
     }
     // 업적 생성
     createAchievement() {
@@ -174,7 +178,10 @@ class Stage extends ClassVersion {
         this.gateOpen = gateOpen;
         this.closedGateMessage = closedGateMessage;
         this.connectedStage = connectedStage;
-        this.cut = cut;
+        this.cut = [];
+        cut.map((data) => {
+            this.cut.push(new Cut(data));
+        });
     }
     // 컷 생성
     createCut() {
@@ -260,4 +267,4 @@ class Transition extends ClassVersion {
     static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, Game, Source, Stage, Cut };
+export { ClassVersion, Source, Game, Stage, Cut };
