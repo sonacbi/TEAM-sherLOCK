@@ -16,19 +16,7 @@
     width: 350px;
     border-radius: 10px;
     transform: translate(-50%, -50%);
-}
-
-#X {
-    position: absolute;
-    width: 15px;
-    right: 3%;
-    top: 3%;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-}
-
-#X:hover {
-    opacity: 0.5;
+    background-color: #2727275a;
 }
 
 .Sign_up .Sign_up_content .header_logo {
