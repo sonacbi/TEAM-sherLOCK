@@ -23,3 +23,17 @@
     position: absolute;
     display: flex;
 }
+
+.floor {
+    position: absolute;
+    bottom: 0;
+    height: 5vh;
+    width: 100%;
+    display: flex;
+}
+
+.hallway {
+    background-color: black;
+    height: 100%;
+    width: 100%;
+}

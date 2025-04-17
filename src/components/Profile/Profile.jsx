@@ -7,18 +7,20 @@ import './Profile.css';
 import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png';
 import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubble.png'
 
+// 프로필 컴포넌트 정의 (로그인 여부에 따라 다른 UI 보여줌)
 const Profile = ({ onSignInClick, onSignUpClick }) => {
-  const [userToken, setUserToken] = useState(null);
-  const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [userToken, setUserToken] = useState(null); // 사용자 토큰 상태
+  const [showProfileSetup, setShowProfileSetup] = useState(false); // 프로필 설정 창 표시 여부
 
+  // 컴포넌트가 마운트될 때 localStorage에서 토큰 읽고 디코딩
   useEffect(() => {
     const token = localStorage.getItem("token");
   
     if (token) {
       try {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(token); // 토큰 디코딩
         console.log("🧾 디코딩된 결과:", decoded);
-        setUserToken(decoded.user_name);
+        setUserToken(decoded.user_name); // 사용자 이름 설정
       } catch (error) {
         console.error("❌ 토큰 디코딩 실패:", error);
         setUserToken(null);
@@ -29,32 +31,35 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
     }
   }, []);
 
+  // 로그아웃 처리 함수
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUserToken(null);
+    localStorage.removeItem('token'); // 토큰 삭제
+    setUserToken(null); // 상태 초기화
   };
 
+  // 프로필 아이콘 클릭 시 프로필 설정창 표시
   const handleProfileClick = () => {
-    setShowProfileSetup(true);
-    // 3초(3000ms) 뒤에 자동으로 숨기기
+    setShowProfileSetup(true); // 설정창 보이기
     setTimeout(() => {
-      setShowProfileSetup(false);
+      setShowProfileSetup(false); // 3초 후 자동 숨김
     }, 3000);
   };
 
   return (
     <>
       {userToken ? (
+        // 로그인된 경우: 사용자 프로필 보여줌
         <div className='profile'>
           <div className='profile_outside'>
             <img 
               id='ex_user_profile'
               src={ex_user_profile}
               alt='ex_user_profile'
-              onClick={handleProfileClick}
+              onClick={handleProfileClick} // 프로필 클릭 시 설정창 열기
             />
           </div>
 
+          {/* 프로필 설정 팝업 (MY페이지, 로그아웃 등) */}
           <div className={`profile_setup ${showProfileSetup ? 'show' : 'hide'}`}>
             <div className='profile_setup_inside'>
               <img 
@@ -71,6 +76,7 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
           </div>
         </div>
       ) : (
+        // 로그인되지 않은 경우: 로그인/회원가입 버튼 표시
         <Sign onSignInClick={onSignInClick} onSignUpClick={onSignUpClick} />
       )}
     </>
