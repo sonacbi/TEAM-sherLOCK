@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import axios from 'axios';
 import UserDAO from '../DAO/userDAO.js';
-import { issueToken } from '../DAO/userController.js';
+import { issueToken } from './userController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
