@@ -66,6 +66,9 @@ function Sign_in({ onClose, onSignUpClick }) {
   
   // 🔗 소셜 로그인 요청 (→ 백엔드로) ------------- //
   const handleSocial = (e) => {  
+    // 이전 경로 저장
+    localStorage.setItem('prevPath', window.location.pathname);
+    
     e.preventDefault();
     window.location.href = "http://localhost:5000/auth/kakao/login"; // ← 백엔드로 넘김
     // 이후 로그는 app.get("/auth/kakao/login", (req, res) 으로 경로 진행

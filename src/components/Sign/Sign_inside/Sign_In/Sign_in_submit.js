@@ -17,6 +17,8 @@ export async function submitLogin(user_id, user_pw, setUserPwError) {
     if (response.ok && data.token) {
       localStorage.setItem('token', data.token);
       alert('로그인 성공!');
+      window.location.reload(); // 이건 현재 경로를 유지한 채 새로고침
+
     } else {
       // ❗ 비밀번호 에러 메시지 전달
       if (data.message === '! 비밀번호가 일치하지 않습니다') {
