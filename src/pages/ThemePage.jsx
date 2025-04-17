@@ -19,19 +19,25 @@ function ThemePage() {
     const [showSignUp, setShowSignUp] = useState(false);
 
     useEffect(() => {
+        if (showSignIn || showSignUp) return;
+    
         fullpageRef.current = new fullpage('#fullpage', {
-        licenseKey: 'gplv3-license',
-        autoScrolling: true,
-        navigation: false,
+            licenseKey: 'gplv3-license',
+            autoScrolling: true,
+            navigation: false,
         });
-
+    
         return () => {
-        if (fullpageRef.current) {
-            fullpageRef.current.destroy('all');
-            fullpageRef.current = null;
-        }
+            // showSignIn/showSignUp 중에는 destroy 생략
+            if (!showSignIn && !showSignUp && fullpageRef.current) {
+                const fullpageEl = document.getElementById('fullpage');
+                if (fullpageEl && fullpageEl.children.length > 0) {
+                    fullpageRef.current.destroy('all');
+                    fullpageRef.current = null;
+                }
+            }
         };
-    }, []);
+    }, [showSignIn, showSignUp]);
 
     const handleSignInClick = () => {
         setShowSignIn(true);
@@ -59,23 +65,28 @@ function ThemePage() {
     const backgroundImage = backgroundMap[theme];
 
     return (
-        <div id="fullpage">
-            <div className="section">
-                <img id='theme_background' src={backgroundImage} alt='theme_background'/>
+        <>
+            <div id="fullpage">
+                <div className="section">
+                    <img id='theme_background' src={backgroundImage} alt='theme_background'/>
 
-                <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
-                {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick}/>}
-                {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick}/>}
+                    <header>
+                        <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
+                    </header>
+                </div>
+
+                <div className="section">
+                    <img id='theme_background' src={backgroundImage} alt='theme_background'/>
+                </div>
+
+                <div className="section footer_section">
+                    <Footer />
+                </div>
             </div>
 
-            <div className="section">
-                <img id='theme_background' src={backgroundImage} alt='theme_background'/>
-            </div>
-
-            <div className="section footer_section">
-                <Footer />
-            </div>
-        </div>
+            {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick}/>}
+            {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick}/>}
+        </>
     );
 }
 

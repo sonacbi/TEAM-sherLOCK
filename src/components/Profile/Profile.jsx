@@ -32,7 +32,6 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setUserToken(null);
-    window.location.href = '/Main'; // 필요에 따라 다른 경로로 수정 가능
   };
 
   const handleProfileClick = () => {
