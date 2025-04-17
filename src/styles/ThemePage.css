@@ -1,0 +1,16 @@
+.section {
+    display: block !important;
+}
+
+.fp-watermark {
+    display: none !important;
+}
+
+#theme_background {
+    width: 100dvw;
+    height: 100dvh;
+}
+
+.section.footer_section {
+    height: auto !important;
+}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import IntroPage from './pages/IntroPage';
 import MainPage from './pages/MainPage';
 import SocialAuthHandler from './pages/SocialAuthHandler'; // 카카오
+import ThemePage from './pages/ThemePage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         {/* 카카오/네이버 로그인용 path */}
         <Route path="/auth/kakao" element={<SocialAuthHandler />} />
         <Route path="/auth/naver" element={<SocialAuthHandler />} />
+        <Route path="/Theme/:theme" element={<ThemePage />} />
       </Routes>
     </Router>
   );
