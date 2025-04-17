@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Profile from '../components/Profile/Profile';
@@ -28,6 +29,7 @@ function MainPage() {
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const noticeRef = useRef(null);
   const [showNotice, setShowNotice] = useState(false);
+  const navigate = useNavigate();
 
   const themes = [
     { id: "horror", label: "호러", outline: horror_outline, icon: horror_icon },
@@ -207,7 +209,7 @@ function MainPage() {
       <div className='MainPage_content'>
         <img id='Main_background' src={background} alt='Main_background' />
 
-        <header>
+        <header className="MainPage_header">
           <div className="notice">
             <img id='notice_img' src={notice_img} alt='notice_img' onClick={handleNoticeClick} />
 
@@ -259,6 +261,25 @@ function MainPage() {
               ref={(el) => {
                 if (el) articlesRef.current[index] = el;
               }}
+              onClick={(e) => {
+                const target = e.currentTarget;
+          
+                // 클릭 시 축소 애니메이션
+                target.classList.add('article-clicked');
+          
+                // 150ms 후 다시 커지게 만들기
+                setTimeout(() => {
+                  target.classList.remove('article-clicked');
+                  target.classList.add('article-clicked-back');
+                }, 150);
+          
+                // 전체 애니메이션(작아졌다가 커짐) 끝난 후 navigate 실행
+                setTimeout(() => {
+                  target.classList.remove('article-clicked-back');
+                  navigate(`/Theme/${id}`);
+                }, 1000);
+              }}
+              style={{ cursor: 'pointer' }}
             >
               <img className={`${id}_outline`} src={outline} alt={`${id}_outline`} />
               <div className={`${id}_icon`}>

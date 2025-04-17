@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Profile from '../components/Profile/Profile';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
@@ -14,29 +15,52 @@ import adventure_background from '../assets/images/ThemePage_img/adventure/adven
 
 function ThemePage() {
     const { theme } = useParams();
-    const fullpageRef = useRef(null);
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
+    const backgroundMap = {
+        horror: horror_background,
+        adventure: adventure_background,
+    };
+
+    const backgroundImage = backgroundMap[theme];
+
+    // 🛑 theme가 없으면 아무것도 렌더링하지 않음
+    if (!theme || !backgroundImage) return null;
+
     useEffect(() => {
-        if (showSignIn || showSignUp) return;
-    
-        fullpageRef.current = new fullpage('#fullpage', {
-            licenseKey: 'gplv3-license',
-            autoScrolling: true,
-            navigation: false,
-        });
-    
+        // fullpage 중복 초기화 방지용
+        if (window.fullpage_api) {
+            window.fullpage_api.destroy('all');
+        }
+
+        if (!showSignIn && !showSignUp) {
+            new fullpage('#fullpage', {
+                licenseKey: 'gplv3-license',
+                autoScrolling: true,
+                navigation: false,
+            });
+        }
+
         return () => {
-            // showSignIn/showSignUp 중에는 destroy 생략
-            if (!showSignIn && !showSignUp && fullpageRef.current) {
-                const fullpageEl = document.getElementById('fullpage');
-                if (fullpageEl && fullpageEl.children.length > 0) {
-                    fullpageRef.current.destroy('all');
-                    fullpageRef.current = null;
-                }
+            if (window.fullpage_api) {
+                window.fullpage_api.destroy('all');
             }
         };
+    }, [showSignIn, showSignUp, theme]);
+
+    useEffect(() => {
+        if (showSignIn || showSignUp) {
+            document.body.style.overflow = 'hidden';
+            if (window.fullpage_api) {
+                window.fullpage_api.setAllowScrolling(false);
+            }
+        } else {
+            document.body.style.overflow = '';
+            if (window.fullpage_api) {
+                window.fullpage_api.setAllowScrolling(true);
+            }
+        }
     }, [showSignIn, showSignUp]);
 
     const handleSignInClick = () => {
@@ -44,39 +68,28 @@ function ThemePage() {
         setShowSignUp(false);
     };
 
-    const handleCloseSignIn = () => {
-        setShowSignIn(false);
-    };
-
     const handleSignUpClick = () => {
         setShowSignIn(false);
         setShowSignUp(true);
     };
-    
-    const handleCloseSignUp = () => {
-        setShowSignUp(false);
-    };
 
-    const backgroundMap = {
-        horror: horror_background,
-        adventure: adventure_background
-    };
-
-    const backgroundImage = backgroundMap[theme];
+    const handleCloseSignIn = () => setShowSignIn(false);
+    const handleCloseSignUp = () => setShowSignUp(false);
 
     return (
         <>
             <div id="fullpage">
                 <div className="section">
-                    <img id='theme_background' src={backgroundImage} alt='theme_background'/>
+                    <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
-                    <header>
+                    <header className="theme_header">
+                        <Header_Logo />
                         <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
                     </header>
                 </div>
 
                 <div className="section">
-                    <img id='theme_background' src={backgroundImage} alt='theme_background'/>
+                    <img id="theme_background" src={backgroundImage} alt="theme_background" />
                 </div>
 
                 <div className="section footer_section">
@@ -84,8 +97,8 @@ function ThemePage() {
                 </div>
             </div>
 
-            {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick}/>}
-            {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick}/>}
+            {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick} />}
+            {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick} />}
         </>
     );
 }

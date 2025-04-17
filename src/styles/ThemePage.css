@@ -14,3 +14,12 @@
 .section.footer_section {
     height: auto !important;
 }
+
+.theme_header {
+    justify-content: space-between;
+    padding-left: 3%;
+    width: 100%;
+    top: 5%;
+    position: absolute;
+    display: flex;
+}
