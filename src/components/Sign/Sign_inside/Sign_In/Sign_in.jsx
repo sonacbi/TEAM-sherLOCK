@@ -66,7 +66,9 @@ function Sign_in({ onClose, onSignUpClick }) {
   });
   
   // 🔗 소셜 로그인 요청 (→ 백엔드로) ------------- //
-  const handleSocial = (e) => {  
+  const handleSocial = (e) => {
+    localStorage.setItem('prevPath', window.location.pathname); 
+    
     const targetClass = e.currentTarget.className;
 
     if (targetClass.includes('kakao_login')) {
