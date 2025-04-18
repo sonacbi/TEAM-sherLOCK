@@ -1,4 +1,5 @@
 import pool from '../db/db.js';
+import { User } from '../User/mypage/UserInfo_modules.js'; 
 
 class UserDAO {
   /* 유저 아이디를 기반으로 서버에 접속. 유저가 실제로 있는지 검증 (deleted = 1 미노출) */
@@ -21,20 +22,15 @@ class UserDAO {
     return rows[0];
   }
 
-    
  // 소셜 회원가입 로직 추가 (중복 확인 후)
-  static async registerUser(user_id, user_email, social_id) {
+  static async registerUser(user_id, user_email, social_id, type) {
+    const user_social = {}
     // 카카오 사용자 정보로부터 필요한 값 추출
-    const user_pw = null; // 카카오는 비밀번호가 없으므로 null 처리
-    const user_name = user_email.split('@')[0]; // 카카오에서 닉네임 가져오기
-    const user_type = 2; // 소셜 로그인 타입 (카카오 2)
-    const membership = 'inactive'; // 필요한 경우, 기본값 설정
-    const birth_date = null; // 카카오에서 생년월일을 가져올 수 있으면 추가
-    const created_at = new Date(); // 현재 시간으로 설정
-    const updated_at = new Date(); // 현재 시간으로 설정
-    const deleted = 0; // 삭제되지 않은 사용자로 설정
-    const user_social = { kakao : social_id }; // 소셜 로그인 정보
-    const profile_url = 'default'; // 카카오 프로필 이미지 URL
+    if(type == 'kakao'){
+      user_social.kakao = social_id; // Kakao 소셜 ID 할당
+    }else if(type == 'naver'){
+      user_social.naver = social_id; // Naver 소셜 ID 할당
+    }
 
     // user_social 객체를 문자열로 변환하여 저장
     const user_social_stringified = JSON.stringify(user_social);
@@ -48,25 +44,23 @@ class UserDAO {
       // 이미 가입된 유저가 있을 경우, 해당 유저로 로그인하도록 처리
       return existingUser;  // 로그인 된 유저 반환
     }
-    console.log("회원가입 에러 체크");
-    const user = {
+
+    // User 객체 생성
+    const newUser = new User({
       user_id,
-      user_pw,
-      user_name,
-      user_type,
+      user_pw: null, // 카카오는 비밀번호가 없으므로 null 처리
+      user_name: `${user_email.split('@')[0]}${type === 'kakao' ? ' (KA)' : (type === 'naver' ? ' (NA)' : '')}`, // 이메일에서 이름 추출 후 '(KA)' 또는 '(NA)' 추가
+      user_type: type === 'kakao' ? 2 : (type === 'naver' ? 3 : 1), // 소셜 로그인 타입 (카카오는 2, 네이버는 3, 기본값은 1)
       user_email,
-      membership,
-      birth_date,
-      created_at,
-      updated_at,
-      deleted,
+      user_social,
       user_social_stringified,
-      profile_url
-    }
+    });
+
+    console.log("회원가입 에러 체크");
 
     // 사용자 정보 저장 로직
-    await this.insertUser(user);  // 'this'로 호출, 정적 메소드에서 사용
-    return user;
+    await this.insertUser(newUser);  // 'this'로 호출, 정적 메소드에서 사용
+    return newUser;
   }
   
   /* 소셜 회원가입용 검증 로직 */
@@ -106,10 +100,7 @@ class UserDAO {
     console.log("중복없음");
     return null; // 중복 없음
   }
-
-
-
-
+  
   /* 입력받은 데이터 객체를 기반으로 db에 넣음 */
   static async insertUser(user) {
     try {
@@ -118,7 +109,6 @@ class UserDAO {
         membership, birth_date, created_at, updated_at, profile_url, deleted
       } = user;
 
-  
       await pool.query(
         `INSERT INTO userinfo 
           (user_id, user_pw, user_name, user_type, user_email, user_social, membership, birth_date, created_at, updated_at, profile_url, deleted) 

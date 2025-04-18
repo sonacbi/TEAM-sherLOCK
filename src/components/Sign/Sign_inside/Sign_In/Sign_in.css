@@ -65,15 +65,14 @@
     gap: 30px;
 }
 
-.kakao_login, .sherlock_login, .kakao_login2 {
+.kakao_login, .naver_login, .sherlock_login, .kakao_login2, .naver_login2 {
     width: 212px;
     height: 40px;
     border-radius: 3px;
     padding: 10px;
 }
 
-.kakao_login, .kakao_login2 {
-    background-color: #ffea62;
+.kakao_login, .kakao_login2, .naver_login, .naver_login2 {
     display: flex;
     align-items: center;
     font-weight: bold;
@@ -82,7 +81,16 @@
     transition: opacity 0.3s ease;
 }
 
-#kakao {
+.kakao_login, .kakao_login2 {
+    background-color: #ffea62;
+}
+
+.naver_login, .naver_login2 {
+    background-color: #00c559;
+    color: white;
+}
+
+#kakao, #naver {
     width: 30px;
     height: 30px;
 }
@@ -98,7 +106,8 @@
     font-weight: bold;
 }
 
-.sherlock_login:hover, .kakao_login:hover, .kakao_login2:hover {
+.sherlock_login:hover, .kakao_login:hover, .kakao_login2:hover,
+.naver_login:hover, .naver_login2:hover {
     opacity: 0.5;
 }
 
@@ -159,7 +168,7 @@
     opacity: 0.5;
 }
 
-.kakao_hidden {
+.kakao_hidden, .naver_hidden {
     display: flex;
     flex-direction: column;
     align-items: center;
