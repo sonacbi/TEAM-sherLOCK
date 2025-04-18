@@ -47,7 +47,7 @@
     margin-top: 20%;
     width: 60%;
     height: 40%;
-    border: 2px solid #b22222;
+    /* border: 2px solid #b22222; */
     border-radius: 10px;
 }
 
@@ -87,6 +87,7 @@
     transform: translate(-50%, -50%);
     color: white;
     font-size: 1vw;
+    font-weight: bold;
 }
 
 .door_top1, .door_top2, .door_top3 {
@@ -104,6 +105,68 @@
     background-color: black;
     height: 100%;
     width: 100%;
+}
+
+.theme_door_infinite {
+    width: 100%;
+    height: 90%;
+    position: absolute;
+    bottom: 0;
+}
+
+.sort_search {
+    height: 19%;
+}
+
+.infinite {
+    height: 75%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-left: 5%;
+}
+
+.infinite::-webkit-scrollbar {
+    display: none;
+}
+
+.theme_door_room {
+    width: 23%;
+    height: 100%;
+    margin-right: 9%;
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.theme_room {
+    height: 15%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.room {
+    position: relative;
+}
+
+.room p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.theme_door {
+    height: 100%;
+    width: 100%;
+    background-color: black;
+}
+
+.theme_door_infinite .hallway {
+    height: 6%;
 }
 
 .section.footer_section {
