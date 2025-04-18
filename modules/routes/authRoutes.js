@@ -3,8 +3,9 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import axios from 'axios';
 import UserDAO from '../DAO/userDAO.js';
-import { issueToken } from './userController.js';
+import { issueToken, getIPLocation, Created_log } from './userController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+
 
 const router = express.Router();
 
@@ -77,7 +78,13 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(user_pw, user.user_pw);
     if (!isMatch) return res.status(401).json({ success: false, message: '! 비밀번호가 일치하지 않습니다' });
 
+    // ip와 지역 정보 
+    const { ip, location } = await getIPLocation(req);
+    // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
+    // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
+    Created_log(user, ip, location);
     const token = issueToken(user);
+
     res.json({ success: true, token });
   } catch (err) {
     console.error('💥 서버 오류:', err);
@@ -164,6 +171,11 @@ router.post('/:provider', async (req, res) => {
         const user = await UserDAO.registerUser(user_id, email, social_id, 'kakao');
 
         // 카카오 로그인 후 JWT 발급
+        // ip와 지역 정보 
+        const { ip, location } = await getIPLocation(req);
+        // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
+        // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
+        Created_log(user, ip, location);
         const token = issueToken(user);
 
         res.status(200).json({ token });
@@ -208,6 +220,11 @@ router.post('/:provider', async (req, res) => {
           const user = await UserDAO.registerUser(user_id, email, social_id, 'naver');
       
           // JWT 발급
+          // ip와 지역 정보 
+          const { ip, location } = await getIPLocation(req);
+          // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
+          // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
+          Created_log(user, ip, location);
           const token = issueToken(user);
       
           res.status(200).json({ token });

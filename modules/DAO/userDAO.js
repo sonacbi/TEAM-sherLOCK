@@ -120,7 +120,26 @@ class UserDAO {
       throw err;  // 라우터 쪽에서 500 에러 등으로 응답할 수 있도록
     }
   }
+
+  /* 유저 로그 찍기 */
+  static async insertUser_log(user_log){
+    try{
+      const {
+        user_id, ip, created_at, location, login_type} = user_log;
   
+        await pool.query(
+          `INSERT INTO user_log 
+            (user_id, ip, created_at, location, login_type) 
+           VALUES (?, ?, ?, ?, ?)`,
+          [user_id, ip, created_at, location, login_type]
+        );
+    } catch (err) {
+      console.error("Log insert failed:", err);
+      throw err;  // 라우터 쪽에서 500 에러 등으로 응답할 수 있도록
+    }
+    
+  }
+
 
   /* 유저 아이디를 기반으로 해당 열을 '삭제' */
   // 실제 삭제 (사용주의)

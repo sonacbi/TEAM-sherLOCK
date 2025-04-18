@@ -1,7 +1,29 @@
 // userController.js
 
 import jwt from 'jsonwebtoken';
+import { User_log } from '../user/mypage/User_log_modules.js'; // 유저 로그 객체 생성
+import UserDAO from '../DAO/userDAO.js'; // 유저 로그 생성용
+import pool from '../db/db.js';
+import axios from 'axios';
 
+export async function Created_log(user, ip = 'unknown', location = 'default'){
+  // 🔥 로그인 로그 객체 생성
+  const loginLog = new User_log({
+    user_id: user.user_id,
+    ip: ip || 'unknown',
+    location,
+    login_type: user.user_type
+  });
+
+  // 🔥 로그 DB에 저장 (비동기 처리)
+  try {
+    await UserDAO.insertUser_log(loginLog);
+    console.log('📝 로그인 로그 저장 완료!');
+  } catch (error) {
+    console.error('❌ 로그인 로그 저장 실패:', error);
+  }
+
+}
 export function issueToken(user) {
   console.log('🧪 JWT에 넣을 user_id:', user.user_id);
   console.log('🧪 JWT에 넣을 user_name:', user.user_name); // 여기서 undefined면 문제임
@@ -33,7 +55,6 @@ export function issueToken(user) {
   console.log('🧪 JWT에 넣을 created_at:', user.created_at);
   console.log('🧪 JWT에 넣을 updated_at:', user.updated_at);
   console.log('🧪 JWT에 넣을 profile_url:', user.profile_url);
-
   return jwt.sign(
     {
       user_id: user.user_id,
@@ -51,5 +72,45 @@ export function issueToken(user) {
     { expiresIn: '1h' }
   );
 }
-const userController = { issueToken };
+
+export async function getIPLocation(req) {
+  let ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+
+  // 로컬 IP인 경우 처리 (예: ::1 또는 127.0.0.1)
+  if (ip === '::1' || ip === '127.0.0.1') {
+    ip = '8.8.8.8'; // 구글 DNS IP로 대체 (로컬호스트에서 실제 외부 API 테스트)
+  }
+
+  // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
+
+  // IP를 기반으로 위치 정보를 가져옴
+  const { city, region, country } = await getLocationByIP(ip);
+
+  // 위치 정보를 하나의 문자열로 결합
+  const location = `${city}, ${region}, ${country}`;
+
+  // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
+
+  return { ip, location };
+
+}
+
+async function getLocationByIP(ip) {
+  try {
+    const response = await axios.get(`http://ip-api.com/json/${ip}`);
+    if (response.data && response.data.status === 'success') {
+      return {
+        city: response.data.city,      // 도시
+        region: response.data.region,  // 지역
+        country: response.data.country // 국가
+      };
+    }
+    return { city: 'Unknown', region: 'Unknown', country: 'Unknown' };
+  } catch (error) {
+    console.error('IP 위치 조회 오류:', error);
+    return { city: 'Unknown', region: 'Unknown', country: 'Unknown' };
+  }
+}
+
+const userController = { issueToken, getIPLocation, Created_log };
 export default userController;
