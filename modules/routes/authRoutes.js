@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import axios from 'axios';
 import UserDAO from '../DAO/userDAO.js';
-import { issueToken, getIPLocation } from './userController.js';
+import { issueToken, getIPLocation, Created_log } from './userController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 
@@ -82,7 +82,8 @@ router.post('/login', async (req, res) => {
     const { ip, location } = await getIPLocation(req);
     // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
     // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
-    const token = issueToken(user, ip, location);
+    Created_log(user, ip, location);
+    const token = issueToken(user);
 
     res.json({ success: true, token });
   } catch (err) {
@@ -174,7 +175,8 @@ router.post('/:provider', async (req, res) => {
         const { ip, location } = await getIPLocation(req);
         // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
         // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
-        const token = issueToken(user, ip, location);
+        Created_log(user, ip, location);
+        const token = issueToken(user);
 
         res.status(200).json({ token });
       } catch (err) {
@@ -219,10 +221,11 @@ router.post('/:provider', async (req, res) => {
       
           // JWT 발급
           // ip와 지역 정보 
-        const { ip, location } = await getIPLocation(req);
-        // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
-        // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
-        const token = issueToken(user, ip, location);
+          const { ip, location } = await getIPLocation(req);
+          // console.log(`IP: ${ip}`); // IP 출력 (디버깅용)
+          // console.log(`Location: ${location}`); // 위치 정보 출력 (디버깅용)
+          Created_log(user, ip, location);
+          const token = issueToken(user);
       
           res.status(200).json({ token });
         } catch (err) {

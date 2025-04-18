@@ -6,7 +6,25 @@ import UserDAO from '../DAO/userDAO.js'; // 유저 로그 생성용
 import pool from '../db/db.js';
 import axios from 'axios';
 
-export async function issueToken(user, ip = 'unknown', location = 'default') {
+export async function Created_log(user, ip = 'unknown', location = 'default'){
+  // 🔥 로그인 로그 객체 생성
+  const loginLog = new User_log({
+    user_id: user.user_id,
+    ip: ip || 'unknown',
+    location,
+    login_type: user.user_type
+  });
+
+  // 🔥 로그 DB에 저장 (비동기 처리)
+  try {
+    await UserDAO.insertUser_log(loginLog);
+    console.log('📝 로그인 로그 저장 완료!');
+  } catch (error) {
+    console.error('❌ 로그인 로그 저장 실패:', error);
+  }
+
+}
+export function issueToken(user) {
   console.log('🧪 JWT에 넣을 user_id:', user.user_id);
   console.log('🧪 JWT에 넣을 user_name:', user.user_name); // 여기서 undefined면 문제임
   switch(user.user_type) {
@@ -37,23 +55,6 @@ export async function issueToken(user, ip = 'unknown', location = 'default') {
   console.log('🧪 JWT에 넣을 created_at:', user.created_at);
   console.log('🧪 JWT에 넣을 updated_at:', user.updated_at);
   console.log('🧪 JWT에 넣을 profile_url:', user.profile_url);
-
-    // 🔥 로그인 로그 객체 생성
-    const loginLog = new User_log({
-      user_id: user.user_id,
-      ip: ip || 'unknown',
-      location,
-      login_type: user.user_type
-    });
-
-    // 🔥 로그 DB에 저장 (비동기 처리)
-    try {
-      await UserDAO.insertUser_log(loginLog);
-      console.log('📝 로그인 로그 저장 완료!');
-    } catch (error) {
-      console.error('❌ 로그인 로그 저장 실패:', error);
-    }
-
   return jwt.sign(
     {
       user_id: user.user_id,
@@ -70,8 +71,6 @@ export async function issueToken(user, ip = 'unknown', location = 'default') {
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
-
-
 }
 
 export async function getIPLocation(req) {
@@ -113,5 +112,5 @@ async function getLocationByIP(ip) {
   }
 }
 
-const userController = { issueToken, getIPLocation };
+const userController = { issueToken, getIPLocation, Created_log };
 export default userController;
