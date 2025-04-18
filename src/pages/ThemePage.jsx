@@ -37,14 +37,15 @@ function ThemePage() {
         horror: horror_stairs,
     };
 
+    //테마별 TOP3 이미지 매핑
     const topMap = {
         horror: horror_top,
     }
 
     // 현재 테마에 맞는 이미지 가져오기
-    const backgroundImage = backgroundMap[theme];
-    const stairsImage = stairsMap[theme];
-    const topImage = topMap[theme];
+    const backgroundImage = backgroundMap[theme] || horror_background;
+    const stairsImage = stairsMap[theme] || horror_stairs;
+    const topImage = topMap[theme] || horror_top;
 
     // theme 값이 없거나 배경 이미지가 없으면 아무것도 렌더링하지 않음
     if (!theme || !backgroundImage) return null;
@@ -122,6 +123,7 @@ function ThemePage() {
                             <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
                         </header>
 
+                        {/* 테마 콘텐츠 영역: 랭크 + TOP3 */}
                         <div className='theme_hit_rank_floor'>
                             <div className='theme_hit_rank'>
                                 <div className='theme_rank'>
