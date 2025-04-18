@@ -13,7 +13,9 @@ import '../styles/ThemePage.css';
 
 import horror_background from '../assets/images/ThemePage_img/horror/horror_background.png';
 import horror_stairs from '../assets/images/ThemePage_img/horror/horror_stairs.png';
+import horror_top from '../assets/images/ThemePage_img/horror/horror_top.png';
 import adventure_background from '../assets/images/ThemePage_img/adventure/adventure_background.png';
+import crime_background from '../assets/images/ThemePage_img/crime/crime_background.png';
 
 function ThemePage() {
     // URL 파라미터에서 theme 값을 가져옴
@@ -27,6 +29,7 @@ function ThemePage() {
     const backgroundMap = {
         horror: horror_background,
         adventure: adventure_background,
+        crime: crime_background
     };
 
     // 테마별 계단 이미지 매핑
@@ -34,9 +37,14 @@ function ThemePage() {
         horror: horror_stairs,
     };
 
+    const topMap = {
+        horror: horror_top,
+    }
+
     // 현재 테마에 맞는 이미지 가져오기
     const backgroundImage = backgroundMap[theme];
     const stairsImage = stairsMap[theme];
+    const topImage = topMap[theme];
 
     // theme 값이 없거나 배경 이미지가 없으면 아무것도 렌더링하지 않음
     if (!theme || !backgroundImage) return null;
@@ -104,19 +112,75 @@ function ThemePage() {
             <div id="fullpage">
                 {/* 첫 번째 섹션 */}
                 <div className="section">
-                    {/* 배경 이미지 */}
-                    <img id="theme_background" src={backgroundImage} alt="theme_background" />
+                    <div className='theme_wrap'>
+                        {/* 배경 이미지 */}
+                        <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
-                    {/* 헤더 영역: 로고 + 프로필 */}
-                    <header className="theme_header">
-                        <Header_Logo />
-                        <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
-                    </header>
+                        {/* 헤더 영역: 로고 + 프로필 */}
+                        <header className="theme_header">
+                            <Header_Logo />
+                            <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
+                        </header>
 
-                    {/* 중간 구조물(계단 + 복도) */}
-                    <div className='floor'>
-                        <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
-                        <div className='hallway'></div>
+                        <div className='theme_hit_rank_floor'>
+                            <div className='theme_hit_rank'>
+                                <div className='theme_rank'>
+                                    <div className='rank'>
+
+                                    </div>
+                                </div>
+
+                                <div className='theme_hit'>
+                                    <div className='theme_door_hit1'>
+                                        <div className='top1'>
+                                            <div className='theme_door_top1'>
+                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
+
+                                                <p>TOP 1</p>
+                                            </div>
+                                        </div>
+
+                                        <div className='door_top1'>
+
+                                        </div>
+                                    </div>
+
+                                    <div className='theme_door_hit2'>
+                                        <div className='top2'>
+                                            <div className='theme_door_top2'>
+                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
+
+                                                <p>TOP 2</p>
+                                            </div>
+                                        </div>
+
+                                        <div className='door_top2'>
+                                            
+                                        </div>
+                                    </div>
+
+                                    <div className='theme_door_hit3'>
+                                        <div className='top3'>
+                                            <div className='theme_door_top3'>
+                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
+
+                                                <p>TOP 3</p>
+                                            </div>
+                                        </div>
+
+                                        <div className='door_top3'>
+                                            
+                                        </div>
+                                    </div>  
+                                </div>
+                            </div>
+
+                            {/* 중간 구조물(계단 + 복도) */}
+                            <div className='floor'>
+                                <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
+                                <div className='hallway'></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
