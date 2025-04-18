@@ -99,7 +99,7 @@ router.post('/check-id', async (req, res) => {
 
 /* ------------------소셜 로그인------------------ */
 // 카카오 
-const KAKAO_CLIENT_ID = 'f6372d1dc197e39ed6c42d524e310b68';
+const KAKAO_CLIENT_ID = 'ca5fd43fdb70b3e29002fcfd54060168';
 const KAKAO_REDIRECT_URI = 'http://localhost:5173/auth/kakao';
 
 // 네이버
