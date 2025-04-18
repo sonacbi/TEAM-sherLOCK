@@ -66,9 +66,15 @@ function Sign_in({ onClose, onSignUpClick }) {
   
   // 🔗 소셜 로그인 요청 (→ 백엔드로) ------------- //
   const handleSocial = (e) => {  
-    e.preventDefault();
-    window.location.href = "http://localhost:5000/auth/kakao/login"; // ← 백엔드로 넘김
-    // 이후 로그는 app.get("/auth/kakao/login", (req, res) 으로 경로 진행
+    const targetClass = e.currentTarget.className;
+
+    if (targetClass.includes('kakao_login')) {
+      window.location.href = "http://localhost:5000/auth/kakao/login";
+    } else if (targetClass.includes('naver_login')) {
+      window.location.href = "http://localhost:5000/auth/naver/login";
+    } else {
+      console.error('알 수 없는 로그인 버튼 클릭됨');
+    }
   };
   
   const handleSignUpClick = () => {
@@ -90,6 +96,11 @@ function Sign_in({ onClose, onSignUpClick }) {
               <div className='kakao_login' onClick={handleSocial}>
                 <img id='kakao' src={kakao} alt='kakao' />
                 <p>Kakao로 로그인</p>
+              </div>
+
+              {/* 네이버 api 테스트용 코드 */}
+              <div className='naver_login' style={{ background: 'white' }} onClick={handleSocial}>
+                <p>네이버로 로그인</p>
               </div>
 
               <div className='sherlock_login' onClick={handleSherlockLoginClick}>

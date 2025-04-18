@@ -23,9 +23,14 @@ class UserDAO {
   }
 
  // 소셜 회원가입 로직 추가 (중복 확인 후)
-  static async registerUser(user_id, user_email, social_id) {
+  static async registerUser(user_id, user_email, social_id, type) {
+    const user_social = {}
     // 카카오 사용자 정보로부터 필요한 값 추출
-    const user_social = { kakao : social_id }; // 소셜 로그인 정보
+    if(type == 'kakao'){
+      user_social.kakao = social_id; // Kakao 소셜 ID 할당
+    }else if(type == 'naver'){
+      user_social.naver = social_id; // Naver 소셜 ID 할당
+    }
 
     // user_social 객체를 문자열로 변환하여 저장
     const user_social_stringified = JSON.stringify(user_social);
@@ -44,8 +49,8 @@ class UserDAO {
     const newUser = new User({
       user_id,
       user_pw: null, // 카카오는 비밀번호가 없으므로 null 처리
-      user_name: user_email.split('@')[0], // 카카오에서 닉네임 가져오기
-      user_type: 2, // 소셜 로그인 타입 (카카오 2)
+      user_name: `${user_email.split('@')[0]}${type === 'kakao' ? ' (KA)' : (type === 'naver' ? ' (NA)' : '')}`, // 이메일에서 이름 추출 후 '(KA)' 또는 '(NA)' 추가
+      user_type: type === 'kakao' ? 2 : (type === 'naver' ? 3 : 1), // 소셜 로그인 타입 (카카오는 2, 네이버는 3, 기본값은 1)
       user_email,
       user_social,
       user_social_stringified,
