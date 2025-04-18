@@ -7,12 +7,13 @@ import './Sign_in.css';
 
 import Sign_background from '../../../../assets/images/Sign/Sign_background.png';
 import kakao from '../../../../assets/images/Sign/Kakao.png';
+import naver from '../../../../assets/images/Sign/Naver.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
 function Sign_in({ onClose, onSignUpClick }) {
   const [showSherlockLogin, setShowSherlockLogin] = useState(false);
-  const [showKakaoLogin, setShowKakaoLogin] = useState(false);
+  const [showSocialLogin, setShowSocialLogin] = useState(false);
 
   // ⚙️ 유효성 검사 관련 상태 ---------------------------//
   const [user_id, setUserId] = useState('');
@@ -23,7 +24,7 @@ function Sign_in({ onClose, onSignUpClick }) {
   // ⚙️ 로그인 버튼 세팅 --------------------------------//
   const handleSherlockLoginClick = () => {
     setShowSherlockLogin(true);
-    setShowKakaoLogin(true);
+    setShowSocialLogin(true);
   };
   // 👁️ 일괄적으로 유효성 검사 실시 → 📓로그인 폼 제출 -// 
   const handleSubmit = async (e) => {
@@ -95,12 +96,13 @@ function Sign_in({ onClose, onSignUpClick }) {
             <div className='kakao_sherlock'>
               <div className='kakao_login' onClick={handleSocial}>
                 <img id='kakao' src={kakao} alt='kakao' />
-                <p>Kakao로 로그인</p>
+                <p>Kakao 로그인</p>
               </div>
 
               {/* 네이버 api 테스트용 코드 */}
-              <div className='naver_login' style={{ background: 'white' }} onClick={handleSocial}>
-                <p>네이버로 로그인</p>
+              <div className='naver_login' onClick={handleSocial}>
+                <img id='naver' src={naver} alt='naver' />
+                <p>Naver 로그인</p>
               </div>
 
               <div className='sherlock_login' onClick={handleSherlockLoginClick}>
@@ -181,13 +183,22 @@ function Sign_in({ onClose, onSignUpClick }) {
           )}
         </div>
 
-        {showKakaoLogin && (
-          <div className='kakao_hidden'>
-            <div className='kakao_login2' onClick={handleSocial}>
-              <img id='kakao' src={kakao} alt='kakao' />
-              <p>Kakao로 로그인</p>
+        {showSocialLogin && (
+          <>
+            <div className='kakao_hidden'>
+              <div className='kakao_login2' onClick={handleSocial}>
+                <img id='kakao' src={kakao} alt='kakao' />
+                <p>Kakao 로그인</p>
+              </div>
             </div>
-          </div>
+
+            <div className='naver_hidden'>
+              <div className='naver_login2' onClick={handleSocial}>
+                <img id='naver' src={naver} alt='naver' />
+                <p>Naver 로그인</p>
+              </div>
+            </div>
+          </>
         )}
 
         <div className='Sign_up_img'>
