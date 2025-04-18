@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import axios from 'axios';
 import UserDAO from '../DAO/userDAO.js';
-import { issueToken } from '../DAO/userController.js';
+import { issueToken } from './userController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -99,8 +99,13 @@ router.post('/check-id', async (req, res) => {
 
 /* ------------------소셜 로그인------------------ */
 // 카카오 
-const KAKAO_CLIENT_ID = 'f6372d1dc197e39ed6c42d524e310b68';
+const KAKAO_CLIENT_ID = 'ca5fd43fdb70b3e29002fcfd54060168';
 const KAKAO_REDIRECT_URI = 'http://localhost:5173/auth/kakao';
+
+// 네이버
+const NAVER_CLIENT_ID = '400L3PxBMavB8kwfbrXt';
+const NAVER_REDIRECT_URI = 'http://localhost:5173/auth/naver';
+const NAVER_CLIENT_SECRET = 'OeswV15ngL';
 
 // 📞 소셜 로그인 요청 (프론트에서 온 연락) ----- //
 router.get('/kakao/login', (req, res) => {
@@ -110,6 +115,13 @@ router.get('/kakao/login', (req, res) => {
   // <Route path="/auth/kakao" element={<SocialAuthHandler />} />
   // <Route path="/auth/naver" element={<SocialAuthHandler />} />
 });
+
+router.get('/naver/login', (req, res) => {
+  const state = Math.random().toString(36).substring(2); // CSRF 방지용 (옵션이지만 추천)
+
+  const redirectUri = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NAVER_CLIENT_ID}&redirect_uri=${NAVER_REDIRECT_URI}&state=${state}`;
+  res.redirect(redirectUri);
+ });
 
 // 📞 api 제공업체가 돌려주는 응답을  ---------- //
 // SocialAuthHandler.jsx가 받아서 해독하고(미들웨어)
@@ -149,7 +161,7 @@ router.post('/:provider', async (req, res) => {
         const social_id = userRes.data.id;
 
         // 3. 여기서 DB에 사용자 정보 확인/등록
-        const user = await UserDAO.registerUser(user_id, email, social_id);
+        const user = await UserDAO.registerUser(user_id, email, social_id, 'kakao');
 
         // 카카오 로그인 후 JWT 발급
         const token = issueToken(user);
@@ -161,9 +173,50 @@ router.post('/:provider', async (req, res) => {
       }
       break;
 
-    case 'naver':
-    // 네이버 로그인 로직
-    break;
+      case 'naver':
+        try {
+          // 1. 인가 코드로 access_token 요청
+          const tokenRes = await axios.post(
+            'https://nid.naver.com/oauth2.0/token',
+            null,
+            {
+              params: {
+                grant_type: 'authorization_code',
+                client_id: NAVER_CLIENT_ID,
+                client_secret: NAVER_CLIENT_SECRET,
+                code,
+                redirect_uri: NAVER_REDIRECT_URI,
+              },
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            }
+          );
+      
+          const { access_token } = tokenRes.data;
+      
+          // 2. access_token으로 사용자 정보 요청
+          const userRes = await axios.get('https://openapi.naver.com/v1/nid/me', {
+            headers: { Authorization: `Bearer ${access_token}` },
+          });
+      
+          const naverAccount = userRes.data.response;
+          console.log(naverAccount);
+          const user_id = 'naver_' + naverAccount.id;
+          const email = naverAccount.email;
+          const social_id = naverAccount.id;
+      
+          // 3. DB에 사용자 정보 확인/등록
+          const user = await UserDAO.registerUser(user_id, email, social_id, 'naver');
+      
+          // JWT 발급
+          const token = issueToken(user);
+      
+          res.status(200).json({ token });
+        } catch (err) {
+          console.error(err);
+          res.status(500).send('네이버 로그인 실패');
+        }
+        break;
+      
 
     default:
       return res.status(400).send('지원하지 않는 소셜 로그인입니다.');
