@@ -35,7 +35,7 @@ class Game extends ClassVersion {
         puzzle: [], // 퍼즐
         mechanic: [], // 기능
         support: [] // 도움
-    }, theme = Theme.horror, tag = '', difficulty = Difficulty.medium, playTime = 10, visibility = Visibility.public, isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), inventory = [], stage = [new Stage({})] }) {
+    }, theme = Theme.horror, tag = '', difficulty = Difficulty.easy, playTime = 10, visibility = Visibility.public, isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), inventory = [], stage = [new Stage({})] }) {
         super();
         this.id = id;
         this.title = title;
@@ -267,4 +267,4 @@ class Transition extends ClassVersion {
     static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut };
+export { ClassVersion, Source, Game, Stage, Cut, Theme, Difficulty, Visibility, StageType, CutType, PuzzleType };

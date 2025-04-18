@@ -1,6 +1,7 @@
 table td:nth-child(1) {
     /* border: 1px solid black; */
-    padding-right: 120px;
+    min-width: 190px;
+    padding-right: 60px;
 }
 /* #stage td {
     width: 200px;
@@ -24,7 +25,10 @@ section>div {
     margin-right: 50px;
 }
 
-input {
+input[type="text"],
+input[type="number"],
+textarea
+{
     margin-left: 10px;
-    width: 130px;
+    width: 120px;
 }

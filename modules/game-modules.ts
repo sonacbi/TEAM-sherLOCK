@@ -69,7 +69,7 @@ class Game extends ClassVersion {
         },
         theme = Theme.horror,
         tag = '',
-        difficulty = Difficulty.medium,
+        difficulty = Difficulty.easy,
         playTime = 10,
         visibility = Visibility.public,
         isRanking = false,
@@ -421,4 +421,4 @@ class Transition extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut }
+export { ClassVersion, Source, Game, Stage, Cut, Theme, Difficulty, Visibility, StageType, CutType, PuzzleType }

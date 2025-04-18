@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Game, Source, Stage, Cut  } from "../../modules/game-modules"
+import { Game, Source, Stage, Cut, Theme, Difficulty, Visibility, StageType  } from "../../modules/game-modules"
 import "../styles/workspace.css"
 import LocalSaveGamePage from "../components/Workspace/LocalSaveGamePage";
 import ServerSaveGamePage from "../components/Workspace/ServerSaveGamePage";
@@ -13,9 +13,7 @@ export default function Workspace() {
 
     // 사용자 게임파일 불러오기
     function uploadGameFile(event) {
-        event.preventDefault();
-        const formData = new FormData(event.target)
-        const jsonFile = formData.get("file")
+        const jsonFile = event.target.files[0]
         console.log('업로드된 게임 JSON: ',jsonFile)
 
         const reader = new FileReader();
@@ -43,7 +41,7 @@ export default function Workspace() {
                 console.log('업로드 오류\n', error);
                 return new Game(prev);
             }
-        }) 
+        })
     }
 
     // console.log('파싱된 파일2',file)
@@ -163,14 +161,13 @@ export default function Workspace() {
 
     return(
         <>
-        <section>
-            <form onSubmit={uploadGameFile}>
-                <input type="file" name="file" accept=".json"/>
-                <button type="submit">업로드</button>
-            </form>
+        <section style={{backgroundColor: "#dddd55"}}>
+            <input type="file" name="file" accept=".json" onChange={uploadGameFile}/>
             <button onClick={fileToGame}>업로드된 파일 적용</button>
         </section>
-        <section>
+        <section
+        // style={{backgroundColor: "#d9d9d9"}}
+        >
             <div>
                 <form onSubmit={updateGame}>
                     <div>
@@ -190,12 +187,16 @@ export default function Workspace() {
                         </label>
                     </div>
                     <div>
-                        <label>테마
-                            <select name="game_theme" id="" defaultValue={game.theme}>
-                                <option value="horror">호러</option>
-                                <option value="adventure">모험</option>
-                                <option value="criminal">추리</option>
-                            </select>
+                        <label>테마:
+                            <label>호러
+                                <input type="radio" name="game_theme" value={Theme.horror} defaultChecked={game.theme == Theme.horror} key={game.theme}/>
+                            </label>
+                            <label>모험
+                                <input type="radio" name="game_theme" value={Theme.adventure} defaultChecked={game.theme == Theme.adventure} key={game.theme}/>
+                            </label>
+                            <label>범죄
+                                <input type="radio" name="game_theme" value={Theme.crime} defaultChecked={game.theme == Theme.crime} key={game.theme}/>
+                            </label>
                         </label>
                     </div>
                     <div>
@@ -204,12 +205,16 @@ export default function Workspace() {
                         </label>
                     </div>
                     <div>
-                        <label>난이도
-                            <select name="game_difficulty" id="" defaultValue={game.difficulty}>
-                                <option value="easy">쉬움</option>
-                                <option value="middle">보통</option>
-                                <option value="hard">어려움</option>
-                            </select>
+                        <label>난이도:
+                            <label>쉬움
+                                <input type="radio" name="game_difficulty" value={Difficulty.easy} defaultChecked={game.difficulty == Difficulty.easy} key={game.difficulty}/>
+                            </label>
+                            <label>보통
+                                <input type="radio" name="game_difficulty" value={Difficulty.medium} defaultChecked={game.difficulty == Difficulty.medium} key={game.difficulty}/>
+                            </label>
+                            <label>어려움
+                                <input type="radio" name="game_difficulty" value={Difficulty.hard} defaultChecked={game.difficulty == Difficulty.hard} key={game.difficulty}/>
+                            </label>
                         </label>
                     </div>
                     <div>
@@ -218,12 +223,16 @@ export default function Workspace() {
                         </label>
                     </div>
                     <div>
-                        <label>공개 여부
-                            <select name="game_visibility" id="" defaultValue={game.visibility}>
-                                <option value="public">공개</option>
-                                <option value="unlisted">일부공개</option>
-                                <option value="private">비공개</option>
-                            </select>
+                        <label>공개 여부:
+                            <label>공개
+                                <input type="radio" name="game_visibility" value={Visibility.public} defaultChecked={game.visibility == Visibility.public} key={game.visibility}/>
+                            </label>
+                            <label>일부공개
+                                <input type="radio" name="game_visibility" value={Visibility.unlisted} defaultChecked={game.visibility == Visibility.unlisted} key={game.visibility}/>
+                            </label>
+                            <label>비공개
+                                <input type="radio" name="game_visibility" value={Visibility.private} defaultChecked={game.visibility == Visibility.private} key={game.visibility}/>
+                            </label>
                         </label>
                     </div>
                     <div>
@@ -242,7 +251,7 @@ export default function Workspace() {
             <div>
                 <form onSubmit={chooseStageIndex} on>
                     <label>스테이지 인덱스
-                        <input type="number" name="stage_index"/>
+                        <input type="number" name="stage_index" defaultValue={0}/>
                     </label>
                     <button type="submit">조회</button>
                 </form>
@@ -260,12 +269,18 @@ export default function Workspace() {
                     </div>
                     <div>
                         <label>타입
-                            <select name="stage_type" id="">
-                                <option value="normal">일반</option>
-                                <option value="death">죽음</option>
-                                <option value="ending">엔딩</option>
-                                <option value="hidden">히든</option>
-                            </select>
+                            <label>노말
+                                <input type="radio" name="stage_type" value={StageType.normal} defaultChecked={game.stage[index].type == StageType.normal} key={game.stage[index].type}/>
+                            </label>
+                            <label>죽음
+                                <input type="radio" name="stage_type" value={StageType.death} defaultChecked={game.stage[index].type == StageType.death} key={game.stage[index].type}/>
+                            </label>
+                            <label>엔딩
+                                <input type="radio" name="stage_type" value={StageType.ending} defaultChecked={game.stage[index].type == StageType.ending} key={game.stage[index].type}/>
+                            </label>
+                            <label>히든
+                                <input type="radio" name="stage_type" value={StageType.hidden} defaultChecked={game.stage[index].type == StageType.hidden} key={game.stage[index].type}/>
+                            </label>
                         </label>
                     </div>
                     <div>
