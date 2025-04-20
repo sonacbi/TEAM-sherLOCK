@@ -1,7 +1,7 @@
-export default function LocalSaveGamePage(props) {
+export default function LocalSaveGame(props) {
     const game = props.game;
     function downloadGame() {
-        const data = { game }
+        const data = game;
         // console.log("0", data)
         const datastr = JSON.stringify(data, null, 2);
         // console.log("1", datastr)

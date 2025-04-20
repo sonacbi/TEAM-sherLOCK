@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import axios from "axios";
 import { useState } from "react";
 
-export default function ServerSaveGamePage(props) {
+export default function ServerSaveGame(props) {
     const game = props.game;
     const setGame = props.setGame;
     function postToServer() {
