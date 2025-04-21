@@ -14,6 +14,7 @@ function App() {
         <Route path="/Main" element={<MainPage />} />
         <Route path="/auth/kakao" element={<SocialAuthHandler />} />
         <Route path="/auth/naver" element={<SocialAuthHandler />} />
+        <Route path="/auth/google" element={<SocialAuthHandler />} />
         <Route path="/Theme/:theme" element={<ThemePage />} />
       </Routes>
     </Router>
