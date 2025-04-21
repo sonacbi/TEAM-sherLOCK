@@ -37,6 +37,10 @@ function ThemePage() {
     const [section2Visible, setSection2Visible] = useState(false); // 섹션2 보이는지 여부
     const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 상태
 
+    const hasAnimated = useRef(false); // 두 번째 섹션 애니메이션이 한 번이라도 실행되었는지 여부를 저장 (true면 다시 실행하지 않음)
+    const hasAnimated2 = useRef(false);
+    const [shouldAnimate, setShouldAnimate] = useState(false);
+
     // 테마별 이미지 매핑
     const backgroundMap = {
         horror: horror_background,
@@ -104,14 +108,15 @@ function ThemePage() {
             ([entry]) => {
                 if (entry.isIntersecting) {
                     setSection2Visible(true);
-                    setIsAnimating(true); // 애니메이션 시작
+                } else {
+                    setSection2Visible(false);
                 }
             },
             { threshold: 0.01 }
         );
-
+    
         if (section2Ref.current) observer.observe(section2Ref.current);
-
+    
         return () => {
             if (section2Ref.current) observer.unobserve(section2Ref.current);
         };
@@ -119,19 +124,23 @@ function ThemePage() {
 
     // 애니메이션 끝나면 스크롤 활성화
     useEffect(() => {
+        // 이미 애니메이션 실행한 적 있다면 무시
+        if (hasAnimated.current) return;
+    
         if (section2Visible) {
+            setIsAnimating(true);
+            document.body.style.overflow = 'hidden';
+    
             const initialCount = 4;
             const delays = Array.from({ length: initialCount }, (_, i) => i);
             setAnimatedIndexes(delays);
-
-            setIsAnimating(true);
-            document.body.style.overflow = 'hidden'; // 스크롤 비활성화
-
+    
             const timeout = setTimeout(() => {
                 setIsAnimating(false);
-                document.body.style.overflow = ''; // 스크롤 활성화
-            }, initialCount * 300 + 300); // 애니메이션 후 버퍼시간
-
+                document.body.style.overflow = '';
+                hasAnimated.current = true; // 다시는 실행되지 않도록
+            }, initialCount * 400 + 400);
+    
             return () => clearTimeout(timeout);
         }
     }, [section2Visible]);
@@ -227,6 +236,17 @@ function ThemePage() {
         };
     }, [showSignIn, showSignUp]);
 
+    useEffect(() => {
+        console.log('useEffect 실행됨');
+      
+        if (!hasAnimated2.current) {
+          console.log('애니메이션 실행 전 상태: ', hasAnimated2.current);
+          setShouldAnimate(true);
+          hasAnimated2.current = true;
+          console.log('애니메이션 실행 후 상태: ', hasAnimated2.current);
+        }
+    }, []);
+
     // 감속 스크롤 함수
     const smoothScroll = () => {
         if (Math.abs(scrollAmount.current) > 0.5) {
@@ -278,7 +298,7 @@ function ThemePage() {
                                 </div>
 
                                 <div className='theme_hit'>
-                                    <div className='theme_door_hit1'>
+                                    <div className={`theme_door_hit1 ${shouldAnimate ? 'animate' : ''}`}>
                                         <div className='top1'>
                                             <div className='theme_door_top1'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -292,7 +312,7 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className='theme_door_hit2'>
+                                    <div className={`theme_door_hit2 ${shouldAnimate ? 'animate' : ''}`}>
                                         <div className='top2'>
                                             <div className='theme_door_top2'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -306,7 +326,7 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className='theme_door_hit3'>
+                                    <div className={`theme_door_hit3 ${shouldAnimate ? 'animate' : ''}`}>
                                         <div className='top3'>
                                             <div className='theme_door_top3'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -346,8 +366,16 @@ function ThemePage() {
                                 {items.map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`theme_door_room ${section2Visible && animatedIndexes.includes(index) ? 'animate' : ''}`}
-                                        style={animatedIndexes.includes(index) ? { animationDelay: `${index * 0.3}s` } : {}}
+                                        className={`theme_door_room ${
+                                        section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
+                                            ? 'animate'
+                                            : ''
+                                        }`}
+                                        style={
+                                        section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
+                                            ? { animationDelay: `${index * 0.3}s` }
+                                            : {}
+                                        }
                                     >
                                         {/* 방 번호와 이미지 */}
                                         <div className="theme_room">
