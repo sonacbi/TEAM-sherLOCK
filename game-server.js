@@ -3,6 +3,12 @@ import mysql from 'mysql2'
 import 'dotenv/config'
 import cors from 'cors'
 import fs from 'fs'
+import { fileURLToPath } from 'url';
+import path from 'path';
+import uploadZipRouter from './modules/routes/uploadZIPGameToServer.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors()); // CORS 허용
@@ -37,14 +43,10 @@ app.post("/workspace", (req, res) => {
       res.json(results);
       // 서버에 게임 파일 저장하기
       const game = req.body.game;
-      const path = `serverDB/games/${game_id}.json`;
-      const data = JSON.stringify({game}, null, 2);
-      fs.writeFileSync(path, data, (err) => {
-        if(err) {
-          console.error('파일 쓰기 실패: ', err);
-          return;
-        } else console.log('파일 쓰기 완료!')
-      })
+      const path = `serverDB/games/${game_id}`;
+      const data = JSON.stringify(game, null, 2);
+      fs.mkdirSync(path, { recursive: true })
+      fs.writeFileSync(path+'/game.json', data)
     }
   });
 });
@@ -60,7 +62,7 @@ app.put("/workspace", (req, res) => {
       // 서버에 게임 파일 저장하기
       const game = req.body.game;
       const path = `serverDB/games/${game_id}.json`;
-      const data = JSON.stringify({game}, null, 2);
+      const data = JSON.stringify(game, null, 2);
       fs.writeFileSync(path, data, (err) => {
         if(err) {
           console.error('파일 수정 실패: ', err);
@@ -71,6 +73,37 @@ app.put("/workspace", (req, res) => {
   });
 });
 
+
+// 필요한 폴더 생성
+['games', 'temp'].forEach((dir) => {
+  const fullPath = path.join(__dirname, 'server', dir);
+  if (!fs.existsSync(fullPath)) {
+    fs.mkdirSync(fullPath);
+  }
+});
+
+app.use('/workspace-files/:game_id', uploadZipRouter);
+app.post('/workspace-files/:game_id', (req, res) => {
+  const gameId = req.params.game_id;
+  const userId = 0
+  db.query(`INSERT INTO game (game_id, user_id) VALUES (?, ?);`, [gameId, userId], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    } else {
+      return res.json(results);
+    }
+  })
+})
+app.put('/workspace-files/:game_id', (req, res) => {
+  const gameId = req.params.game_id;
+  db.query(`UPDATE game SET updated_at = CURRENT_TIMESTAMP WHERE game_id = ?;`, [gameId], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    } else {
+      return res.json(results);
+    }
+  })
+})
 
 
 // ^^^^^^^^ 테 스 트 ^^^^^^^^

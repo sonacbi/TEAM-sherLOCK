@@ -2,7 +2,7 @@ import React from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-export default function LocalZIPSaveGame(props) {
+export default function SaveZIPGameToLocal(props) {
   const game = props.game;
   const thumnailImg = props.imgs.thumnailImg;
   const stageImg = props.imgs.stageImg;

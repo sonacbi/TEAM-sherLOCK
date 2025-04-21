@@ -20,6 +20,12 @@ table td:nth-child(1) {
     background-color: #00c3ff;
 }
 
+section {
+    padding: 3px;
+}
+section button {
+    margin-right: 20px;
+}
 section>div {
     display:inline-flex;
     margin-right: 50px;

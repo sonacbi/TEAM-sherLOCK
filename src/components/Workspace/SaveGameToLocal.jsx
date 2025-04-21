@@ -1,4 +1,4 @@
-export default function LocalSaveGame(props) {
+export default function SaveGameToLocal(props) {
     const game = props.game;
     function downloadGame() {
         const data = game;

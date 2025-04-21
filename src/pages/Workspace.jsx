@@ -2,9 +2,9 @@ import { useState } from "react";
 import JSZip from 'jszip';
 import { Game, Source, Stage, Cut, Theme, Difficulty, Visibility, StageType  } from "../../modules/game-modules"
 import "../styles/workspace.css"
-import LocalSaveGame from "../components/Workspace/LocalSaveGame";
-import LocalZIPSaveGame from "../components/Workspace/LocalZIPSaveGame";
-import ServerSaveGame from "../components/Workspace/ServerSaveGame";
+import SaveGameToLocal from "../components/Workspace/SaveGameToLocal";
+import SaveZIPGameToLocal from "../components/Workspace/SaveZIPGameToLocal";
+import SaveGameToServer from "../components/Workspace/SaveGameToServer";
 
 export default function Workspace() {
     const [game, setGame] = useState(new Game({}));
@@ -64,10 +64,11 @@ export default function Workspace() {
                     zipEntry.async('string').then((content) => {
                         setGame(new Game(JSON.parse(content)));
                     });
-                } else if (zipEntry.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                } else if (zipEntry.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
                     // 이미지 파일 처리
                     zipEntry.async('blob').then((blob) => {
                         const url = new File([blob], zipEntry.name);
+                        // const url = new File([blob], zipEntry.name.slice(9,));
                         imgFiles.push(url);
                         setImgs([...imgFiles]);
                     });
@@ -163,6 +164,11 @@ export default function Workspace() {
             const newGame = { ...prev, stage: [...prev.stage, new Stage({})] };
             return newGame;
         });
+        setStageImg(prev => {
+            const newImg = [...prev]
+            newImg.push(new File([], ''))
+            return newImg;
+        })
     }
     // 새로운 컷 생성하는 함수
     function createGameCut(index) {
@@ -409,7 +415,7 @@ export default function Workspace() {
                     <tr>
                         <td>썸네일:</td>
                         <td>
-                            <img src={game.thumbnailURL.length ? game.thumbnailURL : null} style={{width: "200px"}}/>
+                            {/* <img src={game.thumbnailURL.length ? game.thumbnailURL : null} style={{width: "200px"}}/> */}
                             <img src={URL.createObjectURL(thumnailImg)} style={{width: "200px"}}/>
                         </td>
                     </tr>
@@ -475,7 +481,7 @@ export default function Workspace() {
                     <tr>
                         <td>사진</td>
                         <td>
-                            <img src={data.imgURL.length ? data.imgURL : null} style={{width: "500px"}}/>
+                            {/* <img src={data.imgURL.length ? data.imgURL : null} style={{width: "500px"}}/> */}
                             <img src={URL.createObjectURL(stageImg[index] ?? new File([], ''))} style={{width: "500px"}}/>
                         </td>
                     </tr>
@@ -536,9 +542,11 @@ export default function Workspace() {
             </div>
         </div>
         <section style={{backgroundColor: "#ffbb66"}}>
-            <LocalSaveGame game={game}/>
-            <LocalZIPSaveGame game={game} imgs={{thumnailImg, stageImg}}/>
-            <ServerSaveGame game={game} setGame={setGame}/>
+            <SaveGameToLocal game={game}/>
+            <SaveZIPGameToLocal game={game} imgs={{thumnailImg, stageImg}}/>
+        </section>
+        <section style={{backgroundColor: "#ffaa22"}}>
+            <SaveGameToServer game={game} setGame={setGame} imgs={{thumnailImg, stageImg}}/>
         </section>
         </>
     )
