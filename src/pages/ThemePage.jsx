@@ -37,9 +37,9 @@ function ThemePage() {
     const [section2Visible, setSection2Visible] = useState(false); // 섹션2 보이는지 여부
     const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 상태
 
-    const hasAnimated = useRef(false); // 두 번째 섹션 애니메이션이 한 번이라도 실행되었는지 여부를 저장 (true면 다시 실행하지 않음)
-    const hasAnimated2 = useRef(false);
-    const [shouldAnimate, setShouldAnimate] = useState(false);
+    const hasAnimated = useRef(false); // 두 번째 섹션 애니메이션 실행 여부 저장
+    const hasAnimated2 = useRef(false); // 첫 번째 애니메이션 실행 여부 저장
+    const [shouldAnimate, setShouldAnimate] = useState(false); // 첫 번째 애니메이션 실행 여부
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -236,14 +236,11 @@ function ThemePage() {
         };
     }, [showSignIn, showSignUp]);
 
+    // 첫 번째 섹션 애니메이션 한 번만 실행되게 변경
     useEffect(() => {
-        console.log('useEffect 실행됨');
-      
         if (!hasAnimated2.current) {
-          console.log('애니메이션 실행 전 상태: ', hasAnimated2.current);
           setShouldAnimate(true);
           hasAnimated2.current = true;
-          console.log('애니메이션 실행 후 상태: ', hasAnimated2.current);
         }
     }, []);
 
