@@ -18,68 +18,60 @@ import adventure_background from '../assets/images/ThemePage_img/adventure/adven
 import crime_background from '../assets/images/ThemePage_img/crime/crime_background.png';
 
 function ThemePage() {
-    // URL 파라미터에서 theme 값을 가져옴
+    // URL 파라미터에서 theme 값 가져오기
     const { theme } = useParams();
 
-    // 로그인 및 회원가입 창 상태 관리
+    // 로그인 및 회원가입 상태
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
-    const [items, setItems] = useState([]); // 아이템 상태 배열 (무한 스크롤로 점점 더 추가될 방 정보 등 저장)
-    const observerRef = useRef(null); // 마지막 방 아이템을 감시할 IntersectionObserver 대상
-    const scrollContainerRef = useRef(null); // 가로 스크롤이 적용될 div 요소를 참조 (스크롤 컨테이너)
-    const scrollAmount = useRef(0); // 휠로 인한 스크롤 양
-    const animationFrame = useRef(null); // requestAnimationFrame을 위한 참조
-    const lastScrollTime = useRef(0); // 마지막 스크롤 시간 기록
+    const [items, setItems] = useState([]); // 아이템 상태 배열
+    const observerRef = useRef(null); // IntersectionObserver 대상
+    const scrollContainerRef = useRef(null); // 가로 스크롤 컨테이너
+    const scrollAmount = useRef(0); // 휠 스크롤 양
+    const animationFrame = useRef(null); // requestAnimationFrame 참조
+    const lastScrollTime = useRef(0); // 마지막 스크롤 시간
 
-    // 테마별 배경 이미지 매핑
+    const [animatedIndexes, setAnimatedIndexes] = useState([]); // 애니메이션 인덱스 상태
+    const section2Ref = useRef(null); // 섹션2 참조
+    const [section2Visible, setSection2Visible] = useState(false); // 섹션2 보이는지 여부
+    const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 상태
+
+    // 테마별 이미지 매핑
     const backgroundMap = {
         horror: horror_background,
         adventure: adventure_background,
         crime: crime_background
     };
-
-    // 테마별 계단 이미지 매핑
     const stairsMap = {
         horror: horror_stairs,
     };
-
-    //테마별 TOP3 이미지 매핑
     const topMap = {
         horror: horror_top,
-    }
-
-    //테마별 Room 이미지 매핑
+    };
     const roomMap = {
         horror: horror_room,
-    }
+    };
 
-    // 현재 테마에 맞는 이미지 가져오기
+    // 테마에 맞는 이미지 가져오기
     const backgroundImage = backgroundMap[theme] || horror_background;
     const stairsImage = stairsMap[theme] || horror_stairs;
     const topImage = topMap[theme] || horror_top;
     const roomImage = roomMap[theme] || horror_room;
 
-    // theme 값이 없거나 배경 이미지가 없으면 아무것도 렌더링하지 않음
+    // theme 없거나 배경 이미지 없으면 렌더링 안함
     if (!theme || !backgroundImage) return null;
 
     // fullpage.js 초기화 및 해제
     useEffect(() => {
-        // 기존 fullpage 인스턴스 제거 (중복 방지)
         if (window.fullpage_api) {
-            window.fullpage_api.destroy('all');
+            window.fullpage_api.destroy('all'); // 기존 fullpage 인스턴스 제거
         }
 
-        // 로그인, 회원가입 창이 안 떠 있을 때만 fullpage 초기화
         if (!showSignIn && !showSignUp) {
-            new fullpage('#fullpage', {
-                licenseKey: 'gplv3-license', // 무료 라이선스
-                autoScrolling: true,
-                navigation: false,
-            });
+            new fullpage('#fullpage', { licenseKey: 'gplv3-license', autoScrolling: true, navigation: false });
         }
 
-        // 컴포넌트 언마운트 시 fullpage 정리
         return () => {
             if (window.fullpage_api) {
                 window.fullpage_api.destroy('all');
@@ -91,14 +83,10 @@ function ThemePage() {
     useEffect(() => {
         if (showSignIn || showSignUp) {
             document.body.style.overflow = 'hidden';
-            if (window.fullpage_api) {
-                window.fullpage_api.setAllowScrolling(false);
-            }
+            if (window.fullpage_api) window.fullpage_api.setAllowScrolling(false);
         } else {
             document.body.style.overflow = '';
-            if (window.fullpage_api) {
-                window.fullpage_api.setAllowScrolling(true);
-            }
+            if (window.fullpage_api) window.fullpage_api.setAllowScrolling(true);
         }
     }, [showSignIn, showSignUp]);
 
@@ -106,12 +94,52 @@ function ThemePage() {
     const loadMoreItems = () => {
         setItems((prev) => [
             ...prev,
-            ...Array.from({ length: 10 }, (_, i) => prev.length + i + 1) // 숫자 배열로 추가
+            ...Array.from({ length: 10 }, (_, i) => prev.length + i + 1)
         ]);
     };
 
-    // IntersectionObserver를 사용하여 마지막 아이템이 화면에 보일 때마다 로드
+    // IntersectionObserver로 섹션2 보이면 애니메이션 시작
     useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setSection2Visible(true);
+                    setIsAnimating(true); // 애니메이션 시작
+                }
+            },
+            { threshold: 0.01 }
+        );
+
+        if (section2Ref.current) observer.observe(section2Ref.current);
+
+        return () => {
+            if (section2Ref.current) observer.unobserve(section2Ref.current);
+        };
+    }, []);
+
+    // 애니메이션 끝나면 스크롤 활성화
+    useEffect(() => {
+        if (section2Visible) {
+            const initialCount = 4;
+            const delays = Array.from({ length: initialCount }, (_, i) => i);
+            setAnimatedIndexes(delays);
+
+            setIsAnimating(true);
+            document.body.style.overflow = 'hidden'; // 스크롤 비활성화
+
+            const timeout = setTimeout(() => {
+                setIsAnimating(false);
+                document.body.style.overflow = ''; // 스크롤 활성화
+            }, initialCount * 300 + 300); // 애니메이션 후 버퍼시간
+
+            return () => clearTimeout(timeout);
+        }
+    }, [section2Visible]);
+
+    // IntersectionObserver로 마지막 아이템이 보이면 로드
+    useEffect(() => {
+        if (isAnimating) return;
+
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
@@ -124,34 +152,34 @@ function ThemePage() {
         if (observerRef.current) observer.observe(observerRef.current);
 
         return () => observer.disconnect();
-    }, []);
+    }, [isAnimating]);
 
-    // 마우스 휠 이벤트로 가로 스크롤
+    // 휠 이벤트로 가로 스크롤
     useEffect(() => {
         const handleWheel = (e) => {
-            e.preventDefault(); // 기본 수직 스크롤 방지
+            if (isAnimating) {
+                e.preventDefault();
+                return;
+            }
 
-            // 휠 방향에 따라 가로 스크롤
-            const scrollDelta = e.deltaY * 0.2; // 속도 조절
+            e.preventDefault();
+
+            const scrollDelta = e.deltaY * 0.2;
             scrollAmount.current += scrollDelta;
             scrollContainerRef.current.scrollLeft += scrollDelta;
 
-            // 가로 스크롤 끝에 가까워졌을 때 새로운 아이템 로드
             const container = scrollContainerRef.current;
             const scrollPosition = container.scrollLeft;
             const scrollWidth = container.scrollWidth;
             const containerWidth = container.clientWidth;
 
-            // 스크롤이 끝에 거의 도달했을 때 (남은 공간이 200px 이하일 때)
             if (scrollWidth - scrollPosition - containerWidth < 200) {
                 loadMoreItems(); // 새로운 아이템 로드
             }
 
-            // 스크롤이 멈춘 후 감속 적용
             const now = Date.now();
             const timeElapsed = now - lastScrollTime.current;
 
-            // 일정 시간이 지난 후 감속 처리
             if (timeElapsed > 50) {
                 lastScrollTime.current = now;
                 cancelAnimationFrame(animationFrame.current);
@@ -161,14 +189,14 @@ function ThemePage() {
 
         const container = scrollContainerRef.current;
         if (container) {
-            container.addEventListener('wheel', handleWheel); // 마우스 휠 이벤트 처리
+            container.addEventListener('wheel', handleWheel);
         }
 
         return () => {
             if (container) container.removeEventListener('wheel', handleWheel);
             cancelAnimationFrame(animationFrame.current);
         };
-    }, []);
+    }, [isAnimating]);
 
     // 마우스 진입/퇴장 시 스크롤 제어
     useEffect(() => {
@@ -202,29 +230,26 @@ function ThemePage() {
     // 감속 스크롤 함수
     const smoothScroll = () => {
         if (Math.abs(scrollAmount.current) > 0.5) {
-            scrollAmount.current *= 0.9; // 감속 효과
+            scrollAmount.current *= 0.9;
             scrollContainerRef.current.scrollLeft += scrollAmount.current;
 
             animationFrame.current = requestAnimationFrame(smoothScroll);
         }
     };
 
-    // 로그인 버튼 클릭 시
+    // 로그인/회원가입 클릭 시 상태 변경
     const handleSignInClick = () => {
         setShowSignIn(true);
         setShowSignUp(false);
     };
 
-    // 회원가입 버튼 클릭 시
     const handleSignUpClick = () => {
         setShowSignIn(false);
         setShowSignUp(true);
     };
 
-    // 로그인 창 닫기
+    // 로그인/회원가입 창 닫기
     const handleCloseSignIn = () => setShowSignIn(false);
-
-    // 회원가입 창 닫기
     const handleCloseSignUp = () => setShowSignUp(false);
 
     return (
@@ -307,7 +332,7 @@ function ThemePage() {
                 </div>
 
                 {/* 두 번째 섹션 - 테마 복도 */}
-                <div className="section">
+                <div className="section" ref={section2Ref}>
                     <div className='theme_wrap'>
                         {/* 배경 이미지 */}
                         <img id="theme_background" src={backgroundImage} alt="theme_background" />
@@ -319,13 +344,17 @@ function ThemePage() {
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
                                 {items.map((_, index) => (
-                                    <div key={index} className="theme_door_room">
+                                    <div
+                                        key={index}
+                                        className={`theme_door_room ${section2Visible && animatedIndexes.includes(index) ? 'animate' : ''}`}
+                                        style={animatedIndexes.includes(index) ? { animationDelay: `${index * 0.3}s` } : {}}
+                                    >
                                         {/* 방 번호와 이미지 */}
                                         <div className="theme_room">
-                                            <div className='room'>
-                                                <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
-                                                <p>{401 + index}</p>
-                                            </div>
+                                        <div className='room'>
+                                            <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
+                                            <p>{401 + index}</p>
+                                        </div>
                                         </div>
 
                                         {/* 각 방에 연결된 문 영역 */}
