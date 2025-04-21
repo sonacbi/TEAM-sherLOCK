@@ -75,6 +75,8 @@ function Sign_in({ onClose, onSignUpClick }) {
       window.location.href = "http://localhost:5000/auth/kakao/login";
     } else if (targetClass.includes('naver_login')) {
       window.location.href = "http://localhost:5000/auth/naver/login";
+    } else if (targetClass.includes('google_login')) {
+      window.location.href = "http://localhost:5000/auth/google/login";
     } else {
       console.error('알 수 없는 로그인 버튼 클릭됨');
     }
@@ -105,6 +107,11 @@ function Sign_in({ onClose, onSignUpClick }) {
               <div className='naver_login' onClick={handleSocial}>
                 <img id='naver' src={naver} alt='naver' />
                 <p>Naver 로그인</p>
+              </div>
+
+              <div className='google_login' onClick={handleSocial}>
+                
+                <p>google 로그인</p>
               </div>
 
               <div className='sherlock_login' onClick={handleSherlockLoginClick}>

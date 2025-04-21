@@ -200,9 +200,9 @@ function Sign_up({ onClose, onSignInClick }) {
                                         onBlur={handleBlurClear(setErrors)}  // 블러 시 에러 초기화
                                     >
                                         <option value="" disabled>선택</option> {/* selected disabled → disabled로 수정함 (확인요망) */}
-                                        <option value="google.com">gmail.com</option>
+                                        <option value="gmail.com">gmail.com</option>
                                         <option value="naver.com">naver.com</option>
-                                        <option value="daum.com">daum.net</option>
+                                        <option value="daum.net">daum.net</option>
                                     </select>
                                 </div>
                                 

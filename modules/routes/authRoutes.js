@@ -114,6 +114,11 @@ const NAVER_CLIENT_ID = '400L3PxBMavB8kwfbrXt';
 const NAVER_REDIRECT_URI = 'http://localhost:5173/auth/naver';
 const NAVER_CLIENT_SECRET = 'OeswV15ngL';
 
+// 구글
+const GOOGLE_CLIENT_ID = '1073536937047-0qdgdfh3t6f3dica0u6jnlatqjlbuu71.apps.googleusercontent.com';
+const GOOGLE_REDIRECT_URI = 'http://localhost:5173/auth/google';
+const GOOGLE_CLIENT_SECRET = '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';
+
 // 📞 소셜 로그인 요청 (프론트에서 온 연락) ----- //
 router.get('/kakao/login', (req, res) => {
   const redirectUri = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
@@ -128,7 +133,13 @@ router.get('/naver/login', (req, res) => {
 
   const redirectUri = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NAVER_CLIENT_ID}&redirect_uri=${NAVER_REDIRECT_URI}&state=${state}`;
   res.redirect(redirectUri);
- });
+});
+
+router.get('/google/login', (req, res) => {
+  const redirectUri = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_REDIRECT_URI}&response_type=code&scope=profile email&access_type=offline`;
+  res.redirect(redirectUri);
+});
+
 
 // 📞 api 제공업체가 돌려주는 응답을  ---------- //
 // SocialAuthHandler.jsx가 받아서 해독하고(미들웨어)
@@ -234,6 +245,49 @@ router.post('/:provider', async (req, res) => {
         }
         break;
       
+
+
+      case 'google':
+        try {
+          // 1. 인가 코드로 access_token 요청
+          const tokenRes = await axios.post(
+            'https://oauth2.googleapis.com/token',
+            {
+              code,
+              client_id: GOOGLE_CLIENT_ID,
+              client_secret: GOOGLE_CLIENT_SECRET,
+              redirect_uri: GOOGLE_REDIRECT_URI,
+              grant_type: 'authorization_code',
+            }
+          );
+          const { access_token } = tokenRes.data;
+      
+          // 2. 사용자 정보 요청
+          const userRes = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo`, {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          });
+      
+          const googleUser = userRes.data;
+          const user_id = 'google_' + googleUser.id;
+          const email = googleUser.email;
+          const social_id = googleUser.id;
+      
+          // 3. DB 등록 or 로그인 처리
+          const user = await UserDAO.registerUser(user_id, email, social_id, 'google');
+      
+          const { ip, location } = await getIPLocation(req);
+          Created_log(user, ip, location);
+          const token = issueToken(user);
+      
+          res.status(200).json({ token });
+        } catch (err) {
+          console.error(err);
+          res.status(500).send('구글 로그인 실패');
+        }
+        break;
+        
 
     default:
       return res.status(400).send('지원하지 않는 소셜 로그인입니다.');

@@ -24,6 +24,7 @@ function SocialAuthHandler() {
     let provider = '';
     if (path.includes('/kakao')) provider = 'kakao';
     if (path.includes('/naver')) provider = 'naver';
+    if (path.includes('/google')) provider = 'google';
 
     if (!code || !provider) {
       alert('소셜 로그인에 실패했습니다.');
