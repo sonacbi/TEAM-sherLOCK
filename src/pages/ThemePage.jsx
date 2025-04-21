@@ -269,8 +269,8 @@ function ThemePage() {
     };
 
     // 로그인/회원가입 창 닫기
-    const handleCloseSignIn = () => setShowSignIn(false);
-    const handleCloseSignUp = () => setShowSignUp(false);
+    const handleCloseSignIn = () => {setShowSignIn(false); setShouldAnimate(false);}
+    const handleCloseSignUp = () => {setShowSignUp(false); setShouldAnimate(false);}
 
     return (
         <>
@@ -298,7 +298,7 @@ function ThemePage() {
                                 </div>
 
                                 <div className='theme_hit'>
-                                    <div className={`theme_door_hit1 ${shouldAnimate ? 'animate' : ''}`}>
+                                    <div className={`theme_door_hit1 ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top1'>
                                             <div className='theme_door_top1'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -312,7 +312,7 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className={`theme_door_hit2 ${shouldAnimate ? 'animate' : ''}`}>
+                                    <div className={`theme_door_hit2 ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top2'>
                                             <div className='theme_door_top2'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -326,7 +326,7 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className={`theme_door_hit3 ${shouldAnimate ? 'animate' : ''}`}>
+                                    <div className={`theme_door_hit3 ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top3'>
                                             <div className='theme_door_top3'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />

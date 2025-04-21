@@ -65,6 +65,13 @@
     opacity: 0;
 }
 
+.theme_door_hit1.standard,
+.theme_door_hit2.standard,
+.theme_door_hit3.standard {
+    flex: 1;
+    opacity: 100;
+}
+
 .theme_door_hit1.animate {
     animation: slideInFromRight 1s ease forwards;
     animation-delay: 0s;
