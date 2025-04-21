@@ -8,6 +8,7 @@ import './Sign_in.css';
 import Sign_background from '../../../../assets/images/Sign/Sign_background.png';
 import kakao from '../../../../assets/images/Sign/Kakao.png';
 import naver from '../../../../assets/images/Sign/Naver.png';
+import google from '../../../../assets/images/Sign/Google.png';
 import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
@@ -110,7 +111,7 @@ function Sign_in({ onClose, onSignUpClick }) {
               </div>
 
               <div className='google_login' onClick={handleSocial}>
-                
+                <img id='google' src={google} alt='google' />
                 <p>google 로그인</p>
               </div>
 
@@ -193,21 +194,19 @@ function Sign_in({ onClose, onSignUpClick }) {
         </div>
 
         {showSocialLogin && (
-          <>
-            <div className='kakao_hidden'>
-              <div className='kakao_login2' onClick={handleSocial}>
-                <img id='kakao' src={kakao} alt='kakao' />
-                <p>Kakao 로그인</p>
-              </div>
+          <div className='social_hidden'>
+            <div className='kakao_login2' onClick={handleSocial}>
+              <img id='kakao' src={kakao} alt='kakao'/>
             </div>
 
-            <div className='naver_hidden'>
-              <div className='naver_login2' onClick={handleSocial}>
-                <img id='naver' src={naver} alt='naver' />
-                <p>Naver 로그인</p>
-              </div>
+            <div className='naver_login2' onClick={handleSocial}>
+              <img id='naver' src={naver} alt='naver'/>
             </div>
-          </>
+
+            <div className='google_login2' onClick={handleSocial}>
+              <img id='google' src={google} alt='google'/>
+            </div>
+          </div>
         )}
 
         <div className='Sign_up_img'>

@@ -65,14 +65,14 @@
     gap: 30px;
 }
 
-.kakao_login, .naver_login, .sherlock_login, .kakao_login2, .naver_login2 {
+.kakao_login, .naver_login, .google_login, .sherlock_login {
     width: 212px;
     height: 40px;
     border-radius: 3px;
     padding: 10px;
 }
 
-.kakao_login, .kakao_login2, .naver_login, .naver_login2 {
+.kakao_login, .naver_login, .google_login {
     display: flex;
     align-items: center;
     font-weight: bold;
@@ -81,22 +81,26 @@
     transition: opacity 0.3s ease;
 }
 
-.kakao_login, .kakao_login2 {
+.kakao_login {
     background-color: #ffea62;
 }
 
-.naver_login, .naver_login2 {
+.naver_login {
     background-color: #00c559;
     color: white;
 }
 
-#kakao, #naver {
+.google_login {
+    background-color: white;
+}
+
+#kakao, #naver, #google {
     width: 30px;
     height: 30px;
 }
 
 .sherlock_login {
-    background-color: #fff;
+    background-color: rgb(174, 174, 174);
     cursor: pointer;
     transition: opacity 0.3s ease;
 }
@@ -106,8 +110,10 @@
     font-weight: bold;
 }
 
-.sherlock_login:hover, .kakao_login:hover, .kakao_login2:hover,
-.naver_login:hover, .naver_login2:hover {
+.sherlock_login:hover, .kakao_login:hover,
+.naver_login:hover, .google_login:hover,
+.kakao_login2:hover, .naver_login2:hover, 
+.google_login2:hover {
     opacity: 0.5;
 }
 
@@ -168,12 +174,25 @@
     opacity: 0.5;
 }
 
-.kakao_hidden, .naver_hidden {
+.social_hidden {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
     margin-top: 20px;
     width: 100%;
+    gap: 10%;
+}
+
+.kakao_login2, .naver_login2, .google_login2 {
+    transition: opacity 0.3s ease;
+}
+
+.kakao_login2 #kakao, 
+.naver_login2 #naver,
+.google_login2 #google {
+    height: 40px;
+    width: 40px;
+    cursor: pointer;
 }
 
 .Sign_up_img {
