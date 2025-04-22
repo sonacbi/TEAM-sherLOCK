@@ -85,7 +85,7 @@ app.put("/workspace", (req, res) => {
 app.use('/workspace-files/:game_id', uploadZipRouter);
 app.post('/workspace-files/:game_id', (req, res) => {
   const gameId = req.params.game_id;
-  const userId = 0
+  const userId = 1
   db.query(`INSERT INTO game (game_id, user_id) VALUES (?, ?);`, [gameId, userId], (err, results) => {
     if (err) {
       return res.status(500).send(err);

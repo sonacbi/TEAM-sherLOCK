@@ -13,7 +13,8 @@ export default function Workspace() {
     const [thumnailImg, setThumnailImg] = useState(new File([], ''));
     const [stageImg, setStageImg] = useState([ new File([], '') ]);
     const [stageIndex, setStageIndex] = useState(0);
-    console.log('게임데이터:', game)
+    const date = `(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) `
+    console.log(`${date}게임데이터:`, game)
 
     // 사용자 게임파일 불러오기
     function uploadGameFile(event) {
@@ -204,7 +205,7 @@ export default function Workspace() {
         const description = fromData.get("stage_description");
         const timeLimit = Number(fromData.get("stage_timeLimit"));
         const gateOpen = fromData.get("stage_gateOpen") ? true : false;
-        const closedGateMessage = fromData.get("stage_closedGateMessage");
+        const closedGateMessage = fromData.get("stage_closedGateMessage") ? fromData.get("stage_closedGateMessage") : null;
         const connectedStage = fromData.get("stage_connectedStage");
         setGame(prev => {
             const newGame = { ...prev };
@@ -224,10 +225,8 @@ export default function Workspace() {
         })
     }
 
-    function chooseStageIndex(event) {
-        event.preventDefault();
-        const formData = new FormData(event.target);
-        const index = formData.get("stage_index");
+    function handleStageIndex(event) {
+        const index = event.target.value;
         if (game.stage[index]) {
             setStageIndex(index);
         } else {
@@ -342,12 +341,15 @@ export default function Workspace() {
                 </form>
             </div>
             <div>
-                <form onSubmit={chooseStageIndex}>
-                    <label>스테이지 인덱스
-                        <input type="number" name="stage_index" defaultValue={0}/>
-                    </label>
-                    <button type="submit">조회</button>
-                </form>
+                <div>
+                    스테이지 선택
+                    {game.stage.map((data, index)=>(
+                        <button value={index} onClick={handleStageIndex}>{index}</button>
+                        // <label>{index}
+                        //     <input type="radio" name="stage_index" value={index} onChange={handleStageIndex}/>
+                        // </label>
+                    ))}
+                </div>
                 <form onSubmit={updateGameStage}>
                     <div>
                         <h3>스테이지 번호: {stageIndex}</h3>
@@ -400,6 +402,19 @@ export default function Workspace() {
                         </label>
                     </div>
                     <div>
+                        {/* {game.stage.map((data, index1) => {
+                            game.stage[stageIndex].connectedStage.map((data, index2) => {
+                                return({index2})
+                            })
+                            return(
+                                <label>{index1}
+                                    <input type="checkbox" name="stage_connectedStage"/>
+                                </label>
+                            )
+                        })}
+                        {game.stage[stageIndex].connectedStage.map((data, index) => (
+                            <input type="checkbox" name="stage_connectedStage"/>
+                        ))} */}
                         <label>연결된 스테이지
                             <input type="number" name="stage_connectedStage" defaultValue={game.stage[stageIndex].connectedStage} key={game.stage[stageIndex].connectedStage}/>
                         </label>

@@ -38,6 +38,7 @@ export default function SaveGameToServer(props) {
         if(!game.id) {
             const nanoId = nanoid(8);
             const newGame = { ...game, id: nanoId };
+            setGame({ ...game, id: nanoId })
             zip.file("game.json", JSON.stringify(newGame, null, 2))
             method = "POST";
             param = nanoId;
