@@ -193,7 +193,7 @@
 }
 
 .theme article.article-clicked {
-    transform: scale(0.95) translateY(-20px);
+    transform: scale(0.93) translateY(-20px);
 }
 
 .theme article.article-clicked-back {

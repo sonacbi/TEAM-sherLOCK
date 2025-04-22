@@ -195,7 +195,7 @@
     cursor: pointer;
 }
 
-.Sign_up_img {
+.Sign_up_text {
     display: flex;
     justify-content: center;
     height: 15%;
@@ -205,10 +205,11 @@
 }
 
 #Sign_up {
-    width: 50px;
-    height: 60px;
+    font-family: 'Gugi', sans-serif;
     cursor: pointer;
     transition: opacity 0.3s ease;
+    font-size: 17px;
+    color: white;
 }
 
 #Sign_up:hover {

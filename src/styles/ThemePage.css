@@ -101,6 +101,7 @@
 
 #theme_door_top_img {
     width: 6vw;
+    cursor: pointer;
 }
 
 .theme_door_top1 p, .theme_door_top2 p, .theme_door_top3 p {
@@ -111,11 +112,35 @@
     color: white;
     font-size: 1vw;
     font-weight: bold;
+    transition: color 0.3s ease;
+    cursor: pointer;
 }
 
 .door_top1, .door_top2, .door_top3 {
     background-color: black;
     height: 90%;
+    cursor: pointer;
+}
+
+.theme_door_hit1.horror:hover .theme_door_top1 p,
+.theme_door_hit2.horror:hover .theme_door_top2 p,
+.theme_door_hit3.horror:hover .theme_door_top3 p,
+.theme_door_room.horror:hover .room p {
+    color: #b22222;
+}
+
+.theme_door_hit1.adventure:hover .theme_door_top1 p,
+.theme_door_hit2.adventure:hover .theme_door_top2 p,
+.theme_door_hit3.adventure:hover .theme_door_top3 p,
+.theme_door_room.adventure:hover .room p {
+    color: #e4c590;
+}
+
+.theme_door_hit1.crime:hover .theme_door_top1 p,
+.theme_door_hit2.crime:hover .theme_door_top2 p,
+.theme_door_hit3.crime:hover .theme_door_top3 p,
+.theme_door_room.crime:hover .room p {
+    color: #4f4f4f;
 }
 
 .floor {
@@ -178,6 +203,10 @@
     position: relative;
 }
 
+#theme_room_img {
+    cursor: pointer;
+}
+
 .room p {
     position: absolute;
     top: 50%;
@@ -186,12 +215,15 @@
     color: white;
     font-weight: bold;
     font-size: 20px;
+    transition: color 0.3s ease;
+    cursor: pointer;
 }
 
 .theme_door {
     height: 100%;
     width: 100%;
     background-color: black;
+    cursor: pointer;
 }
 
 .theme_door_infinite .hallway {

@@ -9,7 +9,6 @@ import Sign_background from '../../../../assets/images/Sign/Sign_background.png'
 import kakao from '../../../../assets/images/Sign/Kakao.png';
 import naver from '../../../../assets/images/Sign/Naver.png';
 import google from '../../../../assets/images/Sign/Google.png';
-import Sign_up from '../../../../assets/images/Sign/Sign_Up.png';
 import X from '../../../../assets/images/Sign/X.png';
 
 function Sign_in({ onClose, onSignUpClick }) {
@@ -209,8 +208,8 @@ function Sign_in({ onClose, onSignUpClick }) {
           </div>
         )}
 
-        <div className='Sign_up_img'>
-          <img id='Sign_up' src={Sign_up} alt='Sign_up' onClick={handleSignUpClick}/>
+        <div className='Sign_up_text'>
+          <p id='Sign_up' onClick={handleSignUpClick}>회원가입</p>
         </div>
       </div>
     </div>

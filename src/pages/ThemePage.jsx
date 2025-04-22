@@ -295,7 +295,7 @@ function ThemePage() {
                                 </div>
 
                                 <div className='theme_hit'>
-                                    <div className={`theme_door_hit1 ${shouldAnimate ? 'animate' : 'standard'}`}>
+                                    <div className={`theme_door_hit1 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top1'>
                                             <div className='theme_door_top1'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -309,7 +309,7 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className={`theme_door_hit2 ${shouldAnimate ? 'animate' : 'standard'}`}>
+                                    <div className={`theme_door_hit2 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top2'>
                                             <div className='theme_door_top2'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -323,7 +323,7 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className={`theme_door_hit3 ${shouldAnimate ? 'animate' : 'standard'}`}>
+                                    <div className={`theme_door_hit3 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top3'>
                                             <div className='theme_door_top3'>
                                                 <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
@@ -363,7 +363,7 @@ function ThemePage() {
                                 {items.map((_, index) => (
                                     <div
                                         key={index}
-                                        className={`theme_door_room ${
+                                        className={`theme_door_room ${theme} ${
                                         section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
                                             ? 'animate'
                                             : ''
@@ -376,10 +376,10 @@ function ThemePage() {
                                     >
                                         {/* 방 번호와 이미지 */}
                                         <div className="theme_room">
-                                        <div className='room'>
-                                            <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
-                                            <p>{401 + index}</p>
-                                        </div>
+                                            <div className='room'>
+                                                <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
+                                                <p>{401 + index}</p>
+                                            </div>
                                         </div>
 
                                         {/* 각 방에 연결된 문 영역 */}

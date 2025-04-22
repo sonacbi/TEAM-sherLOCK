@@ -147,7 +147,7 @@
     opacity: 0.5;
 }
 
-.Sign_in_img {
+.Sign_in_text {
     display: flex;
     justify-content: center;
     height: 10%;
@@ -156,10 +156,11 @@
 }
 
 #Sign_in {
-    width: 50px;
-    height: 60px;
     cursor: pointer;
     transition: opacity 0.3s ease;
+    font-size: 17px;
+    color: white;
+    font-family: 'Gugi', sans-serif;
 }
 
 #Sign_in:hover {

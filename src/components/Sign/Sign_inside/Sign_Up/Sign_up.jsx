@@ -11,7 +11,6 @@ import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css'; 
 
 import Sign_background from '../../../../assets/images/Sign/Sign_background.png';
-import Sign_in from '../../../../assets/images/Sign/Sign_In.png';
 import X from '../../../../assets/images/Sign/X.png';
 
 function Sign_up({ onClose, onSignInClick }) {
@@ -277,8 +276,8 @@ function Sign_up({ onClose, onSignInClick }) {
                     </div>
                 </div>
 
-                <div className='Sign_in_img'>
-                    <img id='Sign_in' src={Sign_in} alt='Sign_in' onClick={handleSignInClick}/>
+                <div className='Sign_in_text'>
+                    <p id='Sign_in' onClick={handleSignInClick}>로그인</p>
                 </div>
             </div>
         </div>
