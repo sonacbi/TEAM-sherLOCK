@@ -47,6 +47,9 @@ function SocialAuthHandler() {
         // 로그인 성공 시 로컬스토리지에 토큰 저장 (예시)
         localStorage.setItem('token', res.data.token);
 
+        // 최근 로그인 수단 저장
+        localStorage.setItem('lastLoginMethod', provider); 
+
         // 소셜 로그인 호출 전에 저장했던 주소로 리턴 
         const prevPath = localStorage.getItem('prevPath') || '/';
         navigate(prevPath);

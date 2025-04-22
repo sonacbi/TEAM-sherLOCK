@@ -85,7 +85,11 @@ router.post('/login', async (req, res) => {
     Created_log(user, ip, location);
     const token = issueToken(user);
 
-    res.json({ success: true, token });
+    res.json({ 
+      success: true,
+      token,
+      loginMethod: 'general'
+     });
   } catch (err) {
     console.error('💥 서버 오류:', err);
     res.status(500).json({ error: '로그인 중 서버 오류 발생' });
@@ -189,7 +193,10 @@ router.post('/:provider', async (req, res) => {
         Created_log(user, ip, location);
         const token = issueToken(user);
 
-        res.status(200).json({ token });
+        res.status(200).json({ 
+          token,
+          loginMethod: provider  // 👈 provider는 'kakao', 'naver', 'google' 중 하나
+        });
       } catch (err) {
         console.error(err);
         res.status(500).send('카카오 로그인 실패');
@@ -238,7 +245,10 @@ router.post('/:provider', async (req, res) => {
           Created_log(user, ip, location);
           const token = issueToken(user);
       
-          res.status(200).json({ token });
+          res.status(200).json({ 
+            token,
+            loginMethod: provider
+          });
         } catch (err) {
           console.error(err);
           res.status(500).send('네이버 로그인 실패');
@@ -281,7 +291,10 @@ router.post('/:provider', async (req, res) => {
           Created_log(user, ip, location);
           const token = issueToken(user);
       
-          res.status(200).json({ token });
+          res.status(200).json({ 
+            token,
+            loginMethod: provider
+          });
         } catch (err) {
           console.error(err);
           res.status(500).send('구글 로그인 실패');

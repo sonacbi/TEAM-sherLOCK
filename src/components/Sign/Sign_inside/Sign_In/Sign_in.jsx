@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import { validateId, validatePassword, checkLoginUserId } from './Sign_in_validateSubmit.js'; // 유효성 검사 로직(프론트) → Sign_in_submit.jsx(프론트 제출폼) 연동
 import { submitLogin } from './Sign_in_submit.js'; // 새로 분리된 함수 import
@@ -20,6 +20,9 @@ function Sign_in({ onClose, onSignUpClick }) {
   const [user_pw, setUserPw] = useState('');
   const [idError, setUserIdError] = useState('');
   const [passwordError, setUserPwError] = useState('');
+
+  // ⚙️ 최근 로그인 ---------------------------//
+  const [lastLoginMethod, setLastLoginMethod] = useState('');
 
   // ⚙️ 로그인 버튼 세팅 --------------------------------//
   const handleSherlockLoginClick = () => {
@@ -86,6 +89,12 @@ function Sign_in({ onClose, onSignUpClick }) {
     onSignUpClick();
   };
 
+  // ⚙️ 최근 로그인 정보 불러오기 -------------------//
+  useEffect(() => {
+    const loginMethod = localStorage.getItem('lastLoginMethod');
+    setLastLoginMethod(loginMethod);
+  }, []);
+
   return (
     <div className='Sign_in'>
       <img id='Sign_background' src={Sign_background} alt='Sign_background' />
@@ -98,23 +107,22 @@ function Sign_in({ onClose, onSignUpClick }) {
         <div className='login'>
           {!showSherlockLogin && (
             <div className='kakao_sherlock'>
-              <div className='kakao_login' onClick={handleSocial}>
+              <div className={`kakao_login ${lastLoginMethod === 'kakao' ? 'highlight' : ''}`} onClick={handleSocial}>
                 <img id='kakao' src={kakao} alt='kakao' />
                 <p>Kakao 로그인</p>
               </div>
-
-              {/* 네이버 api 테스트용 코드 */}
-              <div className='naver_login' onClick={handleSocial}>
+        
+              <div className={`naver_login ${lastLoginMethod === 'naver' ? 'highlight' : ''}`} onClick={handleSocial}>
                 <img id='naver' src={naver} alt='naver' />
                 <p>Naver 로그인</p>
               </div>
-
-              <div className='google_login' onClick={handleSocial}>
+        
+              <div className={`google_login ${lastLoginMethod === 'google' ? 'highlight' : ''}`} onClick={handleSocial}>
                 <img id='google' src={google} alt='google' />
-                <p>google 로그인</p>
+                <p>Google 로그인</p>
               </div>
-
-              <div className='sherlock_login' onClick={handleSherlockLoginClick}>
+        
+              <div className={`sherlock_login ${lastLoginMethod === 'general' ? 'highlight' : ''}`} onClick={handleSherlockLoginClick}>
                 <p>셜LOCK ID 로그인</p>
               </div>
             </div>
@@ -194,15 +202,15 @@ function Sign_in({ onClose, onSignUpClick }) {
 
         {showSocialLogin && (
           <div className='social_hidden'>
-            <div className='kakao_login2' onClick={handleSocial}>
+            <div className={`kakao_login2 ${lastLoginMethod === 'kakao' ? 'highlight' : ''}`} onClick={handleSocial}>
               <img id='kakao' src={kakao} alt='kakao'/>
             </div>
 
-            <div className='naver_login2' onClick={handleSocial}>
+            <div className={`naver_login2 ${lastLoginMethod === 'naver' ? 'highlight' : ''}`} onClick={handleSocial}>
               <img id='naver' src={naver} alt='naver'/>
             </div>
 
-            <div className='google_login2' onClick={handleSocial}>
+            <div className={`google_login2 ${lastLoginMethod === 'google' ? 'highlight' : ''}`} onClick={handleSocial}>
               <img id='google' src={google} alt='google'/>
             </div>
           </div>
