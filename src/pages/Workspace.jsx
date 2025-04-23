@@ -402,6 +402,12 @@ export default function Workspace() {
                         </label>
                     </div>
                     <div>
+                        {/* {game.stage.map((data, index) => {
+                            return <input type="checkbox" name="stage_connectedStage" value={index}/>
+                        })}
+                        {game.stage[stageIndex].connectedStage.map((data, index) => {
+                            return (<button onClick={game.stage[stageIndex].connectedStage.splice(index)}>{data}</button>)
+                        })} */}
                         {/* {game.stage.map((data, index1) => {
                             game.stage[stageIndex].connectedStage.map((data, index2) => {
                                 return({index2})
@@ -442,7 +448,7 @@ export default function Workspace() {
                     </tr>
                     <tr>
                         <td>설명: </td>
-                        <td>{game.description}</td>
+                        <td><pre>{game.description}</pre></td>
                     </tr>
                     <tr>
                         <td>테마: </td>
@@ -506,7 +512,7 @@ export default function Workspace() {
                     </tr>
                     <tr>
                         <td>설명</td>
-                        <td>{data.description}</td>
+                        <td><pre>{data.description}</pre></td>
                     </tr>
                     <tr>
                         <td>시간제한</td>
