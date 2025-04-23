@@ -217,8 +217,7 @@
 }
 
 /* 최근 로그인 방식 강조 스타일시트 */
-
-.kakao_login.highlight, .naver_login.highlight, .google_login.highlight, .sherlock_login.highlight {
-    background-color: #ff0000; /* 강조된 색 */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 강조 효과 */
-  }
+/* .kakao_login.highlight, .naver_login.highlight, .google_login.highlight, .sherlock_login.highlight {
+    background-color: #ff0000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+} */

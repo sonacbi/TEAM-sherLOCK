@@ -80,12 +80,12 @@ function MainPage() {
 
   // 로그인/회원가입 모달이 열려 있을 때 스크롤 방지
   useEffect(() => {
-    if (showSignIn || showSignUp) {
+    if (showSignIn || showSignUp || showNotice) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
     }
-  }, [showSignIn, showSignUp]);
+  }, [showSignIn, showSignUp, showNotice]);
 
   // 테마 아이템들이 보일 때 페이드 인 애니메이션 처리
   useEffect(() => {
@@ -119,9 +119,12 @@ function MainPage() {
 
       const noticeTable = document.querySelector('.notice_table');
       const noticeText = document.querySelector('.notice_text');
+      const noticeTextWrap = document.querySelector('.notice_text_wrap');
+
       if (
         (noticeTable && noticeTable.contains(e.target)) ||
-        (noticeText && noticeText.contains(e.target))
+        (noticeText && noticeText.contains(e.target)) ||
+        (noticeTextWrap && noticeTextWrap.contains(e.target))
       ) {
         return;
       }
@@ -196,17 +199,20 @@ function MainPage() {
   // 공지사항 외부 클릭 시 닫기 처리
   useEffect(() => {
     const handleClickOutside = (event) => {
+      const noticeWrap = document.querySelector('.notice_text_wrap');
+  
       if (
         noticeRef.current &&
         !noticeRef.current.contains(event.target) &&
+        !noticeWrap?.contains(event.target) &&
         event.target.id !== 'notice_img'
       ) {
-        setIsNoticeOpen(false);
+        setIsNoticeOpen(false); // 리스트만 닫힘
       }
     };
-
+  
     document.addEventListener('mousedown', handleClickOutside);
-
+  
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -239,47 +245,14 @@ function MainPage() {
               <img id="notice_speech_bubble" src={notice_speech_bubble} alt="notice_speech_bubble" />
 
               {/* 공지사항 목록 보기 */}
-              {!showNotice && (
-                <div className="notice_table">
-                  {items.map((item, index) => (
-                    <div key={index} className="notice_table_text" onClick={() => handleItemClick(index)}>
-                      {item}
-                    </div>
-                  ))}
-                  {hasMore && <div ref={loader} style={{ height: '10px' }} />}
-                </div>
-              )}
-
-              {/* 공지사항 상세 보기 */}
-              {showNotice && (
-                <div className="notice_text">
-                  <div className="title">
-                    서버 점검 안내
+              <div className="notice_table">
+                {items.map((item, index) => (
+                  <div key={index} className="notice_table_text" onClick={() => handleItemClick(index)}>
+                    {item}
                   </div>
-
-                  <div className="text">
-                    {/* 공지사항 text 예시 */}
-                    안녕하세요, [셜LOCK]입니다.<br/>
-                    보다 안정적인 서비스 제공을 위해 아래와 같이 서버 점검이 예정되어 있습니다.<br/><br/>
-                    ■ 점검 일시<br/><br/>
-                    2025년 4월 20일(일) 02:00 ~ 04:00 (약 2시간 예정)<br/><br/>
-                    ■ 점검 내용<br/><br/>
-                    서버 성능 개선 및 보안 업데이트<br/>
-                    서비스 안정성 향상 작업<br/><br/>
-                    ■ 점검 영향<br/><br/>
-                    점검 시간 동안 서비스 이용이 일시적으로 중단됩니다.<br/>
-                    (웹사이트 접속 및 일부 기능 제한)<br/><br/>
-                    이용에 불편을 드려 죄송합니다.<br/>
-                    더 나은 서비스를 제공하기 위한 작업이오니 너른 양해 부탁드립니다.<br/><br/>
-                    감사합니다.
-                  </div>
-
-                  <div className="exit_day">
-                    <p className="exit" onClick={() => setShowNotice(false)}>나가기</p>
-                    <p className="day">2025-04-13</p>
-                  </div>
-                </div>
-              )}
+                ))}
+                {hasMore && <div ref={loader} style={{ height: '10px' }} />}
+              </div>
             </div>
           </div>
 
@@ -334,6 +307,41 @@ function MainPage() {
       {/* 로그인/회원가입 모달 표시 */}
       {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick}/>}
       {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick}/>}
+
+      {/* 공지사항 상세 모달 표시 */}
+      {showNotice && (
+        <div className="notice_text_wrap">
+          <div className="notice_text_modal">
+            <div className="notice_text">
+              <div className="title">
+                서버 점검 안내
+              </div>
+
+              <div className="text">
+                {/* 공지사항 text 예시 */}
+                안녕하세요, [셜LOCK]입니다.<br/>
+                보다 안정적인 서비스 제공을 위해 아래와 같이 서버 점검이 예정되어 있습니다.<br/><br/>
+                ■ 점검 일시<br/><br/>
+                2025년 4월 20일(일) 02:00 ~ 04:00 (약 2시간 예정)<br/><br/>
+                ■ 점검 내용<br/><br/>
+                서버 성능 개선 및 보안 업데이트<br/>
+                서비스 안정성 향상 작업<br/><br/>
+                ■ 점검 영향<br/><br/>
+                점검 시간 동안 서비스 이용이 일시적으로 중단됩니다.<br/>
+                (웹사이트 접속 및 일부 기능 제한)<br/><br/>
+                이용에 불편을 드려 죄송합니다.<br/>
+                더 나은 서비스를 제공하기 위한 작업이오니 너른 양해 부탁드립니다.<br/><br/>
+                감사합니다.
+              </div>
+
+              <div className="exit_day">
+                <p className="exit" onClick={() => setShowNotice(false)}>나가기</p>
+                <p className="day">2025-04-13</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
