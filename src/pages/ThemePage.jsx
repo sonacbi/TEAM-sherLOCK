@@ -14,8 +14,21 @@ import horror_background from '../assets/images/ThemePage_img/horror/horror_back
 import horror_stairs from '../assets/images/ThemePage_img/horror/horror_stairs.png';
 import horror_top from '../assets/images/ThemePage_img/horror/horror_top.png';
 import horror_room from '../assets/images/ThemePage_img/horror/horror_room.png';
+import horror_top1_img from '../assets/images/ThemePage_img/horror/horror_top1_img.png';
+import horror_top2_img from '../assets/images/ThemePage_img/horror/horror_top2_img.png';
+import horror_top3_img from '../assets/images/ThemePage_img/horror/horror_top3_img.png';
+import horror_door1_img from '../assets/images/ThemePage_img/horror/horror_door1_img.png';
+import horror_door2_img from '../assets/images/ThemePage_img/horror/horror_door2_img.png';
+import horror_door3_img from '../assets/images/ThemePage_img/horror/horror_door3_img.png';
+import horror_door4_img from '../assets/images/ThemePage_img/horror/horror_door4_img.png';
+import horror_rating_star from '../assets/images/ThemePage_img/horror/horror_rating_star.png';
+import horror_difficulty_img from '../assets/images/ThemePage_img/horror/horror_difficulty_img.png';
 import adventure_background from '../assets/images/ThemePage_img/adventure/adventure_background.png';
+import adventure_rating_star from '../assets/images/ThemePage_img/adventure/adventure_rating_star.png';
+import adventure_difficulty_img from '../assets/images/ThemePage_img/adventure/adventure_difficulty_img.png';
 import crime_background from '../assets/images/ThemePage_img/crime/crime_background.png';
+import crime_rating_star from '../assets/images/ThemePage_img/crime/crime_rating_star.png';
+import crime_difficulty_img from '../assets/images/ThemePage_img/crime/crime_difficulty_img.png';
 
 function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
@@ -56,15 +69,45 @@ function ThemePage() {
     const roomMap = {
         horror: horror_room,
     };
+    const starMap = {
+        horror: horror_rating_star,
+        adventure: adventure_rating_star,
+        crime: crime_rating_star
+    }
+    const difficultyMap = {
+        horror: horror_difficulty_img,
+        adventure: adventure_difficulty_img,
+        crime: crime_difficulty_img
+    }
 
     // 테마에 맞는 이미지 가져오기
     const backgroundImage = backgroundMap[theme] || horror_background;
     const stairsImage = stairsMap[theme] || horror_stairs;
     const topImage = topMap[theme] || horror_top;
     const roomImage = roomMap[theme] || horror_room;
+    const starImage = starMap[theme] || horror_rating_star;
+    const difficultyImage = difficultyMap[theme] || horror_difficulty_img;
 
     // theme 없거나 배경 이미지 없으면 렌더링 안함
     if (!theme || !backgroundImage) return null;
+
+    const top1_difficulty = 5;
+    const top2_difficulty = 3;
+    const top3_difficulty = 4;
+
+    const horrorDoorImages = [
+        horror_door1_img,
+        horror_door2_img,
+        horror_door3_img,
+        horror_door4_img
+    ];
+
+    const doorData = [
+        { rating: 4.8, reviews: '1,927', title: '괴물', difficulty: 3 },
+        { rating: 4.8, reviews: '1,234', title: '폐쇄병동', difficulty: 2 },
+        { rating: 4.7, reviews: '1,850', title: '500원짜리 문방구 공포집', difficulty: 5 },
+        { rating: 4.6, reviews: '2,100', title: 'Conjuring House', difficulty: 5 },
+    ];
 
     // fullpage.js 초기화 및 해제
     useEffect(() => {
@@ -305,7 +348,30 @@ function ThemePage() {
                                         </div>
 
                                         <div className='door_top1'>
+                                            <img id='theme_top1_img' src={horror_top1_img} alt='theme_top1_img' />
 
+                                            <div className='theme_top1_data'>
+                                                <div className='difficulty_rating'>
+                                                    <div className='rating'>
+                                                        <img id='theme_rating_star' src={starImage} alt='theme_rating_star' />
+
+                                                        <p className='rating_text'>5.0 (3,455)</p>
+                                                    </div>
+
+                                                    <div className='difficulty'>
+                                                        {Array.from({ length: top1_difficulty }).map((_, index) => (
+                                                            <img 
+                                                                key={index}
+                                                                id='theme_difficulty_img' 
+                                                                src={difficultyImage} 
+                                                                alt='theme_difficulty_img' 
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <p className='theme_top1_title'>나의 식인 룸메이트</p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -319,7 +385,30 @@ function ThemePage() {
                                         </div>
 
                                         <div className='door_top2'>
-                                            
+                                            <img id='theme_top2_img' src={horror_top2_img} alt='theme_top2_img' />
+
+                                            <div className='theme_top2_data'>
+                                                <div className='difficulty_rating'>
+                                                    <div className='rating'>
+                                                        <img id='theme_rating_star' src={starImage} alt='theme_rating_star' />
+
+                                                        <p className='rating_text'>4.9 (2,129)</p>
+                                                    </div>
+
+                                                    <div className='difficulty'>
+                                                        {Array.from({ length: top2_difficulty }).map((_, index) => (
+                                                            <img 
+                                                                key={index}
+                                                                id='theme_difficulty_img' 
+                                                                src={difficultyImage} 
+                                                                alt='theme_difficulty_img' 
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <p className='theme_top2_title'>그림커티</p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -333,7 +422,30 @@ function ThemePage() {
                                         </div>
 
                                         <div className='door_top3'>
-                                            
+                                            <img id='theme_top3_img' src={horror_top3_img} alt='theme_top3_img' />
+
+                                            <div className='theme_top3_data'>
+                                                <div className='difficulty_rating'>
+                                                    <div className='rating'>
+                                                        <img id='theme_rating_star' src={starImage} alt='theme_rating_star' />
+
+                                                        <p className='rating_text'>4.9 (1,927)</p>
+                                                    </div>
+
+                                                    <div className='difficulty'>
+                                                        {Array.from({ length: top3_difficulty }).map((_, index) => (
+                                                            <img 
+                                                                key={index}
+                                                                id='theme_difficulty_img' 
+                                                                src={difficultyImage} 
+                                                                alt='theme_difficulty_img' 
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <p className='theme_top3_title'>미스터리모험</p>
+                                            </div>
                                         </div>
                                     </div>  
                                 </div>
@@ -360,32 +472,71 @@ function ThemePage() {
 
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
-                                {items.map((_, index) => (
-                                    <div
-                                        key={index}
-                                        className={`theme_door_room ${theme} ${
-                                        section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
-                                            ? 'animate'
-                                            : ''
-                                        }`}
-                                        style={
-                                        section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
-                                            ? { animationDelay: `${index * 0.3}s` }
-                                            : {}
-                                        }
-                                    >
-                                        {/* 방 번호와 이미지 */}
-                                        <div className="theme_room">
-                                            <div className='room'>
-                                                <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
-                                                <p>{401 + index}</p>
+                                {items.map((_, index) => {
+                                    const roomNumber = 401 + index;
+
+                                    // 방 번호에 맞게 이미지를 순차적으로 할당 (401번은 door1, 402번은 door2 ...)
+                                    const doorImageIndex = (roomNumber - 401) % 4;
+
+                                    // 아이템에 해당하는 데이터 가져오기 (예: 평점, 제목, 난이도)
+                                    const { rating, reviews, title, difficulty } = doorData[index % doorData.length]; // 데이터 순환
+
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={`theme_door_room ${theme} ${
+                                                section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
+                                                    ? 'animate'
+                                                    : ''
+                                            }`}
+                                            style={
+                                                section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
+                                                    ? { animationDelay: `${index * 0.3}s` }
+                                                    : {}
+                                            }
+                                        >
+                                            {/* 방 번호와 이미지 */}
+                                            <div className="theme_room">
+                                                <div className='room'>
+                                                    <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
+                                                    <p>{roomNumber}</p> {/* 동적으로 방 번호 표시 */}
+                                                </div>
+                                            </div>
+
+                                            {/* 각 방에 연결된 문 영역 */}
+                                            <div className='theme_door'>
+                                                {/* 반복적으로 이미지를 표시 (순차적으로 이미지가 반복됨) */}
+                                                <img
+                                                    id='theme_door_img'
+                                                    src={horrorDoorImages[doorImageIndex]} // 이미지 인덱스를 통해 반복
+                                                    alt={`theme_door_img_${doorImageIndex}`}
+                                                />
+
+                                                <div className='theme_door_data'>
+                                                    <div className='difficulty_rating'>
+                                                        <div className='rating'>
+                                                            <img id='theme_rating_star' src={starImage} alt='theme_rating_star' />
+                                                            <p className='rating_text'>{rating} ({reviews})</p>
+                                                        </div>
+
+                                                        <div className='difficulty'>
+                                                            {Array.from({ length: difficulty }).map((_, index) => (
+                                                                <img 
+                                                                    key={index}
+                                                                    id='theme_difficulty_img' 
+                                                                    src={difficultyImage} 
+                                                                    alt='theme_difficulty_img' 
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <p className='theme_door_title'>{title}</p>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        {/* 각 방에 연결된 문 영역 */}
-                                        <div className='theme_door'></div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
 
                                 {/* 무한 스크롤 감지를 위한 감시 대상 요소 */}
                                 <div ref={observerRef} style={{ width: '20px' }}></div>
