@@ -9,6 +9,9 @@ dotenv.config({ path: './modules/db/.env' });
 // authRoutes : 회원가입&로그인 관련 라우트
 import authRoutes from './modules/routes/authRoutes.js';
 
+// notice : 공지사항 관련 라우트
+import noticeRoute from './modules/routes/notice.js';
+
 const app = express();
 app.use(express.json());
 
@@ -29,6 +32,8 @@ app.use(bodyParser.json()); // post 해석
 // 라우트 연결
 // 1. 회원가입-로그인 관련 라우트
 app.use('/auth', authRoutes);
+// 2. 공지사항 관련 라우트
+app.use('/api/notices', noticeRoute);
 
 /* ---------------------------------------------------------------------- */
 
