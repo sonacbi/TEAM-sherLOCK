@@ -371,6 +371,11 @@
     padding-top: 10px;
 }
 
+#theme_door_img {
+    width: 100%;
+    height: 480px;
+}
+
 .theme_door_data #theme_difficulty_img {
     width: 1.5vw;
     height: 3vh;
