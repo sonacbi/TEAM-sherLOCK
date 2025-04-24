@@ -1,0 +1,40 @@
+table td:nth-child(1) {
+    /* border: 1px solid black; */
+    min-width: 190px;
+    padding-right: 60px;
+}
+/* #stage td {
+    width: 200px;
+} */
+
+#game {
+    background-color: #aeecff;
+}
+.stage {
+    margin-left: 50px;
+    background-color: rgb(166, 213, 255)
+}
+.cut {
+    padding: 10px 0;
+    margin-left: 50px;
+    background-color: #00c3ff;
+}
+
+section {
+    padding: 3px;
+}
+section button {
+    margin-right: 20px;
+}
+section>div {
+    display:inline-flex;
+    margin-right: 50px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea
+{
+    margin-left: 10px;
+    width: 120px;
+}
