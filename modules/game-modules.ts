@@ -23,11 +23,11 @@ enum Theme {
     adventure = "adventure",
     crime     = "crime",
 }
-enum Difficulty {
-    easy   = "easy",
-    medium = "medium",
-    hard   = "hard",
-}
+// enum Difficulty {
+//     easy   = "easy",
+//     medium = "medium",
+//     hard   = "hard",
+// }
 enum Visibility {
     public   = "public",
     unlisted = "unlisted",
@@ -42,16 +42,17 @@ class Game extends ClassVersion {
     thumbnailURL:   string;         // 게임 썸네일 URL
     description:    string;         // 설명
     role:           Role;           // 각 제작자가 맡은 역할
-    theme:          Theme;          // 테마
+    // theme:          Theme;          // 테마
     tag:            string;         // 태그
-    difficulty:     Difficulty;     // 난이도
+    // difficulty:     Difficulty;     // 난이도
+    difficulty:     number;         // 난이도
     playTime:       number;         // 예상 소요 시간
-    visibility:     Visibility;     // 공개 여부
+    // visibility:     Visibility;     // 공개 여부
     isRanking:      boolean;        // 랭킹 표시 여부
     isHiddenStage:  boolean;        // 히든 스테이지 여부
     achievement:    Achievement[];  // 업적
     source:         Source;         // 게임소스
-    inventory:      Item[];         // 인벤토리
+    // inventory:      Item[];         // 인벤토리
     stage:          Stage[];        // 스테이지
     
     constructor({
@@ -67,16 +68,17 @@ class Game extends ClassVersion {
             mechanic: [],     // 기능
             support: []       // 도움
         },
-        theme = Theme.horror,
+        // theme = Theme.horror,
         tag = '',
-        difficulty = Difficulty.easy,
+        // difficulty = Difficulty.easy,
+        difficulty = 1,
         playTime = 10,
-        visibility = Visibility.public,
+        // visibility = Visibility.public,
         isRanking = false,
         isHiddenStage = false,
         achievement = [],
         source = new Source({}),
-        inventory = [],
+        // inventory = [],
         stage = [new Stage({})]
     }) {
         super()
@@ -85,16 +87,16 @@ class Game extends ClassVersion {
         this.thumbnailURL = thumbnailURL;
         this.description = description;
         this.role = role;
-        this.theme = theme;
+        // this.theme = theme;
         this.tag = tag;
         this.difficulty = difficulty;
         this.playTime = playTime;
-        this.visibility = visibility;
+        // this.visibility = visibility;
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
         this.achievement = achievement;
         this.source = new Source(source);
-        this.inventory = inventory;
+        // this.inventory = inventory;
         this.stage = [];
         stage.map((data)=>{
             this.stage.push(new Stage(data));
@@ -116,12 +118,12 @@ class Game extends ClassVersion {
     deleteStage() {}
     
     // 인벤토리 조작
-    getItem(item) {
-        this.inventory.push(item);
-    }
-    setItem(i) {
-        this.inventory[i];
-    }
+    // getItem(item) {
+    //     this.inventory.push(item);
+    // }
+    // setItem(i) {
+    //     this.inventory[i];
+    // }
     putItem() {}
 }
 
@@ -421,4 +423,4 @@ class Transition extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut, Theme, Difficulty, Visibility, StageType, CutType, PuzzleType }
+export { ClassVersion, Source, Game, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType }

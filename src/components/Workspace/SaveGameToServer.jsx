@@ -7,6 +7,8 @@ const GAME_SERVER_PORT = 5000;
 export default function SaveGameToServer(props) {
     const game = props.game;
     const setGame = props.setGame;
+    const theme = props.theme;
+    const visibility = props.visibility;
     const thumnailImg = props.imgs.thumnailImg;
     const stageImg = props.imgs.stageImg;
     const formData = new FormData();
@@ -51,7 +53,7 @@ export default function SaveGameToServer(props) {
         try {
             const blob = await zip.generateAsync({type: 'blob'});
             formData.append('zipfile', blob, 'game.zip')
-            const res = await fetch(`http://localhost:${GAME_SERVER_PORT}/workspace-files/${param}`, {
+            const res = await fetch(`http://localhost:${GAME_SERVER_PORT}/workspace-files/${param}?theme=${theme}&visibility=${visibility}`, {
                 method: method,
                 body: formData,
             });
@@ -65,7 +67,7 @@ export default function SaveGameToServer(props) {
     return(
         <>
         <button onClick={uploadJSONToServer}>
-            서버 저장
+            (구)서버 저장
         </button>
         <button onClick={uploadFilesToServer}>
             파일들을 서버 저장

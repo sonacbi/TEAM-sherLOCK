@@ -12,12 +12,11 @@ var Theme;
     Theme["adventure"] = "adventure";
     Theme["crime"] = "crime";
 })(Theme || (Theme = {}));
-var Difficulty;
-(function (Difficulty) {
-    Difficulty["easy"] = "easy";
-    Difficulty["medium"] = "medium";
-    Difficulty["hard"] = "hard";
-})(Difficulty || (Difficulty = {}));
+// enum Difficulty {
+//     easy   = "easy",
+//     medium = "medium",
+//     hard   = "hard",
+// }
 var Visibility;
 (function (Visibility) {
     Visibility["public"] = "public";
@@ -35,23 +34,31 @@ class Game extends ClassVersion {
         puzzle: [], // 퍼즐
         mechanic: [], // 기능
         support: [] // 도움
-    }, theme = Theme.horror, tag = '', difficulty = Difficulty.easy, playTime = 10, visibility = Visibility.public, isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), inventory = [], stage = [new Stage({})] }) {
+    }, 
+    // theme = Theme.horror,
+    tag = '', 
+    // difficulty = Difficulty.easy,
+    difficulty = 1, playTime = 10, 
+    // visibility = Visibility.public,
+    isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), 
+    // inventory = [],
+    stage = [new Stage({})] }) {
         super();
         this.id = id;
         this.title = title;
         this.thumbnailURL = thumbnailURL;
         this.description = description;
         this.role = role;
-        this.theme = theme;
+        // this.theme = theme;
         this.tag = tag;
         this.difficulty = difficulty;
         this.playTime = playTime;
-        this.visibility = visibility;
+        // this.visibility = visibility;
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
         this.achievement = achievement;
         this.source = new Source(source);
-        this.inventory = inventory;
+        // this.inventory = inventory;
         this.stage = [];
         stage.map((data) => {
             this.stage.push(new Stage(data));
@@ -71,12 +78,12 @@ class Game extends ClassVersion {
     // 스테이지 삭제
     deleteStage() { }
     // 인벤토리 조작
-    getItem(item) {
-        this.inventory.push(item);
-    }
-    setItem(i) {
-        this.inventory[i];
-    }
+    // getItem(item) {
+    //     this.inventory.push(item);
+    // }
+    // setItem(i) {
+    //     this.inventory[i];
+    // }
     putItem() { }
 }
 /**
@@ -267,4 +274,4 @@ class Transition extends ClassVersion {
     static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut, Theme, Difficulty, Visibility, StageType, CutType, PuzzleType };
+export { ClassVersion, Source, Game, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType };

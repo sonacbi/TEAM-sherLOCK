@@ -74,6 +74,32 @@ app.put("/workspace", (req, res) => {
   });
 });
 
+// 게임 테이터 가져오기기
+app.get("/game/:theme", (req, res) => {
+//   console.log(`파람들: ${req.params}\n쿼리들: ${req.query}`);
+  const theme = req.params.theme;
+  const limit = Number(req.query.limit);
+  const offset = Number(req.query.offset);
+  db.query(`SELECT * FROM game WHERE theme = ? AND visibility = 'public' ORDER BY created_at LIMIT ? OFFSET ?;`, [theme, limit, offset], (err, results) => {
+    const newData = [];
+    results.map((data, index) => {
+        let gameId = data.game_id;
+        let game = JSON.parse(fs.readFileSync(`server/games/${gameId}/game.json`))
+        console.log(game)
+        let title = game.title
+        let thumbnail = `${gameId}/${game.thumbnailURL}`
+        newData.push({...data, title: title, thumbnail: thumbnail})
+    })
+    console.log('results: ', results)
+    console.log('newData: ', newData)
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.json(newData);
+    }
+  });
+});
+
 
 // 필요한 폴더 생성
 ['games', 'temp'].forEach((dir) => {
@@ -87,7 +113,9 @@ app.use('/workspace-files/:game_id', uploadZipRouter);
 app.post('/workspace-files/:game_id', (req, res) => {
   const gameId = req.params.game_id;
   const userId = "gourn"
-  db.query(`INSERT INTO game (game_id, user_id) VALUES (?, ?);`, [gameId, userId], (err, results) => {
+  const theme = req.query.theme;
+  const visibility = req.query.visibility;
+  db.query(`INSERT INTO game (game_id, user_id, theme, visibility) VALUES (?, ?, ?, ?);`, [gameId, userId, theme, visibility], (err, results) => {
     if (err) {
       return res.status(500).send(err);
     } else {
@@ -97,7 +125,9 @@ app.post('/workspace-files/:game_id', (req, res) => {
 })
 app.put('/workspace-files/:game_id', (req, res) => {
   const gameId = req.params.game_id;
-  db.query(`UPDATE game SET updated_at = CURRENT_TIMESTAMP WHERE game_id = ?;`, [gameId], (err, results) => {
+  const theme = req.query.theme;
+  const visibility = req.query.visibility;
+  db.query(`UPDATE game SET updated_at = CURRENT_TIMESTAMP, theme = ?, visibility = ? WHERE game_id = ?;`, [theme, visibility, gameId], (err, results) => {
     if (err) {
       return res.status(500).send(err);
     } else {
