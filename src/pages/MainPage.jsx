@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import DOMPurify from 'dompurify'; // 공지사항의 콘텐츠를 안전하게 정리하는 라이브러리 (XSS 공격 방지)
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Profile from '../components/Profile/Profile';
@@ -32,6 +34,20 @@ function MainPage() {
   const [hasMore, setHasMore] = useState(true);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
+  const [noticeDetail, setNoticeDetail] = useState(null);
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,  // 24시간 형식
+    }).replace(',', '');  // 날짜와 시간이 붙어서 나오므로, 쉼표를 제거
+  };
 
   const navigate = useNavigate();
 
@@ -41,20 +57,37 @@ function MainPage() {
     { id: "adventure", label: "모험", outline: adventure_outline, icon: adventure_icon },
     { id: "crime", label: "범죄", outline: crime_outline, icon: crime_icon }
   ];
+  
+  // 공지사항 불러오기
+  useEffect(() => {
+    const loadMore = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/notices?page=${page}`);
+        const newItems = response.data.data;
+        
 
-  // 예시 공지사항 리스트
-  const exampleNotices = [
-    '서버 점검 안내',
-    '신규 기능 업데이트',
-    '이벤트 공지사항',
-    '시스템 긴급 점검',
-    '이용 약관 변경 안내',
-    '개인정보 처리방침 변경',
-    '신년 이벤트 진행 중',
-    '설문조사 참여 이벤트',
-    '로그인 오류 수정 완료',
-    '서비스 개선사항 안내'
-  ];
+        // 중복 방지 로직
+        setItems((prev) => {
+          const existingIds = new Set(prev.map((item) => item.notice_id));
+          const uniqueNewItems = newItems.filter((item) => !existingIds.has(item.notice_id));
+          return [...prev, ...uniqueNewItems];
+        });
+        
+  
+        if (newItems.length === 0 || newItems.length < 10) {
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.error('공지사항 불러오기 실패:', error);
+      }
+    };
+  
+    if (hasMore) {
+      loadMore(); // ✔️ page !== 1 조건 제거
+    }
+  }, [page, hasMore]);
+  
+  
 
   // 로그인 버튼 클릭 시 처리
   const handleSignInClick = () => {
@@ -151,31 +184,6 @@ function MainPage() {
     };
   }, [showSignIn, showSignUp]);
 
-  // 공지사항 아이템 로딩 (무한 스크롤 구현)
-  useEffect(() => {
-    const loadMore = async () => {
-      const startIndex = (page - 1) * 10;
-      const endIndex = startIndex + 10;
-      const newItems = exampleNotices.slice(startIndex, endIndex);
-
-      setItems((prev) => [...prev, ...newItems]);
-
-      if (endIndex >= exampleNotices.length) {
-        setHasMore(false); // 더 이상 로딩할 데이터 없음
-      }
-    };
-
-    if (page !== 1 && hasMore) {
-      loadMore();
-    }
-  }, [page]);
-
-  // 첫 로딩 시 공지사항 10개만 세팅
-  useEffect(() => {
-    const initialItems = exampleNotices.slice(0, 10);
-    setItems(initialItems);
-  }, []);
-
   // 무한 스크롤을 위한 IntersectionObserver 설정
   useEffect(() => {
     if (!loader.current || !isNoticeOpen) return;
@@ -225,9 +233,17 @@ function MainPage() {
   };
 
   // 공지 아이템 클릭 시 상세 내용 보여주기
-  const handleItemClick = (index) => {
-    setShowNotice(true);
-  };
+  const handleItemClick = async (noticeId) => {
+    console.log('Clicked notice ID:', noticeId); // ID가 제대로 전달되는지 확인
+    try {
+      const response = await axios.get(`http://localhost:5000/api/notices/${noticeId}`); // 공지사항 상세 정보 요청
+      setNoticeDetail(response.data);
+      setShowNotice(true); // 모달 열기
+    } catch (error) {
+      console.error('공지사항 상세 불러오기 실패:', error);
+    }
+  };  
+  
 
   // 전체 렌더링 구조 시작
   return (
@@ -246,13 +262,26 @@ function MainPage() {
 
               {/* 공지사항 목록 보기 */}
               <div className="notice_table">
-                {items.map((item, index) => (
-                  <div key={index} className="notice_table_text" onClick={() => handleItemClick(index)}>
-                    {item}
-                  </div>
-                ))}
+                {console.log("Items:", items)}  {/* items 배열 전체를 확인 */}
+                {items.map((item, index) => {
+                  console.log("Item:", item);  // 각 아이템을 로그로 출력
+                  console.log("Notice ID:", item?.notice_id);  // notice_id를 안전하게 출력
+                  
+                  return (
+                    <div
+                      key={item?.notice_id || index}  // 각 공지사항 고유 ID 사용
+                      className="notice_table_text"
+                      onClick={() => handleItemClick(item?.notice_id)}  // 공지사항 ID로 클릭 이벤트 처리
+                    >
+                      {item?.title}  {/* 공지사항 제목 표시 */}
+                    </div>
+                  );
+                })}
                 {hasMore && <div ref={loader} style={{ height: '10px' }} />}
               </div>
+
+
+
             </div>
           </div>
 
@@ -309,39 +338,30 @@ function MainPage() {
       {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick}/>}
 
       {/* 공지사항 상세 모달 표시 */}
-      {showNotice && (
+      {showNotice && noticeDetail && (
         <div className="notice_text_wrap">
           <div className="notice_text_modal">
             <div className="notice_text">
               <div className="title">
-                서버 점검 안내
+                {noticeDetail.title}
               </div>
 
-              <div className="text">
-                {/* 공지사항 text 예시 */}
-                안녕하세요, [셜LOCK]입니다.<br/>
-                보다 안정적인 서비스 제공을 위해 아래와 같이 서버 점검이 예정되어 있습니다.<br/><br/>
-                ■ 점검 일시<br/><br/>
-                2025년 4월 20일(일) 02:00 ~ 04:00 (약 2시간 예정)<br/><br/>
-                ■ 점검 내용<br/><br/>
-                서버 성능 개선 및 보안 업데이트<br/>
-                서비스 안정성 향상 작업<br/><br/>
-                ■ 점검 영향<br/><br/>
-                점검 시간 동안 서비스 이용이 일시적으로 중단됩니다.<br/>
-                (웹사이트 접속 및 일부 기능 제한)<br/><br/>
-                이용에 불편을 드려 죄송합니다.<br/>
-                더 나은 서비스를 제공하기 위한 작업이오니 너른 양해 부탁드립니다.<br/><br/>
-                감사합니다.
-              </div>
+              {/* content가 HTML로 렌더링되도록 수정 */}
+              <div className="text" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(noticeDetail.content) }} />
 
               <div className="exit_day">
                 <p className="exit" onClick={() => setShowNotice(false)}>나가기</p>
-                <p className="day">2025-04-13</p>
+                <p className="day">
+                  {formatDate(noticeDetail.updated_at || noticeDetail.created_at)}
+                </p>  {/* 날짜 포맷팅 */}
               </div>
             </div>
           </div>
         </div>
       )}
+      
+      {/* 로더 컴포넌트 */}
+      <div ref={loader}></div>
     </div>
   );
 }
