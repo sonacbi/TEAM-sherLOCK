@@ -1,39 +1,41 @@
-.workspace table td:nth-child(1) {
+#workspace table td:nth-child(1) {
     /* border: 1px solid black; */
-    min-width: 190px;
+    width: 180px;
     padding-right: 60px;
+}
+#workspace table{
+    width: 800px;
 }
 /* #stage td {
     width: 200px;
 } */
-
-.workspace #game {
+#workspace #game {
     background-color: #aeecff;
 }
-.workspace .stage {
+#workspace .stage {
     margin-left: 50px;
     background-color: rgb(166, 213, 255)
 }
-.workspace .cut {
+#workspace .cut {
     padding: 10px 0;
     margin-left: 50px;
     background-color: #00c3ff;
 }
 
-.workspace section {
+#workspace>section {
     padding: 3px;
 }
-.workspace section button {
+#workspace section button {
     margin-right: 20px;
 }
-.workspace section>div {
+#workspace section>div {
     display:inline-flex;
     margin-right: 50px;
 }
 
-.workspace input[type="text"],
-.workspace input[type="number"],
-.workspace textarea
+#workspace input[type="text"],
+#workspace input[type="number"],
+#workspace textarea
 {
     margin-left: 10px;
     width: 120px;

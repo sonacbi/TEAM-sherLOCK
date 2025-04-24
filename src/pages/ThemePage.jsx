@@ -38,7 +38,8 @@ function ThemePage() {
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
-    const [items, setItems] = useState([]); // 아이템 상태 배열
+    const [games, setgames] = useState([]); // 아이템 상태 배열
+    const searchWord = useRef(''); // 검색어
     const observerRef = useRef(null); // IntersectionObserver 대상
     const scrollContainerRef = useRef(null); // 가로 스크롤 컨테이너
     const scrollAmount = useRef(0); // 휠 스크롤 양
@@ -138,12 +139,27 @@ function ThemePage() {
     }, [showSignIn, showSignUp]);
 
     // 새로운 아이템 로드
-    const loadMoreItems = () => {
-        setItems((prev) => [
-            ...prev,
-            ...Array.from({ length: 10 }, (_, i) => prev.length + i + 1)
-        ]);
+    const loadMoregames = async () => {
+        const res = await fetch(`http://localhost:4000/game/${theme}?limit=${games.length + 14}&offset=${games.length}`);
+        const data = await res.json();
+        console.log('가져온 게임 뎅터: ',data);
+        setgames((prev) => {
+            // const pageData = {
+            //     ...data.
+            // }
+            return [
+                ...prev,
+                ...data
+                // ...Array.from({ length: 10 }, (_, i) => prev.length + i + 1)
+            ]
+        });
+        console.log('games:',games)
     };
+
+    const searchgames = (event) => {
+        searchWord.current = event.target.value;
+        console.log(searchWord)
+    }
 
     // IntersectionObserver로 섹션2 보이면 애니메이션 시작
     useEffect(() => {
@@ -195,7 +211,7 @@ function ThemePage() {
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
-                    loadMoreItems();
+                    loadMoregames();
                 }
             },
             { root: scrollContainerRef.current, threshold: 1.0 }
@@ -226,7 +242,7 @@ function ThemePage() {
             const containerWidth = container.clientWidth;
 
             if (scrollWidth - scrollPosition - containerWidth < 200) {
-                loadMoreItems(); // 새로운 아이템 로드
+                loadMoregames(); // 새로운 아이템 로드
             }
 
             const now = Date.now();
@@ -472,7 +488,7 @@ function ThemePage() {
 
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
-                                {items.map((_, index) => {
+                                {games.map((data, index) => {
                                     const roomNumber = 401 + index;
 
                                     // 방 번호에 맞게 이미지를 순차적으로 할당 (401번은 door1, 402번은 door2 ...)
@@ -508,7 +524,7 @@ function ThemePage() {
                                                 {/* 반복적으로 이미지를 표시 (순차적으로 이미지가 반복됨) */}
                                                 <img
                                                     id='theme_door_img'
-                                                    src={horrorDoorImages[doorImageIndex]} // 이미지 인덱스를 통해 반복
+                                                    src={`../../server/games/${data.thumbnail}`} // 이미지 인덱스를 통해 반복
                                                     alt={`theme_door_img_${doorImageIndex}`}
                                                 />
 
@@ -520,7 +536,7 @@ function ThemePage() {
                                                         </div>
 
                                                         <div className='difficulty'>
-                                                            {Array.from({ length: difficulty }).map((_, index) => (
+                                                            {Array.from({ length: data.difficulty }).map((_, index) => (
                                                                 <img 
                                                                     key={index}
                                                                     id='theme_difficulty_img' 
@@ -531,7 +547,7 @@ function ThemePage() {
                                                         </div>
                                                     </div>
 
-                                                    <p className='theme_door_title'>{title}</p>
+                                                    <p className='theme_door_title'>{data.title}</p>
                                                 </div>
                                             </div>
                                         </div>

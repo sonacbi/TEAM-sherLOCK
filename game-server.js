@@ -84,14 +84,15 @@ app.get("/game/:theme", (req, res) => {
     const newData = [];
     results.map((data, index) => {
         let gameId = data.game_id;
-        let game = JSON.parse(fs.readFileSync(`server/games/${gameId}/game.json`))
-        console.log(game)
-        let title = game.title
-        let thumbnail = `${gameId}/${game.thumbnailURL}`
-        newData.push({...data, title: title, thumbnail: thumbnail})
+        let game = JSON.parse(fs.readFileSync(`server/games/${gameId}/game.json`));
+        // console.log(game);
+        let title = game.title;
+        let thumbnail = `${gameId}/${game.thumbnailURL}`;
+        let difficulty = game.difficulty;
+        newData.push({...data, title: title, thumbnail: thumbnail, difficulty: difficulty});
     })
-    console.log('results: ', results)
-    console.log('newData: ', newData)
+    // console.log('results: ', results)
+    // console.log('newData: ', newData)
     if (err) {
       res.status(500).send(err);
     } else {
