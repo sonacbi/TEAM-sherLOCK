@@ -244,7 +244,7 @@ export default function Workspace() {
     }
 
     return(
-        <>
+        <div id="workspace">
         <section style={{backgroundColor: "#55dd55"}}>
             <button onClick={showImgs}>이미지 보기</button>
             <button onClick={showThumbnailImg}>썸네일 이미지 보기</button>
@@ -598,6 +598,6 @@ export default function Workspace() {
         <section style={{backgroundColor: "#ffaa22"}}>
             <SaveGameToServer game={game} setGame={setGame} theme={theme} visibility={visibility} imgs={{thumnailImg, stageImg}}/>
         </section>
-        </>
+        </div>
     )
 }

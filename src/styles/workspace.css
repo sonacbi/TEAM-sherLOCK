@@ -1,4 +1,4 @@
-table td:nth-child(1) {
+.workspace table td:nth-child(1) {
     /* border: 1px solid black; */
     min-width: 190px;
     padding-right: 60px;
@@ -7,33 +7,33 @@ table td:nth-child(1) {
     width: 200px;
 } */
 
-#game {
+.workspace #game {
     background-color: #aeecff;
 }
-.stage {
+.workspace .stage {
     margin-left: 50px;
     background-color: rgb(166, 213, 255)
 }
-.cut {
+.workspace .cut {
     padding: 10px 0;
     margin-left: 50px;
     background-color: #00c3ff;
 }
 
-section {
+.workspace section {
     padding: 3px;
 }
-section button {
+.workspace section button {
     margin-right: 20px;
 }
-section>div {
+.workspace section>div {
     display:inline-flex;
     margin-right: 50px;
 }
 
-input[type="text"],
-input[type="number"],
-textarea
+.workspace input[type="text"],
+.workspace input[type="number"],
+.workspace textarea
 {
     margin-left: 10px;
     width: 120px;
