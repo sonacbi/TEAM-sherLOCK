@@ -167,7 +167,7 @@ app.post("/data", (req, res) => {
 
 
 
-const port = process.env.GAME_SERVER_PORT;
+const port = '4000';
 app.listen(port, () => {
   console.log(`게임서버 실행 중··· (포트: ${port})`);
 });

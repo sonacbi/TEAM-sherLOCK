@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import axios from "axios";
 import JSZip from "jszip";
 
-const GAME_SERVER_PORT = 5000;
+const GAME_SERVER_PORT = 4000;
 
 export default function SaveGameToServer(props) {
     const game = props.game;
