@@ -10,10 +10,13 @@ import fullpage from 'fullpage.js';
 import 'fullpage.js/dist/fullpage.min.css';
 import '../styles/ThemePage.css';
 
+import search_icon from '../assets/images/ThemePage_img/search_icon.png';
 import horror_background from '../assets/images/ThemePage_img/horror/horror_background.png';
 import horror_stairs from '../assets/images/ThemePage_img/horror/horror_stairs.png';
 import horror_top from '../assets/images/ThemePage_img/horror/horror_top.png';
 import horror_room from '../assets/images/ThemePage_img/horror/horror_room.png';
+import horror_down_arrow from '../assets/images/ThemePage_img/horror/horror_down_arrow.png';
+import horror_right_arrow from '../assets/images/ThemePage_img/horror/horror_right_arrow.png';
 import horror_top1_img from '../assets/images/ThemePage_img/horror/horror_top1_img.png';
 import horror_top2_img from '../assets/images/ThemePage_img/horror/horror_top2_img.png';
 import horror_top3_img from '../assets/images/ThemePage_img/horror/horror_top3_img.png';
@@ -70,22 +73,30 @@ function ThemePage() {
     const roomMap = {
         horror: horror_room,
     };
+    const downarrowMap = {
+        horror: horror_down_arrow,
+    };
+    const rightarrowMap = {
+        horror: horror_right_arrow,
+    };
     const starMap = {
         horror: horror_rating_star,
         adventure: adventure_rating_star,
         crime: crime_rating_star
-    }
+    };
     const difficultyMap = {
         horror: horror_difficulty_img,
         adventure: adventure_difficulty_img,
         crime: crime_difficulty_img
-    }
+    };
 
     // 테마에 맞는 이미지 가져오기
     const backgroundImage = backgroundMap[theme] || horror_background;
     const stairsImage = stairsMap[theme] || horror_stairs;
     const topImage = topMap[theme] || horror_top;
     const roomImage = roomMap[theme] || horror_room;
+    const downarrowImage = downarrowMap[theme] || horror_down_arrow;
+    const rightarrowImage = rightarrowMap[theme] || horror_right_arrow;
     const starImage = starMap[theme] || horror_rating_star;
     const difficultyImage = difficultyMap[theme] || horror_difficulty_img;
 
@@ -467,6 +478,8 @@ function ThemePage() {
                                 </div>
                             </div>
 
+                            <img id='theme_down_arrow' src={downarrowImage} alt='theme_down_arrow' />
+
                             {/* 중간 구조물(계단 + 복도) */}
                             <div className='floor'>
                                 <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
@@ -483,8 +496,21 @@ function ThemePage() {
                         <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
                         <div className='theme_door_infinite'>
-                            {/* 정렬 및 검색 영역 (현재 비어있음) */}
-                            <div className='sort_search'></div>
+                            {/* 정렬 및 검색 영역 */}
+                            <div className='sort_search_wrap'>
+                                <div className='sort_search_arrow'>
+                                    <img id='theme_right_arrow' src={rightarrowImage} alt='theme_right_arrow' />
+                                    
+                                    <div className='sort_search'>
+                                        <div className='search'>
+                                            <img id='search_icon' src={search_icon} alt='search_icon' />
+                                            <input className='door_search' type='text' placeholder="제목 검색"/>
+                                        </div>
+                                        
+                                        <h1 className='sort'>평점 순</h1>
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
