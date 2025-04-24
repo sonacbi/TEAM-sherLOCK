@@ -5,7 +5,6 @@ import MainPage from './pages/MainPage';
 import SocialAuthHandler from './pages/SocialAuthHandler';
 import Workspace from './pages/Workspace';
 import ThemePage from './pages/ThemePage';
-import Game from './pages/Game';
 
 function App() {
   return (
@@ -19,7 +18,6 @@ function App() {
         <Route path="/auth/google" element={<SocialAuthHandler />} />
         <Route path="/Theme/:theme" element={<ThemePage />} />
         <Route path='/workspace' element={<Workspace/>} />
-        <Route path='/Game/:id' element={<Game/>} />
       </Routes>
     </Router>
   );
