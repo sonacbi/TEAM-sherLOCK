@@ -160,13 +160,13 @@
 }
 
 #theme_rating_star {
-    width: 25px;
-    height: 25px;
+    width: 1.5vw;
+    height: 4vh;
 }
 
 .rating_text {
     color: white;
-    font-size: 18px;
+    font-size: 1.3vw;
 }
 
 .difficulty {
@@ -177,15 +177,15 @@
 }
 
 #theme_difficulty_img {
-    width: 25px;
-    height: 25px;
+    width: 1.5vw;
+    height: 3vh;
 }
 
 .theme_top1_title, .theme_top2_title, .theme_top3_title, .theme_door_title {
     padding: 0 30px;
     display: flex;
     align-items: center;
-    font-size: 20px;
+    font-size: 1.2vw;
     color: white;
 }
 
@@ -197,12 +197,12 @@
     color: #b22222;
 }
 
-.theme_door_hit1.horror:hover .door_top1,
+/* .theme_door_hit1.horror:hover .door_top1,
 .theme_door_hit2.horror:hover .door_top2,
 .theme_door_hit3.horror:hover .door_top3,
 .theme_door_room.horror:hover .theme_door {
     box-shadow: 0 0 50px #b51111;
-}
+} */
 
 .theme_door_hit1.adventure:hover .theme_door_top1 p,
 .theme_door_hit2.adventure:hover .theme_door_top2 p,
@@ -211,12 +211,12 @@
     color: #e4c590;
 }
 
-.theme_door_hit1.adventure:hover .door_top1,
+/* .theme_door_hit1.adventure:hover .door_top1,
 .theme_door_hit2.adventure:hover .door_top2,
 .theme_door_hit3.adventure:hover .door_top3,
 .theme_door_room.adventure:hover .theme_door {
     box-shadow: 0 0 50px #a97213;
-}
+} */
 
 .theme_door_hit1.crime:hover .theme_door_top1 p,
 .theme_door_hit2.crime:hover .theme_door_top2 p,
@@ -225,12 +225,12 @@
     color: #4f4f4f;
 }
 
-.theme_door_hit1.crime:hover .door_top1,
+/* .theme_door_hit1.crime:hover .door_top1,
 .theme_door_hit2.crime:hover .door_top2,
 .theme_door_hit3.crime:hover .door_top3,
 .theme_door_room.crime:hover .theme_door {
     box-shadow: 0 0 50px #000000;
-}
+} */
 
 .floor {
     width: 100%;
@@ -321,8 +321,8 @@
 }
 
 .theme_door_data #theme_difficulty_img {
-    width: 20px;
-    height: 20px;
+    width: 1.5vw;
+    height: 3vh;
 }
 
 .theme_door_infinite .hallway {
