@@ -197,6 +197,10 @@
     color: #b22222;
 }
 
+.sort.horror:hover {
+    color: #8b1c1c;
+}
+
 /* .theme_door_hit1.horror:hover .door_top1,
 .theme_door_hit2.horror:hover .door_top2,
 .theme_door_hit3.horror:hover .door_top3,
@@ -305,6 +309,8 @@
 .sort {
     font-size: 2.5vw;
     transform: skewX(-20deg);
+    transition: color 0.5s ease;
+    cursor: pointer;
 }
 
 .infinite {

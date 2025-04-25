@@ -523,7 +523,7 @@ function ThemePage() {
                                             <input className='door_search' type='text' placeholder="제목 검색" onChange={searchGames}/>
                                         </div>
                                         
-                                        <h1 className='sort'>평점 순</h1>
+                                        <h1 className={`sort ${theme}`}>평점 순</h1>
                                     </div>
                                 </div>
                             </div>
