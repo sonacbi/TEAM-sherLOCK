@@ -41,7 +41,7 @@ function ThemePage() {
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
-    const [games, setgames] = useState([]); // 아이템 상태 배열
+    const [games, setGames] = useState([]); // 아이템 상태 배열
     const searchWord = useRef(''); // 검색어
     const observerRef = useRef(null); // IntersectionObserver 대상
     const scrollContainerRef = useRef(null); // 가로 스크롤 컨테이너
@@ -150,26 +150,42 @@ function ThemePage() {
     }, [showSignIn, showSignUp]);
 
     // 새로운 아이템 로드
-    const loadMoregames = async () => {
+    const loadMoreGames = async () => {
         const res = await fetch(`http://localhost:4000/game/${theme}?limit=${games.length + 14}&offset=${games.length}`);
-        const data = await res.json();
-        console.log('가져온 게임 뎅터: ',data);
-        setgames((prev) => {
+        const datas = await res.json();
+        console.log('가져온 게임 뎅터: ',datas);
+
+        const keyword = searchWord.current.trim().toLowerCase();
+        const filtered = datas.filter(game =>
+            game.title.toLowerCase().includes(keyword)
+        );
+        console.log('필터링된 게임 데이터: ', filtered);
+        const word = new RegExp(searchWord.current)
+        datas.map((data, index) => {
+            console.log('맞음',word.test(data.title))
+            if(word.test(data.title)) {
+                datas.splice(index, 1)
+            }
+        })
+
+        setGames((prev) => {
             // const pageData = {
             //     ...data.
             // }
             return [
                 ...prev,
-                ...data
+                ...filtered
                 // ...Array.from({ length: 10 }, (_, i) => prev.length + i + 1)
             ]
         });
-        console.log('games:',games)
+        // console.log('games:',games)
     };
 
-    const searchgames = (event) => {
+    const searchGames = (event) => {
         searchWord.current = event.target.value;
-        console.log(searchWord)
+        console.log('서치워드',searchWord.current)
+        setGames([]);
+        loadMoreGames();
     }
 
     // IntersectionObserver로 섹션2 보이면 애니메이션 시작
@@ -222,7 +238,7 @@ function ThemePage() {
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
-                    loadMoregames();
+                    loadMoreGames();
                 }
             },
             { root: scrollContainerRef.current, threshold: 1.0 }
@@ -253,7 +269,7 @@ function ThemePage() {
             const containerWidth = container.clientWidth;
 
             if (scrollWidth - scrollPosition - containerWidth < 200) {
-                loadMoregames(); // 새로운 아이템 로드
+                loadMoreGames(); // 새로운 아이템 로드
             }
 
             const now = Date.now();
@@ -504,7 +520,7 @@ function ThemePage() {
                                     <div className='sort_search'>
                                         <div className='search'>
                                             <img id='search_icon' src={search_icon} alt='search_icon' />
-                                            <input className='door_search' type='text' placeholder="제목 검색"/>
+                                            <input className='door_search' type='text' placeholder="제목 검색" onChange={searchGames}/>
                                         </div>
                                         
                                         <h1 className='sort'>평점 순</h1>
@@ -551,7 +567,7 @@ function ThemePage() {
                                                 <img
                                                     id='theme_door_img'
                                                     src={`../../server/games/${data.thumbnail}`} // 이미지 인덱스를 통해 반복
-                                                    alt={`theme_door_img_${doorImageIndex}`}
+                                                    alt={`theme_door_img_${data.thumbnail}`}
                                                 />
 
                                                 <div className='theme_door_data'>
