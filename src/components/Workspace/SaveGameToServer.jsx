@@ -38,6 +38,7 @@ export default function SaveGameToServer(props) {
         let param = '';
         
         if(!game.id) {
+            // game에 아이디가 없으면 아이디(nanoid) 부여
             const nanoId = nanoid(8);
             const newGame = { ...game, id: nanoId };
             setGame({ ...game, id: nanoId })
@@ -50,6 +51,7 @@ export default function SaveGameToServer(props) {
             param = game.id;
         }
 
+        // 게임 zip 파일 서버로 전송
         try {
             const blob = await zip.generateAsync({type: 'blob'});
             formData.append('zipfile', blob, 'game.zip')

@@ -151,40 +151,28 @@ function ThemePage() {
 
     // 새로운 아이템 로드
     const loadMoreGames = async () => {
-        const res = await fetch(`http://localhost:4000/game/${theme}?limit=${games.length + 14}&offset=${games.length}`);
+        const res = await fetch(`http://localhost:4000/game/${theme}?limit=${games.length + 10}&search_word=${searchWord.current}`);
         const datas = await res.json();
-        console.log('가져온 게임 뎅터: ',datas);
+        console.log('가져온 게임들: ',datas);
 
         const keyword = searchWord.current.trim().toLowerCase();
         const filtered = datas.filter(game =>
             game.title.toLowerCase().includes(keyword)
         );
-        console.log('필터링된 게임 데이터: ', filtered);
-        const word = new RegExp(searchWord.current)
-        datas.map((data, index) => {
-            console.log('맞음',word.test(data.title))
-            if(word.test(data.title)) {
-                datas.splice(index, 1)
-            }
-        })
+        console.log('필터링된 게임들: ', filtered);
 
-        setGames((prev) => {
-            // const pageData = {
-            //     ...data.
-            // }
-            return [
-                ...prev,
-                ...filtered
-                // ...Array.from({ length: 10 }, (_, i) => prev.length + i + 1)
-            ]
-        });
-        // console.log('games:',games)
+        // setGames((prev) => [...prev, ...filtered]);
+        setGames([...filtered]);
     };
 
     const searchGames = (event) => {
-        searchWord.current = event.target.value;
-        console.log('서치워드',searchWord.current)
+        event.preventDefault();
+        searchWord.current = new FormData(event.target).get("door_search");
+        console.log('검색된 글자: ',searchWord.current)
         setGames([]);
+        hasAnimated.current = false;
+        setSection2Visible(true);
+        // setTimeout(await loadMoreGames(), 1)
         loadMoreGames();
     }
 
@@ -238,6 +226,7 @@ function ThemePage() {
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
+                    console.log("좌측에서 랜더링됨")
                     loadMoreGames();
                 }
             },
@@ -270,6 +259,7 @@ function ThemePage() {
 
             if (scrollWidth - scrollPosition - containerWidth < 200) {
                 loadMoreGames(); // 새로운 아이템 로드
+                console.log("우측에서 랜더링됨")
             }
 
             const now = Date.now();
@@ -520,7 +510,10 @@ function ThemePage() {
                                     <div className='sort_search'>
                                         <div className='search'>
                                             <img id='search_icon' src={search_icon} alt='search_icon' />
-                                            <input className='door_search' type='text' placeholder="제목 검색" onChange={searchGames}/>
+                                            <form onSubmit={searchGames}>
+                                                <input className='door_search' name='door_search' type='text' placeholder="제목 검색"/>
+                                                <button type='submit'>검색</button>
+                                            </form>
                                         </div>
                                         
                                         <h1 className={`sort ${theme}`}>평점 순</h1>

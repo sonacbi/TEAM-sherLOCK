@@ -74,25 +74,25 @@ app.put("/workspace", (req, res) => {
   });
 });
 
-// 게임 테이터 가져오기기
+// 게임 테이터 가져오기
 app.get("/game/:theme", (req, res) => {
-//   console.log(`파람들: ${req.params}\n쿼리들: ${req.query}`);
   const theme = req.params.theme;
   const limit = Number(req.query.limit);
   const offset = Number(req.query.offset);
-  db.query(`SELECT * FROM game WHERE theme = ? AND visibility = 'public' ORDER BY created_at LIMIT ? OFFSET ?;`, [theme, limit, offset], (err, results) => {
+  const search_word = req.query.search_word;
+  db.query(`SELECT * FROM game WHERE theme = ? AND visibility = 'public' ORDER BY created_at LIMIT ?;`, [theme, limit], (err, results) => {
     const newData = [];
     results.map((data, index) => {
         let gameId = data.game_id;
         let game = JSON.parse(fs.readFileSync(`server/games/${gameId}/game.json`));
         // console.log(game);
-        let title = game.title;
-        let thumbnail = `${gameId}/${game.thumbnailURL}`;
-        let difficulty = game.difficulty;
-        newData.push({...data, title: title, thumbnail: thumbnail, difficulty: difficulty});
+        newData.push({
+          ...data,
+          title: game.title,
+          thumbnail: `${gameId}/${game.thumbnailURL}`,
+          difficulty: game.difficulty
+        });
     })
-    // console.log('results: ', results)
-    // console.log('newData: ', newData)
     if (err) {
       res.status(500).send(err);
     } else {
@@ -110,6 +110,7 @@ app.get("/game/:theme", (req, res) => {
   }
 });
 
+// 워크스페이스에서 만든 게임 파일을 서버에 저장
 app.use('/workspace-files/:game_id', uploadZipRouter);
 app.post('/workspace-files/:game_id', (req, res) => {
   const gameId = req.params.game_id;
@@ -170,5 +171,5 @@ app.post("/data", (req, res) => {
 
 const port = '4000';
 app.listen(port, () => {
-  console.log(`게임서버 실행 중··· (포트: ${port})`);
+  console.log(`Game server : http://localhost:${port}`);
 });
