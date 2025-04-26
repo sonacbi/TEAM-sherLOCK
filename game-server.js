@@ -1,11 +1,12 @@
 import express from 'express'
 import mysql from 'mysql2'
-import 'dotenv/config'
 import cors from 'cors'
 import fs from 'fs'
 import { fileURLToPath } from 'url';
 import path from 'path';
-import uploadZipRouter from './modules/routes/uploadZIPGameToServer.js';
+import getGame from './modules/routes/game/getGame.js';
+import getGames from './modules/routes/game/getGames.js';
+import uploadGameRoute from './modules/routes/game/uploadGame.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,23 +14,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors()); // CORS 허용
 app.use(express.json()); // JSON 요청 처리
-
-// MySQL 연결
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  port: "3400",
-  password: "0000",
-  database: "sherlock",
-});
-
-db.connect((err) => {
-  if (err) {
-    console.error("MySQL 연결 실패: ", err);
-  } else {
-    console.log("MySQL 연결 성공!");
-  }
-});
 
 // 워크스페이스
 app.post("/workspace", (req, res) => {
@@ -75,32 +59,8 @@ app.put("/workspace", (req, res) => {
 });
 
 // 게임 테이터 가져오기
-app.get("/game/:theme", (req, res) => {
-  const theme = req.params.theme;
-  const limit = Number(req.query.limit);
-  const offset = Number(req.query.offset);
-  const search_word = req.query.search_word;
-  db.query(`SELECT * FROM game WHERE theme = ? AND visibility = 'public' ORDER BY created_at LIMIT ?;`, [theme, limit], (err, results) => {
-    const newData = [];
-    results.map((data, index) => {
-        let gameId = data.game_id;
-        let game = JSON.parse(fs.readFileSync(`server/games/${gameId}/game.json`));
-        // console.log(game);
-        newData.push({
-          ...data,
-          title: game.title,
-          thumbnail: `${gameId}/${game.thumbnailURL}`,
-          difficulty: game.difficulty
-        });
-    })
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(newData);
-    }
-  });
-});
-
+app.use('/game', getGame);
+app.use('/games', getGames);
 
 // 필요한 폴더 생성
 ['games', 'temp'].forEach((dir) => {
@@ -111,62 +71,7 @@ app.get("/game/:theme", (req, res) => {
 });
 
 // 워크스페이스에서 만든 게임 파일을 서버에 저장
-app.use('/workspace-files/:game_id', uploadZipRouter);
-app.post('/workspace-files/:game_id', (req, res) => {
-  const gameId = req.params.game_id;
-  const userId = "gourn"
-  const theme = req.query.theme;
-  const visibility = req.query.visibility;
-  db.query(`INSERT INTO game (game_id, user_id, theme, visibility) VALUES (?, ?, ?, ?);`, [gameId, userId, theme, visibility], (err, results) => {
-    if (err) {
-      return res.status(500).send(err);
-    } else {
-      return res.json(results);
-    }
-  })
-})
-app.put('/workspace-files/:game_id', (req, res) => {
-  const gameId = req.params.game_id;
-  const theme = req.query.theme;
-  const visibility = req.query.visibility;
-  db.query(`UPDATE game SET updated_at = CURRENT_TIMESTAMP, theme = ?, visibility = ? WHERE game_id = ?;`, [theme, visibility, gameId], (err, results) => {
-    if (err) {
-      return res.status(500).send(err);
-    } else {
-      return res.json(results);
-    }
-  })
-})
-
-
-// ^^^^^^^^ 테 스 트 ^^^^^^^^
-// 게임 테이블 조회
-app.get("/game/:num", (req, res) => {
-  console.log("게임 아이디:", req.params.num);
-  const num = Number(req.params.num);
-  console.log(num)
-  db.query(`SELECT * FROM game WHERE game_id = ?;`, [num], (err, results) => {
-    console.log('results: ', results)
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(results);
-    }
-  });
-});
-
-app.post("/data", (req, res) => {
-  const sql = req.body.query;
-  db.query(sql, (err, results) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.json(results);
-    }
-  });
-});
-// vvvvvvvv 테 스 트 vvvvvvvv
-
+app.use('/workspace-files', uploadGameRoute);
 
 
 const port = '4000';

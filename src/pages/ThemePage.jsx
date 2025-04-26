@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Profile from '../components/Profile/Profile';
@@ -57,6 +57,8 @@ function ThemePage() {
     const hasAnimated = useRef(false); // 두 번째 섹션 애니메이션 실행 여부 저장
     const hasAnimated2 = useRef(false); // 첫 번째 애니메이션 실행 여부 저장
     const [shouldAnimate, setShouldAnimate] = useState(false); // 첫 번째 애니메이션 실행 여부
+
+    const navigate = useNavigate();
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -151,7 +153,7 @@ function ThemePage() {
 
     // 새로운 아이템 로드
     const loadMoreGames = async () => {
-        const res = await fetch(`http://localhost:4000/game/${theme}?limit=${games.length + 10}&search_word=${searchWord.current}`);
+        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&search_word=${searchWord.current}`);
         const datas = await res.json();
         console.log('가져온 게임들: ',datas);
 
@@ -545,6 +547,7 @@ function ThemePage() {
                                                     ? { animationDelay: `${index * 0.3}s` }
                                                     : {}
                                             }
+                                            onClick={() => navigate(`/game/${data.game_id}`)}
                                         >
                                             {/* 방 번호와 이미지 */}
                                             <div className="theme_room">
