@@ -5,6 +5,7 @@ import Header_Logo from '../components/Header_Logo/Header_Logo';
 import Profile from '../components/Profile/Profile';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
+import Ranking from '../components/Ranking/Ranking';
 import Footer from '../components/Footer/Footer';
 import fullpage from 'fullpage.js';
 import 'fullpage.js/dist/fullpage.min.css';
@@ -32,6 +33,7 @@ import adventure_difficulty_img from '../assets/images/ThemePage_img/adventure/a
 import crime_background from '../assets/images/ThemePage_img/crime/crime_background.png';
 import crime_rating_star from '../assets/images/ThemePage_img/crime/crime_rating_star.png';
 import crime_difficulty_img from '../assets/images/ThemePage_img/crime/crime_difficulty_img.png';
+
 
 function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
@@ -359,9 +361,7 @@ function ThemePage() {
                         <div className='theme_hit_rank_floor'>
                             <div className='theme_hit_rank'>
                                 <div className='theme_rank'>
-                                    <div className='rank'>
-
-                                    </div>
+                                    <Ranking />
                                 </div>
 
                                 <div className='theme_hit'>
