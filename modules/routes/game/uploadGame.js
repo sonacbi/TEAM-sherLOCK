@@ -1,14 +1,13 @@
 import express from 'express';
 import multer from 'multer';
 import AdmZip from 'adm-zip';
-import path from 'path';
 import fs from 'fs';
 import db from '../../db/db.js';
 
 const router = express.Router();
 
 // 임시 저장 폴더
-const upload = multer({ dest: path.join('server/temp/') });
+const upload = multer({ dest: 'server/temp/' });
 
 // 모든 경로에 해당
 router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
@@ -28,9 +27,9 @@ router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
       return res.status(400).json({ message: 'ZIP 안에 JSON 파일이 없습니다.' });
     }
     
-    zip.extractAllTo(path.join('server/games', gameId), true);
+    zip.extractAllTo(`server/games/${gameId}`, true);
     
-    fs.copyFileSync(req.file.path, 'server/games/' + gameId + '/game.zip');
+    fs.copyFileSync(zipPath, `server/games/${gameId}/game.zip`);
 
     console.log("🎉서버에 게임파일이 저장되었습니다!")
   } catch (err) {
