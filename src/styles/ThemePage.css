@@ -197,8 +197,8 @@
     color: #b22222;
 }
 
-.sort.horror:hover {
-    color: #8b1c1c;
+.sort.horror:hover, .sort_type.horror h2:hover, .difficulty_filter h2:hover {
+    color: #5d1111;
 }
 
 /* .theme_door_hit1.horror:hover .door_top1,
@@ -268,11 +268,31 @@
     padding-left: 5%;
 }
 
+.sort_type {
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.sort_type.visible {
+    opacity: 1;
+}
+
+.sort_type.hidden {
+    opacity: 0;
+}
+
+.sort_type h2 {
+    transform: skewX(-20deg);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
 .sort_search {
     display: flex;
     position: absolute;
     top: -3%;
-    left: 12%;
+    left: 7%;
     gap: 5%;
     width: 30%;
     align-items: center;
@@ -309,8 +329,22 @@
 .sort {
     font-size: 2.5vw;
     transform: skewX(-20deg);
-    transition: color 0.5s ease;
+    transition: color 0.3s ease;
     cursor: pointer;
+}
+
+.difficulty_filter {
+    display: flex;
+    gap: 6%;
+    position: absolute;
+    width: 20%;
+    top: 8%;
+    left: 8%;
+}
+
+.difficulty_filter h2 {
+    cursor: pointer;
+    transition: color 0.3s ease;
 }
 
 .infinite {

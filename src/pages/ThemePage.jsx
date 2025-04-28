@@ -60,6 +60,11 @@ function ThemePage() {
 
     const navigate = useNavigate();
 
+    const [showSortType, setShowSortType] = useState(false);
+    const [selectedSort, setSelectedSort] = useState('평점 높은순'); // 초기 표시 텍스트
+    const timeoutRef = useRef(null); // 타이머 ID 저장용
+
+
     // 테마별 이미지 매핑
     const backgroundMap = {
         horror: horror_background,
@@ -347,6 +352,30 @@ function ThemePage() {
     const handleCloseSignIn = () => {setShowSignIn(false); setShouldAnimate(false);}
     const handleCloseSignUp = () => {setShowSignUp(false); setShouldAnimate(false);}
 
+    const handleSortClick = () => {
+        // 기존 타이머 제거
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+    
+        setShowSortType(true);
+        timeoutRef.current = setTimeout(() => {
+            setShowSortType(false);
+            timeoutRef.current = null;
+        }, 3000);
+    };
+
+    const handleSelectSort = (sortText) => {
+        setSelectedSort(sortText);
+        setShowSortType(false);
+    
+        // 기존 타이머 제거
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+    };
+
     return (
         <>
             {/* fullpage.js의 각 section */}
@@ -518,8 +547,25 @@ function ThemePage() {
                                             </form>
                                         </div>
                                         
-                                        <h1 className={`sort ${theme}`}>평점 순</h1>
+                                        <h1 className={`sort ${theme}`} onClick={handleSortClick}>
+                                            {selectedSort}
+                                        </h1>
                                     </div>
+
+                                    <div className='difficulty_filter'>
+                                        <h2>난이도</h2>
+                                        <h2>1</h2>
+                                        <h2>2</h2>
+                                        <h2>3</h2>
+                                        <h2>4</h2>
+                                        <h2>5</h2>
+                                    </div>
+                                </div>
+
+                                <div className={`sort_type ${theme} ${showSortType ? 'visible' : 'hidden'}`}>
+                                    <h2 className='rating_high' onClick={() => handleSelectSort('평점 낮은순')}>1. 평점 낮은순</h2>
+                                    <h2 className='rating_low' onClick={() => handleSelectSort('평점 높은순')}>2. 평점 높은순</h2>
+                                    <h2 className='view_high' onClick={() => handleSelectSort('조회순')}>3. 조회순</h2>
                                 </div>
                             </div>
 
