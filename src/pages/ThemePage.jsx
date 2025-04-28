@@ -64,6 +64,7 @@ function ThemePage() {
     const [selectedSort, setSelectedSort] = useState('평점 높은순'); // 초기 표시 텍스트
     const timeoutRef = useRef(null); // 타이머 ID 저장용
 
+    const [selectedDifficulty, setSelectedDifficulty] = useState(null);
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -376,6 +377,14 @@ function ThemePage() {
         }
     };
 
+    const handleDifficultyClick = (level) => {
+        if (selectedDifficulty === level) {
+            setSelectedDifficulty(null); // 같은 걸 누르면 해제
+        } else {
+            setSelectedDifficulty(level); // 다른 걸 누르면 선택
+        }
+    };
+
     return (
         <>
             {/* fullpage.js의 각 section */}
@@ -541,7 +550,7 @@ function ThemePage() {
                                     <div className='sort_search'>
                                         <div className='search'>
                                             <img id='search_icon' src={search_icon} alt='search_icon' />
-                                            <form onSubmit={searchGames}>
+                                            <form onSubmit={searchGames} autocomplete="off">
                                                 <input className='door_search' name='door_search' type='text' placeholder="제목 검색"/>
                                                 <button type='submit' style={{display: "none"}}></button>
                                             </form>
@@ -554,11 +563,15 @@ function ThemePage() {
 
                                     <div className='difficulty_filter'>
                                         <h2>난이도</h2>
-                                        <h2>1</h2>
-                                        <h2>2</h2>
-                                        <h2>3</h2>
-                                        <h2>4</h2>
-                                        <h2>5</h2>
+                                        {[1, 2, 3, 4, 5].map((level) => (
+                                            <div
+                                                key={level}
+                                                className={`${level} ${theme} ${selectedDifficulty === level ? 'active' : ''}`}
+                                                onClick={() => handleDifficultyClick(level)}
+                                            >
+                                                <h3>{level}</h3>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -571,72 +584,66 @@ function ThemePage() {
 
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
-                                {games.map((data, index) => {
-                                    const roomNumber = 401 + index;
+                                {games.length === 0 ? (
+                                    <div className="no_games"><h2>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
+                                ) : (
+                                    games.map((data, index) => {
+                                        const roomNumber = 401 + index;
+                                        const doorImageIndex = (roomNumber - 401) % 4;
+                                        const { rating, reviews, title, difficulty } = doorData[index % doorData.length];
 
-                                    // 방 번호에 맞게 이미지를 순차적으로 할당 (401번은 door1, 402번은 door2 ...)
-                                    const doorImageIndex = (roomNumber - 401) % 4;
-
-                                    // 아이템에 해당하는 데이터 가져오기 (예: 평점, 제목, 난이도)
-                                    const { rating, reviews, title, difficulty } = doorData[index % doorData.length]; // 데이터 순환
-
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={`theme_door_room ${theme} ${
-                                                section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
-                                                    ? 'animate'
-                                                    : ''
-                                            }`}
-                                            style={
-                                                section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
-                                                    ? { animationDelay: `${index * 0.3}s` }
-                                                    : {}
-                                            }
-                                            onClick={() => navigate(`/game/${data.game_id}`)}
-                                        >
-                                            {/* 방 번호와 이미지 */}
-                                            <div className="theme_room">
-                                                <div className='room'>
-                                                    <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
-                                                    <p>{roomNumber}</p> {/* 동적으로 방 번호 표시 */}
-                                                </div>
-                                            </div>
-
-                                            {/* 각 방에 연결된 문 영역 */}
-                                            <div className='theme_door'>
-                                                {/* 반복적으로 이미지를 표시 (순차적으로 이미지가 반복됨) */}
-                                                <img
-                                                    id='theme_door_img'
-                                                    src={`../../server/games/${data.thumbnail}`} // 이미지 인덱스를 통해 반복
-                                                    alt={`theme_door_img_${data.thumbnail}`}
-                                                />
-
-                                                <div className='theme_door_data'>
-                                                    <div className='difficulty_rating'>
-                                                        <div className='rating'>
-                                                            <img id='theme_rating_star' src={starImage} alt='theme_rating_star' />
-                                                            <p className='rating_text'>{rating} ({reviews})</p>
-                                                        </div>
-
-                                                        <div className='difficulty'>
-                                                            {Array.from({ length: data.difficulty }).map((_, index) => (
-                                                                <img 
-                                                                    key={index}
-                                                                    id='theme_difficulty_img' 
-                                                                    src={difficultyImage} 
-                                                                    alt='theme_difficulty_img' 
-                                                                />
-                                                            ))}
-                                                        </div>
+                                        return (
+                                            <div
+                                                key={index}
+                                                className={`theme_door_room ${theme} ${
+                                                    section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
+                                                        ? 'animate'
+                                                        : ''
+                                                }`}
+                                                style={
+                                                    section2Visible && animatedIndexes.includes(index) && !hasAnimated.current
+                                                        ? { animationDelay: `${index * 0.3}s` }
+                                                        : {}
+                                                }
+                                                onClick={() => navigate(`/game/${data.game_id}`)}
+                                            >
+                                                <div className="theme_room">
+                                                    <div className='room'>
+                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
+                                                        <p>{roomNumber}</p>
                                                     </div>
+                                                </div>
 
-                                                    <p className='theme_door_title'>{data.title}</p>
+                                                <div className='theme_door'>
+                                                    <img
+                                                        id='theme_door_img'
+                                                        src={`../../server/games/${data.thumbnail}`}
+                                                        alt={`theme_door_img_${data.thumbnail}`}
+                                                    />
+                                                    <div className='theme_door_data'>
+                                                        <div className='difficulty_rating'>
+                                                            <div className='rating'>
+                                                                <img id='theme_rating_star' src={starImage} alt='theme_rating_star' />
+                                                                <p className='rating_text'>{rating} ({reviews})</p>
+                                                            </div>
+                                                            <div className='difficulty'>
+                                                                {Array.from({ length: data.difficulty }).map((_, index) => (
+                                                                    <img 
+                                                                        key={index}
+                                                                        id='theme_difficulty_img' 
+                                                                        src={difficultyImage} 
+                                                                        alt='theme_difficulty_img' 
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <p className='theme_door_title'>{data.title}</p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })
+                                )}
 
                                 {/* 무한 스크롤 감지를 위한 감시 대상 요소 */}
                                 <div ref={observerRef} style={{ width: '20px' }}></div>
