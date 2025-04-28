@@ -325,6 +325,8 @@ function ThemePage() {
             animationFrame.current = requestAnimationFrame(smoothScroll);
         }
     };
+      
+
 
     // 로그인/회원가입 클릭 시 상태 변경
     const handleSignInClick = () => {
