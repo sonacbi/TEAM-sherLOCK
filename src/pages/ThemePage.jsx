@@ -514,7 +514,7 @@ function ThemePage() {
                                             <img id='search_icon' src={search_icon} alt='search_icon' />
                                             <form onSubmit={searchGames}>
                                                 <input className='door_search' name='door_search' type='text' placeholder="제목 검색"/>
-                                                <button type='submit'>검색</button>
+                                                <button type='submit' style={{display: "none"}}></button>
                                             </form>
                                         </div>
                                         

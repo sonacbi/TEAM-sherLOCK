@@ -136,11 +136,11 @@ export default function Workspace() {
         setThumnailImg(formData.get("game_thumbnailURL"))
         // const thumbnailURL = URL.createObjectURL(formData.get("game_thumbnailURL") ?? '')
         const description = formData.get("game_description")
-        const theme = formData.get("game_theme")
+        // const theme = formData.get("game_theme")
         const tag = formData.get("game_tag")
         const difficulty = formData.get("game_difficulty")
         const playTime = Number(formData.get("game_playTime"))
-        const visibility = formData.get("game_visibility")
+        // const visibility = formData.get("game_visibility")
         const isRanking = formData.get("game_isRanking") ? true : false;
         const isHiddenStage = formData.get("game_isHiddenStage") ? true : false;
         setGame(prev => {
@@ -149,11 +149,11 @@ export default function Workspace() {
                 title: title,
                 thumbnailURL: thumbnailURL,
                 description: description,
-                theme: theme,
+                // theme: theme,
                 tag: tag,
                 difficulty: difficulty,
                 playTime: playTime,
-                visibility: visibility,
+                // visibility: visibility,
                 isRanking: isRanking,
                 isHiddenStage: isHiddenStage
             }
@@ -479,10 +479,10 @@ export default function Workspace() {
                         <td>설명: </td>
                         <td><pre>{game.description}</pre></td>
                     </tr>
-                    <tr>
+                    {/* <tr>
                         <td>테마: </td>
                         <td>{game.theme}</td>
-                    </tr>
+                    </tr> */}
                     <tr>
                         <td>태그: </td>
                         <td>{game.tag}</td>
@@ -495,10 +495,10 @@ export default function Workspace() {
                         <td>예상소요시간: </td>
                         <td>{game.playTime}</td>
                     </tr>
-                    <tr>
+                    {/* <tr>
                         <td>공개: </td>
                         <td>{game.visibility}</td>
-                    </tr>
+                    </tr> */}
                     <tr>
                         <td>랭킹?: </td>
                         <td>{game.isRanking ? '있음' : '없음'}</td>
@@ -589,6 +589,21 @@ export default function Workspace() {
                 ))}
                 </>
             ))}
+            </div>
+            <div style={{backgroundColor: "#dddddd"}}>
+                <h3>그외</h3>
+                <table>
+                    <tbody>
+                    <tr>
+                        <td>테마</td>
+                        <td>{theme}</td>
+                    </tr>
+                    <tr>
+                        <td>공개여부</td>
+                        <td>{visibility}</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         <section style={{backgroundColor: "#ffbb66"}}>
