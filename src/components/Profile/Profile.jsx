@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { useParams, useLocation } from 'react-router-dom';
 
 import Sign from '../Sign/Sign_outside/Sign_outside';
 import './Profile.css';
@@ -11,6 +12,13 @@ import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubb
 const Profile = ({ onSignInClick, onSignUpClick }) => {
   const [userToken, setUserToken] = useState(null); // 사용자 토큰 상태
   const [showProfileSetup, setShowProfileSetup] = useState(false); // 프로필 설정 창 표시 여부
+
+  // 현재 접속한 페이지 확인 (추가함)-----------------------------
+  const { theme } = useParams();
+  const location = useLocation();
+
+  const isThemePage = location.pathname.startsWith('/Theme/') && 
+                      ['crime', 'adventure', 'horror'].includes(theme);
 
   // 컴포넌트가 마운트될 때 localStorage에서 토큰 읽고 디코딩
   useEffect(() => {
@@ -49,32 +57,39 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
     <>
       {userToken ? (
         // 로그인된 경우: 사용자 프로필 보여줌
-        <div className='profile'>
-          <div className='profile_outside'>
-            <img 
-              id='ex_user_profile'
-              src={ex_user_profile}
-              alt='ex_user_profile'
-              onClick={handleProfileClick} // 프로필 클릭 시 설정창 열기
-            />
-          </div>
+        <>
+         {/* 현재 접속한 페이지 확인해서 버튼 랜더링 (추가함)------------ */}
+          {isThemePage ? (
+            <button>{theme} 제작하기</button> 
+          ) : null}
 
-          {/* 프로필 설정 팝업 (MY페이지, 로그아웃 등) */}
-          <div className={`profile_setup ${showProfileSetup ? 'show' : 'hide'}`}>
-            <div className='profile_setup_inside'>
+          <div className='profile'>
+            <div className='profile_outside'>
               <img 
-                id='profile_setup_bubble'
-                src={profile_setup_bubble}
-                alt='profile_setup_bubble'
+                id='ex_user_profile'
+                src={ex_user_profile}
+                alt='ex_user_profile'
+                onClick={handleProfileClick} // 프로필 클릭 시 설정창 열기
               />
+            </div>
 
-              <div className='logout_mypage'>
-                <p className='mypage'>MY페이지</p>
-                <p className='logout' onClick={handleLogout}>로그아웃</p>
+            {/* 프로필 설정 팝업 (MY페이지, 로그아웃 등) */}
+            <div className={`profile_setup ${showProfileSetup ? 'show' : 'hide'}`}>
+              <div className='profile_setup_inside'>
+                <img 
+                  id='profile_setup_bubble'
+                  src={profile_setup_bubble}
+                  alt='profile_setup_bubble'
+                />
+
+                <div className='logout_mypage'>
+                  <p className='mypage'>MY페이지</p>
+                  <p className='logout' onClick={handleLogout}>로그아웃</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       ) : (
         // 로그인되지 않은 경우: 로그인/회원가입 버튼 표시
         <Sign onSignInClick={onSignInClick} onSignUpClick={onSignUpClick} />
