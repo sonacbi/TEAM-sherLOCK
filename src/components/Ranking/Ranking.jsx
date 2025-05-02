@@ -4,6 +4,8 @@ import React from 'react';
 import { useEffect, useRef, useState } from "react";
 import { useParams } from 'react-router-dom';
 
+import { motion, AnimatePresence } from 'framer-motion'; // 복잡한 애니메이션 추가용 코드
+
 import './Ranking.css';
 
 import Trophy from '../../assets/images/Ranking_img/trophy.png';
@@ -20,6 +22,10 @@ function Ranking() {
 
   // 트로피 클릭 핸들러 (true <-> false 토글)
   const handleClickRank = () => {setShowTop10((prev) => !prev);};
+
+  // 풀페이지 스크롤 제어용 (비활성화 영역 체크)
+  const rankerParentRef = useRef(null);
+  const rankScrollRef = useRef(null);
 
   // 닉네임 목록
   const namePrefixes = ['Gamer', 'Player', 'User', 'Hero', 'Champion', 'Master', 'King', 'Queen', 'Star', 'Boss'];
@@ -48,153 +54,186 @@ function Ranking() {
   // 1~100위 화면을 위한 데이터 (있는 사람만 표시)
   const fullData100 = sortedData; // 이미 내림차순으로 정렬되어 있으므로 그대로 사용
 
-  // 랭킹 스크롤 이벤트 제어
-  useEffect(() => {
-    const rankerParentElement = document.querySelector('#ranker_1_100');
-    const rankScrollElement = document.querySelector('.rank-scroll');
 
-    const handleMouseEnter = () => {
-        if (window.fullpage_api) {
-            window.fullpage_api.setAllowScrolling(false);
-        }
-    };
+  function RankingComponent({ showTop10, fullData, fullData100, handleClickRank, theme }) {
 
-    const handleMouseLeave = () => {
-        if (window.fullpage_api) {
-            window.fullpage_api.setAllowScrolling(true);
-        }
-    };
+    // ⭐ 애니메이션 시작 전에 먼저 fullpage 스크롤 막기
+    useEffect(() => {
+      if (!showTop10 && window.fullpage_api) {
+        window.fullpage_api.setAllowScrolling(false);
+      }
+    }, [showTop10]);
 
-    const handleWheel = (e) => {
-        if (rankScrollElement) {
-            e.preventDefault(); // 기본 스크롤 방지
-            rankScrollElement.scrollTop += e.deltaY; // 강제로 rank-scroll에 스크롤 보내기
-        }
-    };
-
-    if (rankerParentElement) {
-        rankerParentElement.addEventListener('mouseenter', handleMouseEnter);
-        rankerParentElement.addEventListener('mouseleave', handleMouseLeave);
-        rankerParentElement.addEventListener('wheel', handleWheel, { passive: false }); // 휠 이벤트 추가
-    }
-
-    return () => {
-        if (rankerParentElement) {
-            rankerParentElement.removeEventListener('mouseenter', handleMouseEnter);
-            rankerParentElement.removeEventListener('mouseleave', handleMouseLeave);
-            rankerParentElement.removeEventListener('wheel', handleWheel);
-        }
-    };
-}, []);
     
+    // 풀페이지 스크롤 락
+    const handleRankingEvents = () => {
+      const rankerParentElement = document.querySelector('#ranker_1_100');
+      const rankScrollElement = document.querySelector('.rank-scroll');
+      console.log('🎯 onAnimationComplete');
+      console.log('rankerParentElement:', rankerParentElement);
+      console.log('rankScrollElement:', rankScrollElement);
+  
+      if (rankerParentElement && rankScrollElement && window.fullpage_api) {
+        rankerParentElement.addEventListener('mouseenter', () => {
+          window.fullpage_api.setAllowScrolling(false);
+        });
+        rankerParentElement.addEventListener('mouseleave', () => {
+          window.fullpage_api.setAllowScrolling(true);
+        });
+        rankerParentElement.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          rankScrollElement.scrollTop += e.deltaY;
+        }, { passive: false });
+      }
+    };
+
+
+    return (
+      <div className={`ranking_container ${theme}`}>
+        {/* 공통 타이틀 등 여기에 삽입 */}
+  
+        {/* 1~10위 */}
+        <AnimatePresence mode="wait">
+          {showTop10 && (
+            <motion.ul
+              key="top10"
+              id="ranker_1_10"
+              className="ranker_grid"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
+              onAnimationComplete={handleRankingEvents}
+            >
+              {fullData.slice(0, 10).map((user, index) => (
+                <motion.li
+                  key={user.id}
+                  layout
+                  transition={{ duration: 0.4 }}
+                  className={`li${index + 1}`}
+                >
+                  {/* 왕관 또는 숫자 */}
+                  {index === 0 ? (
+                    <img className="Crown" src={Crown} alt="Crown" />
+                  ) : index === 1 || index === 2 ? (
+                    <div className="rank_header">
+                      <img className="Crown_small" src={Crown} alt="Crown" />
+                    </div>
+                  ) : (
+                    <div className="rank_header">
+                      <span className="rank_index">{index + 1}</span>
+                    </div>
+                  )}
+
+                  {/* 이름 및 점수 */}
+                  <div className="rank_profile">              
+                    <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
+                    <span className="rank_name">{user.name}</span>
+                  </div>
+                  <div className="rank_score">{user.score}</div>
+
+                  {/* 월계관 */}
+                  {index === 0 && <img className="Raurel" src={Raurel} alt="Raurel" />}
+                </motion.li>
+              ))}
+
+  
+              {/* toggle 버튼 */}
+              <motion.li
+                className="toggle_trophy"
+                layout
+                onClick={handleClickRank}
+                transition={{ duration: 0.4 }}
+              >
+                <img className="trophy" src={Trophy} alt="Trophy" />
+              </motion.li>
+            </motion.ul>
+          )}
+  
+          {/* 1~100위 */}
+          {!showTop10 && (
+            <motion.ul
+              key="top100"
+              id="ranker_1_100"
+              className="ranker_flex"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.5 }}
+              onAnimationComplete={handleRankingEvents}
+            >
+              {/* table header */}
+              <li className="table_header">
+                <div className="column_header">등수</div>
+                <div className="column_nickname">닉네임</div>
+                <div className="column_score">점수</div>
+              </li>
+  
+              {/* sticky 1~3위 */}
+              {fullData100.slice(0, 3).map((user, index) => (
+                <motion.li
+                  layout
+                  key={user.id}
+                  className={`li${index + 1} rank_sticky`}
+                >
+                  <div className="rank_header">
+                    <span className="rank_index">{index + 1}</span>
+                  </div>
+                  <div className="rank_profile">              
+                    <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
+                    <span className="rank_name">{user.name}</span>
+                  </div>
+                  <div className="rank_score">{user.score}</div>
+                </motion.li>
+              ))}
+  
+              {/* scroll 영역 */}
+              <div className="rank-scroll">
+                <ul>
+                  {fullData100.slice(3, 100).map((user, index) => (
+                    <motion.li
+                      layout
+                      key={user.id}
+                      className={`li${index + 4}`}
+                    >
+                      <div className="rank_header">
+                        <span className="rank_index">{index + 4}</span>
+                      </div>
+                      <div className="rank_profile">              
+                        <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
+                        <span className="rank_name">{user.name}</span>
+                      </div>
+                      <div className="rank_score">{user.score}</div>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+  
+              {/* 토글 버튼 (겉보기엔 똑같은 위치, 내부 컴포넌트만 바뀜) */}
+              <motion.li
+                layout
+                className="toggle_trophy"
+                onClick={handleClickRank}
+              >
+                <img className="trophy" src={Trophy} alt="Trophy" />
+              </motion.li>
+            </motion.ul>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
-    <div className={`ranking_container ${theme}`}>
-      <p></p>
-    {/* 1~10위 */}
-    <ul id="ranker_1_10" style={{ display: showTop10 ? 'grid' : 'none' }}>
-      {fullData.map((user, index) => {
-        if (index < 10) { // 0~9 인덱스만
-          if (index === 0) {
-            return (
-              <li key={user.id} className={`li${index + 1}`}>
-                <img className="Crown" src={Crown} alt="Crown" />
-                <div className="rank_profile">              
-                  <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
-                  <span className="rank_name">{user.name}</span>
-                </div>
-                <span className="rank_score">{user.score}</span>
-                <img className="Raurel" src={Raurel} alt="Raurel" />
-              </li>
-            );
-          } else if (index === 1 || index === 2) {
-            return (
-              <li key={user.id} className={`li${index + 1}`}>
-                <div className="rank_header">
-                  <img className="Crown_small" src={Crown} alt="Crown" />
-                </div>
-                <div className="rank_profile">              
-                  <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
-                  <span className="rank_name">{user.name}</span>
-                </div>
-                <span className="rank_score">{user.score}</span>
-              </li>
-            );
-          } else {
-            return (
-              <li key={user.id} className={`li${index + 1}`}>
-                <div className="rank_header">
-                  <span className="rank_index">{index + 1}</span>
-                </div>
-                <div className="rank_profile">              
-                  <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
-                  <span className="rank_name">{user.name}</span>
-                </div>
-                <span className="rank_score">{user.score}</span>
-              </li>
-            );
-          }
-        } else {
-          return null; // 11등부터는 안 보여줘
-        }
-      })}
-      {/* 트로피 버튼 */}
-      <li className="toggle_trophy" onClick={handleClickRank}>
-        <img className="trophy" src={Trophy} alt="Trophy" />
-      </li>
-    </ul>
-    {/* 1~100위 (있을 경우만 표시) */}
-    <ul id="ranker_1_100" style={{ display: !showTop10 ? 'flex' : 'none' }}>
-    {/* 테이블 헤더 */}
-    <li className="table_header">
-      <div className="column_header">등수</div>
-      <div className="column_nickname">닉네임</div>
-      <div className="column_score">점수</div>
-    </li>
-
-    {/* 고정 1~3위 */}
-    {fullData100.slice(0, 3).map((user, index) => (
-      <li key={user.id} className={`li${index + 1} rank_sticky`}>
-        <div className="rank_header">
-          <span className="rank_index">{index + 1}</span>
-        </div>
-        <div className="rank_profile">
-          <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
-          <span className="rank_name">{user.name}</span>
-        </div>
-        <span className="rank_score">{user.score}</span>
-      </li>
-    ))}
-
-    {/* 4~100위 (스크롤 영역) */}
-    <div className="rank-scroll">
-      <ul>
-        {fullData100.slice(3, 100).map((user, index) => (
-          <li key={user.id} className={`li${index + 4}`}>
-            <div className="rank_header">
-              <span className="rank_index">{index + 4}</span>
-            </div>
-            <div className="rank_profile">
-              <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
-              <span className="rank_name">{user.name}</span>
-            </div>
-            <span className="rank_score">{user.score}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-    {/* 트로피 버튼 */}
-    <li className="toggle_trophy" onClick={handleClickRank}>
-      <div>
-        <img className="trophy" src={Trophy} alt="Trophy" />
-      </div>
-      
-    </li>
-  </ul>
-    
-
-  </div>
-  );  
+    <RankingComponent
+      showTop10={showTop10}
+      fullData={fullData}
+      fullData100={fullData100}
+      handleClickRank={handleClickRank}
+      theme={theme}
+    />
+  );
+   
 }
 
 export default Ranking;
