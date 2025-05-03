@@ -18,13 +18,33 @@
 .ranking_container.crime{  background: linear-gradient(to bottom, #000516cc, #1c1c3acc);} */
 
 
-.ranking_container ul#ranker_1_10 {
+.ranking_container div#ranker_1_10 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: repeat(6, 48px); /* 각 행의 높이를 45px로 고정 */
   width : 320px;
   gap: 3% 1%;
+  
 }
+
+.grid-container.shrunk {
+  grid-template-rows: 0px 0px 0px 0px 0px 48px;
+  transition: grid-template-rows 3s ease-in-out;
+}
+
+/* .ranker_grid.shrunk li {
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow: hidden;
+}*/
+
+.ranker_grid.shrunk .Crown,
+.ranker_grid.shrunk .Crown_small,
+.ranker_grid.shrunk .rank_profile {
+display: none !important;  }
+
 
 .ranking_container ul#ranker_1_100 {
   width: 320px;
@@ -64,6 +84,13 @@
   margin-bottom: 1%;
 }
 
+.ranking_container #ranker_1_100>.table_header,
+.ranking_container #ranker_1_100>.li1,
+.ranking_container #ranker_1_100>.li2,
+.ranking_container #ranker_1_100>.li3,
+.ranking_container #ranker_1_100>.rank-scroll>ul>li{
+  padding : 5px 0px;
+}
 
 .ranking_container #ranker_1_100>li,
 .ranking_container #ranker_1_100>.rank-scroll>ul>li{
@@ -71,7 +98,7 @@
   grid-template-columns: 1fr 6fr 1fr;
   height: 40px;
   border-radius: 5px;
-  padding : 5px 0px;
+
 }
 
 .ranking_container #ranker_1_100 .rank_header,
@@ -89,19 +116,19 @@
 }
 
 /* 기본 li 배경 (4등부터) */
-.ranking_container.horror li {
+.ranking_container.horror .fillColor {
   background: linear-gradient(45deg, #0e1e2b, #1c2f3f);
-  transition: background 0.3s, transform 0.3s;
+  /* transition: background 0.3s, transform 0.3s; */
 }
 
-.ranking_container.adventure li {
+.ranking_container.adventure .fillColor {
   background: linear-gradient(45deg, #2e2209, #5c4716);
-  transition: background 0.3s, transform 0.3s;
+  /* transition: background 0.3s, transform 0.3s; */
 }
 
-.ranking_container.crime li {
+.ranking_container.crime .fillColor {
   background: linear-gradient(45deg, #150e2b, #2a1e4f);
-  transition: background 0.3s, transform 0.3s;
+  /* transition: background 0.3s, transform 0.3s; */
 }
 
 /* 1~3등 li: 더 강한 그라데이션 */
@@ -124,7 +151,7 @@
 }
 
 /* li hover하면 살짝 밝아지고 약간 확대 */
-.ranking_container li:hover {
+.ranking_container .fillColor:hover {
   background: linear-gradient(45deg, #3c3c3c, #5a5a5a);
   transform: scale(1.02);
   cursor: pointer;
@@ -233,18 +260,29 @@
   grid-row-start : 6;
   grid-row-end : 7;
   width: 100%;
+  height: 100%; 
   padding: 0 0;
   position: relative;
 }
 
+.ranking_container #ranker_1_10 .toggle_trophy > div {
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  width: 100%;
+  height : 100%;
+
+}
+
 .ranking_container #ranker_1_10 .toggle_trophy>img{
-  grid-column: 2;
+  /* grid-column: 2; */
   /* height : 100%; */
-  max-height: 100%;
-  max-width: 100%;
+
   object-fit: contain;
   position: absolute;
-  transform: translate(60%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 
@@ -311,14 +349,27 @@
 }
 
 #ranker_1_100 .toggle_trophy>div{
-  grid-column-start: 2;
+  grid-column : 1 / -1;
+  height: 40px;
   display: flex;
   align-items: start;
   justify-content: center;
+  position: relative; 
+}
+
+#ranker_1_100 .toggle_trophy img,.ranking_container #ranker_1_10 .toggle_trophy img {
+  width: 42px;
+  /* max-height: 100%;
+  max-width: 100%; */
 }
 
 #ranker_1_100 .toggle_trophy img {
-  width: 35px;
+  
+  object-fit: contain;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* .rank {
