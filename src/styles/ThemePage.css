@@ -437,7 +437,7 @@
 }
 
 .theme_door {
-    height: 100%;
+    height: 85%;
     width: 100%;
     background-color: black;
     cursor: pointer;
@@ -449,7 +449,7 @@
 
 #theme_door_img {
     width: 100%;
-    height: 480px;
+    height: 100%;
 }
 
 .theme_door_data #theme_difficulty_img {
