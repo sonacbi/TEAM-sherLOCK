@@ -66,6 +66,8 @@ function ThemePage() {
 
     const [selectedDifficulty, setSelectedDifficulty] = useState(null);
 
+    const [searchKeyword, setSearchKeyword] = useState('');
+
     // 테마별 이미지 매핑
     const backgroundMap = {
         horror: horror_background,
@@ -115,33 +117,27 @@ function ThemePage() {
     const top2_difficulty = 3;
     const top3_difficulty = 4;
 
-    const horrorDoorImages = [
-        horror_door1_img,
-        horror_door2_img,
-        horror_door3_img,
-        horror_door4_img
-    ];
-
     const doorData = [
-        { rating: 4.8, reviews: '1,927', title: '괴물', difficulty: 3 },
-        { rating: 4.8, reviews: '1,234', title: '폐쇄병동', difficulty: 2 },
-        { rating: 4.7, reviews: '1,850', title: '500원짜리 문방구 공포집', difficulty: 5 },
-        { rating: 4.6, reviews: '2,100', title: 'Conjuring House', difficulty: 5 },
+        { rating: 4.8, reviews: '1,927' },
+        { rating: 4.8, reviews: '1,234' },
+        { rating: 4.7, reviews: '1,850' },
+        { rating: 4.6, reviews: '2,100' },
     ];
 
     // fullpage.js 초기화 및 해제
     useEffect(() => {
+        // fullpage.js 초기화 및 제거
         if (window.fullpage_api) {
             window.fullpage_api.destroy('all'); // 기존 fullpage 인스턴스 제거
         }
-
+    
         if (!showSignIn && !showSignUp) {
             new fullpage('#fullpage', { licenseKey: 'gplv3-license', autoScrolling: true, navigation: false });
         }
-
+    
         return () => {
             if (window.fullpage_api) {
-                window.fullpage_api.destroy('all');
+                window.fullpage_api.destroy('all'); // 컴포넌트 언마운트 시 fullpage 제거
             }
         };
     }, [showSignIn, showSignUp, theme]);
@@ -159,30 +155,53 @@ function ThemePage() {
 
     // 새로운 아이템 로드
     const loadMoreGames = async () => {
+        if (isAnimating) {
+            console.log("애니메이션 중 - 게임 로드 차단됨");
+            return;
+        }
+    
         const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&search_word=${searchWord.current}`);
         const datas = await res.json();
-        console.log('가져온 게임들: ',datas);
-
+        console.log('가져온 게임들: ', datas);
+    
         const keyword = searchWord.current.trim().toLowerCase();
         const filtered = datas.filter(game =>
             game.title.toLowerCase().includes(keyword)
         );
         console.log('필터링된 게임들: ', filtered);
-
-        // setGames((prev) => [...prev, ...filtered]);
-        setGames([...filtered]);
+    
+        setGames([...filtered]); // 게임 리스트 업데이트
     };
 
     const searchGames = (event) => {
         event.preventDefault();
-        searchWord.current = new FormData(event.target).get("door_search");
-        console.log('검색된 글자: ',searchWord.current)
+    
+        // 🔒 애니메이션 중이면 재실행 방지
+        if (isAnimating) {
+            console.log("애니메이션 중 - 검색 차단됨");
+            return;
+        }
+    
+        const keyword = new FormData(event.target).get("door_search");
+        searchWord.current = keyword;
+        setSearchKeyword(keyword); // ✅ 상태로 저장
+    
         setGames([]);
         hasAnimated.current = false;
         setSection2Visible(true);
-        // setTimeout(await loadMoreGames(), 1)
+    
         loadMoreGames();
-    }
+    
+        setIsAnimating(true);
+        if (window.fullpage_api) {
+            window.fullpage_api.setAllowScrolling(false);
+        }
+    
+        setTimeout(() => {
+            setIsAnimating(false);
+            hasAnimated.current = true;
+        }, 4 * 400 + 400);
+    };
 
     // IntersectionObserver로 섹션2 보이면 애니메이션 시작
     useEffect(() => {
@@ -206,22 +225,26 @@ function ThemePage() {
 
     // 애니메이션 끝나면 스크롤 활성화
     useEffect(() => {
-        // 이미 애니메이션 실행한 적 있다면 무시
+        // 애니메이션이 끝날 때 풀페이지 스크롤 활성화
         if (hasAnimated.current) return;
     
         if (section2Visible) {
             setIsAnimating(true);
-            document.body.style.overflow = 'hidden';
     
-            const initialCount = 4;
-            const delays = Array.from({ length: initialCount }, (_, i) => i);
-            setAnimatedIndexes(delays);
+            // 풀페이지 스크롤 비활성화
+            if (window.fullpage_api) {
+                window.fullpage_api.setAllowScrolling(false);
+            }
+    
+            document.body.style.overflow = 'hidden';
+            setAnimatedIndexes(Array.from({ length: 4 }, (_, i) => i));
     
             const timeout = setTimeout(() => {
                 setIsAnimating(false);
                 document.body.style.overflow = '';
-                hasAnimated.current = true; // 다시는 실행되지 않도록
-            }, initialCount * 400 + 400);
+    
+                hasAnimated.current = true;
+            }, 4 * 400 + 400); // 애니메이션 시간 맞추기
     
             return () => clearTimeout(timeout);
         }
@@ -229,97 +252,121 @@ function ThemePage() {
 
     // IntersectionObserver로 마지막 아이템이 보이면 로드
     useEffect(() => {
-        if (isAnimating) return;
-
         const observer = new IntersectionObserver(
             (entries) => {
+                // 애니메이션 중이면 스크롤을 무시
+                if (isAnimating) return;
+    
                 if (entries[0].isIntersecting) {
-                    console.log("좌측에서 랜더링됨")
+                    console.log("좌측에서 랜더링됨");
                     loadMoreGames();
                 }
             },
             { root: scrollContainerRef.current, threshold: 1.0 }
         );
-
+    
         if (observerRef.current) observer.observe(observerRef.current);
-
+    
         return () => observer.disconnect();
-    }, [isAnimating]);
+    }, [isAnimating]); // isAnimating 상태가 변경될 때마다 감지
 
     // 휠 이벤트로 가로 스크롤
     useEffect(() => {
         const handleWheel = (e) => {
+            // 애니메이션 중이면 휠 이벤트를 막고 무한 스크롤만 활성화
             if (isAnimating) {
                 e.preventDefault();
                 return;
             }
-
+    
+            // 휠 이벤트로 가로 스크롤
             e.preventDefault();
-
+    
             const scrollDelta = e.deltaY * 0.2;
             scrollAmount.current += scrollDelta;
             scrollContainerRef.current.scrollLeft += scrollDelta;
-
+    
             const container = scrollContainerRef.current;
             const scrollPosition = container.scrollLeft;
             const scrollWidth = container.scrollWidth;
             const containerWidth = container.clientWidth;
-
+    
             if (scrollWidth - scrollPosition - containerWidth < 200) {
-                loadMoreGames(); // 새로운 아이템 로드
-                console.log("우측에서 랜더링됨")
+                if (!isAnimating) {
+                    loadMoreGames();
+                    console.log("우측에서 랜더링됨");
+                }
             }
-
+    
             const now = Date.now();
             const timeElapsed = now - lastScrollTime.current;
-
+    
             if (timeElapsed > 50) {
                 lastScrollTime.current = now;
                 cancelAnimationFrame(animationFrame.current);
                 animationFrame.current = requestAnimationFrame(smoothScroll);
             }
         };
-
+    
         const container = scrollContainerRef.current;
         if (container) {
             container.addEventListener('wheel', handleWheel);
         }
-
+    
         return () => {
             if (container) container.removeEventListener('wheel', handleWheel);
             cancelAnimationFrame(animationFrame.current);
         };
     }, [isAnimating]);
-
+    
     // 마우스 진입/퇴장 시 스크롤 제어
     useEffect(() => {
         const container = scrollContainerRef.current;
-
+    
         const handleMouseEnter = () => {
-            if (window.fullpage_api) {
+            if (!isAnimating && window.fullpage_api) {
                 window.fullpage_api.setAllowScrolling(false);
             }
         };
-
+    
         const handleMouseLeave = () => {
-            if (!showSignIn && !showSignUp && window.fullpage_api) {
+            if (!isAnimating && !showSignIn && !showSignUp && window.fullpage_api) {
                 window.fullpage_api.setAllowScrolling(true);
             }
         };
-
+    
+        // ✅ 마우스 초기 위치 확인 (단, 애니메이션이 끝난 후에만)
+        const handleInitialMousePosition = (e) => {
+            if (!container || isAnimating) return;
+    
+            const rect = container.getBoundingClientRect();
+            const isInside =
+                e.clientX >= rect.left &&
+                e.clientX <= rect.right &&
+                e.clientY >= rect.top &&
+                e.clientY <= rect.bottom;
+    
+            if (!isInside && !showSignIn && !showSignUp && window.fullpage_api) {
+                window.fullpage_api.setAllowScrolling(true);
+            }
+        };
+    
+        window.addEventListener('mousemove', handleInitialMousePosition, { once: true });
+    
         if (container) {
             container.addEventListener('mouseenter', handleMouseEnter);
             container.addEventListener('mouseleave', handleMouseLeave);
         }
-
+    
         return () => {
+            window.removeEventListener('mousemove', handleInitialMousePosition);
             if (container) {
                 container.removeEventListener('mouseenter', handleMouseEnter);
                 container.removeEventListener('mouseleave', handleMouseLeave);
             }
         };
-    }, [showSignIn, showSignUp]);
-
+    }, [isAnimating, showSignIn, showSignUp]);
+    
     // 첫 번째 섹션 애니메이션 한 번만 실행되게 변경
     useEffect(() => {
         if (!hasAnimated2.current) {
@@ -585,12 +632,11 @@ function ThemePage() {
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
                                 {games.length === 0 ? (
-                                    <div className="no_games"><h2>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
+                                    <div className="no_games" key={searchKeyword}><h2><span style={{ fontSize: '18px' }}>검색: {searchKeyword}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
                                 ) : (
                                     games.map((data, index) => {
                                         const roomNumber = 401 + index;
-                                        const doorImageIndex = (roomNumber - 401) % 4;
-                                        const { rating, reviews, title, difficulty } = doorData[index % doorData.length];
+                                        const { rating, reviews } = doorData[index % doorData.length];
 
                                         return (
                                             <div

@@ -388,8 +388,8 @@
 
 .no_games {
     position: absolute;
-    top: 40%;
-    left: 40%;
+    top: 35%;
+    left: 39%;
     transform: translate(-50%, -50%);
     color: rgba(255, 255, 255, 0.374);
     animation: slideInFromRight 1s ease forwards;
