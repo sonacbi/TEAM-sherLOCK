@@ -4,6 +4,32 @@
     top: 20%;
 }
 
+.workspace_button {
+    position: absolute;
+    left: -60%;
+    top: 6%;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 0;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.workspace_button.horror {
+    background-color: #b22222;
+    color: white;
+}
+
+.workspace_button.adventure {
+    background-color: #e5ae4e;
+    color: white;
+}
+
+.workspace_button.crime {
+    background-color: #656565;
+    color: white;
+}
+
 .profile_outside {
     display: flex;
     align-items: center;
@@ -18,10 +44,11 @@
     border-radius: 50%;
     cursor: pointer;
     transition: opacity 0.3s ease;
+    opacity: 0.5;
 }
 
-#ex_user_profile:hover {
-    opacity: 0.5;
+#ex_user_profile:hover, .workspace_button:hover {
+    opacity: 1;
 }
 
 .profile_setup {

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 import Sign from '../Sign/Sign_outside/Sign_outside';
 import './Profile.css';
 
 import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png';
-import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubble.png'
+import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubble.png';
 
 // 프로필 컴포넌트 정의 (로그인 여부에 따라 다른 UI 보여줌)
 const Profile = ({ onSignInClick, onSignUpClick }) => {
@@ -19,6 +19,8 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
 
   const isThemePage = location.pathname.startsWith('/Theme/') && 
                       ['crime', 'adventure', 'horror'].includes(theme);
+
+  const navigate = useNavigate();
 
   // 컴포넌트가 마운트될 때 localStorage에서 토큰 읽고 디코딩
   useEffect(() => {
@@ -53,17 +55,21 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
     }, 3000);
   };
 
+  const handleWorkspaceClick = () => {
+    navigate(`/Theme/${theme}/workspace`);
+  };
+
   return (
     <>
       {userToken ? (
         // 로그인된 경우: 사용자 프로필 보여줌
         <>
-         {/* 현재 접속한 페이지 확인해서 버튼 랜더링 (추가함)------------ */}
-          {isThemePage ? (
-            <button>{theme} 제작하기</button> 
-          ) : null}
-
           <div className='profile'>
+            {/* 현재 접속한 페이지 확인해서 버튼 랜더링 (추가함)------------ */}
+            {isThemePage ? (
+              <button className={`workspace_button ${theme}`} onClick={handleWorkspaceClick}>제작하기</button> 
+            ) : null}
+
             <div className='profile_outside'>
               <img 
                 id='ex_user_profile'

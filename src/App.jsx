@@ -18,7 +18,7 @@ function App() {
         <Route path="/auth/naver" element={<SocialAuthHandler />} />
         <Route path="/auth/google" element={<SocialAuthHandler />} />
         <Route path="/Theme/:theme" element={<ThemePage />} />
-        <Route path='/workspace' element={<Workspace/>} />
+        <Route path='/Theme/:theme/workspace' element={<Workspace/>} />
         <Route path='/game/:game_id' element={<GamePage/>} />
       </Routes>
     </Router>
