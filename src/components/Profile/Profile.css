@@ -11,23 +11,32 @@
     padding: 5px 10px;
     border-radius: 5px;
     border: 0;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
+    color: white;
+    transition: background-color 0.3s ease;
 }
 
 .workspace_button.horror {
     background-color: #b22222;
-    color: white;
+}
+
+.workspace_button.horror:hover {
+    background-color: #8f1b1b;
 }
 
 .workspace_button.adventure {
     background-color: #e5ae4e;
-    color: white;
+}
+
+.workspace_button.adventure:hover {
+    background-color: #c89844;
 }
 
 .workspace_button.crime {
     background-color: #656565;
-    color: white;
+}
+
+.workspace_button.crime:hover {
+    background-color: #595959;
 }
 
 .profile_outside {
@@ -43,12 +52,6 @@
     object-fit: cover;
     border-radius: 50%;
     cursor: pointer;
-    transition: opacity 0.3s ease;
-    opacity: 0.5;
-}
-
-#ex_user_profile:hover, .workspace_button:hover {
-    opacity: 1;
 }
 
 .profile_setup {

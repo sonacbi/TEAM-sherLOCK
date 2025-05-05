@@ -189,7 +189,6 @@
     color: white;
 }
 
-
 .theme_door_hit1.horror:hover .theme_door_top1 p,
 .theme_door_hit2.horror:hover .theme_door_top2 p,
 .theme_door_hit3.horror:hover .theme_door_top3 p,
@@ -212,11 +211,11 @@
 .theme_door_hit2.adventure:hover .theme_door_top2 p,
 .theme_door_hit3.adventure:hover .theme_door_top3 p,
 .theme_door_room.adventure:hover .room p {
-    color: #e4c590;
+    color: #e5ae4e;
 }
 
 .sort.adventure:hover, .sort_type.adventure h2:hover, .difficulty_filter div.adventure:hover, .difficulty_filter div.adventure.active {
-    color: #e5ae4e;
+    color: #9b7534;
 }
 
 /* .theme_door_hit1.adventure:hover .door_top1,
@@ -246,8 +245,8 @@
 
 #theme_down_arrow {
     position: absolute;
-    bottom: 8%;
-    left: 2%;
+    bottom: 9%;
+    left: 3%;
 }
 
 .floor {
