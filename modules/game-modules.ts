@@ -10,14 +10,14 @@ class ClassVersion {
 
 
 
-type Role = {
-    planning:   string[],
-    art:        string[],
-    story:      string[],
-    puzzle:     string[],
-    mechanic:   string[],
-    support:    string[]
-}
+// type Role = {
+//     planning:   string[],
+//     art:        string[],
+//     story:      string[],
+//     puzzle:     string[],
+//     mechanic:   string[],
+//     support:    string[]
+// }
 enum Theme {
     horror    = "horror",
     adventure = "adventure",
@@ -41,16 +41,16 @@ class Game extends ClassVersion {
     title:          string;         // 제목
     thumbnailURL:   string;         // 게임 썸네일 URL
     description:    string;         // 설명
-    role:           Role;           // 각 제작자가 맡은 역할
+    // role:           Role;           // 각 제작자가 맡은 역할
     // theme:          Theme;          // 테마
-    tag:            string;         // 태그
+    // tag:            string;         // 태그
     // difficulty:     Difficulty;     // 난이도
     difficulty:     number;         // 난이도
     playTime:       number;         // 예상 소요 시간
     // visibility:     Visibility;     // 공개 여부
     isRanking:      boolean;        // 랭킹 표시 여부
     isHiddenStage:  boolean;        // 히든 스테이지 여부
-    achievement:    Achievement[];  // 업적
+    // achievement:    Achievement[];  // 업적
     source:         Source;         // 게임소스
     // inventory:      Item[];         // 인벤토리
     stage:          Stage[];        // 스테이지
@@ -60,23 +60,23 @@ class Game extends ClassVersion {
         title = '',
         thumbnailURL = '',
         description = '',
-        role = {
-            planning: [],     // 기획
-            art: [],          // 그림
-            story: [],        // 스토리
-            puzzle: [],       // 퍼즐
-            mechanic: [],     // 기능
-            support: []       // 도움
-        },
+        // role = {
+        //     planning: [],     // 기획
+        //     art: [],          // 그림
+        //     story: [],        // 스토리
+        //     puzzle: [],       // 퍼즐
+        //     mechanic: [],     // 기능
+        //     support: []       // 도움
+        // },
         // theme = Theme.horror,
-        tag = '',
+        // tag = '',
         // difficulty = Difficulty.easy,
         difficulty = 1,
         playTime = 10,
         // visibility = Visibility.public,
         isRanking = false,
         isHiddenStage = false,
-        achievement = [],
+        // achievement = [],
         source = new Source({}),
         // inventory = [],
         stage = [new Stage({})]
@@ -86,15 +86,15 @@ class Game extends ClassVersion {
         this.title = title;
         this.thumbnailURL = thumbnailURL;
         this.description = description;
-        this.role = role;
+        // this.role = role;
         // this.theme = theme;
-        this.tag = tag;
+        // this.tag = tag;
         this.difficulty = difficulty;
         this.playTime = playTime;
         // this.visibility = visibility;
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
-        this.achievement = achievement;
+        // this.achievement = achievement;
         this.source = new Source(source);
         // this.inventory = inventory;
         this.stage = [];

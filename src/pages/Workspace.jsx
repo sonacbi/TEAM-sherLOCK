@@ -137,7 +137,7 @@ export default function Workspace() {
         // const thumbnailURL = URL.createObjectURL(formData.get("game_thumbnailURL") ?? '')
         const description = formData.get("game_description")
         // const theme = formData.get("game_theme")
-        const tag = formData.get("game_tag")
+        // const tag = formData.get("game_tag")
         const difficulty = formData.get("game_difficulty")
         const playTime = Number(formData.get("game_playTime"))
         // const visibility = formData.get("game_visibility")
@@ -150,7 +150,7 @@ export default function Workspace() {
                 thumbnailURL: thumbnailURL,
                 description: description,
                 // theme: theme,
-                tag: tag,
+                // tag: tag,
                 difficulty: difficulty,
                 playTime: playTime,
                 // visibility: visibility,
@@ -287,11 +287,11 @@ export default function Workspace() {
                             <textarea type="text" name="game_description" defaultValue={game.description} key={game.description}/>
                         </label>
                     </div>
-                    <div>
+                    {/* <div>
                         <label>태그
                             <input type="text" name="game_tag" defaultValue={game.tag} key={game.tag}/>
                         </label>
-                    </div>
+                    </div> */}
                     <div>
                         <label>난이도:
                             {/* <label>쉬움
@@ -482,11 +482,11 @@ export default function Workspace() {
                     {/* <tr>
                         <td>테마: </td>
                         <td>{game.theme}</td>
-                    </tr> */}
+                    </tr>
                     <tr>
                         <td>태그: </td>
                         <td>{game.tag}</td>
-                    </tr>
+                    </tr> */}
                     <tr>
                         <td>난이도: </td>
                         <td>{game.difficulty}</td>
