@@ -21,42 +21,23 @@ enum Visibility {
     private  = "private",
 }
 
+
+
 /**
  * 게임 생성기
  */
 class Game extends ClassVersion {
-    id:             number;         // MySQL과 연동해서 얻음
-    title:          string;         // 제목
-    thumbnailURL:   string;         // 게임 썸네일 URL
-    description:    string;         // 설명
-    difficulty:     number;         // 난이도
-    playTime:       number;         // 예상 소요 시간
-    isRanking:      boolean;        // 랭킹 표시 여부
-    isHiddenStage:  boolean;        // 히든 스테이지 여부
+    id:             string;         // MySQL과 연동해서 얻음
     source:         Source;         // 게임소스
     stage:          Stage[];        // 스테이지
     
     constructor({
         id = null,
-        title = '',
-        thumbnailURL = '',
-        description = '',
-        difficulty = 1,
-        playTime = 10,
-        isRanking = false,
-        isHiddenStage = false,
         source = new Source({}),
         stage = [new Stage({})]
     }) {
         super()
         this.id = id;
-        this.title = title;
-        this.thumbnailURL = thumbnailURL;
-        this.description = description;
-        this.difficulty = difficulty;
-        this.playTime = playTime;
-        this.isRanking = isRanking;
-        this.isHiddenStage = isHiddenStage;
         this.source = new Source(source);
         this.stage = [];
         stage.map((data)=>{
