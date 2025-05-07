@@ -17,7 +17,7 @@ function App() {
         <Route path="/auth/naver" element={<SocialAuthHandler />} />
         <Route path="/auth/google" element={<SocialAuthHandler />} />
         <Route path="/Theme/:theme" element={<ThemePage />} />
-        <Route path='/Theme/:theme/workspace' element={<Workspace/>} />
+        <Route path='/Theme/workspace' element={<Workspace/>} />
       </Routes>
     </Router>
   );

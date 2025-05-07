@@ -6,6 +6,7 @@ import Profile from '../components/Profile/Profile';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
 import Footer from '../components/Footer/Footer';
+import GameInfo from '../components/GameInfo/GameInfo';
 import fullpage from 'fullpage.js';
 import 'fullpage.js/dist/fullpage.min.css';
 import '../styles/ThemePage.css';
@@ -20,10 +21,6 @@ import horror_right_arrow from '../assets/images/ThemePage_img/horror/horror_rig
 import horror_top1_img from '../assets/images/ThemePage_img/horror/horror_top1_img.png';
 import horror_top2_img from '../assets/images/ThemePage_img/horror/horror_top2_img.png';
 import horror_top3_img from '../assets/images/ThemePage_img/horror/horror_top3_img.png';
-import horror_door1_img from '../assets/images/ThemePage_img/horror/horror_door1_img.png';
-import horror_door2_img from '../assets/images/ThemePage_img/horror/horror_door2_img.png';
-import horror_door3_img from '../assets/images/ThemePage_img/horror/horror_door3_img.png';
-import horror_door4_img from '../assets/images/ThemePage_img/horror/horror_door4_img.png';
 import horror_rating_star from '../assets/images/ThemePage_img/horror/horror_rating_star.png';
 import horror_difficulty_img from '../assets/images/ThemePage_img/horror/horror_difficulty_img.png';
 import adventure_background from '../assets/images/ThemePage_img/adventure/adventure_background.png';
@@ -710,6 +707,9 @@ function ThemePage() {
             {/* 로그인 / 회원가입 모달 */}
             {showSignIn && <Sign_in onClose={handleCloseSignIn} onSignUpClick={handleSignUpClick} />}
             {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick} />}
+
+            {/* 게임 정보 모달 */}
+            <GameInfo />
         </>
     );
 }

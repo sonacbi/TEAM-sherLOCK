@@ -56,7 +56,7 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
   };
 
   const handleWorkspaceClick = () => {
-    navigate(`/Theme/${theme}/workspace`);
+    navigate(`/Theme/workspace`);
   };
 
   return (
