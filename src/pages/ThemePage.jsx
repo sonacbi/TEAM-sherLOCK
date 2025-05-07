@@ -34,9 +34,10 @@ function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
     const { theme } = useParams();
 
-    // 로그인 및 회원가입 상태
+    // 로그인 및 회원가입 및 게임정보 상태
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
+    const [showGameInfo, setShowGameInfo] = useState(false);
 
     const [games, setGames] = useState([]); // 아이템 상태 배열
     const searchWord = useRef(''); // 검색어
@@ -141,14 +142,14 @@ function ThemePage() {
 
     // 로그인/회원가입 시 스크롤 비활성화
     useEffect(() => {
-        if (showSignIn || showSignUp) {
+        if (showSignIn || showSignUp || showGameInfo) {
             document.body.style.overflow = 'hidden';
             if (window.fullpage_api) window.fullpage_api.setAllowScrolling(false);
         } else {
             document.body.style.overflow = '';
             if (window.fullpage_api) window.fullpage_api.setAllowScrolling(true);
         }
-    }, [showSignIn, showSignUp]);
+    }, [showSignIn, showSignUp, showGameInfo]);
 
     // 새로운 아이템 로드
     const loadMoreGames = async () => {
@@ -458,13 +459,13 @@ function ThemePage() {
                                     <div className={`theme_door_hit1 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top1'>
                                             <div className='theme_door_top1'>
-                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
+                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
 
-                                                <p>TOP 1</p>
+                                                <p onClick={() => setShowGameInfo(true)}>TOP 1</p>
                                             </div>
                                         </div>
 
-                                        <div className='door_top1'>
+                                        <div className='door_top1' onClick={() => setShowGameInfo(true)}>
                                             <img id='theme_top1_img' src={horror_top1_img} alt='theme_top1_img' />
 
                                             <div className='theme_top1_data'>
@@ -495,13 +496,13 @@ function ThemePage() {
                                     <div className={`theme_door_hit2 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top2'>
                                             <div className='theme_door_top2'>
-                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
+                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
 
-                                                <p>TOP 2</p>
+                                                <p onClick={() => setShowGameInfo(true)}>TOP 2</p>
                                             </div>
                                         </div>
 
-                                        <div className='door_top2'>
+                                        <div className='door_top2' onClick={() => setShowGameInfo(true)}>
                                             <img id='theme_top2_img' src={horror_top2_img} alt='theme_top2_img' />
 
                                             <div className='theme_top2_data'>
@@ -532,13 +533,13 @@ function ThemePage() {
                                     <div className={`theme_door_hit3 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
                                         <div className='top3'>
                                             <div className='theme_door_top3'>
-                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' />
+                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
 
-                                                <p>TOP 3</p>
+                                                <p onClick={() => setShowGameInfo(true)}>TOP 3</p>
                                             </div>
                                         </div>
 
-                                        <div className='door_top3'>
+                                        <div className='door_top3' onClick={() => setShowGameInfo(true)}>
                                             <img id='theme_top3_img' src={horror_top3_img} alt='theme_top3_img' />
 
                                             <div className='theme_top3_data'>
@@ -648,16 +649,15 @@ function ThemePage() {
                                                         ? { animationDelay: `${index * 0.3}s` }
                                                         : {}
                                                 }
-                                                onClick={() => navigate(`/game/${data.game_id}`)}
                                             >
                                                 <div className="theme_room">
                                                     <div className='room'>
-                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' />
-                                                        <p>{roomNumber}</p>
+                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' onClick={() => setShowGameInfo(true)}/>
+                                                        <p onClick={() => setShowGameInfo(true)}>{roomNumber}</p>
                                                     </div>
                                                 </div>
 
-                                                <div className='theme_door'>
+                                                <div className='theme_door' onClick={() => setShowGameInfo(true)}>
                                                     <img
                                                         id='theme_door_img'
                                                         src={`../../server/games/${data.thumbnail}`}
@@ -709,7 +709,7 @@ function ThemePage() {
             {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick} />}
 
             {/* 게임 정보 모달 */}
-            <GameInfo />
+            {showGameInfo && <GameInfo setShowGameInfo={setShowGameInfo} />}
         </>
     );
 }
