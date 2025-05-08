@@ -19,38 +19,27 @@ function IntroPage() {
   const [showHint, setShowHint] = useState(false); // 힌트 표시 여부
 
   const lockRef = useRef(null); // 자물쇠 이미지에 대한 ref
+  const [canClick, setCanClick] = useState(false); // 자물쇠 클릭 가능 여부
 
   // 자물쇠 클릭 시 발생할 동작
   const handleClick = () => {
-    // 자물쇠가 이미 클릭되었으면 아무 작업도 하지 않음
-    if (clicked) return;
-
-    setClicked(true); // 클릭 상태 변경
-
-    // Sherlock 로고의 opacity를 0으로 설정하여 천천히 사라지게 함
+    if (clicked || !canClick) return; // 애니메이션 전에는 클릭 금지
+  
+    setClicked(true);
     setShelOpacity(0);
-
-    // site-description을 숨김
     setShowDescription(false);
-
-    // 일정 시간 후에 자물쇠 이미지를 GIF로 변경하고, 위치를 중앙으로 이동
+  
     setTimeout(() => {
-      setImageSrc(lockGif); // 자물쇠 이미지를 애니메이션 GIF로 변경
-
-      setLockPosition({
-        left: '55%', // 자물쇠를 화면 중앙으로 이동
-        top: '45%',
-      });
-
-      // 자물쇠 이동을 부드럽게 처리
-      lockRef.current.style.transition = 'all 1s ease-in-out'; // 부드럽게 이동
-      lockRef.current.style.transform = 'translate(-50%, -50%)'; // 중앙으로 정확히 이동
+      setImageSrc(lockGif);
+      setLockPosition({ left: '55%', top: '45%' });
+  
+      lockRef.current.style.transition = 'all 1s ease-in-out';
+      lockRef.current.style.transform = 'translate(-50%, -50%)';
     });
-
-    // 2.3초 후에 Main 페이지로 이동
+  
     setTimeout(() => {
-      navigate('/Main'); // /Main으로 이동
-    }, 2300); // 2300ms = 2.3초 후 이동
+      navigate('/Main');
+    }, 2300);
   };
 
   // 컴포넌트 마운트 후 2초 뒤에 site-description을 표시
@@ -72,6 +61,23 @@ function IntroPage() {
     // 컴포넌트 언마운트 시 타이머 정리
     return () => clearTimeout(timer2);
   }, []); // 이 effect는 컴포넌트가 마운트 될 때만 실행됨
+
+  useEffect(() => {
+    const desc = document.querySelector('.site_description');
+    const handleAnimationEnd = () => {
+      setCanClick(true); // 애니메이션이 끝나면 클릭 가능
+    };
+  
+    if (desc) {
+      desc.addEventListener('transitionend', handleAnimationEnd);
+    }
+  
+    return () => {
+      if (desc) {
+        desc.removeEventListener('transitionend', handleAnimationEnd);
+      }
+    };
+  }, []);
 
   return (
     <div className='IntroPage_wrap'>

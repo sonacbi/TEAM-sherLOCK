@@ -4,7 +4,7 @@
     height: 100dvh;
     top: 0;
     left: 0;
-    background-color: #0a0a0aeb;
+    background-color: #0a0a0ada;
     animation: fadeInWrap 0.6s ease forwards;
 }
 
@@ -73,6 +73,154 @@
 .GameInfo_content {
     height: 90%;
     background-color: black;
+    padding: 10px;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.thumbnail_basic_info {
+    flex: 2.5;
+    display: flex;
+    padding: 10px;
+}
+
+.thumbnail {
+    flex: 1;
+}
+
+#thumbnail_img {
+    border-radius: 10px;
+    height: 100%;
+    width: 100%;
+}
+
+.basic_info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.basic_info > * {
+    flex: 1;
+    margin: 5px;
+    margin-right: 0;
+    margin-left: 20px;
+    background-color: rgba(255, 255, 255, 0.097);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    width: fit-content;
+}
+
+.door_title, .door_difficulty, .door_estimated_time, .door_creator, .door_date_created {
+    gap: 10px;
+}
+
+.door_rating, .door_play_count {
+    gap: 5px;
+}
+
+#GameInfo_star {
+    width: 20px;
+    margin-left: 10px;
+}
+
+#GameInfo_difficulty {
+    width: 25px;
+    margin-left: 5px;
+}
+
+#player_icon {
+    width: 30px;
+}
+
+.playgame {
+    flex: 0.3;
+    margin: 0 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.097);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.playgame.horror:hover {background-color: #b22222;}
+.playgame.adventure:hover {background-color: #e5ae4e;}
+.playgame.crime:hover {background-color: #4f4f4f;}
+
+.GameInfo_introduction  {
+    flex: 3;
+    padding: 10px;
+    padding-top: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabmenu {
+    flex: 1;
+    display: flex;
+}
+
+.introduction_menu, .gallery_menu {
+    position: relative; /* ::after 기준 */
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    overflow: hidden; /* 애니메이션 잘림 방지 */
+}
+
+.introduction_menu::after,
+.gallery_menu::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.introduction_menu::after {transform-origin: right;}
+.gallery_menu::after {transform-origin: left;}
+
+.introduction_menu.horror::after,
+.gallery_menu.horror::after {background-color: #b22222;}
+
+.introduction_menu.adventure::after,
+.gallery_menu.adventure::after {background-color: #e5ae4e;}
+
+.introduction_menu.crime::after,
+.gallery_menu.crime::after {background-color: #4f4f4f;}
+
+.introduction_menu::before,
+.gallery_menu::before {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.097);
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+}
+
+.introduction_menu.active::after,
+.gallery_menu.active::after {
+    transform: scaleX(1);
+}
+
+.introduction_gallery {
+    flex: 6;
 }
 
 @keyframes slideInFromRight {
