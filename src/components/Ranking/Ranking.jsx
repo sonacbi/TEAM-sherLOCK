@@ -14,6 +14,7 @@ import Raurel from'../../assets/images/Ranking_img/raurel.png';
 import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png'; // 더미데이터
 
 
+
 function Ranking() {
   // 주소값에서 theme 파라미터 가져오기
   const { theme } = useParams();
@@ -21,29 +22,47 @@ function Ranking() {
   // 랭킹 상태
   const [showTop10, setShowTop10] = useState(true); // 처음엔 1~10위 보여주기
   const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 진행 중 상태
-  const [step, setStep] = useState('idle');
+  const [step, setStep] = useState('idle');  
+
+  const [trophyWidth, setTrophyWidth] = useState(null);
+  const trophyRef = useRef();
 
   // 트로피 클릭 핸들러 (애니메이션 토글)
   const handleClickRank = () => {
     if (isAnimating || step !== 'idle') return;  // 이미 애니메이션 중이면 리턴
+
+    // 애니메이션 시작 전에 현재 width 저장
+    if (trophyRef.current) {
+      const width = trophyRef.current.getBoundingClientRect().width;
+      console.log("확인");
+      setTrophyWidth(width);  // 애니메이션 시작 전에 현재 width 저장
+    }
   
     setIsAnimating(true);  // 애니메이션 시작
     setStep('collapsingTop10');  // 축소 애니메이션 시작
   };
+
+  // 랭킹 1~10 접히는 속도 조절
+  const [trans_10] = useState(1.4);
   
   // 애니메이션 상태 변화 처리
   useEffect(() => {
     if (step === 'collapsingTop10') {
       setTimeout(() => {
-        setStep('shrinkTop10');  // 축소 상태로 변경
-      }, 1000);
-    } else if (step === 'shrinkTop10') {
-      setTimeout(() => {
         setShowTop10(false);  // Top10 숨기기
         setStep('idle');  // 상태 초기화
         setIsAnimating(false);  // 애니메이션 종료
-      }, 4000); // 축소 애니메이션 후, Top10 숨김
-    }
+      }, 1500); // 1.5초 후 안의 내용을을 실행함
+    } 
+
+
+    // else if (step === 'shrinkTop10') {
+    //   setTimeout(() => {
+    //     setShowTop10(false);  // Top10 숨기기
+    //     setStep('idle');  // 상태 초기화
+    //     setIsAnimating(false);  // 애니메이션 종료
+    //   }, 4000); // 축소 애니메이션 후, Top10 숨김
+    // }
   }, [step]);
 
   // 풀페이지 스크롤 제어용 (비활성화 영역 체크)
@@ -137,38 +156,39 @@ function Ranking() {
       }
     };
 
-    const TrophyDiv = ({ step }) => {
+    const TrophyDiv = ({ step, prevWidthProp }) => {
       const divRef = useRef(null);
-      const [width, setWidth] = useState('100%');
-      const [isWidthCalculated, setIsWidthCalculated] = useState(false);
+      const [animatedWidth, setAnimatedWidth] = useState(prevWidthProp);
 
-      // step이 변경될 때마다 width를 저장하고 애니메이션이 완료될 때까지 변경하지 않음
-      useLayoutEffect(() => {
-        if (divRef.current && step === 'collapsingTop10' && !isWidthCalculated) {
-          const rect = divRef.current.getBoundingClientRect();
-          setWidth(rect.width);
-          setIsWidthCalculated(true); // width가 한 번만 계산되도록 설정
-          console.log('저장된 이전 width :', rect.width); // 콘솔로 확인
-        }
-      }, [step, isWidthCalculated]);
-
-      // 애니메이션이 완료된 후 width가 변하지 않도록 처리
       useEffect(() => {
-        if (step === 'idle') {
-          setIsWidthCalculated(false); // idle 상태에서 width를 다시 계산할 수 있게 설정
-        }
-      }, [step]);
+        if (step === 'collapsingTop10') {
+          // 일단 이전 width 적용
+          setAnimatedWidth(`${prevWidthProp}px`);
+    
+          // 다음 프레임에 새로운 width 적용 → 애니메이션 유도
+          requestAnimationFrame(() => {
+            const rect =  divRef.current?.parentElement?.getBoundingClientRect(); // 부모요소 크기 참조
+            if (rect?.width > 0) { setAnimatedWidth(`${rect.width}px`); }
+          });
+          
+        } else { setAnimatedWidth(`${prevWidthProp}px`); }
+      }, [step, prevWidthProp]);
+    
+  
     
       return (
         <motion.div
-          className='fillColor'
+          className="fillColor"
           ref={divRef}
           initial={false}
-          animate={{
-            width: step === 'collapsingTop10' || step === 'shrinkTop10' ? '100%' : width,
-          }}
+          animate={{ width: animatedWidth }}
           transition={{
-            duration: 3,
+            type : 'spring',
+            stiffness: 100,
+            damping: 20,
+            mass: 1,
+            restDelta: 0.001,
+            duration: step === 'collapsingTop10' ? 0.8 : 0,
             ease: 'easeInOut',
           }}
           style={{
@@ -178,8 +198,9 @@ function Ranking() {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: step === 'collapsingTop10' ? 'auto' : '50%', // collapsingTop10일 때 left를 auto로 설정
+            right: step === 'collapsingTop10' ? '0%' : 'auto', // collapsingTop10일 때 right를 50%로 설정
+            transform: step === 'collapsingTop10' ? 'none' : 'translateX(-50%)', // collapsingTop10일 때 transform을 제거
           }}
         >
           <img className="trophy" src={Trophy} alt="Trophy" />
@@ -200,75 +221,109 @@ function Ranking() {
               key={step}
               id="ranker_1_10"
               layout
-              className={`ranker_grid ${step === 'shrinkTop10' ? 'shrunk' : ''}`}
-              // animate={step === 'shrinkTop10' ? { gridTemplateRows: 'repeat(5, 0px), 48px', transition: { duration: 5, ease: 'easeInOut' } } : {}}
+              className={`ranker_grid` }
+              animate={step === 'collapsingTop10' ? { height: 'auto', gridTemplateRows: 'repeat(6, auto)' } : {}}
               onAnimationComplete={handleRankingEvents}
               style={{ position: 'relative' }} // 부모의 relative 설정을 다시 확인
             >
               {fullData.slice(0, 10).map((user, index) => (
-                <motion.li
-                  key={`user-${user.id}`}
-                  layout
-                  animate={
-                    step === 'collapsingTop10' || step === 'shrinkTop10'
-                      ? 
-                      index === 9 // li10
-                        ? { width: 0, opacity: 0, position: 'absolute', padding: 0, margin :0 }
-                        : { height: 0, opacity: 0 , padding: 0, margin :0 }
-                      : {}
-                  }
-                  transition={{ duration: 3 }}
-                  className={`li${index + 1} fillColor`}
-                  style={{
-                    overflow: 'hidden',
-                    gridColumn: index === 0 ? '1' : index === 1 ? '2' : index === 2 ? '2' : index % 2 === 1 ? '1' : '2',
-                    gridRowStart: index === 0 ? 1 : index === 1 ? 1 : index === 2 ? 2 : undefined,
-                    gridRowEnd: index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 3 : undefined,
-                    position: 'relative', // 위치는 relative로 유지
-                  }}
-                >
-                  {/* 왕관 또는 숫자 */}
-                  {index === 0 ? (
-                    <img className="Crown" src={Crown} alt="Crown" />
-                  ) : index === 1 || index === 2 ? (
-                    <div className="rank_header">
-                      <img className="Crown_small" src={Crown} alt="Crown" />
-                    </div>
-                  ) : (
-                    <div className="rank_header">
-                      <span className="rank_index">{index + 1}</span>
-                    </div>
-                  )}
+                index === 9 ? (
+                  <React.Fragment key={`user-${user.id}`}>
+                    <motion.li
+                      layout
+                      animate={
+                        step === 'collapsingTop10'
+                          ? { width: 0, opacity: 0, position: 'absolute', padding: 0, margin: 0 }
+                          : {}
+                      }
+                      transition={{ duration: 0 }}
+                      className={`li${index + 1} fillColor`}
+                      style={{
+                        overflow: 'hidden',
+                        gridColumn: '1',
+                        position: 'relative',
+                      }}
+                    >
+                      {/* 왕관 또는 숫자 */}
+                      <div className="rank_header">
+                        <span className="rank_index">{index + 1}</span>
+                      </div>
 
-                  {/* 이름 및 점수 */}
-                  <div className="rank_profile">
-                    <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
-                    <span className="rank_name">{user.name}</span>
-                  </div>
-                  <div className="rank_score">{user.score}</div>
+                      {/* 이름 및 점수 */}
+                      <div className="rank_profile">
+                        <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
+                        <span className="rank_name">{user.name}</span>
+                      </div>
+                      <div className="rank_score">{user.score}</div>
+                    </motion.li>
+                  </React.Fragment>
+                ) : (
+                  <motion.li
+                    key={`user-${user.id}`}
+                    layout
+                    animate={
+                      step === 'collapsingTop10'
+                        ? { height: 0, opacity: 0, padding: 0, margin: 0 }
+                        : {}
+                    }
+                    transition={{ duration: trans_10,
+                      type: 'tween',
+                      ease: 'anticipate',
+                     }}
+                    className={`li${index + 1} fillColor`}
+                    style={{
+                      overflow: 'hidden',
+                      gridColumn: index === 0 ? '1' : index === 1 ? '2' : index === 2 ? '2' : index % 2 === 1 ? '1' : '2',
+                      gridRowStart: index === 0 ? 1 : index === 1 ? 1 : index === 2 ? 2 : undefined,
+                      gridRowEnd: index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 3 : undefined,
+                      position: 'relative',
+                    }}
+                  >
+                    {/* 왕관 또는 숫자 */}
+                    {index === 0 ? (
+                      <img className="Crown" src={Crown} alt="Crown" />
+                    ) : index === 1 || index === 2 ? (
+                      <div className="rank_header">
+                        <img className="Crown_small" src={Crown} alt="Crown" />
+                      </div>
+                    ) : (
+                      <div className="rank_header">
+                        <span className="rank_index">{index + 1}</span>
+                      </div>
+                    )}
 
-                  {/* 월계관 */}
-                  {index === 0 && <img className="Raurel" src={Raurel} alt="Raurel" />}
-                </motion.li>
+                    {/* 이름 및 점수 */}
+                    <div className="rank_profile">
+                      <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
+                      <span className="rank_name">{user.name}</span>
+                    </div>
+                    <div className="rank_score">{user.score}</div>
+
+                    {/* 월계관 */}
+                    {index === 0 && <img className="Raurel" src={Raurel} alt="Raurel" />}
+                  </motion.li>
+                )
               ))}
 
               {/* toggle 버튼 */}
               <motion.div
                 layoutId="trophy" // layoutId는 여전히 toggle을 위한 요소에서만 사용
                 layout
-                transition={{ layout: { duration: 0 } }}
+                transition={{ layout: {type : 'tween', duration: trans_10 } }}
                 className="toggle_trophy"
+                ref={trophyRef} // ref를 제대로 설정
                 onClick={handleClickRank}
                 style={{
-                  gridRowStart: step === 'shrinkTop10' ? 6 : step === 'collapsingTop10' ? 6 : 6,
-                  gridRowEnd: step === 'shrinkTop10' ? 7 : step === 'collapsingTop10' ? 7 : 7,
+                  gridRowStart: 6,
+                  gridRowEnd: 7,
                   gridColumn:
-                    step === 'shrinkTop10' ? '1 / span 2' : step === 'collapsingTop10' ? '1 / span 2' : '2 / span 1',
-                  position: step === 'shrinkTop10' || step === 'collapsingTop10' ? 'absolute' : 'relative',
-                  top: step === 'shrinkTop10' ? '0' : 'auto',  // shrinkTop10일 때 top: 0으로 이동
+                    step === 'collapsingTop10' ? '1 / span 2' : '2 / span 1',
+                  position: 'collapsingTop10' ? 'absolute' : 'relative',
+                  top: 'auto',  
+                  height : '48px'
                 }}
               >
-                <TrophyDiv step={step} />
+                <TrophyDiv  step={step} prevWidthProp={trophyWidth} />
               </motion.div>
             </motion.div>
           )}
@@ -337,6 +392,7 @@ function Ranking() {
                 layout
                 className="toggle_trophy fillColor"
                 onClick={handleClickRank}
+                style ={ {height : '48px'}}
               >
                 <div>
                 <img className="trophy" src={Trophy} alt="Trophy" />
