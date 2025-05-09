@@ -56,10 +56,8 @@ function ThemePage() {
     const hasAnimated2 = useRef(false); // 첫 번째 애니메이션 실행 여부 저장
     const [shouldAnimate, setShouldAnimate] = useState(false); // 첫 번째 애니메이션 실행 여부
 
-    const navigate = useNavigate();
-
     const [showSortType, setShowSortType] = useState(false);
-    const [selectedSort, setSelectedSort] = useState('평점 높은순'); // 초기 표시 텍스트
+    const [selectedSort, setSelectedSort] = useState('평점순 (↑)'); // 초기 표시 텍스트
     const timeoutRef = useRef(null); // 타이머 ID 저장용
 
     const [selectedDifficulty, setSelectedDifficulty] = useState(null);
@@ -621,9 +619,16 @@ function ThemePage() {
                                 </div>
 
                                 <div className={`sort_type ${theme} ${showSortType ? 'visible' : 'hidden'}`}>
-                                    <h2 className='rating_high' onClick={() => handleSelectSort('평점 낮은순')}>1. 평점 낮은순</h2>
-                                    <h2 className='rating_low' onClick={() => handleSelectSort('평점 높은순')}>2. 평점 높은순</h2>
-                                    <h2 className='view_high' onClick={() => handleSelectSort('조회순')}>3. 조회순</h2>
+                                    <div className='sort_type1_wrap'>
+                                        <h2 className='rating_high' onClick={() => handleSelectSort('평점순 (↓)')}>1. 평점순 (↓)</h2>
+                                        <h2 className='rating_low' onClick={() => handleSelectSort('평점순 (↑)')}>2. 평점순 (↑)</h2>
+                                        <h2 className='view_high' onClick={() => handleSelectSort('최신순')}>3. 최신순</h2>
+                                    </div>
+
+                                    <div className='sort_type2_wrap'>
+                                        <h2 className='rating_high' onClick={() => handleSelectSort('플레이순 (↓)')}>4. 플레이순 (↓)</h2>
+                                        <h2 className='rating_low' onClick={() => handleSelectSort('플레이순 (↑)')}>5. 플레이순 (↑)</h2>
+                                    </div>
                                 </div>
                             </div>
 

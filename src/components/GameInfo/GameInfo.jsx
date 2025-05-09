@@ -15,6 +15,9 @@ import crime_GameInfo_rating_star from '../../assets/images/ThemePage_img/crime/
 import crime_GameInfo_difficulty from '../../assets/images/ThemePage_img/crime/crime_difficulty_img.png';
 import thumbnail_img from '../../assets/images/ThemePage_img/horror/horror_door1_img.png';
 import player_icon from '../../assets/images/GameInfo/player_icon.png';
+import gallery1_img from '../../assets/images/GameInfo/gallery1_img.png';
+import gallery2_img from '../../assets/images/GameInfo/gallery2_img.png';
+import gallery3_img from '../../assets/images/GameInfo/gallery3_img.png';
 
 function GameInfo({ setShowGameInfo }) {
   // URL 파라미터에서 theme 값 가져오기
@@ -69,8 +72,8 @@ function GameInfo({ setShowGameInfo }) {
     <div className={`GameInfo_wrap ${isExiting ? 'fadeOut' : ''}`}>
       <img id='GameInfo_background' src={GameInfo_backgroundImage} alt='GameInfo_background' />
 
-      <div className={`GameInfo_door ${theme}`}>
-        <div className='GameInfo_room'>
+      <div className='GameInfo_door'>
+        <div className={`GameInfo_room ${theme}`}>
           <img id='GameInfo_room_img' src={GameInfo_roomImage} alt='GameInfo_room_img' />
           <p>401</p>
           <h5 onClick={handleExitClick}>EXIT</h5>
@@ -153,7 +156,40 @@ function GameInfo({ setShowGameInfo }) {
             </div>
 
             <div className='introduction_gallery'>
+              {activeTab === 'introduction' && (
+                <div className='introduction'>
+                  <p>
+                    스토리: “도시는 고요하다. 단 하나, 괴물만이 움직인다.”
+                    깨어나 보니 모든 것이 바뀌어 있었다.
+                    사라진 사람들, 닫힌 문, 그리고 그 안에서 들리는 무언가의 숨소리…
+                    괴물의 정체를 밝혀내고, 살아서 탈출하라. 단, 시간은 많지 않다.<br /><br />
+                    처음 만들어본 방탈출입니다!<br />
+                    부족한 점이 있을 수도 있지만,<br />
+                    열심히 고민하고 재미있게 구성해봤습니다.<br /><br />
+                    무섭기도 하고, 당황스럽기도 한 순간들이
+                    여러분에게 특별한 기억으로 남았으면 좋겠습니다.
+                    긴장도 하면서, 웃기도 하면서
+                    가볍게, 재미있게 즐겨주세요!
+                    즐거운 플레이 되시길 바랍니다
+                  </p>
+                </div>
+              )}
 
+              {activeTab === 'gallery' && (
+                <div className='gallery'>
+                  <div className='gallery_img1'>
+                    <img id='gallery1_img' src={gallery1_img} alt='gallery1_img' />
+                  </div>
+
+                  <div className='gallery_img2'>
+                    <img id='gallery2_img' src={gallery2_img} alt='gallery2_img' />
+                  </div>
+
+                  <div className='gallery_img3'>
+                    <img id='gallery3_img' src={gallery3_img} alt='gallery3_img' />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
