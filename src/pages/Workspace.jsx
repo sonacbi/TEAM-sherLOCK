@@ -1,22 +1,20 @@
 import { useState } from "react";
 import JSZip from 'jszip';
-import { Game, Source, Stage, Cut, Theme, Visibility, StageType  } from "../../modules/game-modules"
+import { Game, GameInfo, Source, Stage, Cut, Theme, Visibility, StageType  } from "../../modules/game-modules"
 import "../styles/workspace.css"
-import SaveGameToLocal from "../components/Workspace/SaveGameToLocal";
 import SaveZIPGameToLocal from "../components/Workspace/SaveZIPGameToLocal";
 import SaveGameToServer from "../components/Workspace/SaveGameToServer";
 
 export default function Workspace() {
     const [game, setGame] = useState(new Game({}));
-    const [theme, setTheme] = useState(Theme.horror);
-    const [visibility, setVisibility] = useState(Visibility.public);
+    const [gameInfo, setGameInfo] = useState(new GameInfo({}));
     const [file, setFile] = useState({});
     const [imgs, setImgs] = useState([]);
-    const [thumnailImg, setThumnailImg] = useState(new File([], ''));
+    const [thumbnailImg, setThumbnailImg] = useState(new File([], ''));
     const [stageImg, setStageImg] = useState([ new File([], '') ]);
     const [stageIndex, setStageIndex] = useState(0);
     const date = `(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) `
-    console.log(`${date}게임데이터:`, game, `[${theme}] [${visibility}]`)
+    console.log(`${date}게임:`, game, gameInfo)
 
     // 사용자 게임파일 불러오기
     function uploadGameFile(event) {
@@ -83,7 +81,7 @@ export default function Workspace() {
         imgs.map(img=>{
             // console.log('잉1',game.thumbnailURL)
             // console.log('잉2',img.name)
-            if(game.thumbnailURL == img.name) setThumnailImg(img);
+            if(game.thumbnailURL == img.name) setThumbnailImg(img);
             game.stage.map((data, index)=>{
                 if(data.imgURL == img.name) setStageImg(prev=>{
                     const newImg = [...prev]
@@ -98,8 +96,8 @@ export default function Workspace() {
         console.log('이미지', imgs)
     }
     function showThumbnailImg() {
-        console.log('썸넬이미지', thumnailImg)
-        console.log('썸넬이미지', URL.createObjectURL(thumnailImg))
+        console.log('썸넬이미지', thumbnailImg)
+        console.log('썸넬이미지', URL.createObjectURL(thumbnailImg))
         console.log('download/'+game.thumbnailURL)
     }
     function showStageImgs() {
@@ -108,8 +106,8 @@ export default function Workspace() {
 
     function handleThumbnailChange(e) {
         // const img = e.target.files[0];
-        // // if(img) setThumnailImg(URL.createObjectURL(img));
-        // if(img) setThumnailImg(img);
+        // // if(img) setThumbnailImg(URL.createObjectURL(img));
+        // if(img) setThumbnailImg(img);
     }
 
     function handleStageImgChange(e) {
@@ -128,36 +126,33 @@ export default function Workspace() {
     // console.log('파싱된 파일2',file)
     
     // 게임 데이터 수정하는 함수
-    function updateGame(event) {
+    function updategameInfo(event) {
         event.preventDefault();
-        const formData = new FormData(event.target)
-        const title = formData.get("game_title")
-        const thumbnailURL = formData.get("game_thumbnailURL").name
-        setThumnailImg(formData.get("game_thumbnailURL"))
-        // const thumbnailURL = URL.createObjectURL(formData.get("game_thumbnailURL") ?? '')
-        const description = formData.get("game_description")
-        // const theme = formData.get("game_theme")
-        // const tag = formData.get("game_tag")
-        const difficulty = formData.get("game_difficulty")
-        const playTime = Number(formData.get("game_playTime"))
-        // const visibility = formData.get("game_visibility")
-        const isRanking = formData.get("game_isRanking") ? true : false;
-        const isHiddenStage = formData.get("game_isHiddenStage") ? true : false;
-        setGame(prev => {
+        const formData = new FormData(event.target);
+        const title = formData.get("title");
+        const thumbnail = formData.get("thumbnail").name;
+        setThumbnailImg(formData.get("thumbnail"));
+        const theme = formData.get("theme");
+        const visibility = formData.get("visibility");
+        const description = formData.get("description");
+        const difficulty = formData.get("difficulty");
+        const playTime = Number(formData.get("playTime"));
+        const isRanking = formData.get("isRanking") ? true : false;
+        const isHiddenStage = formData.get("isHiddenStage") ? true : false;
+        setGameInfo(prev => {
             const newGame = {
                 ...prev,
                 title: title,
-                thumbnailURL: thumbnailURL,
+                thumbnail: thumbnail,
                 description: description,
-                // theme: theme,
-                // tag: tag,
+                theme: theme,
                 difficulty: difficulty,
                 playTime: playTime,
-                // visibility: visibility,
+                visibility: visibility,
                 isRanking: isRanking,
                 isHiddenStage: isHiddenStage
-            }
-            return newGame;
+            };
+            return new GameInfo(newGame);
         })
     }
 
@@ -165,7 +160,7 @@ export default function Workspace() {
     function createGameStage() {
         setGame(prev => {
             const newGame = { ...prev, stage: [...prev.stage, new Stage({})] };
-            return newGame;
+            return new Game(newGame);
         });
         setStageImg(prev => {
             const newImg = [...prev]
@@ -186,7 +181,7 @@ export default function Workspace() {
                 ...newGame.stage[index], 
                 cut: [...(newGame.stage[index].cut || []), new Cut({})] 
             };
-            return newGame;
+            return new Game(newGame);
         });
     }
 
@@ -232,15 +227,8 @@ export default function Workspace() {
                 connectedStage,
                 cut: newGame.stage[stageIndex].cut
             })
-            return newGame;
+            return new Game(newGame);
         })
-    }
-
-    function updateOthers(event) {
-        event.preventDefault();
-        const formData = new FormData(event.target);
-        setTheme(formData.get("theme"))
-        setVisibility(formData.get("visibility"))
     }
 
     return(
@@ -269,70 +257,81 @@ export default function Workspace() {
         )}
         <section /* style={{backgroundColor: "#d9d9d9"}} */>
             <div>
-                <form onSubmit={updateGame}>
+                <form onSubmit={updategameInfo}>
                     <div>
                         <label>제목
-                            <input type="text" name="game_title" defaultValue={game.title} key={game.title}/>
+                            <input type="text" name="title" defaultValue={gameInfo.title} key={gameInfo.title}/>
                         </label>
                     </div>
                     <div>
                         <label>썸네일
-                            {/* <input type="text" name="game_thumbnailURL" value={game.thumbnailURL} key={game.thumbnailURL} readOnly/> */}
-                            <input type="file" name="game_thumbnailURL" accept="image/*" onChange={handleThumbnailChange}/>
-                            {/* <input type="file" name="game_thumbnailURL" accept="image/*" defaultValue={thumnailImg} key={thumnailImg} onChange={handleThumbnailChange}/> */}
+                            <input type="file" name="thumbnail" accept="image/*" onChange={handleThumbnailChange}/>
+                            {/* <input type="file" name="thumbnail" accept="image/*" defaultValue={thumbnailImg} key={thumbnailImg} onChange={handleThumbnailChange}/> */}
+                        </label>
+                    </div>
+                    <div>
+                        <label>테마:
+                            <label>호러
+                                <input type="radio" name="theme" value={Theme.horror} defaultChecked={gameInfo.theme == Theme.horror} key={gameInfo.theme}/>
+                            </label>
+                            <label>모험
+                                <input type="radio" name="theme" value={Theme.adventure} defaultChecked={gameInfo.theme == Theme.adventure} key={gameInfo.theme}/>
+                            </label>
+                            <label>범죄
+                                <input type="radio" name="theme" value={Theme.crime} defaultChecked={gameInfo.theme == Theme.crime} key={gameInfo.theme}/>
+                            </label>
+                        </label>
+                    </div>
+                    <div>
+                        <label>공개 여부:
+                            <label>공개
+                                <input type="radio" name="visibility" value={Visibility.public} defaultChecked={gameInfo.visibility == Visibility.public} key={gameInfo.visibility}/>
+                            </label>
+                            <label>일부공개
+                                <input type="radio" name="visibility" value={Visibility.unlisted} defaultChecked={gameInfo.visibility == Visibility.unlisted} key={gameInfo.visibility}/>
+                            </label>
+                            <label>비공개
+                                <input type="radio" name="visibility" value={Visibility.private} defaultChecked={gameInfo.visibility == Visibility.private} key={gameInfo.visibility}/>
+                            </label>
                         </label>
                     </div>
                     <div>
                         <label>설명
-                            <textarea type="text" name="game_description" defaultValue={game.description} key={game.description}/>
+                            <textarea type="text" name="description" defaultValue={gameInfo.description} key={gameInfo.description}/>
                         </label>
                     </div>
-                    {/* <div>
-                        <label>태그
-                            <input type="text" name="game_tag" defaultValue={game.tag} key={game.tag}/>
-                        </label>
-                    </div> */}
                     <div>
                         <label>난이도:
-                            {/* <label>쉬움
-                                <input type="radio" name="game_difficulty" value={Difficulty.easy} defaultChecked={game.difficulty == Difficulty.easy} key={game.difficulty}/>
-                            </label>
-                            <label>보통
-                                <input type="radio" name="game_difficulty" value={Difficulty.medium} defaultChecked={game.difficulty == Difficulty.medium} key={game.difficulty}/>
-                            </label>
-                            <label>어려움
-                                <input type="radio" name="game_difficulty" value={Difficulty.hard} defaultChecked={game.difficulty == Difficulty.hard} key={game.difficulty}/>
-                            </label> */}
                             <label>1
-                                <input type="radio" name="game_difficulty" value={1} defaultChecked={game.difficulty == 1} key={game.difficulty}/>
+                                <input type="radio" name="difficulty" value={1} defaultChecked={gameInfo.difficulty == 1} key={gameInfo.difficulty}/>
                             </label>
                             <label>2
-                                <input type="radio" name="game_difficulty" value={2} defaultChecked={game.difficulty == 2} key={game.difficulty}/>
+                                <input type="radio" name="difficulty" value={2} defaultChecked={gameInfo.difficulty == 2} key={gameInfo.difficulty}/>
                             </label>
                             <label>3
-                                <input type="radio" name="game_difficulty" value={3} defaultChecked={game.difficulty == 3} key={game.difficulty}/>
+                                <input type="radio" name="difficulty" value={3} defaultChecked={gameInfo.difficulty == 3} key={gameInfo.difficulty}/>
                             </label>
                             <label>4
-                                <input type="radio" name="game_difficulty" value={4} defaultChecked={game.difficulty == 4} key={game.difficulty}/>
+                                <input type="radio" name="difficulty" value={4} defaultChecked={gameInfo.difficulty == 4} key={gameInfo.difficulty}/>
                             </label>
                             <label>5
-                                <input type="radio" name="game_difficulty" value={5} defaultChecked={game.difficulty == 5} key={game.difficulty}/>
+                                <input type="radio" name="difficulty" value={5} defaultChecked={gameInfo.difficulty == 5} key={gameInfo.difficulty}/>
                             </label>
                         </label>
                     </div>
                     <div>
                         <label>예상소요시간
-                            <input type="number" name="game_playTime" step={10} defaultValue={game.playTime} key={game.playTime}/>
+                            <input type="number" name="playTime" step={10} defaultValue={gameInfo.playTime} key={gameInfo.playTime}/>
                         </label>
                     </div>
                     <div>
                         <label>랭킹 여부
-                            <input type="checkbox" name="game_isRanking" defaultChecked={game.isRanking} key={game.isRanking}/>
+                            <input type="checkbox" name="isRanking" defaultChecked={gameInfo.isRanking} key={gameInfo.isRanking}/>
                         </label>
                     </div>
                     <div>
                         <label>히든 여부
-                            <input type="checkbox" name="game_isHiddenStage" defaultChecked={game.isHiddenStage} key={game.isHiddenStage}/>
+                            <input type="checkbox" name="isHiddenStage" defaultChecked={gameInfo.isHiddenStage} key={gameInfo.isHiddenStage}/>
                         </label>
                     </div>
                     <button type="submit">게임데이터 수정</button>
@@ -426,91 +425,52 @@ export default function Workspace() {
                     <button type="submit">스테이지 수정하기</button>
                 </form>
             </div>
-            <div style={{backgroundColor: "#dddddd"}}>
-                <form onSubmit={updateOthers}>기타
-                    <div>
-                        <label>테마:
-                            <label>호러
-                                <input type="radio" name="theme" value={Theme.horror} defaultChecked={theme == Theme.horror} key={theme}/>
-                            </label>
-                            <label>모험
-                                <input type="radio" name="theme" value={Theme.adventure} defaultChecked={theme == Theme.adventure} key={theme}/>
-                            </label>
-                            <label>범죄
-                                <input type="radio" name="theme" value={Theme.crime} defaultChecked={theme == Theme.crime} key={theme}/>
-                            </label>
-                        </label>
-                    </div>
-                    <div>
-                        <label>공개 여부:
-                            <label>공개
-                                <input type="radio" name="visibility" value={Visibility.public} defaultChecked={visibility == Visibility.public} key={visibility}/>
-                            </label>
-                            <label>일부공개
-                                <input type="radio" name="visibility" value={Visibility.unlisted} defaultChecked={visibility == Visibility.unlisted} key={visibility}/>
-                            </label>
-                            <label>비공개
-                                <input type="radio" name="visibility" value={Visibility.private} defaultChecked={visibility == Visibility.private} key={visibility}/>
-                            </label>
-                        </label>
-                    </div>
-                    <button type="submit">수정</button>
-                </form>
-            </div>
         </section>
         <div id="game">
-            <h1>게임 제목: "{game.title}"</h1>
+            <h1>게임 제목: "{gameInfo.title}"</h1>
             <table>
                 <tbody>
                     <tr>
                         <td>썸네일:</td>
                         <td>
                             {/* <img src={game.thumbnailURL.length ? game.thumbnailURL : null} style={{width: "200px"}}/> */}
-                            <img src={URL.createObjectURL(thumnailImg)} style={{width: "200px"}}/>
+                            <img src={URL.createObjectURL(thumbnailImg)} style={{width: "200px"}}/>
                         </td>
                     </tr>
                     <tr>
                         <td>썸네일 경로: </td>
                         <td>
-                            {game.thumbnailURL}
+                            {gameInfo.thumbnail}
                         </td>
                     </tr>
                     <tr>
                         <td>설명: </td>
-                        <td><pre>{game.description}</pre></td>
-                    </tr>
-                    {/* <tr>
-                        <td>테마: </td>
-                        <td>{game.theme}</td>
+                        <td><pre>{gameInfo.description}</pre></td>
                     </tr>
                     <tr>
-                        <td>태그: </td>
-                        <td>{game.tag}</td>
-                    </tr> */}
+                        <td>테마: </td>
+                        <td>{gameInfo.theme}</td>
+                    </tr>
                     <tr>
                         <td>난이도: </td>
-                        <td>{game.difficulty}</td>
+                        <td>{gameInfo.difficulty}</td>
                     </tr>
                     <tr>
                         <td>예상소요시간: </td>
-                        <td>{game.playTime}</td>
+                        <td>{gameInfo.playTime}</td>
                     </tr>
-                    {/* <tr>
+                    <tr>
                         <td>공개: </td>
-                        <td>{game.visibility}</td>
-                    </tr> */}
+                        <td>{gameInfo.visibility}</td>
+                    </tr>
                     <tr>
                         <td>랭킹?: </td>
-                        <td>{game.isRanking ? '있음' : '없음'}</td>
+                        <td>{gameInfo.isRanking ? '있음' : '없음'}</td>
                     </tr>
                     <tr>
                         <td>히든?: </td>
-                        <td>{game.isHiddenStage ? '있음' : '없음'}</td>
+                        <td>{gameInfo.isHiddenStage ? '있음' : '없음'}</td>
                     </tr>
-                    {/* <tr>
-                        <td>인벤토리: </td>
-                        <td>{game.inventory ? '있음': '없음'}</td>
-                    </tr> */}
                 </tbody>
             </table>
             <button onClick={createGameStage}>스테이지 추가하기</button>
@@ -590,28 +550,12 @@ export default function Workspace() {
                 </>
             ))}
             </div>
-            <div style={{backgroundColor: "#dddddd"}}>
-                <h3>그외</h3>
-                <table>
-                    <tbody>
-                    <tr>
-                        <td>테마</td>
-                        <td>{theme}</td>
-                    </tr>
-                    <tr>
-                        <td>공개여부</td>
-                        <td>{visibility}</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
         <section style={{backgroundColor: "#ffbb66"}}>
-            <SaveGameToLocal game={game}/>
-            <SaveZIPGameToLocal game={game} imgs={{thumnailImg, stageImg}}/>
+            <SaveZIPGameToLocal game={game} imgs={{thumbnailImg, stageImg}}/>
         </section>
         <section style={{backgroundColor: "#ffaa22"}}>
-            <SaveGameToServer game={game} setGame={setGame} theme={theme} visibility={visibility} imgs={{thumnailImg, stageImg}}/>
+            <SaveGameToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} imgs={{thumbnailImg, stageImg}}/>
         </section>
         </div>
     )

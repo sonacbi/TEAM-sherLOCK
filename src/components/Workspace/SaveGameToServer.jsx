@@ -1,43 +1,42 @@
-import { nanoid } from "nanoid";
-import axios from "axios";
 import JSZip from "jszip";
+import { nanoid } from "nanoid";
+import { GameInfo } from "../../../modules/game-modules";
 
 export default function SaveGameToServer(props) {
     const game = props.game;
-    const setGame = props.setGame;
-    const theme = props.theme;
-    const visibility = props.visibility;
-    const thumnailImg = props.imgs.thumnailImg;
+    const gameInfo = props.gameInfo;
+    const setGameInfo = props.setGameInfo;
+    const thumbnailImg = props.imgs.thumbnailImg;
     const stageImg = props.imgs.stageImg;
-    const formData = new FormData();
     async function uploadFilesToServer() {
+        const formData = new FormData();
         const zip = new JSZip();
-        zip.file(`${thumnailImg.name}`, thumnailImg);
+        zip.file("game.json", JSON.stringify(game, null, 2))
+        console.log(props.imgs)
+        zip.file(`${thumbnailImg.name}`, thumbnailImg);
         stageImg.map((data) => {
           zip.file(`${data.name}`, data)
         })
         let method = '';
         let param = '';
         
-        if(!game.id) {
+        if(!gameInfo.id) {
             // game에 아이디가 없으면 아이디(nanoid) 부여
             const nanoId = nanoid(8);
-            const newGame = { ...game, id: nanoId };
-            setGame({ ...game, id: nanoId })
-            zip.file("game.json", JSON.stringify(newGame, null, 2))
+            setGameInfo(new GameInfo({ ...gameInfo, id: nanoId }))
             method = "POST";
             param = nanoId;
         } else {
-            zip.file("game.json", JSON.stringify(game, null, 2))
             method = "PUT";
-            param = game.id;
+            param = gameInfo.id;
         }
 
         // 게임 zip 파일 서버로 전송
         try {
             const blob = await zip.generateAsync({type: 'blob'});
-            formData.append('zipfile', blob, 'game.zip')
-            const res = await fetch(`http://localhost:4000/workspace/${param}?theme=${theme}&visibility=${visibility}`, {
+            formData.append('zipfile', blob, 'game.zip');
+            formData.append('gameInfo', JSON.stringify(gameInfo));
+            const res = await fetch(`http://localhost:4000/workspace/${param}`, {
                 method: method,
                 body: formData,
             });

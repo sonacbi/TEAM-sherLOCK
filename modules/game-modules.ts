@@ -10,6 +10,28 @@ class ClassVersion {
 
 
 
+/**
+ * 게임 생성기
+ */
+class Game extends ClassVersion {
+    source:     Source;         // 게임소스
+    stage:      Stage[];        // 스테이지
+    
+    constructor({
+        source = new Source({}),
+        stage = [new Stage({})]
+    }) {
+        super()
+        this.source = new Source(source);
+        this.stage = [];
+        stage.map((data)=>{
+            this.stage.push(new Stage(data));
+        })
+    }
+}
+
+
+
 enum Theme {
     horror    = "horror",
     adventure = "adventure",
@@ -20,29 +42,40 @@ enum Visibility {
     unlisted = "unlisted",
     private  = "private",
 }
+class GameInfo {
+    id:             string;         // 아이디
+    title:          string;         // 제목
+    thumbnail:      string;         // 게임 썸네일 URL
+    theme:          Theme;          // 테마
+    visibility:     Visibility;     // 공개 여부
+    description:    string;         // 설명
+    difficulty:     number;         // 난이도
+    playTime:       number;         // 예상 소요 시간
+    isRanking:      boolean;        // 랭킹 표시 여부
+    isHiddenStage:  boolean;        // 히든 스테이지 여부
 
-
-
-/**
- * 게임 생성기
- */
-class Game extends ClassVersion {
-    id:             string;         // MySQL과 연동해서 얻음
-    source:         Source;         // 게임소스
-    stage:          Stage[];        // 스테이지
-    
     constructor({
         id = null,
-        source = new Source({}),
-        stage = [new Stage({})]
+        title = '',
+        thumbnail = '',
+        theme = Theme.horror,
+        visibility = Visibility.public,
+        description = '',
+        difficulty = 1,
+        playTime = 10,
+        isRanking = false,
+        isHiddenStage = false
     }) {
-        super()
         this.id = id;
-        this.source = new Source(source);
-        this.stage = [];
-        stage.map((data)=>{
-            this.stage.push(new Stage(data));
-        })
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.theme = theme;
+        this.visibility = visibility;
+        this.description = description;
+        this.difficulty = difficulty;
+        this.playTime = playTime;
+        this.isRanking = isRanking;
+        this.isHiddenStage = isHiddenStage;
     }
 }
 
@@ -268,4 +301,4 @@ class Puzzle extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType }
+export { ClassVersion, Game, GameInfo, Source, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType }

@@ -33,6 +33,12 @@ import crime_background from '../assets/images/ThemePage_img/crime/crime_backgro
 import crime_rating_star from '../assets/images/ThemePage_img/crime/crime_rating_star.png';
 import crime_difficulty_img from '../assets/images/ThemePage_img/crime/crime_difficulty_img.png';
 
+const FilterSetting = {
+    rating_desc: "rating_desc",
+    rating_asc: "rating_asc",
+    view_desc: "view_desc"
+}
+
 function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
     const { theme } = useParams();
@@ -61,12 +67,10 @@ function ThemePage() {
     const navigate = useNavigate();
 
     const [showSortType, setShowSortType] = useState(false);
-    const [selectedSort, setSelectedSort] = useState('평점 높은순'); // 초기 표시 텍스트
+    const [selectedSort, setSelectedSort] = useState(FilterSetting.rating_desc); // 초기 표시 텍스트
     const timeoutRef = useRef(null); // 타이머 ID 저장용
 
-    const [selectedDifficulty, setSelectedDifficulty] = useState(null);
-
-    const [searchKeyword, setSearchKeyword] = useState('');
+    const [difficulty, setDifficulty] = useState(null);
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -160,17 +164,26 @@ function ThemePage() {
             return;
         }
     
-        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&search_word=${searchWord.current}`);
+        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&offset=${0}&search_keyword=${searchWord.current}`);
         const datas = await res.json();
         console.log('가져온 게임들: ', datas);
     
-        const keyword = searchWord.current.trim().toLowerCase();
-        const filtered = datas.filter(game =>
-            game.title.toLowerCase().includes(keyword)
-        );
-        console.log('필터링된 게임들: ', filtered);
+        // const keyword = searchWord.current.trim().toLowerCase();
+        // const filtered = datas.filter(game =>
+        //     game.title.toLowerCase().includes(keyword)
+        // );
+        // console.log('필터링된 게임들: ', filtered);
     
-        setGames([...filtered]); // 게임 리스트 업데이트
+        // setGames([...filtered]); // 게임 리스트 업데이트
+        setGames(datas); // 게임 리스트 업데이트
+        // setGames(prev => {
+        //     return [
+        //         ...prev,
+        //         ...datas
+        //     ]
+        // })
+
+        console.log('games:',games)
     };
 
     const searchGames = (event) => {
@@ -184,7 +197,6 @@ function ThemePage() {
     
         const keyword = new FormData(event.target).get("door_search");
         searchWord.current = keyword;
-        setSearchKeyword(keyword); // ✅ 상태로 저장
     
         setGames([]);
         hasAnimated.current = false;
@@ -425,10 +437,10 @@ function ThemePage() {
     };
 
     const handleDifficultyClick = (level) => {
-        if (selectedDifficulty === level) {
-            setSelectedDifficulty(null); // 같은 걸 누르면 해제
+        if (difficulty === level) {
+            setDifficulty(null); // 같은 걸 누르면 해제
         } else {
-            setSelectedDifficulty(level); // 다른 걸 누르면 선택
+            setDifficulty(level); // 다른 걸 누르면 선택
         }
     };
 
@@ -613,7 +625,7 @@ function ThemePage() {
                                         {[1, 2, 3, 4, 5].map((level) => (
                                             <div
                                                 key={level}
-                                                className={`${level} ${theme} ${selectedDifficulty === level ? 'active' : ''}`}
+                                                className={`${level} ${theme} ${difficulty === level ? 'active' : ''}`}
                                                 onClick={() => handleDifficultyClick(level)}
                                             >
                                                 <h3>{level}</h3>
@@ -623,16 +635,16 @@ function ThemePage() {
                                 </div>
 
                                 <div className={`sort_type ${theme} ${showSortType ? 'visible' : 'hidden'}`}>
-                                    <h2 className='rating_high' onClick={() => handleSelectSort('평점 낮은순')}>1. 평점 낮은순</h2>
-                                    <h2 className='rating_low' onClick={() => handleSelectSort('평점 높은순')}>2. 평점 높은순</h2>
-                                    <h2 className='view_high' onClick={() => handleSelectSort('조회순')}>3. 조회순</h2>
+                                    <h2 className={`${FilterSetting.rating_desc}`} onClick={() => handleSelectSort(FilterSetting.rating_desc)}>1. 평점 낮은순</h2>
+                                    <h2 className={`${FilterSetting.rating_asc}`} onClick={() => handleSelectSort(FilterSetting.rating_asc)}>2. 평점 높은순</h2>
+                                    <h2 className={`${FilterSetting.view_desc}`} onClick={() => handleSelectSort(FilterSetting.view_desc)}>3. 조회순</h2>
                                 </div>
                             </div>
 
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
                                 {games.length === 0 ? (
-                                    <div className="no_games" key={searchKeyword}><h2><span style={{ fontSize: '18px' }}>검색: {searchKeyword}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
+                                    <div className="no_games" key={searchWord.current}><h2><span style={{ fontSize: '18px' }}>검색: {searchWord.current}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
                                 ) : (
                                     games.map((data, index) => {
                                         const roomNumber = 401 + index;
@@ -663,7 +675,7 @@ function ThemePage() {
                                                 <div className='theme_door'>
                                                     <img
                                                         id='theme_door_img'
-                                                        src={`../../server/games/${data.thumbnail}`}
+                                                        src={`../../server/games/${data.game_id}/${data.thumbnail}`}
                                                         alt={`theme_door_img_${data.thumbnail}`}
                                                     />
                                                     <div className='theme_door_data'>
