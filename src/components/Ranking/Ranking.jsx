@@ -27,6 +27,8 @@ function Ranking() {
   const [trophyWidth, setTrophyWidth] = useState(null);
   const trophyRef = useRef();
 
+  const [positionMode, setPositionMode] = useState('absolute'); // position을 전환할 상태
+
   // 트로피 클릭 핸들러 (애니메이션 토글)
   const handleClickRank = () => {
     if (isAnimating || step !== 'idle') return;  // 이미 애니메이션 중이면 리턴
@@ -49,12 +51,25 @@ function Ranking() {
   useEffect(() => {
     if (step === 'collapsingTop10') {
       setTimeout(() => {
+        setPositionMode('absolute'); // 애니메이션 중에는 absolute
         setShowTop10(false);  // Top10 숨기기
+        // DOM 반영 뒤 step 변경 (비동기 처리로 다음 프레임에 넘기기)
+        requestAnimationFrame(() => {
+          setStep('expandTrans');  // 이 시점부터 애니메이션 트리거
+        });
+
+        
+        
+      }, 1500); // 1.5초 후 안의 내용을 실행함
+      
+    } else if(step === 'expandTrans') {
+        setTimeout(() => {
+
         setStep('idle');  // 상태 초기화
         setIsAnimating(false);  // 애니메이션 종료
-      }, 1500); // 1.5초 후 안의 내용을을 실행함
-    } 
 
+      }, 1500); // 1.5초 후 안의 내용을 실행함
+    }
 
     // else if (step === 'shrinkTop10') {
     //   setTimeout(() => {
@@ -331,13 +346,17 @@ function Ranking() {
           {/* 1~100위 */}
           {!showTop10 && (
             <motion.ul
-              key={step} 
+              
               id="ranker_1_100"
               className="ranker_flex"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.5 }}
+              initial={step === 'collapsingTop10' ? { height: 0 } : step === 'expandTrans' ? { height: 0 } : false}
+              animate={step === 'expandTrans' ? { height : 330 } : {  }}
+              exit={false}
+              transition={{ 
+                type: 'tween',
+                duration: 0.5, // 원하는 시간
+                ease: 'easeInOut'
+              }}
               onAnimationComplete={handleRankingEvents}
             >
               {/* table header */}
@@ -352,6 +371,8 @@ function Ranking() {
                 <motion.li
                   layout
                   key={user.id}
+                  initial={step === 'collapsingTop10' ? { height: 0 } : {}}
+                  animate={step === 'expandTrans' ? { height: 'auto' } : {}}
                   className={`li${index + 1} rank_sticky`}
                 >
                   <div className="rank_header">
@@ -366,7 +387,12 @@ function Ranking() {
               ))}
   
               {/* scroll 영역 */}
-              <div className="rank-scroll">
+              <motion.div 
+                className="rank-scroll"
+                initial={step === 'collapsingTop10' ? { height: 0 } : {}}
+                animate={step === 'expandTrans' ? { height: 'auto' } : {}}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+              >
                 <ul>
                   {fullData100.slice(3, 100).map((user, index) => (
                     <motion.li
@@ -385,14 +411,18 @@ function Ranking() {
                     </motion.li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
   
               {/* 토글 버튼 (겉보기엔 똑같은 위치, 내부 컴포넌트만 바뀜) */}
               <motion.li
                 layout
                 className="toggle_trophy fillColor"
                 onClick={handleClickRank}
-                style ={ {height : '48px'}}
+                style ={ {height : '48px', 
+                  }}
+                // animate = {step === 'collapsingTop10'? { top : 0, bottom : 'none', y : 0} : step === 'expandTrans' ? {y : 320} : false}
+                transition={{ duration: 0.8 }}
+                onAnimationComplete={() => setPositionMode('sticky')}
               >
                 <div>
                 <img className="trophy" src={Trophy} alt="Trophy" />

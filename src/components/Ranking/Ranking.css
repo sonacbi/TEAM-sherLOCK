@@ -307,6 +307,7 @@ display: none !important;  }
   overflow-y: auto;  /* 세로 스크롤을 활성화 */
   min-height: 120px;
   max-height: 500px; /* 적당히 잡아야 함 */
+  overflow: hidden;
   -webkit-overflow-scrolling: touch; /* 터치스크롤을 부드럽게 */
   scrollbar-gutter: stable; /* 스크롤 생겨도 레이아웃 흔들리지 않게! */
   display: flex; /* <<< grid 말고 flex */
