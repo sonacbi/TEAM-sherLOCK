@@ -33,11 +33,7 @@ import crime_background from '../assets/images/ThemePage_img/crime/crime_backgro
 import crime_rating_star from '../assets/images/ThemePage_img/crime/crime_rating_star.png';
 import crime_difficulty_img from '../assets/images/ThemePage_img/crime/crime_difficulty_img.png';
 
-const FilterSetting = {
-    rating_desc: "rating_desc",
-    rating_asc: "rating_asc",
-    view_desc: "view_desc"
-}
+import { FilterSetting } from '../../modules/filters';
 
 function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
@@ -163,8 +159,15 @@ function ThemePage() {
             console.log("애니메이션 중 - 게임 로드 차단됨");
             return;
         }
-    
-        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&offset=${0}&search_keyword=${searchWord.current}`);
+
+        let filter;
+        if (selectedSort == FilterSetting.rating_desc) filter = "created_at";
+        else if (selectedSort == FilterSetting.rating_asc) filter = "created_at";
+        else if (selectedSort == FilterSetting.latest_desc) filter = "created_at";
+        else if (selectedSort == FilterSetting.play_desc) filter = "play_count DESC";
+        else if (selectedSort == FilterSetting.play_asc) filter = "play_count ASC";
+
+        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&offset=${0}&search_keyword=${searchWord.current}&filter=${filter}&difficulty=${difficulty}`);
         const datas = await res.json();
         console.log('가져온 게임들: ', datas);
     
@@ -186,18 +189,13 @@ function ThemePage() {
         console.log('games:',games)
     };
 
-    const searchGames = (event) => {
-        event.preventDefault();
-    
+    const searchGames = () => {
         // 🔒 애니메이션 중이면 재실행 방지
         if (isAnimating) {
             console.log("애니메이션 중 - 검색 차단됨");
             return;
         }
-    
-        const keyword = new FormData(event.target).get("door_search");
-        searchWord.current = keyword;
-    
+
         setGames([]);
         hasAnimated.current = false;
         setSection2Visible(true);
@@ -428,12 +426,13 @@ function ThemePage() {
     const handleSelectSort = (sortText) => {
         setSelectedSort(sortText);
         setShowSortType(false);
-    
+        
         // 기존 타이머 제거
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
         }
+        searchGames();
     };
 
     const handleDifficultyClick = (level) => {
@@ -442,6 +441,7 @@ function ThemePage() {
         } else {
             setDifficulty(level); // 다른 걸 누르면 선택
         }
+        searchGames();
     };
 
     return (
@@ -609,14 +609,26 @@ function ThemePage() {
                                     <div className='sort_search'>
                                         <div className='search'>
                                             <img id='search_icon' src={search_icon} alt='search_icon' />
-                                            <form onSubmit={searchGames} autocomplete="off">
+                                            <form
+                                                onSubmit={(event) => {
+                                                    event.preventDefault();
+                                                    searchWord.current = new FormData(event.target).get("door_search");
+                                                    searchGames();
+                                                }
+                                                }
+                                                autocomplete="off"
+                                            >
                                                 <input className='door_search' name='door_search' type='text' placeholder="제목 검색"/>
                                                 <button type='submit' style={{display: "none"}}></button>
                                             </form>
                                         </div>
                                         
                                         <h1 className={`sort ${theme}`} onClick={handleSortClick}>
-                                            {selectedSort}
+                                            {selectedSort == FilterSetting.rating_desc && "평점순 (↓)"}
+                                            {selectedSort == FilterSetting.rating_asc && "평점순 (↑)"}
+                                            {selectedSort == FilterSetting.latest_desc && "최신순"}
+                                            {selectedSort == FilterSetting.play_desc && "플레이순 (↓)"}
+                                            {selectedSort == FilterSetting.play_asc && "플레이순 (↑)"}
                                         </h1>
                                     </div>
 
@@ -635,9 +647,16 @@ function ThemePage() {
                                 </div>
 
                                 <div className={`sort_type ${theme} ${showSortType ? 'visible' : 'hidden'}`}>
-                                    <h2 className={`${FilterSetting.rating_desc}`} onClick={() => handleSelectSort(FilterSetting.rating_desc)}>1. 평점 낮은순</h2>
-                                    <h2 className={`${FilterSetting.rating_asc}`} onClick={() => handleSelectSort(FilterSetting.rating_asc)}>2. 평점 높은순</h2>
-                                    <h2 className={`${FilterSetting.view_desc}`} onClick={() => handleSelectSort(FilterSetting.view_desc)}>3. 조회순</h2>
+                                    <div className='sort_type1_wrap'>
+                                        <h2 className={`${FilterSetting.rating_desc}`} onClick={() => handleSelectSort(FilterSetting.rating_desc)}>1. 평점순 (↓)</h2>
+                                        <h2 className={`${FilterSetting.rating_asc}`} onClick={() => handleSelectSort(FilterSetting.rating_asc)}>2. 평점순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.view_desc}`} onClick={() => handleSelectSort(FilterSetting.latest_desc)}>3. 최신순</h2>
+                                    </div>
+
+                                    <div className='sort_type2_wrap'>
+                                        <h2 className={`${FilterSetting.play_desc}`} onClick={() => handleSelectSort(FilterSetting.play_desc)}>4. 플레이순 (↓)</h2>
+                                        <h2 className={`${FilterSetting.play_asc}`} onClick={() => handleSelectSort(FilterSetting.play_asc)}>5. 플레이순 (↑)</h2>
+                                    </div>
                                 </div>
                             </div>
 
