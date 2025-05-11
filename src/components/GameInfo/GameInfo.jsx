@@ -19,13 +19,14 @@ import gallery1_img from '../../assets/images/GameInfo/gallery1_img.png';
 import gallery2_img from '../../assets/images/GameInfo/gallery2_img.png';
 import gallery3_img from '../../assets/images/GameInfo/gallery3_img.png';
 
-function GameInfo({ setShowGameInfo }) {
+function GameInfo({ setShowGameInfo, setShowLoading, setLoadingMessage }) {
   // URL 파라미터에서 theme 값 가져오기
   const { theme } = useParams();
 
   const [isExiting, setIsExiting] = useState(false);
   const GameInfo_difficulty = 3;
   const [activeTab, setActiveTab] = useState('introduction');
+  const [isPlayClicked, setIsPlayClicked] = useState(false);
 
   // 테마별 이미지 매핑
   const GameInfo_backgroundMap = {
@@ -66,6 +67,12 @@ function GameInfo({ setShowGameInfo }) {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
+  };
+
+  const handlePlayClick = () => {
+    setIsPlayClicked(true);
+    setLoadingMessage('입장 중 . . .');
+    setShowLoading(true);
   };
 
   return (
@@ -134,7 +141,10 @@ function GameInfo({ setShowGameInfo }) {
             </div>
           </div>
 
-          <div className={`playgame ${theme}`}>
+          <div
+            className={`playgame ${theme} ${isPlayClicked ? 'clicked' : ''}`}
+            onClick={handlePlayClick}
+          >
             <h4>입장하기</h4>
           </div>
 

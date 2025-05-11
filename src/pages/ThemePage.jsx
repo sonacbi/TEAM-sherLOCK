@@ -7,6 +7,7 @@ import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
 import Footer from '../components/Footer/Footer';
 import GameInfo from '../components/GameInfo/GameInfo';
+import Loading from '../components/Loading/Loading';
 import fullpage from 'fullpage.js';
 import 'fullpage.js/dist/fullpage.min.css';
 import '../styles/ThemePage.css';
@@ -34,10 +35,14 @@ function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
     const { theme } = useParams();
 
-    // 로그인 및 회원가입 및 게임정보 상태
+    // 로그인 및 회원가입 및 게임정보 및 로딩 상태
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
     const [showGameInfo, setShowGameInfo] = useState(false);
+    const [showLoading, setShowLoading] = useState(false);
+
+    // 로딩 메세지
+    const [loadingMessage, setLoadingMessage] = useState('');
 
     const [games, setGames] = useState([]); // 아이템 상태 배열
     const searchWord = useRef(''); // 검색어
@@ -441,7 +446,7 @@ function ThemePage() {
                         {/* 헤더 영역: 로고 + 프로필 */}
                         <header className="theme_header">
                             <Header_Logo />
-                            <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} />
+                            <Profile onSignInClick={handleSignInClick} onSignUpClick={handleSignUpClick} setShowLoading={setShowLoading} setLoadingMessage={setLoadingMessage} />
                         </header>
 
                         {/* 테마 콘텐츠 영역: 랭크 + TOP3 */}
@@ -714,7 +719,10 @@ function ThemePage() {
             {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick} />}
 
             {/* 게임 정보 모달 */}
-            {showGameInfo && <GameInfo setShowGameInfo={setShowGameInfo} />}
+            {showGameInfo && <GameInfo setShowGameInfo={setShowGameInfo} setShowLoading={setShowLoading} setLoadingMessage={setLoadingMessage} />}
+
+            {/* 로딩 모달 */}
+            {showLoading && <Loading message={loadingMessage} />}
         </>
     );
 }

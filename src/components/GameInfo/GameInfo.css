@@ -154,6 +154,10 @@
 .playgame.adventure:hover {background-color: #e5ae4e;}
 .playgame.crime:hover {background-color: #4f4f4f;}
 
+.playgame.clicked.horror {background-color: #b22222;}
+.playgame.clicked.adventure {background-color: #e5ae4e;}
+.playgame.clicked.crime {background-color: #4f4f4f;}
+
 .GameInfo_introduction  {
     flex: 3;
     padding: 10px;

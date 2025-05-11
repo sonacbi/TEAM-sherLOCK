@@ -9,7 +9,7 @@ import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png';
 import profile_setup_bubble from '../../assets/images/Profile/profile_setup_bubble.png';
 
 // 프로필 컴포넌트 정의 (로그인 여부에 따라 다른 UI 보여줌)
-const Profile = ({ onSignInClick, onSignUpClick }) => {
+const Profile = ({ onSignInClick, onSignUpClick, setShowLoading, setLoadingMessage }) => {
   const [userToken, setUserToken] = useState(null); // 사용자 토큰 상태
   const [showProfileSetup, setShowProfileSetup] = useState(false); // 프로필 설정 창 표시 여부
 
@@ -56,7 +56,14 @@ const Profile = ({ onSignInClick, onSignUpClick }) => {
   };
 
   const handleWorkspaceClick = () => {
-    navigate(`/Theme/workspace`);
+    if (setShowLoading) {
+      setShowLoading(true); // 부모에서 로딩 띄움
+      setLoadingMessage('이동 중 . . .');
+
+      setTimeout(() => {
+        navigate(`/Theme/workspace`);
+      }, 3000);
+    }
   };
 
   return (

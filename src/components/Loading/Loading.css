@@ -1,0 +1,65 @@
+.Loading_wrap {
+    position: absolute;
+    width: 100dvw;
+    height: 100dvh;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.838);
+}
+
+.Loading_content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.Loading_line_lock {
+    position: relative;
+}
+
+.Loading_line {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border-left: 5px solid white;
+    animation: rotateBorder 2s linear infinite; /* 애니메이션 추가 */
+}
+
+#Loading_lock_img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    animation: floatUpDown 2s ease-in-out infinite;
+}
+
+.Loading_content p {
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    margin-top: 20px;
+    font-family: 'Gugi', sans-serif;
+}
+
+@keyframes rotateBorder {
+    0% {
+        transform: rotate(0deg); /* 초기 상태 */
+    }
+    100% {
+        transform: rotate(360deg); /* 360도 회전 */
+    }
+}
+
+@keyframes floatUpDown {
+    0% {
+        transform: translate(-50%, -45%);
+    }
+    50% {
+        transform: translate(-50%, -55%);
+    }
+    100% {
+        transform: translate(-50%, -45%);
+    }
+}
