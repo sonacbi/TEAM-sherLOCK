@@ -5,6 +5,7 @@ import MainPage from './pages/MainPage';
 import SocialAuthHandler from './pages/SocialAuthHandler';
 import ThemePage from './pages/ThemePage';
 import Workspace from './pages/Workspace';
+import PlayPage from './pages/PlayPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/auth/google" element={<SocialAuthHandler />} />
         <Route path="/Theme/:theme" element={<ThemePage />} />
         <Route path='/Theme/workspace' element={<Workspace/>} />
+        <Route path='/Theme/:theme/Play' element={<PlayPage/>} />
       </Routes>
     </Router>
   );

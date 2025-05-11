@@ -1,7 +1,7 @@
 import { useState } from "react";
 import JSZip from 'jszip';
 import { Game, Source, Stage, Cut, Theme, Visibility, StageType  } from "../../modules/game-modules"
-import "../styles/workspace.css"
+import "../styles/Workspace.css"
 import SaveGameToLocal from "../components/Workspace/SaveGameToLocal";
 import SaveZIPGameToLocal from "../components/Workspace/SaveZIPGameToLocal";
 import SaveGameToServer from "../components/Workspace/SaveGameToServer";

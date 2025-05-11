@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import './GameInfo.css';
 
@@ -22,6 +22,8 @@ import gallery3_img from '../../assets/images/GameInfo/gallery3_img.png';
 function GameInfo({ setShowGameInfo, setShowLoading, setLoadingMessage }) {
   // URL 파라미터에서 theme 값 가져오기
   const { theme } = useParams();
+
+  const navigate = useNavigate();
 
   const [isExiting, setIsExiting] = useState(false);
   const GameInfo_difficulty = 3;
@@ -73,6 +75,10 @@ function GameInfo({ setShowGameInfo, setShowLoading, setLoadingMessage }) {
     setIsPlayClicked(true);
     setLoadingMessage('입장 중 . . .');
     setShowLoading(true);
+
+    setTimeout(() => {
+      navigate(`/Theme/${theme}/Play`); // 3초 후 PlayPage로 이동
+    }, 3000);  // 3000ms = 3초
   };
 
   return (

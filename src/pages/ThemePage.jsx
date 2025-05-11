@@ -145,14 +145,14 @@ function ThemePage() {
 
     // 로그인/회원가입 시 스크롤 비활성화
     useEffect(() => {
-        if (showSignIn || showSignUp || showGameInfo) {
+        if (showSignIn || showSignUp || showGameInfo || showLoading) {
             document.body.style.overflow = 'hidden';
             if (window.fullpage_api) window.fullpage_api.setAllowScrolling(false);
         } else {
             document.body.style.overflow = '';
             if (window.fullpage_api) window.fullpage_api.setAllowScrolling(true);
         }
-    }, [showSignIn, showSignUp, showGameInfo]);
+    }, [showSignIn, showSignUp, showGameInfo, showLoading]);
 
     // 새로운 아이템 로드
     const loadMoreGames = async () => {
