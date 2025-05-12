@@ -256,7 +256,7 @@ function Sign_in({ onClose, onSignUpClick }) {
       </div>
 
       {/* ✅ 로딩 모달 */}
-      {isLoading && <Loading message="로그인 중입니다..." />}
+      {isLoading && <Loading message="로그인 중 . . ." />}
     </div>
   );
 }

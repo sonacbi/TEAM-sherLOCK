@@ -289,7 +289,7 @@ function Sign_up({ onClose, onSignInClick }) {
             </div>
 
             {/* ✅ 로딩 모달 */}
-            {isLoading && <Loading message="회원가입 처리 중입니다..." />}
+            {isLoading && <Loading message="회원가입 중 . . ." />}
         </div>
     );
 }

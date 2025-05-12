@@ -86,7 +86,7 @@ function SocialAuthHandler() {
       </div>
       
       {/* 로딩 화면 조건부 렌더링 */}
-      {isLoading && <Loading message="로그인 처리 중입니다..." />}
+      {isLoading && <Loading message="로그인 중 . . ." />}
       
     </>
   );
