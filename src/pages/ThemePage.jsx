@@ -640,7 +640,7 @@ function ThemePage() {
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
                                 {games.length === 0 ? (
-                                    <div className="no_games" key={searchKeyword}><h2><span style={{ fontSize: '18px' }}>검색: {searchKeyword}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
+                                    <div className="no_games" key={searchKeyword}><h2><span>검색: {searchKeyword}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
                                 ) : (
                                     games.map((data, index) => {
                                         const roomNumber = 401 + index;
