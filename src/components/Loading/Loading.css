@@ -17,6 +17,9 @@
 
 .Loading_line_lock {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .Loading_line {

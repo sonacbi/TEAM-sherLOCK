@@ -14,8 +14,23 @@ import google from '../../../../assets/images/Sign/Google.png';
 import X from '../../../../assets/images/Sign/X.png';
 
 function Sign_in({ onClose, onSignUpClick }) {
-  const [showSherlockLogin, setShowSherlockLogin] = useState(false);
-  const [showSocialLogin, setShowSocialLogin] = useState(false);
+  // 👁️ 소셜 로그인시 로딩 중 화면 착시 테크닉
+  const saved = localStorage.getItem('social_enter');
+  let initialSherlock = false;
+  let initialSocial = false;
+
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      initialSherlock = parsed.sherlock;
+      initialSocial = parsed.social;
+    } catch (e) {
+      console.error('⚠️ social_enter 초기값 파싱 실패:', e);
+    }
+  }
+
+  const [showSherlockLogin, setShowSherlockLogin] = useState(initialSherlock);
+  const [showSocialLogin, setShowSocialLogin] = useState(initialSocial);
 
   // ⚙️ 유효성 검사 관련 상태 ---------------------------//
   const [user_id, setUserId] = useState('');
@@ -63,9 +78,8 @@ function Sign_in({ onClose, onSignUpClick }) {
 
     if (!idMsg && !pwMsg) {
       console.log("로그인 시도");
-      await submitLogin(user_id, user_pw, setUserPwError); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.js)
+      await submitLogin(user_id, user_pw, setUserPwError, setIsLoading); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.js)
       // 로그인이 실패할 경우 '비밀번호가 일치하지 않았습니다' 메세지 리턴
-      setIsLoading(false);  // 로그인 시도 후 로딩 종료
     }
   };
 
@@ -77,6 +91,12 @@ function Sign_in({ onClose, onSignUpClick }) {
   
   // 🔗 소셜 로그인 요청 (→ 백엔드로) ------------- //
   const handleSocial = (e) => {
+    // 현재 로그인 UI 상태를 저장
+    localStorage.setItem('social_enter', JSON.stringify({
+      sherlock: showSherlockLogin,
+      social: showSocialLogin,
+    }));
+
     localStorage.setItem('prevPath', window.location.pathname); 
     
     const targetClass = e.currentTarget.className;
@@ -91,6 +111,13 @@ function Sign_in({ onClose, onSignUpClick }) {
       console.error('알 수 없는 로그인 버튼 클릭됨');
     }
   };
+
+  // ⚙️ 소셜 로그인에서 마운트시 현재 상태 다시 리턴하는 용도
+  useEffect(() => {
+    localStorage.removeItem('social_enter');
+  }, []);
+
+
   
   const handleSignUpClick = () => {
     onSignUpClick();

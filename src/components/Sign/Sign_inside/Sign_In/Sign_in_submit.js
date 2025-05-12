@@ -1,5 +1,5 @@
 // Sign_in_submit.js 
-export async function submitLogin(user_id, user_pw, setUserPwError) {
+export async function submitLogin(user_id, user_pw, setUserPwError, setIsLoading) {
   try {
     const response = await fetch('http://localhost:5000/auth/login', {
       method: 'POST',
@@ -18,10 +18,14 @@ export async function submitLogin(user_id, user_pw, setUserPwError) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('lastLoginMethod', data.loginMethod);
 
+      // 로딩 애니메이션을 충분히 보여주기 위한 딜레이
+      setIsLoading(true);
+
       setTimeout(( )=> {
         // alert('로그인 성공!');
+        
         window.location.reload(); // 이건 현재 경로를 유지한 채 새로고침
-      }, 1000);
+      }, 3000);
 
     } else {
       // ❗ 비밀번호 에러 메시지 전달
