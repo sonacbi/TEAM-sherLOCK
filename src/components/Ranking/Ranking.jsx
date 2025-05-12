@@ -27,21 +27,27 @@ function Ranking() {
   const [trophyWidth, setTrophyWidth] = useState(null);
   const trophyRef = useRef();
 
-  const [positionMode, setPositionMode] = useState('absolute'); // position을 전환할 상태
-
   // 트로피 클릭 핸들러 (애니메이션 토글)
   const handleClickRank = () => {
     if (isAnimating || step !== 'idle') return;  // 이미 애니메이션 중이면 리턴
 
-    // 애니메이션 시작 전에 현재 width 저장
-    if (trophyRef.current) {
-      const width = trophyRef.current.getBoundingClientRect().width;
-      console.log("확인");
-      setTrophyWidth(width);  // 애니메이션 시작 전에 현재 width 저장
+    if(showTop10){
+
+      // 애니메이션 시작 전에 현재 width 저장
+      if (trophyRef.current) {
+        const width = trophyRef.current.getBoundingClientRect().width;
+        console.log("확인");
+        setTrophyWidth(width);  // 애니메이션 시작 전에 현재 width 저장
+      }
+    
+      setIsAnimating(true);  // 애니메이션 시작
+      setStep('collapsingTop10');  // 축소 애니메이션 시작
+
+    }else if(!showTop10) {
+      setIsAnimating(true);  // 애니메이션 시작
+      setStep('shrink');  // 축소 애니메이션 시작
     }
-  
-    setIsAnimating(true);  // 애니메이션 시작
-    setStep('collapsingTop10');  // 축소 애니메이션 시작
+    
   };
 
   // 랭킹 1~10 접히는 속도 조절
@@ -50,35 +56,55 @@ function Ranking() {
   // 애니메이션 상태 변화 처리
   useEffect(() => {
     if (step === 'collapsingTop10') {
+      console.log("Current step:", step);
       setTimeout(() => {
-        setPositionMode('absolute'); // 애니메이션 중에는 absolute
         setShowTop10(false);  // Top10 숨기기
         // DOM 반영 뒤 step 변경 (비동기 처리로 다음 프레임에 넘기기)
         requestAnimationFrame(() => {
           setStep('expandTrans');  // 이 시점부터 애니메이션 트리거
         });
 
-        
-        
       }, 1500); // 1.5초 후 안의 내용을 실행함
       
     } else if(step === 'expandTrans') {
+      console.log("Current step:", step);
         setTimeout(() => {
 
         setStep('idle');  // 상태 초기화
         setIsAnimating(false);  // 애니메이션 종료
 
-      }, 1500); // 1.5초 후 안의 내용을 실행함
+      }, 700); // 0.7초 후 안의 내용을 실행함
+    }else if(step === 'idle') {
+      console.log("Current step:", step);
     }
-
-    // else if (step === 'shrinkTop10') {
-    //   setTimeout(() => {
-    //     setShowTop10(false);  // Top10 숨기기
-    //     setStep('idle');  // 상태 초기화
-    //     setIsAnimating(false);  // 애니메이션 종료
-    //   }, 4000); // 축소 애니메이션 후, Top10 숨김
-    // }
+    
   }, [step]);
+
+
+useEffect(() => {
+  if(step === 'shrink'){
+    console.log("Current step:", step);
+    setTimeout(() => {
+        setShowTop10(true);  // Top10 올리기
+        // DOM 반영 뒤 step 변경 (비동기 처리로 다음 프레임에 넘기기)
+        requestAnimationFrame(() => {
+          setStep('popup');  // 이 시점부터 애니메이션 트리거
+        });
+
+      }, 1200); // 0.7초 후 안의 내용을 실행함
+  }else if(step === 'popup') {
+      console.log("Current step:", step);
+        setTimeout(() => {
+
+        setStep('idle');  // 상태 초기화
+        setIsAnimating(false);  // 애니메이션 종료
+
+      }, 1000); // 1.0초 후 안의 내용을 실행함
+    }else if(step === 'idle') {
+      console.log("Current step:", step);
+    }
+}, [step])
+
 
   // 풀페이지 스크롤 제어용 (비활성화 영역 체크)
   const rankerParentRef = useRef(null);
@@ -145,23 +171,23 @@ function Ranking() {
         const rect = elem.getBoundingClientRect();
         return rect.height > 0 && rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
       };
-    
       // 둘 다 없거나 화면에 보이지 않으면 스크롤 허용
       if ((!rankerElement100 && !rankerElement10) || 
           (!isVisible(rankerElement100) && !isVisible(rankerElement10))) {
         window.fullpage_api.setAllowScrolling(true);
         return;
       }
-  
       // 마우스 이벤트 바인딩 (하나라도 있는 경우)
       const activeElement = rankerElement100 || rankerElement10 || rankerParentElement;
       if (activeElement && window.fullpage_api) {
         activeElement.addEventListener('mouseenter', () => {
           console.log('🟡 mouseover triggered');
+          
           window.fullpage_api.setAllowScrolling(false);
         });
         activeElement.addEventListener('mouseleave', () => {
           console.log('🟢 mouseout triggered');
+          
           window.fullpage_api.setAllowScrolling(true);
         });
         activeElement.addEventListener('wheel', (e) => {
@@ -170,6 +196,16 @@ function Ranking() {
         }, { passive: false });
       }
     };
+
+// 애니메이션 상태 변화 처리
+  useEffect(() => {
+    if (step === 'idle') {
+      console.log("Current step:", step);
+      handleRankingEvents(); // 'idle' 상태일 때 handleRankingEvents 호출
+    }
+  }, [step]); // step이 변경될 때마다 실행됨
+
+
 
     const TrophyDiv = ({ step, prevWidthProp }) => {
       const divRef = useRef(null);
@@ -197,7 +233,7 @@ function Ranking() {
           ref={divRef}
           initial={false}
           animate={{ width: animatedWidth }}
-          transition={{
+          transition={!(step === 'popup')?{
             type : 'spring',
             stiffness: 100,
             damping: 20,
@@ -205,17 +241,17 @@ function Ranking() {
             restDelta: 0.001,
             duration: step === 'collapsingTop10' ? 0.8 : 0,
             ease: 'easeInOut',
-          }}
+          }: {}}
           style={{
             borderRadius: '5px',
-            position: 'absolute',
+            position: step === 'popup' ? 'relative' : 'absolute',
             height: '100%',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            left: step === 'collapsingTop10' ? 'auto' : '50%', // collapsingTop10일 때 left를 auto로 설정
-            right: step === 'collapsingTop10' ? '0%' : 'auto', // collapsingTop10일 때 right를 50%로 설정
-            transform: step === 'collapsingTop10' ? 'none' : 'translateX(-50%)', // collapsingTop10일 때 transform을 제거
+            left: step === 'popup' ? 'auto' : step === 'collapsingTop10' ? 'auto' : '50%',
+            right: step === 'popup' ? '0%' : step === 'collapsingTop10' ? '0%' : 'auto',
+            transform: step === 'popup' ? 'none' : step === 'collapsingTop10' ? 'none' : 'translateX(-50%)',
           }}
         >
           <img className="trophy" src={Trophy} alt="Trophy" />
@@ -237,8 +273,10 @@ function Ranking() {
               id="ranker_1_10"
               layout
               className={`ranker_grid` }
-              animate={step === 'collapsingTop10' ? { height: 'auto', gridTemplateRows: 'repeat(6, auto)' } : {}}
+              initial = {step === 'popup' ? {opacity : 0, y : 5}: {}}
+              animate={step === 'collapsingTop10' ? { height: 'auto', gridTemplateRows: 'repeat(6, auto)' } : step === 'popup' ? {opacity : 1, y : 0} : {}}
               onAnimationComplete={handleRankingEvents}
+              transition={step === 'popup' ? {duration : 1.0} : {}}
               style={{ position: 'relative' }} // 부모의 relative 설정을 다시 확인
             >
               {fullData.slice(0, 10).map((user, index) => (
@@ -324,6 +362,7 @@ function Ranking() {
               <motion.div
                 layoutId="trophy" // layoutId는 여전히 toggle을 위한 요소에서만 사용
                 layout
+                initial={step === 'popup' ? {display : 'grid'} : {}}
                 transition={{ layout: {type : 'tween', duration: trans_10 } }}
                 className="toggle_trophy"
                 ref={trophyRef} // ref를 제대로 설정
@@ -333,7 +372,7 @@ function Ranking() {
                   gridRowEnd: 7,
                   gridColumn:
                     step === 'collapsingTop10' ? '1 / span 2' : '2 / span 1',
-                  position: 'collapsingTop10' ? 'absolute' : 'relative',
+                  position: (step === 'collapsingTop10')||(step === 'popup') ? 'absolute' : 'relative',
                   top: 'auto',  
                   height : '48px'
                 }}
@@ -346,18 +385,21 @@ function Ranking() {
           {/* 1~100위 */}
           {!showTop10 && (
             <motion.ul
-              
               id="ranker_1_100"
               className="ranker_flex"
-              initial={step === 'collapsingTop10' ? { height: 0 } : step === 'expandTrans' ? { height: 0 } : false}
-              animate={step === 'expandTrans' ? { height : 330 } : {  }}
+              initial={step === 'collapsingTop10' ? { height: 40 } : step === 'expandTrans' ? { height: 40 } : step === 'shrink' ? { height: 330, opacity : 1 } : false}
+              animate={step === 'expandTrans' ? { height : 330 } : step === 'idle' ? { height: 330 } : step === 'shrink' ? {height : 40, opacity : 0} : { height: 0 }}
               exit={false}
-              transition={{ 
+              transition={step == 'shrink' ? { 
                 type: 'tween',
-                duration: 0.5, // 원하는 시간
+                duration: 0.8, // 원하는 시간
+                ease: 'easeInOut'
+              } : { 
+                type: 'tween',
+                duration: 0.7, // 원하는 시간
                 ease: 'easeInOut'
               }}
-              onAnimationComplete={handleRankingEvents}
+              // onAnimationComplete={handleRankingEvents}
             >
               {/* table header */}
               <li className="table_header fillColor">
@@ -418,11 +460,11 @@ function Ranking() {
                 layout
                 className="toggle_trophy fillColor"
                 onClick={handleClickRank}
-                style ={ {height : '48px', 
+                style ={ {height : '48px', zIndex : '10'
                   }}
                 // animate = {step === 'collapsingTop10'? { top : 0, bottom : 'none', y : 0} : step === 'expandTrans' ? {y : 320} : false}
                 transition={{ duration: 0.8 }}
-                onAnimationComplete={() => setPositionMode('sticky')}
+                
               >
                 <div>
                 <img className="trophy" src={Trophy} alt="Trophy" />
