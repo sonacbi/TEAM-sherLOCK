@@ -5,6 +5,8 @@ import { submitLogin } from './Sign_in_submit.js'; // 새로 분리된 함수 im
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_in.css';
 
+import Loading from '../../../Loading/Loading.jsx'
+
 import Sign_background from '../../../../assets/images/Sign/Sign_background.png';
 import kakao from '../../../../assets/images/Sign/Kakao.png';
 import naver from '../../../../assets/images/Sign/Naver.png';
@@ -24,6 +26,9 @@ function Sign_in({ onClose, onSignUpClick }) {
   // ⚙️ 최근 로그인 ---------------------------//
   const [lastLoginMethod, setLastLoginMethod] = useState('');
 
+  // 로딩 상태 관리
+  const [isLoading, setIsLoading] = useState(false);
+
   // ⚙️ 로그인 버튼 세팅 --------------------------------//
   const handleSherlockLoginClick = () => {
     setShowSherlockLogin(true);
@@ -32,6 +37,7 @@ function Sign_in({ onClose, onSignUpClick }) {
   // 👁️ 일괄적으로 유효성 검사 실시 → 📓로그인 폼 제출 -// 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     
     // 1️⃣ (프론트) 아이디 형식 먼저 검사 (Msg = Message)
     const idMsg = validateId(user_id);
@@ -58,7 +64,8 @@ function Sign_in({ onClose, onSignUpClick }) {
     if (!idMsg && !pwMsg) {
       console.log("로그인 시도");
       await submitLogin(user_id, user_pw, setUserPwError); // 유효성 검사 통과. 로그인 폼 제출(Sign_in_submit.js)
-      // 로그인이 실패할 경우 '비밀번호가 일치하지 않았습니다' 메세지 리턴턴
+      // 로그인이 실패할 경우 '비밀번호가 일치하지 않았습니다' 메세지 리턴
+      setIsLoading(false);  // 로그인 시도 후 로딩 종료
     }
   };
 
@@ -220,6 +227,9 @@ function Sign_in({ onClose, onSignUpClick }) {
           <p id='Sign_up' onClick={handleSignUpClick}>회원가입</p>
         </div>
       </div>
+
+      {/* ✅ 로딩 모달 */}
+      {isLoading && <Loading message="로그인 중입니다..." />}
     </div>
   );
 }

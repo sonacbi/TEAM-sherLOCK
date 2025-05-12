@@ -6,6 +6,7 @@ import { validateId, validatePassword, validatePasswordCheck, validateEmail, val
     handleFocus, handlePasswordCheckFocus, handleEmailFocus} from './Sign_up_validateSubmit.js';
 import { useNicknameValidator } from './useNicknameValidator'; // 경로 맞춰서!
 
+import Loading from '../../../Loading/Loading.jsx'
 
 import Logo from '../../../Header_Logo/Header_Logo';
 import './Sign_up.css'; 
@@ -25,6 +26,9 @@ function Sign_up({ onClose, onSignInClick }) {
         month: '',
         day: ''
     });
+    
+    // 로딩 상태 관리
+    const [isLoading, setIsLoading] = useState(false);
 
     // 생일 input 처리 통합 함수
     const handleBirthChange = (e) => {
@@ -90,9 +94,12 @@ function Sign_up({ onClose, onSignInClick }) {
     
     // (유효성 검사 로직 분리)
 
-    const handleSubmit = (e) => { // 임포트한 코드 객체 생성
+    const handleSubmit = async (e) => { // 임포트한 코드 객체 생성
+        e.preventDefault();
+        setIsLoading(true); // 로딩 시작
+
         console.log("회원가입 시도!");
-        handleSubmitFunc(e, {
+        await handleSubmitFunc(e, {
             userId,
             password,
             passwordCheck,
@@ -100,7 +107,7 @@ function Sign_up({ onClose, onSignInClick }) {
             email,
             domain,
             birth
-        }, setErrors, onSignInClick);
+        }, setErrors, onSignInClick, null, setIsLoading);  // <- isLoading 제어도 넘기기
     };
 
     /* -----(추가) 닉네임 실시간 검사 분리 ----- */
@@ -280,6 +287,9 @@ function Sign_up({ onClose, onSignInClick }) {
                     <p id='Sign_in' onClick={handleSignInClick}>로그인</p>
                 </div>
             </div>
+
+            {/* ✅ 로딩 모달 */}
+            {isLoading && <Loading message="회원가입 처리 중입니다..." />}
         </div>
     );
 }

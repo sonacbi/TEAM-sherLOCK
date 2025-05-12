@@ -1,10 +1,16 @@
 // 카카오, 네이버 api 로그인 처리용 페이지 (추가)
 // 어디서 들어온 응답인지(path) 확인하고 유형에 맞게 처리
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
+import Loading from '../components/Loading/Loading'; 
+import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in'
+
 function SocialAuthHandler() {
+  // 컴포넌트 위에서 상태 선언
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const called = useRef(false); // ✅ 중복 방지용 플래그
@@ -35,6 +41,8 @@ function SocialAuthHandler() {
     // 백엔드에 소셜 로그인 요청 보내기
     const fetchData = async () => {
       try {
+
+        setIsLoading(true); // ⬅️ 요청 전 로딩 표시
         const res = await axios.post(`http://localhost:5000/auth/${provider}`, { code }
           , {
             headers: {
@@ -52,11 +60,17 @@ function SocialAuthHandler() {
 
         // 소셜 로그인 호출 전에 저장했던 주소로 리턴 
         const prevPath = localStorage.getItem('prevPath') || '/';
-        navigate(prevPath);
+
+        // ✅ 로딩 잠깐 보여준 후 이동
+        setTimeout(() => {
+          setIsLoading(false); // 로딩 종료
+          navigate(prevPath);
+        }, 500);
 
       } catch (err) {
         console.error(err);
         alert('소셜 로그인 처리 중 오류가 발생했습니다.');
+        setIsLoading(false);
         navigate('/Main');
       }
     };
@@ -65,10 +79,18 @@ function SocialAuthHandler() {
   }, [location, navigate]);
 
   return (
-    <div>
-      <p>로그인 처리 중입니다...</p>
-    </div>
+    <>
+      {/* 로그인 / 회원가입 모달 */}
+      <div className="signInModalWrapper">
+        <Sign_in />
+      </div>
+      
+      {/* 로딩 화면 조건부 렌더링 */}
+      {isLoading && <Loading message="로그인 처리 중입니다..." />}
+      
+    </>
   );
+
 }
 
 export default SocialAuthHandler;

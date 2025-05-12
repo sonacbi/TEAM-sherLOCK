@@ -76,59 +76,72 @@ import signSubmit from './Sign_up_submit.js'; // → Sign_up_submit.jsx (프론�
 
 /* ------------------------------- 폼 제출용 핸들이벤트 -------------------------------*/
 
-const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure) => {
+const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure, setIsLoading) => {
     e.preventDefault();
+    setIsLoading(true); // ⬅️ 로딩 시작
+
+    try{
+      const { userId, password, passwordCheck, nickname, email, domain, birth } = formData;
+      const userIdError = await validateId(userId);
+      const nicknameError = await validateNickname(nickname);
+      const emailError = await validateEmail(email, domain);
+
+      const errors = {
+        userId: userIdError,
+        password: validatePassword(password),
+        passwordCheck: validatePasswordCheck(password, passwordCheck),
+        nickname: nicknameError,
+        email: emailError,
+        birth: validateBirth(birth)
+      };
+      console.log(errors);
+      setErrors(errors); // 각 입력 필드에 에러 메시지 출력되도록
+
+      // 하나라도 에러가 있으면 중단
+      const hasError = Object.values(errors).some(err => err !== '');
+      console.log(hasError);
+      if (hasError) return;
+
+      // 아이디 유효성 검사
+        /* (3) DB에 이미 입력된 id일 때 '이미 사용 중인 아이디입니다' */
+        // (백엔드 통신-검증용 코드를 하단에 별도로 작성)
+
+      // 비밀번호 유효성 검사 (프론트↑)
+
+      // 비밀번호check 유효성 검사 (프론트↑)
+
+      // 닉네임 유효성 검사 (중복가능인지, 불가능인지에 따라 코드가 달라짐.)
+        /* - 중복불가능일 경우 '이미 사용된 닉네임입니다' 출력 */
+        // (백엔드 통신-검증용 코드를 하단에 별도로 작성)
+
+      // 이메일 유효성 검사 (unique key 세팅)
+        /* 이미 사용한 이메일의 경우 '이미 사용되고 있는 이메일입니다' 출력 */
+        // (백엔드 통신-검증용 코드를 하단에 별도로 작성)
+
+      // 생일 유효성 검사 (오늘 이후 날짜 입력할 수 없음) (프론트↑)
+
+      
+
+      const result = await signSubmit({ userId, password, nickname, email, domain, birth });
+
+      if (result.success) {
+          // 로딩 유지하면서 3초 후에 onSuccess 실행
+          setTimeout(() => {
+              // alert('회원가입 성공!');
+              onSuccess();          // 로그인 화면으로 이동 등
+              setIsLoading(false);  // 로딩 종료
+          }, 3000);          
+
+      } else {
+          // alert(result.message || '회원가입 실패!');
+          if (onFailure) onFailure(result);
+      }
+    }catch (error) {
+        console.error("회원가입 처리 중 오류:", error);
+        alert("예상치 못한 오류가 발생했습니다.");
+        if (onFailure) onFailure({ success: false, message: '에러 발생' });
+    }     
     
-    const { userId, password, passwordCheck, nickname, email, domain, birth } = formData;
-    const userIdError = await validateId(userId);
-    const nicknameError = await validateNickname(nickname);
-    const emailError = await validateEmail(email, domain);
-
-    const errors = {
-      userId: userIdError,
-      password: validatePassword(password),
-      passwordCheck: validatePasswordCheck(password, passwordCheck),
-      nickname: nicknameError,
-      email: emailError,
-      birth: validateBirth(birth)
-    };
-    console.log(errors);
-    setErrors(errors); // 각 입력 필드에 에러 메시지 출력되도록
-
-    // 하나라도 에러가 있으면 중단
-    const hasError = Object.values(errors).some(err => err !== '');
-    console.log(hasError);
-    if (hasError) return;
-
-    // 아이디 유효성 검사
-      /* (3) DB에 이미 입력된 id일 때 '이미 사용 중인 아이디입니다' */
-      // (백엔드 통신-검증용 코드를 하단에 별도로 작성)
-
-    // 비밀번호 유효성 검사 (프론트↑)
-
-    // 비밀번호check 유효성 검사 (프론트↑)
-
-    // 닉네임 유효성 검사 (중복가능인지, 불가능인지에 따라 코드가 달라짐.)
-      /* - 중복불가능일 경우 '이미 사용된 닉네임입니다' 출력 */
-      // (백엔드 통신-검증용 코드를 하단에 별도로 작성)
-
-    // 이메일 유효성 검사 (unique key 세팅)
-      /* 이미 사용한 이메일의 경우 '이미 사용되고 있는 이메일입니다' 출력 */
-      // (백엔드 통신-검증용 코드를 하단에 별도로 작성)
-
-    // 생일 유효성 검사 (오늘 이후 날짜 입력할 수 없음) (프론트↑)
-
-    
-
-    const result = await signSubmit({ userId, password, nickname, email, domain, birth });
-
-    if (result.success) {
-        alert('회원가입 성공!');
-        onSuccess(); // → Sign_up.jsx의 onSignInClick 실행
-    } else {
-        alert(result.message || '회원가입 실패!');
-        if (onFailure) onFailure(result);
-    }
 };
 
 /* ------------------------- 각 입력 필드 공통 이벤트 핸들러 --------------------------*/
