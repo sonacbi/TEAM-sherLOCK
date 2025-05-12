@@ -100,7 +100,7 @@ const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure, setIsL
       // 하나라도 에러가 있으면 중단
       const hasError = Object.values(errors).some(err => err !== '');
       console.log(hasError);
-      if (hasError) return;
+      if (hasError) { setIsLoading(false); return; }
 
       // 아이디 유효성 검사
         /* (3) DB에 이미 입력된 id일 때 '이미 사용 중인 아이디입니다' */
@@ -135,11 +135,13 @@ const handleSubmit = async (e, formData, setErrors, onSuccess, onFailure, setIsL
       } else {
           // alert(result.message || '회원가입 실패!');
           if (onFailure) onFailure(result);
+          setIsLoading(false);  // 로딩 종료
       }
     }catch (error) {
         console.error("회원가입 처리 중 오류:", error);
         alert("예상치 못한 오류가 발생했습니다.");
         if (onFailure) onFailure({ success: false, message: '에러 발생' });
+        setIsLoading(false);
     }     
     
 };

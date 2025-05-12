@@ -49,10 +49,10 @@ function Sign_in({ onClose, onSignUpClick }) {
     setShowSherlockLogin(true);
     setShowSocialLogin(true);
   };
+  
   // 👁️ 일괄적으로 유효성 검사 실시 → 📓로그인 폼 제출 -// 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     
     // 1️⃣ (프론트) 아이디 형식 먼저 검사 (Msg = Message)
     const idMsg = validateId(user_id);
