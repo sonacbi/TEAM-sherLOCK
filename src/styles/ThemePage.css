@@ -514,6 +514,24 @@
     .no_games h2 {
         font-size: 1.9vw;
     }
+
+    .sort_type {
+        position: absolute;
+        top: 7%;
+        left: 7%;
+    }
+
+    .sort_type h2 {
+        font-size: 20px;
+    }
+
+    #theme_right_arrow {
+        height: 90px;
+    }
+
+    .sort_search_wrap {
+        padding-top: 110px;
+    }
 }
 
 @media (max-width: 700px) {
@@ -523,6 +541,10 @@
 
     .no_games h2 {
         font-size: 2.4vw;
+    }
+
+    .sort_type {
+        gap: 20px;
     }
 }
 
