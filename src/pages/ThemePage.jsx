@@ -432,7 +432,6 @@ function ThemePage() {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
         }
-        searchGames();
     };
 
     const handleDifficultyClick = (level) => {
@@ -441,7 +440,6 @@ function ThemePage() {
         } else {
             setDifficulty(level); // 다른 걸 누르면 선택
         }
-        searchGames();
     };
 
     return (
