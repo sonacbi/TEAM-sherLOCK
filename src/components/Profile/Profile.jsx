@@ -61,7 +61,7 @@ const Profile = ({ onSignInClick, onSignUpClick, setShowLoading, setLoadingMessa
       setLoadingMessage('이동 중 . . .');
 
       setTimeout(() => {
-        navigate(`/Theme/workspace`);
+        navigate(`/Theme/Editor`);
       }, 3000);
     }
   };
