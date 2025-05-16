@@ -19,15 +19,22 @@
     width: 90%;
 }
 
-.GameInfo_door {
+.GameInfo_door_wrap {
     position: absolute;
     bottom: 0;
-    left: 35%;
-    width: 30%;
+    width: 100dvw;
     height: 90%;
+    display: flex;
+    justify-content: center;
+}
+
+.GameInfo_door {
+    width: 30%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     animation: slideInFromRight 1s ease forwards;
+    min-width: 500px;
 }
 
 .GameInfo_door:hover .GameInfo_room.horror p {
