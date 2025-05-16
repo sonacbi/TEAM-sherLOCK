@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
@@ -32,6 +32,7 @@ import crime_background from '../assets/images/ThemePage_img/crime/crime_backgro
 import crime_rating_star from '../assets/images/ThemePage_img/crime/crime_rating_star.png';
 import crime_difficulty_img from '../assets/images/ThemePage_img/crime/crime_difficulty_img.png';
 
+import { FilterSetting } from '../../modules/filters';
 
 function ThemePage() {
     // URL 파라미터에서 theme 값 가져오기
@@ -48,6 +49,7 @@ function ThemePage() {
 
     const [games, setGames] = useState([]); // 아이템 상태 배열
     const searchWord = useRef(''); // 검색어
+    const [showSortType, setShowSortType] = useState(false);
     const observerRef = useRef(null); // IntersectionObserver 대상
     const scrollContainerRef = useRef(null); // 가로 스크롤 컨테이너
     const scrollAmount = useRef(0); // 휠 스크롤 양
@@ -63,13 +65,10 @@ function ThemePage() {
     const hasAnimated2 = useRef(false); // 첫 번째 애니메이션 실행 여부 저장
     const [shouldAnimate, setShouldAnimate] = useState(false); // 첫 번째 애니메이션 실행 여부
 
-    const [showSortType, setShowSortType] = useState(false);
-    const [selectedSort, setSelectedSort] = useState('평점순 (↑)'); // 초기 표시 텍스트
+    const selectedSort = useRef(FilterSetting.rating_desc); // 초기 표시 텍스트
     const timeoutRef = useRef(null); // 타이머 ID 저장용
 
-    const [selectedDifficulty, setSelectedDifficulty] = useState(null);
-
-    const [searchKeyword, setSearchKeyword] = useState('');
+    const difficulty = useRef(null);
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -157,43 +156,50 @@ function ThemePage() {
     }, [showSignIn, showSignUp, showGameInfo, showLoading]);
 
     // 새로운 아이템 로드
-    const loadMoreGames = async () => {
+    const loadMoreGames = useCallback(async () => {
         if (isAnimating) {
             console.log("애니메이션 중 - 게임 로드 차단됨");
             return;
         }
-    
-        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&search_word=${searchWord.current}`);
+
+        let filter;
+        if (selectedSort.current == FilterSetting.rating_desc) filter = "created_at";
+        else if (selectedSort.current == FilterSetting.rating_asc) filter = "created_at";
+        else if (selectedSort.current == FilterSetting.latest_desc) filter = "created_at";
+        else if (selectedSort.current == FilterSetting.play_desc) filter = "play_count DESC";
+        else if (selectedSort.current == FilterSetting.play_asc) filter = "play_count ASC";
+
+        const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&offset=${0}&search_keyword=${searchWord.current}&filter=${filter}&difficulty=${difficulty.current}`);
         const datas = await res.json();
         console.log('가져온 게임들: ', datas);
-    
-        const keyword = searchWord.current.trim().toLowerCase();
-        const filtered = datas.filter(game =>
-            game.title.toLowerCase().includes(keyword)
-        );
-        console.log('필터링된 게임들: ', filtered);
-    
-        setGames([...filtered]); // 게임 리스트 업데이트
-    };
 
-    const searchGames = (event) => {
-        event.preventDefault();
-    
+        setGames(datas); // 게임 리스트 업데이트
+        // setGames(prev => {
+        //     return [
+        //         ...prev,
+        //         ...datas
+        //     ]
+        // })
+
+        console.log('games:',games)
+    }, [games.length, selectedSort.current, searchWord.current, difficulty.current, isAnimating, theme]);
+
+    const searchGames = async (w, s, d) => {
         // 🔒 애니메이션 중이면 재실행 방지
         if (isAnimating) {
             console.log("애니메이션 중 - 검색 차단됨");
             return;
         }
-    
-        const keyword = new FormData(event.target).get("door_search");
-        searchWord.current = keyword;
-        setSearchKeyword(keyword); // ✅ 상태로 저장
-    
+
+        searchWord.current = w;
+        selectedSort.current = s;
+        difficulty.current = d;
+
         setGames([]);
         hasAnimated.current = false;
         setSection2Visible(true);
     
-        loadMoreGames();
+        await loadMoreGames();
     
         setIsAnimating(true);
         if (window.fullpage_api) {
@@ -405,6 +411,13 @@ function ThemePage() {
     const handleCloseSignIn = () => {setShowSignIn(false); setShouldAnimate(false);}
     const handleCloseSignUp = () => {setShowSignUp(false); setShouldAnimate(false);}
 
+    const handleSearchWord = (event) => {
+        if(event.key == 'Enter') {
+            // searchWord.current = event.target.value;
+            searchGames(event.target.value, selectedSort.current, difficulty.current);
+        }
+    };
+
     const handleSortClick = () => {
         // 기존 타이머 제거
         if (timeoutRef.current) {
@@ -419,9 +432,9 @@ function ThemePage() {
     };
 
     const handleSelectSort = (sortText) => {
-        setSelectedSort(sortText);
+        searchGames(searchWord.current, sortText, difficulty.current)
         setShowSortType(false);
-    
+        
         // 기존 타이머 제거
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -430,10 +443,10 @@ function ThemePage() {
     };
 
     const handleDifficultyClick = (level) => {
-        if (selectedDifficulty === level) {
-            setSelectedDifficulty(null); // 같은 걸 누르면 해제
+        if (difficulty.current === level) {
+            searchGames(searchWord.current, selectedSort.current, null); // 같은 걸 누르면 해제
         } else {
-            setSelectedDifficulty(level); // 다른 걸 누르면 선택
+            searchGames(searchWord.current, selectedSort.current, level); // 다른 걸 누르면 선택
         }
     };
 
@@ -600,14 +613,15 @@ function ThemePage() {
                                     <div className='sort_search'>
                                         <div className='search'>
                                             <img id='search_icon' src={search_icon} alt='search_icon' />
-                                            <form onSubmit={searchGames} autocomplete="off">
-                                                <input className='door_search' name='door_search' type='text' placeholder="제목 검색"/>
-                                                <button type='submit' style={{display: "none"}}></button>
-                                            </form>
+                                            <input className='door_search' name='door_search' type='text' placeholder="제목 검색" onKeyDown={handleSearchWord}/>
                                         </div>
                                         
                                         <h1 className={`sort ${theme}`} onClick={handleSortClick}>
-                                            {selectedSort}
+                                            {selectedSort.current == FilterSetting.rating_desc && "평점순 (↓)"}
+                                            {selectedSort.current == FilterSetting.rating_asc && "평점순 (↑)"}
+                                            {selectedSort.current == FilterSetting.latest_desc && "최신순"}
+                                            {selectedSort.current == FilterSetting.play_desc && "플레이순 (↓)"}
+                                            {selectedSort.current == FilterSetting.play_asc && "플레이순 (↑)"}
                                         </h1>
                                     </div>
 
@@ -616,7 +630,7 @@ function ThemePage() {
                                         {[1, 2, 3, 4, 5].map((level) => (
                                             <div
                                                 key={level}
-                                                className={`${level} ${theme} ${selectedDifficulty === level ? 'active' : ''}`}
+                                                className={`${level} ${theme} ${difficulty.current === level ? 'active' : ''}`}
                                                 onClick={() => handleDifficultyClick(level)}
                                             >
                                                 <h3>{level}</h3>
@@ -627,14 +641,14 @@ function ThemePage() {
 
                                 <div className={`sort_type ${theme} ${showSortType ? 'visible' : 'hidden'}`}>
                                     <div className='sort_type1_wrap'>
-                                        <h2 className='rating_high' onClick={() => handleSelectSort('평점순 (↓)')}>1. 평점순 (↓)</h2>
-                                        <h2 className='rating_low' onClick={() => handleSelectSort('평점순 (↑)')}>2. 평점순 (↑)</h2>
-                                        <h2 className='view_high' onClick={() => handleSelectSort('최신순')}>3. 최신순</h2>
+                                        <h2 className={`${FilterSetting.rating_desc}`} onClick={() => handleSelectSort(FilterSetting.rating_desc)}>1. 평점순 (↓)</h2>
+                                        <h2 className={`${FilterSetting.rating_asc}`} onClick={() => handleSelectSort(FilterSetting.rating_asc)}>2. 평점순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.view_desc}`} onClick={() => handleSelectSort(FilterSetting.latest_desc)}>3. 최신순</h2>
                                     </div>
 
                                     <div className='sort_type2_wrap'>
-                                        <h2 className='rating_high' onClick={() => handleSelectSort('플레이순 (↓)')}>4. 플레이순 (↓)</h2>
-                                        <h2 className='rating_low' onClick={() => handleSelectSort('플레이순 (↑)')}>5. 플레이순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.play_desc}`} onClick={() => handleSelectSort(FilterSetting.play_desc)}>4. 플레이순 (↓)</h2>
+                                        <h2 className={`${FilterSetting.play_asc}`} onClick={() => handleSelectSort(FilterSetting.play_asc)}>5. 플레이순 (↑)</h2>
                                     </div>
                                 </div>
                             </div>
@@ -642,7 +656,7 @@ function ThemePage() {
                             {/* 가로 무한 스크롤 영역 */}
                             <div className='infinite' ref={scrollContainerRef}>
                                 {games.length === 0 ? (
-                                    <div className="no_games" key={searchKeyword}><h2><span>검색: {searchKeyword}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
+                                    <div className="no_games" key={searchWord.current}><h2><span style={{ fontSize: '18px' }}>검색: {searchWord.current}</span><br/>해당 제목의 방탈출이 존재하지 않습니다.</h2></div>
                                 ) : (
                                     games.map((data, index) => {
                                         const roomNumber = 401 + index;
@@ -672,7 +686,7 @@ function ThemePage() {
                                                 <div className='theme_door' onClick={() => setShowGameInfo(true)}>
                                                     <img
                                                         id='theme_door_img'
-                                                        src={`../../server/games/${data.thumbnail}`}
+                                                        src={`../../server/games/${data.game_id}/${data.thumbnail}`}
                                                         alt={`theme_door_img_${data.thumbnail}`}
                                                     />
                                                     <div className='theme_door_data'>

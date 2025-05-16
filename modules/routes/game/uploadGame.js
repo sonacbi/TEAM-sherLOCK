@@ -44,20 +44,20 @@ router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
 router.post('/:game_id', async (req, res) => {
   const gameId = req.params.game_id;
   const userId = "admin01"
-  const theme = req.query.theme;
-  const visibility = req.query.visibility;
+  const {title, thumbnail, theme, visibility, description, difficulty, playTime, isRanking, isHiddenStage} = JSON.parse(req.body.gameInfo)
   try {
-    await db.query(`INSERT INTO game (game_id, user_id, theme, visibility) VALUES (?, ?, ?, ?);`, [gameId, userId, theme, visibility])
+    await db.query("INSERT INTO game (game_id, user_id, title, thumbnail, theme, visibility, description, difficulty, playTime, isLanking, isHiddenStage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+      [gameId, userId, title, thumbnail, theme, visibility, description, difficulty, playTime, isRanking, isHiddenStage])
   } catch (err) {
     return res.status(500).send(err);
   }
 })
 router.put('/:game_id', async (req, res) => {
   const gameId = req.params.game_id;
-  const theme = req.query.theme;
-  const visibility = req.query.visibility;
+  const {title, thumbnail, theme, visibility, description, difficulty, playTime, isRanking, isHiddenStage} = JSON.parse(req.body.gameInfo)
   try {
-    await db.query(`UPDATE game SET updated_at = CURRENT_TIMESTAMP, theme = ?, visibility = ? WHERE game_id = ?;`, [theme, visibility, gameId])
+    await db.query("UPDATE game SET updated_at = CURRENT_TIMESTAMP, title = ?, thumbnail = ?, theme = ?, visibility = ?, description = ?, difficulty = ?, playTime = ?, isLanking = ?, isHiddenStage = ? WHERE game_id = ?;",
+      [title, thumbnail, theme, visibility, description, difficulty, playTime, isRanking, isHiddenStage, gameId])
   } catch (err) {
     return res.status(500).send(err);
   }

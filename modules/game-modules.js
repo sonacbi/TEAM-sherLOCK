@@ -6,85 +6,44 @@ class ClassVersion {
     }
 }
 ClassVersion.this_version = "0.0.1"; // 버전
+/**
+ * 게임 생성기
+ */
+class Game extends ClassVersion {
+    constructor({ source = new Source({}), stage = [new Stage({})] }) {
+        super();
+        this.source = new Source(source);
+        this.stage = [];
+        stage.map((data) => {
+            this.stage.push(new Stage(data));
+        });
+    }
+}
 var Theme;
 (function (Theme) {
     Theme["horror"] = "horror";
     Theme["adventure"] = "adventure";
     Theme["crime"] = "crime";
 })(Theme || (Theme = {}));
-// enum Difficulty {
-//     easy   = "easy",
-//     medium = "medium",
-//     hard   = "hard",
-// }
 var Visibility;
 (function (Visibility) {
     Visibility["public"] = "public";
     Visibility["unlisted"] = "unlisted";
     Visibility["private"] = "private";
 })(Visibility || (Visibility = {}));
-/**
- * 게임 생성기
- */
-class Game extends ClassVersion {
-    constructor({ id = null, title = '', thumbnailURL = '', description = '', role = {
-        planning: [], // 기획
-        art: [], // 그림
-        story: [], // 스토리
-        puzzle: [], // 퍼즐
-        mechanic: [], // 기능
-        support: [] // 도움
-    }, 
-    // theme = Theme.horror,
-    tag = '', 
-    // difficulty = Difficulty.easy,
-    difficulty = 1, playTime = 10, 
-    // visibility = Visibility.public,
-    isRanking = false, isHiddenStage = false, achievement = [], source = new Source({}), 
-    // inventory = [],
-    stage = [new Stage({})] }) {
-        super();
+class GameInfo {
+    constructor({ id = null, title = '', thumbnail = '', theme = Theme.horror, visibility = Visibility.public, description = '', difficulty = 1, playTime = 10, isRanking = false, isHiddenStage = false }) {
         this.id = id;
         this.title = title;
-        this.thumbnailURL = thumbnailURL;
+        this.thumbnail = thumbnail;
+        this.theme = theme;
+        this.visibility = visibility;
         this.description = description;
-        this.role = role;
-        // this.theme = theme;
-        this.tag = tag;
         this.difficulty = difficulty;
         this.playTime = playTime;
-        // this.visibility = visibility;
         this.isRanking = isRanking;
         this.isHiddenStage = isHiddenStage;
-        this.achievement = achievement;
-        this.source = new Source(source);
-        // this.inventory = inventory;
-        this.stage = [];
-        stage.map((data) => {
-            this.stage.push(new Stage(data));
-        });
-        // this.stage = stage;
     }
-    // 업적 생성
-    createAchievement() {
-        this.achievement.push(new Achievement());
-    }
-    // 스테이지 생성
-    createStage() {
-        this.stage.push(new Stage({}));
-    }
-    // 스테이지 수정
-    updateStage() { }
-    // 스테이지 삭제
-    deleteStage() { }
-    // 인벤토리 조작
-    // getItem(item) {
-    //     this.inventory.push(item);
-    // }
-    // setItem(i) {
-    //     this.inventory[i];
-    // }
-    putItem() { }
 }
 /**
  * 게임소스
@@ -101,20 +60,6 @@ class Source extends ClassVersion {
         this.strVar = strVar;
         this.boolVar = boolVar;
     }
-    // 생성
-    createItem() {
-        // GameSource.item.push(new Item());
-    }
-    // 변수 조작
-    getIntVar() { }
-    getStrVar() { }
-    getBoolVar() { }
-    setIntVar() { }
-    setStrVar() { }
-    setBoolVar() { }
-    putIntVar() { }
-    putStrVar() { }
-    putBoolVar() { }
 }
 /**
  * 아이템 생성기
@@ -156,14 +101,6 @@ class BoolVar extends ClassVersion {
         this.value = value;
     }
 }
-/**
- * 업적 생성기
- */
-class Achievement extends ClassVersion {
-    constructor() {
-        super();
-    }
-}
 var StageType;
 (function (StageType) {
     StageType["normal"] = "normal";
@@ -190,18 +127,6 @@ class Stage extends ClassVersion {
             this.cut.push(new Cut(data));
         });
     }
-    // 컷 생성
-    createCut() {
-        this.cut.push(new Cut({}));
-    }
-    // 컷 수정
-    updateCut() { }
-    // 컷 삭제
-    deleteCut() { }
-    // 스테이지 연결하기
-    connectStage(i) {
-        this.connectedStage.push(i);
-    }
 }
 var CutType;
 (function (CutType) {
@@ -223,14 +148,6 @@ class Cut extends ClassVersion {
         this.puzzle = puzzle;
         this.connectedCut = connectedCut;
     }
-    setVar() { }
-    // 컷 연결하기
-    connectCut(i) {
-        this.connectedCut.push(i);
-    }
-    createPuzzle() {
-        this.puzzle = new Puzzle({});
-    }
 }
 var PuzzleType;
 (function (PuzzleType) {
@@ -251,27 +168,6 @@ class Puzzle extends ClassVersion {
         this.correct_answer = correct_answer;
         this.hint = hint;
     }
-    createPuzzle() {
-        switch (this.type) {
-            case PuzzleType.choice: // 선택지
-                // 선택지 생성 코드
-                break;
-            case PuzzleType.form:
-                // 텍스트 입력 생성 코드
-                break;
-            case PuzzleType.dial: // 다이얼
-                // 다이얼 생성 코드
-                break;
-            default:
-        }
-    }
-}
-/**
- * 생성기
- */
-class Transition extends ClassVersion {
-    // 강제 컷 진행
-    static forcedCutProgress() { }
 }
 // 모듈 내보내기
-export { ClassVersion, Source, Game, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType };
+export { ClassVersion, Game, GameInfo, Source, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType };
