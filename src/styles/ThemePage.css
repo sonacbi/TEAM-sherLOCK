@@ -585,16 +585,42 @@
 
     }
     
-    .theme_door_hit1 ,.theme_door_hit2 ,.theme_door_hit3 {width: 200px; }
+    .theme_hit { gap : 2%; }
+    .theme_door_hit1 ,.theme_door_hit2 ,.theme_door_hit3 {width: 300px; height : 460px; position:relative;}
     .theme_door_hit1{ grid-column-start: 2; grid-row-start: 1; }
     .theme_door_hit2{ grid-column-start: 1; grid-row-start: 2; }
     .theme_door_hit3{ grid-column-start: 2; grid-row-start: 3; }
+
+    .theme_door_hit1::after ,.theme_door_hit2::after ,.theme_door_hit3::after {
+        content : '';
+        display: block;
+        width: 300%;           /* 박스 너비의 80% 길이 */
+        height: 35px;         /* 높이는 얇은 바 형태 */
+        background-color: #444; /* 바닥색 (원하는 색상으로 변경 가능) */
+        bottom: 0;
+        position:absolute;
+    }
+    .theme_door_hit1::after,.theme_door_hit3::after {
+        left : 0;
+        transform: translateX(-50px) translateY(30px);
+    }
+    .theme_door_hit2::after {
+        right : 0;
+        transform: translateX(50px) translateY(30px);
+    }
     
     .theme_door_hit1 *, .theme_door_hit2 *, .theme_door_hit3 * {
+        font-size: 1rem !important;
+    }
+
+    #theme_door_top_img { width: 80px; }
+    
+    .theme_door_top1 *, .theme_door_top2 *, .theme_door_top3 *{
         font-size: 0.7rem !important;
     }
-    .theme_door_top1 *, .theme_door_top2 *, .theme_door_top3 *{
-        font-size: 0.35rem !important;
+
+    .theme_top1_data, .theme_top2_data, .theme_top3_data {
+        padding : 8px 0px;
     }
 
     #theme_rating_star {
