@@ -1,0 +1,72 @@
+.hover-name-container {
+  width: 100px; /* 또는 필요에 맞는 고정/최대폭 */
+  min-width: 0; /* flex 자식일 때 필수! */
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  display: block; /* flex 자식이면 명시적으로 block화 */
+}
+
+.hover-name-container {
+  width: 100px; /* 또는 필요에 맞는 고정/최대폭 */
+  min-width: 0; /* flex 자식일 때 필수! */
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  display: block; /* flex 자식이면 명시적으로 block화 */
+}
+
+
+.hover-name-container.top-rank {
+  width: auto;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important; /* clip 으로 확실히 해제 */
+}
+
+.hover-name-container.top-rank .hover-name-text {
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+}
+
+.hover-name-text {
+  
+  transition: transform 1s linear;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.hover-name-container:not(:hover) .hover-name-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* 호버 시 text-overflow 해제 */
+.hover-name-container:hover .hover-name-text {
+  text-overflow: unset;
+  overflow: visible;
+}
+
+
+.hover-name-text {
+  
+  transition: transform 1s linear;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.hover-name-container:not(:hover) .hover-name-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* 호버 시 text-overflow 해제 */
+.hover-name-container:hover .hover-name-text {
+  text-overflow: unset;
+  overflow: visible;
+}

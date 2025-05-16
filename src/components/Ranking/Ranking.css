@@ -195,7 +195,7 @@ display: none !important;  }
   grid-column: 1;
   grid-row-start: 1;
   grid-row-end: 3;
-  padding: 34px 0;
+  padding: 15px 0;
   display: flex;
   flex-direction: column; /* 위→아래로 정렬 */
   align-items: center;
@@ -237,7 +237,7 @@ display: none !important;  }
 }
 
 .ranking_container #ranker_1_10 .li1 .rank_score{
-  position: absolute;
+  /* position: absolute; */
   justify-content: center;
   bottom: 25%;
 }
@@ -295,17 +295,24 @@ display: none !important;  }
 
 .rank_profile {
   position: relative;
-  width: 30px;  /* 원형 이미지의 크기를 지정 */
-  height: 30px; /* 원형 이미지의 크기를 지정 */
+  height: 30px;
   justify-content: flex-start;
-  gap: 15%;
 }
 
+#ranker_1_10 .rank_profile{
+  gap: 5%;
+}
+
+#ranker_1_100 .rank_profile{
+  gap: 5%;
+}
+
+
 .rank_profile img{
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 50%; /* 원형으로 만들기*/
-  width: 70%; /* 원하는 너비 */
-  height: 70%; /* 원하는 높이 */
+  width: 21px;  /* 원형 이미지의 크기를 지정 */
+  height: 21px; /* 원하는 높이 */
 }
 
 
@@ -358,7 +365,7 @@ display: none !important;  }
 
 #ranker_1_100 .toggle_trophy>div{
   grid-column : 1 / -1;
-  height: 40px;
+  height: 48px;
   display: flex;
   align-items: start;
   justify-content: center;
