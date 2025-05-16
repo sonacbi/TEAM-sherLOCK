@@ -478,6 +478,8 @@ useEffect(() => {
   }
 
   return (
+  <>
+    <div className='rank_top_margin'> </div>
     <RankingComponent
       showTop10={showTop10}
       fullData={fullData}
@@ -485,6 +487,7 @@ useEffect(() => {
       handleClickRank={handleClickRank}
       theme={theme}
     />
+  </>
   );
    
 }
