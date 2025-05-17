@@ -164,78 +164,101 @@ function ThemePage() {
     }, [showSignIn, showSignUp, showGameInfo, showLoading]);
 
     // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
-    const fadeOutTimer = useRef(null);
-    const unlockTimer = useRef(null);
-    const canScrollFullPageRef = useRef(canScrollFullPage);
-    const visibleWarningRef = useRef(visibleWarning);
+        // 첫 번째 fullpage 섹션 DOM 참조용 ref
+        const firstSectionRef = useRef(null); 
 
+        // 타이머를 저장하는 ref (경고 메시지 페이드아웃, 잠금 해제용)
+        const fadeOutTimer = useRef(null);
+        const unlockTimer = useRef(null);
+
+        // 상태 변수를 ref로 저장해 최신 값 참조 가능하게 함
+        const canScrollFullPageRef = useRef(canScrollFullPage);
+        const visibleWarningRef = useRef(visibleWarning);
+    
+    // 상태 변경 시 ref 값도 동기화
     useEffect(() => { canScrollFullPageRef.current = canScrollFullPage; }, [canScrollFullPage]);
+    useEffect(() => { visibleWarningRef.current = visibleWarning; }, [visibleWarning]);
+
     useEffect(() => {
-    visibleWarningRef.current = visibleWarning;
-  }, [visibleWarning]);
+        const el = scrollRef.current;
+        if (!el) return;
 
-      useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+        // 마우스 휠 이벤트 핸들러
+        const onWheel = (e) => {
+            const canScroll = canScrollFullPageRef.current; // 현재 풀페이지 스크롤 가능 여부
+            const visibleWarn = visibleWarningRef.current; // 경고 메시지 표시 여부
+            
+            // 내부 섹션 스크롤 정보
+            const container = scrollRef.current;
+            const themeScrollTop = container ? container.scrollTop : 0;
+            const themeScrollHeight = container ? container.scrollHeight : 0;
+            const themeClientHeight = container ? container.clientHeight : 0;
+            
+            // 전체 윈도우 스크롤 위치
+            const windowScrollTop = window.scrollY;
 
-    const onWheel = (e) => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      const delta = e.deltaY;
+            // 휠 이벤트 방향 판단
+            const delta = e.deltaY;
+            const isScrollingDown = delta > 0;
 
-      const isScrollingDown = delta > 0;
-      const isAtTop = scrollTop === 0;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+            // 내부 섹션 최상단/최하단 도달 여부
+            const isThemeAtTop = themeScrollTop === 0;
+            const isThemeAtBottom = themeScrollTop + themeClientHeight >= themeScrollHeight - 1;
 
-      if (canScrollFullPageRef.current) {
-        if (!isScrollingDown && isAtTop) {
-          setCanScrollFullPage(false);
-        }
-        return; // 풀페이지 허용 상태일 때 기본 동작
-      }
+            // 풀페이지 스크롤이 가능할 때 처리
+            if (canScroll) {
+                if (!isScrollingDown) {
+                    // 올라가는 방향일 때 fullpage 첫 섹션 상단 도달 체크
+                    const firstSectionTop = firstSectionRef.current ? firstSectionRef.current.offsetTop : 0;
+                    if (windowScrollTop <= firstSectionTop) { // 첫 섹션 최상단 도달하면 풀페이지 off (스크롤 잠금 해제)
+                        setCanScrollFullPage(false);
+                        return;
+                    }
+                    if (isThemeAtTop) { // 내부 섹션 최상단에 도달했을 때도 풀페이지 off
+                        setCanScrollFullPage(false);
+                        return;
+                    }
+                } // 풀페이지 스크롤 가능하고 조건에 안 걸리면 아무 동작 없이 종료
+                return;
+            }
 
-      if (visibleWarningRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
+            // 경고 메시지 보일 때는 스크롤 이벤트 무시
+            if (visibleWarn) { e.preventDefault(); e.stopPropagation(); return; }
 
-      const shouldPrevent =
-        (isScrollingDown && !isAtBottom) ||
-        (!isScrollingDown && !isAtTop);
+            // 내부 섹션 범위 내 스크롤 이동 처리 필요 여부 판단
+            const shouldPrevent =
+                (isScrollingDown && !isThemeAtBottom) || // ↓ 아래로 스크롤 중 내부 섹션 끝 도달 전
+                (!isScrollingDown && !isThemeAtTop);// ↑ 위로 스크롤 중 내부 섹션 최상단 도달 전
 
-      if (shouldPrevent) {
-        e.preventDefault();
-        e.stopPropagation();
-        el.scrollTop += delta;
-      } else if (isScrollingDown && isAtBottom && !canScrollFullPageRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
+            if (shouldPrevent) // 내부 섹션 스크롤 처리 (이벤트 기본 동작 방지 및 내부 scrollTop 조절)
+                { e.preventDefault(); e.stopPropagation();  if (container) container.scrollTop += delta;
+            } else if ( isScrollingDown && isThemeAtBottom && !canScroll ) // 내부 섹션 끝에 도달했고 내려가는 중이며 풀페이지가 off 상태일 때
+                {e.preventDefault(); e.stopPropagation();// 풀페이지를 다시 켜기 위한 경고 표시
 
-        if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
-        if (unlockTimer.current) clearTimeout(unlockTimer.current);
+                setVisibleWarning(true); setShowWarning(true);
+                
+                // 이전 타이머 초기화
+                if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+                if (unlockTimer.current) clearTimeout(unlockTimer.current);
 
-        setVisibleWarning(true);
-        setShowWarning(true);
+                // 1초 후 경고 메시지 숨기기
+                fadeOutTimer.current = setTimeout(() => { setShowWarning(false); }, 1000);
 
-        fadeOutTimer.current = setTimeout(() => {
-          setShowWarning(false);
-        }, 1000);
-
-        unlockTimer.current = setTimeout(() => {
-          setVisibleWarning(false);
-          setCanScrollFullPage(true);
-        }, 1500);
-      }
-    };
-
-    el.addEventListener('wheel', onWheel, { passive: false });
-
-    return () => {
-      el.removeEventListener('wheel', onWheel);
-      if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
-      if (unlockTimer.current) clearTimeout(unlockTimer.current);
-    };
-  }, []); // 빈 배열로 한 번만 등록
+                // 1.5초 후 풀페이지 스크롤 활성화
+                unlockTimer.current = setTimeout(() => { setVisibleWarning(false); setCanScrollFullPage(true);
+                    canScrollFullPageRef.current = true; }, 1500);
+            }
+        };
+        // wheel 이벤트 리스너 등록 (passive:false로 스크롤 제어 가능하게)
+        el.addEventListener('wheel', onWheel, { passive: false });
+        
+        // 컴포넌트 언마운트 시 이벤트 리스너 및 타이머 정리
+        return () => {
+            el.removeEventListener('wheel', onWheel);
+            if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+            if (unlockTimer.current) clearTimeout(unlockTimer.current);
+        };
+    }, []);
 
     // ---------------------------------------------//
 
