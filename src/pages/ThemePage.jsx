@@ -174,11 +174,25 @@ function ThemePage() {
         // 상태 변수를 ref로 저장해 최신 값 참조 가능하게 함
         const canScrollFullPageRef = useRef(canScrollFullPage);
         const visibleWarningRef = useRef(visibleWarning);
+        
+        // 모바일 화면 여부 상태 관리
+        const [isMobile, setIsMobile] = useState(window.innerWidth <= 700);
+
+        useEffect(() => {
+        // 화면 크기 변경 이벤트 등록 (리사이즈 대응)
+        const onResize = () => {
+            setIsMobile(window.innerWidth <= 700);
+        };
+        window.addEventListener('resize', onResize);
+        return () => {
+            window.removeEventListener('resize', onResize);
+        };
+        }, []);
     
     // 상태 변경 시 ref 값도 동기화
     useEffect(() => { canScrollFullPageRef.current = canScrollFullPage; }, [canScrollFullPage]);
     useEffect(() => { visibleWarningRef.current = visibleWarning; }, [visibleWarning]);
-
+    // 모바일일 때만 wheel 이벤트 등록/해제
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
@@ -249,16 +263,24 @@ function ThemePage() {
                     canScrollFullPageRef.current = true; }, 1500);
             }
         };
+        
         // wheel 이벤트 리스너 등록 (passive:false로 스크롤 제어 가능하게)
         el.addEventListener('wheel', onWheel, { passive: false });
-        
+
+        // 모바일 화면이 아니면 이벤트 등록 안 함
+        if (!isMobile) {
+            // 혹시 이전에 이벤트 남아있으면 제거
+            el.removeEventListener('wheel', onWheel);
+            return;
+        }
+
         // 컴포넌트 언마운트 시 이벤트 리스너 및 타이머 정리
         return () => {
             el.removeEventListener('wheel', onWheel);
             if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
             if (unlockTimer.current) clearTimeout(unlockTimer.current);
         };
-    }, []);
+    }, [isMobile]);
 
     // ---------------------------------------------//
 
