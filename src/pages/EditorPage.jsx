@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Editor from '../components/Editor/Editor';
@@ -16,6 +16,9 @@ import event_icon from '../assets/images/EditorPage_img/event_icon.png';
 function EditorPage() {
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState(0);
+    const [addImageFile, setAddImageFile] = useState(null);
+    const fileInputRef = useRef(null);
+
     const navigate = useNavigate();
 
     const handleAddTextBox = () => {
@@ -24,6 +27,17 @@ function EditorPage() {
 
     const handleAddShape = () => {
         setAddShapeTrigger(Date.now());
+    };
+
+    const handleAddImage = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAddImageFile(file);
+        }
     };
 
     return (
@@ -59,9 +73,16 @@ function EditorPage() {
                             <p>도형</p>
                         </div>
 
-                        <div className='picture_area'>
+                        <div className='picture_area' onClick={handleAddImage}>
                             <img id='picture_icon' src={picture_icon} alt='picture_icon' />
                             <p>사진</p>
+                            <input
+                                type='file'
+                                accept='image/*'
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
                         </div>
 
                         <div className='timer_area'>
@@ -88,7 +109,7 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} />
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} />
                         </div>
                     </div>
 

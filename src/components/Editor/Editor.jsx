@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 
-function Editor({ addTextTrigger, addShapeTrigger }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile }) {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
@@ -127,11 +127,55 @@ function Editor({ addTextTrigger, addShapeTrigger }) {
     };
 
     useEffect(() => {
+        if (isReady && addImageFile) {
+            if (!addImageFile.type.startsWith('image/')) {
+                alert('이미지 파일만 업로드할 수 있습니다.');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                if (!canvasInstance.current) {
+                    return;
+                }
+
+                const imgElement = new Image();
+                imgElement.src = e.target.result;
+
+                imgElement.onload = () => {
+                    const fabricImage = new fabric.Image(imgElement, {
+                        ...controlStyle,
+                        left: 150,
+                        top: 150,
+                        scaleX: 0.4,
+                        scaleY: 0.4,
+                    });
+
+                    canvasInstance.current.add(fabricImage);
+                    canvasInstance.current.setActiveObject(fabricImage);
+                    canvasInstance.current.renderAll();
+                };
+
+                imgElement.onerror = () => {
+                    console.error('이미지 로드 실패');
+                };
+            };
+
+            reader.onerror = function () {
+                console.error('파일 읽기 실패');
+            };
+
+            reader.readAsDataURL(addImageFile);
+        }
+    }, [addImageFile]);
+
+    useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
         const handleKeyDown = (e) => {
-            if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (e.key === 'Delete') {
                 const activeObject = canvas.getActiveObject();
                 if (activeObject) {
                     if (activeObject instanceof fabric.ActiveSelection) {
@@ -151,6 +195,34 @@ function Editor({ addTextTrigger, addShapeTrigger }) {
         window.addEventListener('keydown', handleKeyDown);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isReady]);
+
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        const handleWheel = (e) => {
+            if (!e.ctrlKey) return;
+            e.preventDefault();
+
+            let zoom = canvas.getZoom();
+            zoom *= e.deltaY > 0 ? 0.9 : 1.1;
+            zoom = Math.min(Math.max(zoom, 0.5), 5);
+
+            canvas.zoomToPoint({ x: e.offsetX, y: e.offsetY }, zoom);
+            canvas.renderAll();
+        };
+
+        const upperCanvas = canvas.upperCanvasEl;
+        if (upperCanvas) {
+            upperCanvas.addEventListener('wheel', handleWheel, { passive: false });
+        }
+
+        return () => {
+            if (upperCanvas) {
+                upperCanvas.removeEventListener('wheel', handleWheel);
+            }
         };
     }, [isReady]);
 
