@@ -538,7 +538,63 @@
 
 @media (max-width: 700px) {
     /* 추가 */
-    .theme_hit_rank{ position: relative; }
+
+    /* 상단 흐림 */
+    .theme_hit_rank_floor::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0;
+        pointer-events: none; z-index: 10;
+
+        height: 10px;
+        backdrop-filter: blur(20px);     
+        -webkit-backdrop-filter: blur(20px); 
+    }
+    /* 하단 흐림 */
+    .theme_hit_rank_floor::after {
+        content: ''; position: absolute;
+        bottom: 0; left: 0; right: 0;
+        pointer-events: none; z-index: 10;
+
+        height: 20px;
+        transform: translateY(-59.8px);
+        backdrop-filter: blur(20px);     
+        -webkit-backdrop-filter: blur(20px); 
+    }
+    .theme_hit_rank_floor.horror::before{ mask-image: linear-gradient(to bottom, black, transparent); }
+    .theme_hit_rank_floor.adventure::before{ mask-image: linear-gradient(to bottom, white, transparent); }
+    .theme_hit_rank_floor.crime::before{  mask-image: linear-gradient(to bottom, rgb(137, 137, 137), transparent); }
+
+    .theme_hit_rank_floor.horror::after{ mask-image: linear-gradient(to top, black, transparent); }
+    .theme_hit_rank_floor.adventure::after{ mask-image: linear-gradient(to top, white, transparent); }
+    .theme_hit_rank_floor.crime::after{  mask-image: linear-gradient(to top, rgb(137, 137, 137), transparent); }
+
+
+    .theme_hit_rank{ 
+        position: relative;
+        bottom : 0; 
+        overflow: hidden;
+        overflow-y: auto;          /* 수직 스크롤 활성화 */
+        -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+        scrollbar-width: none;       /* Firefox에서 스크롤바 숨기기 */
+        max-height: calc(100% - 7%);
+        min-height: calc(100% - 7%);
+     }
+
+     /* Chrome, Safari 등 WebKit 브라우저에서 스크롤바 숨기기 */
+    .theme_hit_rank::-webkit-scrollbar {
+        display: none;
+    }
+
+    .floor::after {
+        content : '';
+        display: block;
+        width: 100%;           /* 박스 너비의 80% 길이 */
+        height: 7%;         /* 높이는 얇은 바 형태 */
+        background-color: #000000; 
+        bottom: 0;
+        position:absolute;
+    }
+    
 
     .theme_rank, .theme_hit{
         position: absolute;

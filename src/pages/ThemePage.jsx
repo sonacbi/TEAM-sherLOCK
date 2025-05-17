@@ -43,6 +43,13 @@ function ThemePage() {
     const [showGameInfo, setShowGameInfo] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
 
+    // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
+    const scrollRef = useRef(null);
+    const [visibleWarning, setVisibleWarning] = useState(false); // DOM 존재 여부
+    const [showWarning, setShowWarning] = useState(false);       // opacity 표시 여부
+    const [canScrollFullPage, setCanScrollFullPage] = useState(false); // 풀페이지 허용 여부
+    // ---------------------------------------------//
+
     // 로딩 메세지
     const [loadingMessage, setLoadingMessage] = useState('');
 
@@ -155,6 +162,82 @@ function ThemePage() {
             if (window.fullpage_api) window.fullpage_api.setAllowScrolling(true);
         }
     }, [showSignIn, showSignUp, showGameInfo, showLoading]);
+
+    // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
+    const fadeOutTimer = useRef(null);
+    const unlockTimer = useRef(null);
+    const canScrollFullPageRef = useRef(canScrollFullPage);
+    const visibleWarningRef = useRef(visibleWarning);
+
+    useEffect(() => { canScrollFullPageRef.current = canScrollFullPage; }, [canScrollFullPage]);
+    useEffect(() => {
+    visibleWarningRef.current = visibleWarning;
+  }, [visibleWarning]);
+
+      useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const delta = e.deltaY;
+
+      const isScrollingDown = delta > 0;
+      const isAtTop = scrollTop === 0;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+      if (canScrollFullPageRef.current) {
+        if (!isScrollingDown && isAtTop) {
+          setCanScrollFullPage(false);
+        }
+        return; // 풀페이지 허용 상태일 때 기본 동작
+      }
+
+      if (visibleWarningRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      const shouldPrevent =
+        (isScrollingDown && !isAtBottom) ||
+        (!isScrollingDown && !isAtTop);
+
+      if (shouldPrevent) {
+        e.preventDefault();
+        e.stopPropagation();
+        el.scrollTop += delta;
+      } else if (isScrollingDown && isAtBottom && !canScrollFullPageRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+        if (unlockTimer.current) clearTimeout(unlockTimer.current);
+
+        setVisibleWarning(true);
+        setShowWarning(true);
+
+        fadeOutTimer.current = setTimeout(() => {
+          setShowWarning(false);
+        }, 1000);
+
+        unlockTimer.current = setTimeout(() => {
+          setVisibleWarning(false);
+          setCanScrollFullPage(true);
+        }, 1500);
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+      if (unlockTimer.current) clearTimeout(unlockTimer.current);
+    };
+  }, []); // 빈 배열로 한 번만 등록
+
+    // ---------------------------------------------//
 
     // 새로운 아이템 로드
     const loadMoreGames = async () => {
@@ -454,8 +537,29 @@ function ThemePage() {
                         </header>
 
                         {/* 테마 콘텐츠 영역: 랭크 + TOP3 */}
-                        <div className='theme_hit_rank_floor'>
-                            <div className='theme_hit_rank'>
+                        <div className={`theme_hit_rank_floor ${theme}`}>
+                            <div className='theme_hit_rank' ref={scrollRef} >
+                                {visibleWarning && (
+                                    <div
+                                        style={{
+                                        position: 'fixed',           // fixed로 변경해서 화면 고정
+                                        top: '50%',                 // 화면 세로 중앙
+                                        left: '50%',                // 화면 가로 중앙
+                                        transform: 'translate(-50%, -50%)', // 정확한 중앙 정렬
+                                        background: 'rgba(0, 0, 0, 0.8)',
+                                        color: 'white',
+                                        padding: '8px 16px',
+                                        borderRadius: '8px',
+                                        opacity: showWarning ? 1 : 0,
+                                        transition: 'opacity 1s ease-out',
+                                        pointerEvents: 'none',
+                                        zIndex: 9999,              // 다른 요소 위에 표시되도록
+                                        }}
+                                    >
+                                        아래 섹션으로 넘어갑니다...
+                                    </div>
+                                    )}
+
                                 <div className='theme_rank'>
                                     <Ranking />
                                 </div>
