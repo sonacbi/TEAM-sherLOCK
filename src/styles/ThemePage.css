@@ -264,6 +264,11 @@
     z-index: 999;
 }
 
+/* 추가 */
+.copy_floor{
+    display: none;
+}
+
 .theme_door_infinite {
     width: 100%;
     height: 92%;
@@ -539,6 +544,29 @@
 @media (max-width: 700px) {
     /* 추가 */
 
+    /* 레이아웃 변경 */
+    .theme_wrap.section_1 {
+        position: relative;
+        /* overflow: visible;
+        min-height: 100dvh; */
+    }
+
+    .theme_wrap.section_1 #theme_background {
+        position: absolute;
+    }
+
+    .theme_wrap.section_1 .theme_header {
+        position: sticky;
+        top: 0;
+        z-index: 101; /* 위에 뜨게 하려면 필요 */
+    }
+
+    .theme_wrap.section_1 .theme_hit_rank_floor{
+        position: absolute;
+        top : 0;
+        height : 100%;
+    }
+
     /* 상단 흐림 */
     .theme_hit_rank_floor::before {
         content: ''; position: absolute;
@@ -554,9 +582,7 @@
         content: ''; position: absolute;
         bottom: 0; left: 0; right: 0;
         pointer-events: none; z-index: 10;
-
         height: 20px;
-        transform: translateY(-59.8px);
         backdrop-filter: blur(20px);     
         -webkit-backdrop-filter: blur(20px); 
     }
@@ -576,23 +602,16 @@
         overflow-y: auto;          /* 수직 스크롤 활성화 */
         -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
         scrollbar-width: none;       /* Firefox에서 스크롤바 숨기기 */
-        max-height: calc(100% - 7%);
-        min-height: calc(100% - 7%);
+        height : 100%;
      }
 
      /* Chrome, Safari 등 WebKit 브라우저에서 스크롤바 숨기기 */
     .theme_hit_rank::-webkit-scrollbar {
         display: none;
     }
-
-    .floor::after {
-        content : '';
-        display: block;
-        width: 100%;           /* 박스 너비의 80% 길이 */
-        height: 7%;         /* 높이는 얇은 바 형태 */
-        background-color: #000000; 
-        bottom: 0;
-        position:absolute;
+    /* 위치 조정 copy_floor로 대체됨 */
+    .theme_wrap.section_1 .floor {
+        display: none;
     }
     
 
@@ -601,12 +620,13 @@
         top: 0; left: 0; width: 100%; height: 100%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr);
+        grid-template-rows: 180px repeat(4, 1fr);
     }
 
     .rank_top_margin{ display: none; }
 
     .ranking_container {
+        grid-column-start: 1; grid-row-start: 2;
         margin-left: 10px;
         margin-right: 10px;
         z-index: 100;
@@ -641,13 +661,13 @@
 
     }
     
-    .theme_hit { gap : 2%; }
+    .theme_hit { gap : 0%; margin-right : 2%; margin-left : 2%; }
     .theme_door_hit1 ,.theme_door_hit2 ,.theme_door_hit3 {width: 300px; height : 460px; position:relative;}
-    .theme_door_hit1{ grid-column-start: 2; grid-row-start: 1; }
-    .theme_door_hit2{ grid-column-start: 1; grid-row-start: 2; }
-    .theme_door_hit3{ grid-column-start: 2; grid-row-start: 3; }
+    .theme_door_hit1{ grid-column-start: 2; grid-row-start: 2; }
+    .theme_door_hit2{ grid-column-start: 1; grid-row-start: 3; justify-self: end; }
+    .theme_door_hit3{ grid-column-start: 2; grid-row-start: 4; }
 
-    .theme_door_hit1::after ,.theme_door_hit2::after ,.theme_door_hit3::after {
+    .theme_door_hit1::after ,.theme_door_hit2::after {
         content : '';
         display: block;
         width: 300%;           /* 박스 너비의 80% 길이 */
@@ -656,7 +676,7 @@
         bottom: 0;
         position:absolute;
     }
-    .theme_door_hit1::after,.theme_door_hit3::after {
+    .theme_door_hit1::after {
         left : 0;
         transform: translateX(-50px) translateY(30px);
     }
@@ -695,6 +715,16 @@
         width: 15px; height: auto;
     }
     .difficulty{ gap : 2%; }
+
+    .copy_floor {
+        grid-column-start: 1;
+        grid-column-end : span 2;
+        grid-row-start: 5;
+        display: inline-flex;
+        z-index: 10;
+        width: 100%;
+        height: 100%;
+    }
 
     .no_games {
         left: 30%;

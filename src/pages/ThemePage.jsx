@@ -259,8 +259,13 @@ function ThemePage() {
                 fadeOutTimer.current = setTimeout(() => { setShowWarning(false); }, 1000);
 
                 // 1.5초 후 풀페이지 스크롤 활성화
-                unlockTimer.current = setTimeout(() => { setVisibleWarning(false); setCanScrollFullPage(true);
-                    canScrollFullPageRef.current = true; }, 1500);
+                unlockTimer.current = setTimeout(() => { 
+                    setVisibleWarning(false); setCanScrollFullPage(true);
+                    canScrollFullPageRef.current = true; 
+                    
+                    // 풀페이지 활성화된 이후 다음 섹션으로 부드럽게 내려줌
+                    if (window.fullpage_api) { window.fullpage_api.moveSectionDown(); }
+                }, 1500);
             }
         };
         
@@ -571,7 +576,7 @@ function ThemePage() {
             <div id="fullpage">
                 {/* 첫 번째 섹션 */}
                 <div className="section">
-                    <div className='theme_wrap'>
+                    <div className="theme_wrap section_1"> {/* 테마 구분용 */}
                         {/* 배경 이미지 */}
                         <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
@@ -719,7 +724,12 @@ function ThemePage() {
                                                 <p className='theme_top3_title'>미스터리모험</p>
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
+                                    {/* 중간 구조물(계단 + 복도) */}
+                                            <div className='copy_floor'>
+                                                <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
+                                                <div className='hallway'></div>
+                                            </div>
                                 </div>
                             </div>
 
@@ -736,7 +746,7 @@ function ThemePage() {
 
                 {/* 두 번째 섹션 - 테마 복도 */}
                 <div className="section" ref={section2Ref}>
-                    <div className='theme_wrap'>
+                    <div className="theme_wrap section_2"> {/* 테마 구분용 */}
                         {/* 배경 이미지 */}
                         <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
