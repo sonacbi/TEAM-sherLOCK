@@ -49,6 +49,8 @@ function ThemePage() {
 
     const [games, setGames] = useState([]); // 아이템 상태 배열
     const searchWord = useRef(''); // 검색어
+    const selectedSort = useRef(FilterSetting.rating_desc); // 초기 표시 텍스트
+    const difficulty = useRef(null);
     const [showSortType, setShowSortType] = useState(false);
     const observerRef = useRef(null); // IntersectionObserver 대상
     const scrollContainerRef = useRef(null); // 가로 스크롤 컨테이너
@@ -65,10 +67,9 @@ function ThemePage() {
     const hasAnimated2 = useRef(false); // 첫 번째 애니메이션 실행 여부 저장
     const [shouldAnimate, setShouldAnimate] = useState(false); // 첫 번째 애니메이션 실행 여부
 
-    const selectedSort = useRef(FilterSetting.rating_desc); // 초기 표시 텍스트
     const timeoutRef = useRef(null); // 타이머 ID 저장용
 
-    const difficulty = useRef(null);
+    const [gameInfo, setGameInfo] = useState(null);
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -678,12 +679,12 @@ function ThemePage() {
                                             >
                                                 <div className="theme_room">
                                                     <div className='room'>
-                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' onClick={() => setShowGameInfo(true)}/>
-                                                        <p onClick={() => setShowGameInfo(true)}>{roomNumber}</p>
+                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' onClick={() => {setGameInfo({game: data, roomNumber: roomNumber}); setShowGameInfo(true)}}/>
+                                                        <p onClick={() => {setGameInfo({game: data, roomNumber: roomNumber}); setShowGameInfo(true)}}>{roomNumber}</p>
                                                     </div>
                                                 </div>
 
-                                                <div className='theme_door' onClick={() => setShowGameInfo(true)}>
+                                                <div className='theme_door' onClick={() => {setGameInfo({game: data, roomNumber: roomNumber}); setShowGameInfo(true)}}>
                                                     <img
                                                         id='theme_door_img'
                                                         src={`../../server/games/${data.game_id}/${data.thumbnail}`}
@@ -735,7 +736,7 @@ function ThemePage() {
             {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick} />}
 
             {/* 게임 정보 모달 */}
-            {showGameInfo && <GameInfo setShowGameInfo={setShowGameInfo} setShowLoading={setShowLoading} setLoadingMessage={setLoadingMessage} />}
+            {showGameInfo && <GameInfo gameInfo={gameInfo} setShowGameInfo={setShowGameInfo} setShowLoading={setShowLoading} setLoadingMessage={setLoadingMessage} />}
 
             {/* 로딩 모달 */}
             {showLoading && <Loading message={loadingMessage} />}
