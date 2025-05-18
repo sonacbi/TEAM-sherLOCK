@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import Header_Logo from '../components/Header_Logo/Header_Logo';
@@ -209,112 +209,90 @@ function ThemePage() {
     }, [screenWidth, themeRankWidth, isFullScreen]);
 
 // themeHitRef에 가로스크롤 및 휠 이벤트 등록 (700 이하 모바일에서는 등록 안함)
+const onScroll = useCallback(() => {
+  const el = themeHitRef.current;
+  if (!el) return;
+  const { scrollLeft, scrollWidth, clientWidth } = el;
+  const hasHorizontalScroll = scrollWidth > clientWidth;
+
+  if (!hasHorizontalScroll) {
+    if (!canScrollFullPageRef.current) {
+      window.fullpage_api?.setAllowScrolling(true);
+    }
+    return;
+  }
+
+  if (canScrollFullPageRef.current) {
+    window.fullpage_api?.setAllowScrolling(false);
+  }
+
+  const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 10;
+
+  if (isAtRightEnd) {
+    window.fullpage_api?.setAllowScrolling(true);
+  }
+}, []);
+
+const onWheelHandler = useCallback((e) => {
+  const canScroll = canScrollFullPageRef.current;
+  const container = themeHitRef.current;
+  if (!container) return;
+
+  const scrollLeft = container.scrollLeft;
+  const scrollWidth = container.scrollWidth;
+  const clientWidth = container.clientWidth;
+
+  const windowScrollTop = window.scrollY;
+  const delta = e.deltaY;
+  const isScrollingDown = delta > 0;
+
+  const isAtLeftEnd = scrollLeft === 0;
+  const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 1;
+
+  if (canScroll) {
+    if (!isScrollingDown) {
+      const firstSectionTop = firstSectionRef.current ? firstSectionRef.current.offsetTop : 0;
+      if (windowScrollTop <= firstSectionTop || isAtLeftEnd) {
+        setCanScrollFullPage(false);
+        canScrollFullPageRef.current = false;
+        return;
+      }
+    }
+    return;
+  }
+
+  const shouldPrevent =
+    (isScrollingDown && !isAtRightEnd) ||
+    (!isScrollingDown && !isAtLeftEnd);
+
+  if (shouldPrevent) {
+    e.preventDefault();
+    e.stopPropagation();
+    container.scrollLeft += delta;
+  }
+}, []);
+
 useEffect(() => {
-    const el = themeHitRef.current;
-    if (!el) return;
+  const el = themeHitRef.current;
+  if (!el) return;
 
-    if (window.innerWidth <= 700) return; // 모바일에서는 이벤트 등록 안함
+  el.addEventListener('scroll', onScroll);
+  el.addEventListener('wheel', onWheelHandler, { passive: false });
 
-    // 스크롤 이벤트 핸들러
-    const onScroll = () => {
-        const { scrollLeft, scrollWidth, clientWidth } = el;
-        const hasHorizontalScroll = scrollWidth > clientWidth;
+  if (window.innerWidth <= 700) {
+    el.removeEventListener('scroll', onScroll);
+    el.removeEventListener('wheel', onWheelHandler);
+    window.fullpage_api?.setAllowScrolling(true);
+    return;
+  }
 
-        if (!hasHorizontalScroll) {
-            // 가로 스크롤 없으면 fullpage 스크롤 가능하게 설정
-            if (!canScrollFullPageRef.current) {
-                window.fullpage_api?.setAllowScrolling(true);
-            }
-            return;
-        }
+  setThemeRankWidth(el.offsetWidth);
 
-        // 가로스크롤이 존재하면 fullpage 스크롤 잠금
-        if (canScrollFullPageRef.current) {
-            window.fullpage_api?.setAllowScrolling(false);
-        }
-
-        const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 10;
-
-        if (isAtRightEnd) {
-            // 오른쪽 끝 도달 시 경고창 숨기고 fullpage 스크롤 허용
-            window.fullpage_api?.setAllowScrolling(true);
-            // window.fullpage_api?.moveSectionDown();
-        }
-    };
-
-    // 휠 이벤트 핸들러 (가로 스크롤 제어)
-    const onWheelHandler = (e) => {
-        const canScroll = canScrollFullPageRef.current;
-
-        const container = themeHitRef.current;
-        const scrollLeft = container ? container.scrollLeft : 0;
-        const scrollWidth = container ? container.scrollWidth : 0;
-        const clientWidth = container ? container.clientWidth : 0;
-
-        const windowScrollTop = window.scrollY;
-        const delta = e.deltaY;
-        const isScrollingDown = delta > 0;
-
-        const isAtLeftEnd = scrollLeft === 0;
-        const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 1;
-
-        if (canScroll) {
-            // fullpage 스크롤 허용 상태에서 휠 위로 스크롤 시 조건 체크하여 가로스크롤 해제
-            if (!isScrollingDown) {
-                const firstSectionTop = firstSectionRef.current ? firstSectionRef.current.offsetTop : 0;
-                if (windowScrollTop <= firstSectionTop || isAtLeftEnd) {
-                    setCanScrollFullPage(false);
-                    canScrollFullPageRef.current = false;
-                    return;
-                }
-            }
-            return;
-        }
-
-        // 가로 스크롤 영역에서 휠 기본 동작 막고 직접 가로 스크롤 처리
-        const shouldPrevent =
-            (isScrollingDown && !isAtRightEnd) || // 오른쪽 끝 도달 전 가로 스크롤 가능
-            (!isScrollingDown && !isAtLeftEnd);   // 왼쪽 끝 도달 전 가로 스크롤 가능
-
-        if (shouldPrevent) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (container) container.scrollLeft += delta;
-        } else if (isScrollingDown && isAtRightEnd && !canScroll) {
-            // 오른쪽 끝에서 더 아래로 스크롤 시 경고 및 fullpage 스크롤 허용 대기
-            e.preventDefault();
-            e.stopPropagation();
-
-            setVisibleWarning(true);
-            setShowWarning(true);
-
-            if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
-            if (unlockTimer.current) clearTimeout(unlockTimer.current);
-
-            fadeOutTimer.current = setTimeout(() => {
-                setShowWarning(false);
-            }, 1000);
-
-            unlockTimer.current = setTimeout(() => {
-                setVisibleWarning(false);
-                setCanScrollFullPage(true);
-                canScrollFullPageRef.current = true;
-                // window.fullpage_api?.moveSectionDown();
-            }, 1500);
-        }
-    };
-
-    el.addEventListener('scroll', onScroll);
-    el.addEventListener('wheel', onWheelHandler, { passive: false }); // preventDefault 위해 passive:false
-
-    // 초기 themeRankWidth 재설정
-    setThemeRankWidth(el.offsetWidth);
-
-    return () => {
-        el.removeEventListener('scroll', onScroll);
-        el.removeEventListener('wheel', onWheelHandler);
-    };
-}, [windowWidth, isFullScreen]);
+  return () => {
+    el.removeEventListener('scroll', onScroll);
+    el.removeEventListener('wheel', onWheelHandler);
+  };
+}, [windowWidth, isFullScreen, onScroll, onWheelHandler]);
 
     // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
         // 첫 번째 fullpage 섹션 DOM 참조용 ref
@@ -334,12 +312,13 @@ useEffect(() => {
         useEffect(() => {
         // 화면 크기 변경 이벤트 등록 (리사이즈 대응)
         const onResize = () => {
-            setIsMobile(window.innerWidth <= 700);
+            const width = window.innerWidth;
+            setIsMobile(width <= 700);
+            setIsFullScreen(width >= window.screen.width);
         };
+
         window.addEventListener('resize', onResize);
-        return () => {
-            window.removeEventListener('resize', onResize);
-        };
+        return () => window.removeEventListener('resize', onResize);
         }, []);
     
     // 상태 변경 시 ref 값도 동기화
@@ -425,18 +404,26 @@ useEffect(() => {
         // wheel 이벤트 리스너 등록 (passive:false로 스크롤 제어 가능하게)
         el.addEventListener('wheel', onWheel, { passive: false });
 
-        // 모바일 화면이 아니면 이벤트 등록 안 함
-        if (!isMobile) {
-            // 혹시 이전에 이벤트 남아있으면 제거
+        // 기존 타이머 정리 함수
+        const clearTimers = () => {
+            if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+            if (unlockTimer.current) clearTimeout(unlockTimer.current);
+        };
+
+        if (isMobile) {
+            // 모바일이면 wheel 이벤트 등록
+            el.addEventListener('wheel', onWheel, { passive: false });
+        } else {
+            // 모바일이 아니면 wheel 이벤트 제거 및 타이머 정리
             el.removeEventListener('wheel', onWheel);
-            return;
+            clearTimers();
+            window.fullpage_api?.setAllowScrolling(true);
         }
 
         // 컴포넌트 언마운트 시 이벤트 리스너 및 타이머 정리
         return () => {
             el.removeEventListener('wheel', onWheel);
-            if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
-            if (unlockTimer.current) clearTimeout(unlockTimer.current);
+            clearTimers();
         };
     }, [isMobile]);
 
@@ -740,7 +727,7 @@ useEffect(() => {
                         </header>
 
                         {/* 테마 콘텐츠 영역: 랭크 + TOP3 */}
-                        <div className={`theme_hit_rank_floor ${theme} ${!isFullScreen ? 'not_fullscreen' : ''}`}>
+                        <div className={`theme_hit_rank_floor ${theme} ${!isFullScreen ? 'not_fullscreen' : ''} ${isMobile ? 'mobile_view' : ''}`}>
                             <div className='theme_hit_rank' ref={scrollRef} >
                                 {visibleWarning && (
                                     <div
