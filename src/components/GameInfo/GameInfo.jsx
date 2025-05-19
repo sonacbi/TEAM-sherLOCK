@@ -99,15 +99,15 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
             <div className='thumbnail_basic_info'>
               <div className='thumbnail'>
                 {/* <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' /> */}
-              {game ? <img id='thumbnail_img' src={`../server/games/${game.game_id}/${game.thumbnail}`} alt='thumbnail_img' />
-              : <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' />}
+                {game ? <img id='thumbnail_img' src={`../server/games/${game.game_id}/${game.thumbnail}`} alt='thumbnail_img' />
+                : <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' />}
               </div>
 
               <div className='basic_info'>
                 <div className='door_title'>
                   <h4>제목:</h4>
                   {/* <h4>괴물</h4> */}
-                <h4>{game?.title ?? '괴물'}</h4>
+                  <h4>{game?.title ?? '괴물'}</h4>
                 </div>
 
                 <div className='door_rating'>
@@ -121,7 +121,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
 
                   <div className='door_difficulty_img'>
                     {/* {Array.from({ length: GameInfo_difficulty }).map((_, index) => ( */}
-                  {Array.from({ length: game?.difficulty ?? GameInfo_difficulty }).map((_, index) => (
+                    {Array.from({ length: game?.difficulty ?? GameInfo_difficulty }).map((_, index) => (
                       <img 
                           key={index}
                           id='GameInfo_difficulty' 
@@ -134,7 +134,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
 
                 <div className='door_estimated_time'>
                   <h4>예상 소요 시간:</h4>
-                {/* <h4>80분</h4> */}
+                  {/* <h4>80분</h4> */}
                   <h4>{game?.playTime ?? 80}분</h4>
                 </div>
 
@@ -146,13 +146,13 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
                 <div className='door_date_created'>
                   <h4>제작날짜:</h4>
                   {/* <h4>2025-05-08</h4> */}
-                <h4>{game?.created_at.slice(0,10) ?? '2025-05-08'}</h4>
+                  <h4>{game?.created_at.slice(0,10) ?? '2025-05-08'}</h4>
                 </div>
 
                 <div className='door_play_count'>
                   <img id='player_icon' src={player_icon} alt='player_icon' />
                   {/* <h4>20,450</h4> */}
-                <h4>{game?.play_count ?? '20,450'}</h4>
+                  <h4>{game?.play_count ?? '20,450'}</h4>
                 </div>
               </div>
             </div>

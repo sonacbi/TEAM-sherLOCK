@@ -942,8 +942,8 @@ useEffect(() => {
                                         </div>
                                         
                                         <h1 className={`sort ${theme}`} onClick={handleSortClick}>
-                                            {selectedSort.current == FilterSetting.rating_desc && "평점순 (↓)"}
-                                            {selectedSort.current == FilterSetting.rating_asc && "평점순 (↑)"}
+                                            {selectedSort.current == FilterSetting.rating_desc && "평점순 (↑)"}
+                                            {selectedSort.current == FilterSetting.rating_asc && "평점순 (↓)"}
                                             {selectedSort.current == FilterSetting.latest_desc && "최신순"}
                                             {selectedSort.current == FilterSetting.play_desc && "플레이순 (↓)"}
                                             {selectedSort.current == FilterSetting.play_asc && "플레이순 (↑)"}
