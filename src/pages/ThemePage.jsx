@@ -61,6 +61,7 @@ function ThemePage() {
     
     const themeRankRef = useRef(null);
     const themeHitRef = useRef(null);
+    const floorRef = useRef(null);
 
     // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
     const scrollRef = useRef(null);
@@ -219,27 +220,32 @@ function ThemePage() {
 
 // themeHitRef에 가로스크롤 및 휠 이벤트 등록 (700 이하 모바일에서는 등록 안함)
 const onScroll = useCallback(() => {
-  const el = themeHitRef.current;
-  if (!el) return;
-  const { scrollLeft, scrollWidth, clientWidth } = el;
-  const hasHorizontalScroll = scrollWidth > clientWidth;
+    const el = themeHitRef.current;  // el 변수 추가
+    const floorEl = floorRef.current;
+    if (!el || !floorEl) return;
 
-  if (!hasHorizontalScroll) {
-    if (!canScrollFullPageRef.current) {
-      window.fullpage_api?.setAllowScrolling(true);
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const hasHorizontalScroll = scrollWidth > clientWidth;
+
+    // 복도 바닥을 스크롤에 맞춰 x축으로 이동
+    floorEl.style.transform = `translateX(${-scrollLeft}px)`;
+
+    if (!hasHorizontalScroll) {
+        if (!canScrollFullPageRef.current) {
+        window.fullpage_api?.setAllowScrolling(true);
+        }
+        return;
     }
-    return;
-  }
 
-  if (canScrollFullPageRef.current) {
-    window.fullpage_api?.setAllowScrolling(false);
-  }
+    if (canScrollFullPageRef.current) {
+        window.fullpage_api?.setAllowScrolling(false);
+    }
 
-  const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 10;
+    const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 10;
 
-  if (isAtRightEnd) {
-    window.fullpage_api?.setAllowScrolling(true);
-  }
+    if (isAtRightEnd) {
+        window.fullpage_api?.setAllowScrolling(true);
+    }
 }, []);
 
 const onWheelHandler = useCallback((e) => {
@@ -895,7 +901,7 @@ useEffect(() => {
                             <img id='theme_down_arrow' src={downarrowImage} alt='theme_down_arrow' />
 
                             {/* 중간 구조물(계단 + 복도) */}
-                            <div className='floor'>
+                            <div className='floor' ref={floorRef}>
                                 <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
                                 <div className='hallway'></div>
                             </div>

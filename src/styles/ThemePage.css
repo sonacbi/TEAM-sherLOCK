@@ -257,6 +257,18 @@
     display: flex;
 }
 
+.floor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 100%; /* floor 요소 바로 오른쪽에 위치 */
+  height: 100%; /* floor 요소 높이와 같게 */
+  width: 2000px; /* 원하는 충분히 긴 너비 */
+  background: black; /* 막대 색상 (원하는 색으로 변경) */
+  pointer-events: none; /* 클릭 등 이벤트 무시 */
+  z-index: -1; /* floor 뒤에 배치 */
+}
+
 .hallway {
     background-color: black;
     height: 100%;
