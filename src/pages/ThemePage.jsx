@@ -6,6 +6,7 @@ import Profile from '../components/Profile/Profile';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
 import Ranking from '../components/Ranking/Ranking';
+import { lockFullpageScroll, unlockFullpageScroll,  attachScrollControlEvents } from '../components/Ranking/scrollControl.js';
 import Footer from '../components/Footer/Footer';
 import GameInfo from '../components/GameInfo/GameInfo';
 import Loading from '../components/Loading/Loading';
@@ -42,6 +43,14 @@ function ThemePage() {
     const [showSignUp, setShowSignUp] = useState(false);
     const [showGameInfo, setShowGameInfo] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
+
+    // 랭킹 페이지의 풀페이지 충돌 조작 방지용（추가）
+    useEffect(() => {
+    const element = document.querySelector('.theme-scroll-container');
+    const cleanup = attachScrollControlEvents(element, { wheel: true });
+
+    return () => { if (cleanup) cleanup(); };
+    }, []);
 
     // 전체화면 상태인지 아닌지 감지 (추가)
     const [screenWidth, setScreenWidth] = useState(window.innerWidth); // 현재 창 너비
@@ -546,6 +555,18 @@ useEffect(() => {
         return () => observer.disconnect();
     }, [isAnimating]); // isAnimating 상태가 변경될 때마다 감지
 
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        // wheel 이벤트는 attachScrollControlEvents에 위임하지 않음!
+        const cleanup = attachScrollControlEvents(container, { wheel: false });
+
+        return () => {
+            if (cleanup) cleanup();
+        };
+    }, [isAnimating, showSignIn, showSignUp]);
+
     // 휠 이벤트로 가로 스크롤
     useEffect(() => {
         const handleWheel = (e) => {
@@ -660,8 +681,6 @@ useEffect(() => {
             animationFrame.current = requestAnimationFrame(smoothScroll);
         }
     };
-      
-
 
     // 로그인/회원가입 클릭 시 상태 변경
     const handleSignInClick = () => {

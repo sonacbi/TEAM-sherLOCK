@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion'; // 복잡
 
 import './Ranking.css';
 import HoverName from './hoverName.jsx';
+import { lockFullpageScroll, unlockFullpageScroll,  attachScrollControlEvents } from './scrollControl';
 
 import Trophy from '../../assets/images/Ranking_img/trophy.png';
 import rank_user_profile from '../../assets/images/Profile/ex_user_profile.png'; // 더미데이터
@@ -15,6 +16,16 @@ import rank_user_profile from '../../assets/images/Profile/ex_user_profile.png';
 
 
 function Ranking() {
+  // 테마 페이지의 풀페이지 충돌 방지용
+  useEffect(() => {
+    const element = document.querySelector('.rank-scroll');
+    const cleanup = attachScrollControlEvents(element, { wheel: true });
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, []);
+
   // 주소값에서 theme 파라미터 가져오기
   const { theme } = useParams();
 
@@ -157,55 +168,73 @@ const animatedOpacity = step === 'shrink' ? 0 : 1;
 
   // 실제 화면에 렌더링 되는 컴포넌트
   function RankingComponent({ showTop10, fullData, fullData100, handleClickRank, theme }) {
-    
-    // fullpage 스크롤 관리: 스크롤 영역에 마우스 진입 시 스크롤 잠금, 나가면 해제
-      useEffect(() => {
-        const rankerElement100 = document.querySelector('#ranker_1_100');
-        const rankerElement10 = document.querySelector('#ranker_1_10');
-        const rankerParentElement = document.querySelector('.rank-scroll');
+    useEffect(() => {
+  const child = document.querySelector('.rank-scroll');
+  const parent = document.querySelector('#ranker_1_100');
+  if (!child || !parent) return;
 
-        // 특정 요소가 화면에 보이는지 판단하는 함수
-        const isVisible = (elem) => {
-          if (!elem) return false;
-          const rect = elem.getBoundingClientRect();
-          return rect.height > 0 && rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
-        };
+  parent.style.overflow = 'hidden';
 
-        // 둘 다 없거나 둘 다 안 보이면 스크롤 허용 후 종료
-        if ((!rankerElement100 && !rankerElement10) ||
-            (!isVisible(rankerElement100) && !isVisible(rankerElement10))) {
-          window.fullpage_api?.setAllowScrolling(true);
-          return;
-        }
+  const onWheelParent = (e) => {
+    e.preventDefault();
 
-        // 이벤트 핸들러 바인딩
-        const activeElement = rankerElement100 || rankerElement10 || rankerParentElement;
+    // 자식 스크롤 조작
+    const newScrollTop = child.scrollTop + e.deltaY;
 
-        if (activeElement && window.fullpage_api) {
-          // 마우스 진입 시 스크롤 잠금
-          const onMouseEnter = () => window.fullpage_api.setAllowScrolling(false);
-          // 마우스 이탈 시 스크롤 해제
-          const onMouseLeave = () => window.fullpage_api.setAllowScrolling(true);
-          // 휠 스크롤 커스텀 처리
-          const onWheel = (e) => {
-            e.preventDefault();
-            rankerParentElement.scrollTop += e.deltaY;
-          };
+    if (newScrollTop < 0) {
+      child.scrollTop = 0;
+      // 스크롤 최상단 → 부모나 fullpage 스크롤 풀어줘도 됨
+      window.fullpage_api?.setAllowScrolling(true);
+    } else if (newScrollTop > child.scrollHeight - child.clientHeight) {
+      child.scrollTop = child.scrollHeight - child.clientHeight;
+      // 스크롤 최하단 → 부모 스크롤 풀어줘도 됨
+      window.fullpage_api?.setAllowScrolling(true);
+    } else {
+      child.scrollTop = newScrollTop;
+      // 중간 구간에서는 부모 스크롤 잠금 유지
+      window.fullpage_api?.setAllowScrolling(false);
+    }
+  };
 
-          activeElement.addEventListener('mouseenter', onMouseEnter);
-          activeElement.addEventListener('mouseleave', onMouseLeave);
-          activeElement.addEventListener('wheel', onWheel, { passive: false });
+  const onWheelChild = (e) => {
+    e.preventDefault();
 
-          // 클린업: 이벤트 제거
-          return () => {
-            activeElement.removeEventListener('mouseenter', onMouseEnter);
-            activeElement.removeEventListener('mouseleave', onMouseLeave);
-            activeElement.removeEventListener('wheel', onWheel);
-          };
-        }
-      }, [step]);
+    const newScrollTop = child.scrollTop + e.deltaY;
+    if (newScrollTop < 0) {
+      child.scrollTop = 0;
+      e.stopPropagation(); // 부모로 이벤트 못가게 막음
+      window.fullpage_api?.setAllowScrolling(true); // 부모 스크롤 허용
+    } else if (newScrollTop > child.scrollHeight - child.clientHeight) {
+      child.scrollTop = child.scrollHeight - child.clientHeight;
+      e.stopPropagation();
+      window.fullpage_api?.setAllowScrolling(true);
+    } else {
+      child.scrollTop = newScrollTop;
+      e.stopPropagation();
+      window.fullpage_api?.setAllowScrolling(false);
+    }
+  };
 
+  const onMouseEnter = () => {
+    window.fullpage_api?.setAllowScrolling(false);
+  };
 
+  const onMouseLeave = () => {
+    window.fullpage_api?.setAllowScrolling(true);
+  };
+
+  parent.addEventListener('wheel', onWheelParent, { passive: false });
+  child.addEventListener('wheel', onWheelChild, { passive: false });
+  parent.addEventListener('mouseenter', onMouseEnter);
+  parent.addEventListener('mouseleave', onMouseLeave);
+
+  return () => {
+    parent.removeEventListener('wheel', onWheelParent);
+    child.removeEventListener('wheel', onWheelChild);
+    parent.removeEventListener('mouseenter', onMouseEnter);
+    parent.removeEventListener('mouseleave', onMouseLeave);
+  };
+}, []);
 
   // 디버깅용: step 변경 시 로그 출력
     useEffect(() => {

@@ -64,7 +64,7 @@ display: none !important;  }
   flex-direction: column;
   justify-content: flex-start;
 
-  overflow: hidden;  /* <<< 바꿔야 함 */
+  overflow: hidden; 
 
   position: relative;
 }
