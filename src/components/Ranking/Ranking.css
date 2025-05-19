@@ -124,17 +124,17 @@ display: none !important;  }
 
 /* 기본 li 배경 (4등부터) */
 .ranking_container.horror .fillColor {
-  background: linear-gradient(45deg, #0e1e2b, #1c2f3f);
+  background: linear-gradient(45deg, #500808, #7d0d0d);
   /* transition: background 0.3s, transform 0.3s; */
 }
 
 .ranking_container.adventure .fillColor {
-  background: linear-gradient(45deg, #2e2209, #5c4716);
+  background: linear-gradient(45deg, #c28200, #df9c0b);
   /* transition: background 0.3s, transform 0.3s; */
 }
 
 .ranking_container.crime .fillColor {
-  background: linear-gradient(45deg, #150e2b, #2a1e4f);
+  background: linear-gradient(45deg, #1e1e1e, #4a4a4a);
   /* transition: background 0.3s, transform 0.3s; */
 }
 
@@ -142,51 +142,60 @@ display: none !important;  }
 .ranking_container.horror li.li1,
 .ranking_container.horror li.li2,
 .ranking_container.horror li.li3 {
-  background: linear-gradient(45deg, #1a2d40, #284a66);
+  background: linear-gradient(45deg, #500808, #7d0d0d);
 }
 
 .ranking_container.adventure li.li1,
 .ranking_container.adventure li.li2,
 .ranking_container.adventure li.li3 {
-  background: linear-gradient(45deg, #4b370d, #7d5a16);
+  background: linear-gradient(45deg, #c28200, #df9c0b);
 }
 
 .ranking_container.crime li.li1,
 .ranking_container.crime li.li2,
 .ranking_container.crime li.li3 {
-  background: linear-gradient(45deg, #261544, #3f2470);
+  background: linear-gradient(45deg, #1e1e1e, #4a4a4a);
 }
 
 /* li hover하면 살짝 밝아지고 약간 확대 */
-.ranking_container .fillColor:hover {
-  background: linear-gradient(45deg, #3c3c3c, #5a5a5a);
-  transform: scale(1.02);
-  cursor: pointer;
+.ranking_container .fillColor:hover { transform: scale(1.02); cursor: pointer; }
+
+.ranking_container.horror .fillColor:hover {
+  background: #b22222;
+}
+
+.ranking_container.adventure .fillColor:hover {
+  background: #c28200;
+
+}
+.ranking_container.crime .fillColor:hover {
+  background: #1e1e1e;
+
 }
 
 .ranking_container li.table_header:hover{  transform: scale(1.00);}
 
-.ranking_container.horror li.table_header:hover{  background: linear-gradient(45deg, #0e1e2b, #1c2f3f);}
-.ranking_container.adventure li.table_header:hover{  background: linear-gradient(45deg, #2e2209, #5c4716);}
-.ranking_container.crime li.table_header:hover{  background: linear-gradient(45deg, #150e2b, #2a1e4f);}
+.ranking_container.horror li.table_header:hover{  background: linear-gradient(45deg, #500808, #7d0d0d);}
+.ranking_container.adventure li.table_header:hover{  background: linear-gradient(45deg, #c28200, #df9c0b);}
+.ranking_container.crime li.table_header:hover{  background: linear-gradient(45deg, #1e1e1e, #4a4a4a);}
 
 /* 1~3등 hover할 때는 별도 스타일 유지 */
 .ranking_container.horror li.li1:hover,
 .ranking_container.horror li.li2:hover,
 .ranking_container.horror li.li3:hover {
-  background: linear-gradient(45deg, #1d3a53, #2e5b81);
+  background: #b22222;
 }
 
 .ranking_container.adventure li.li1:hover,
 .ranking_container.adventure li.li2:hover,
 .ranking_container.adventure li.li3:hover {
-  background: linear-gradient(45deg, #5b410f, #996f19);
+  background: #c28200;
 }
 
 .ranking_container.crime li.li1:hover,
 .ranking_container.crime li.li2:hover,
 .ranking_container.crime li.li3:hover {
-  background: linear-gradient(45deg, #341d5a, #553489);
+  background: #1e1e1e;
 }
 
 
@@ -348,7 +357,7 @@ display: none !important;  }
 }
 
 #ranker_1_100 .li1, #ranker_1_100 .li2, #ranker_1_100 .li3 {
-  background-color: #0e1e2b; /* 배경색 설정 */
+  /* background-color: #0e1e2b; */
   grid-template-columns: 1fr 6fr 1fr;
   padding: 10px;
 }
@@ -357,7 +366,7 @@ display: none !important;  }
 #ranker_1_100 .toggle_trophy {
   position: sticky;
   bottom: 0;
-  background-color: #0e1e2b;
+  /* background-color: #0e1e2b; */
   z-index: 1;
   text-align: center;
   height: 40px;
