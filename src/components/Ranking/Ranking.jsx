@@ -7,116 +7,128 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion'; // 복잡한 애니메이션 추가용 코드
 
 import './Ranking.css';
+import HoverName from './hoverName.jsx';
+import { lockFullpageScroll, unlockFullpageScroll,  attachScrollControlEvents } from './scrollControl';
 
 import Trophy from '../../assets/images/Ranking_img/trophy.png';
-import Crown from'../../assets/images/Ranking_img/crown.png';
-import Raurel from'../../assets/images/Ranking_img/raurel.png';
-import ex_user_profile from '../../assets/images/Profile/ex_user_profile.png'; // 더미데이터
+import rank_user_profile from '../../assets/images/Profile/ex_user_profile.png'; // 더미데이터
 
 
 
 function Ranking() {
+  // 테마 페이지의 풀페이지 충돌 방지용
+  useEffect(() => {
+    const element = document.querySelector('.rank-scroll');
+    const cleanup = attachScrollControlEvents(element, { wheel: true });
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, []);
+
   // 주소값에서 theme 파라미터 가져오기
   const { theme } = useParams();
 
-  // 랭킹 상태
-  const [showTop10, setShowTop10] = useState(true); // 처음엔 1~10위 보여주기
-  const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 진행 중 상태
-  const [step, setStep] = useState('idle');  
+  // 랭킹 보여줄 범위 상태
+  const [showTop10, setShowTop10] = useState(true); // 기본값: 1~10위 보여줌
+  const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 진행 중 여부
+  const [step, setStep] = useState('idle');  // 애니메이션 단계 상태
 
+  // 트로피 아이콘 너비 상태
   const [trophyWidth, setTrophyWidth] = useState(null);
-  const trophyRef = useRef();
+  const trophyRef = useRef(); // 트로피 DOM 참조
 
-  // 트로피 클릭 핸들러 (애니메이션 토글)
-  const handleClickRank = () => {
-    if (isAnimating || step !== 'idle') return;  // 이미 애니메이션 중이면 리턴
-
-    if(showTop10){
-
-      // 애니메이션 시작 전에 현재 width 저장
-      if (trophyRef.current) {
-        const width = trophyRef.current.getBoundingClientRect().width;
-        console.log("확인");
-        setTrophyWidth(width);  // 애니메이션 시작 전에 현재 width 저장
-      }
-    
-      setIsAnimating(true);  // 애니메이션 시작
-      setStep('collapsingTop10');  // 축소 애니메이션 시작
-
-    }else if(!showTop10) {
-      setIsAnimating(true);  // 애니메이션 시작
-      setStep('shrink');  // 축소 애니메이션 시작
-    }
-    
-  };
-
-  // 랭킹 1~10 접히는 속도 조절
+  // 1~10위 접히는 애니메이션 속도 상수
   const [trans_10] = useState(1.4);
-  
-  // 애니메이션 상태 변화 처리
-  useEffect(() => {
-    if (step === 'collapsingTop10') {
-      console.log("Current step:", step);
-      setTimeout(() => {
-        setShowTop10(false);  // Top10 숨기기
-        // DOM 반영 뒤 step 변경 (비동기 처리로 다음 프레임에 넘기기)
-        requestAnimationFrame(() => {
-          setStep('expandTrans');  // 이 시점부터 애니메이션 트리거
-        });
 
-      }, 1500); // 1.5초 후 안의 내용을 실행함
-      
-    } else if(step === 'expandTrans') {
-      console.log("Current step:", step);
-        setTimeout(() => {
+  // 애니메이션 타이머 ID 저장용 ref
+  const timeoutRef = useRef(null);
 
-        setStep('idle');  // 상태 초기화
-        setIsAnimating(false);  // 애니메이션 종료
+  // 애니메이션 중복 실행 방지용 ref
+  const hasRunRef = useRef(false);
 
-      }, 700); // 0.7초 후 안의 내용을 실행함
-    }else if(step === 'idle') {
-      console.log("Current step:", step);
+  // 트로피 클릭 시 애니메이션 토글 처리 함수
+  const handleClickRank = () => {
+    // 이미 애니메이션 중이거나 상태가 idle이 아니면 동작 안함
+    if (isAnimating || step !== 'idle') return;
+    setIsAnimating(true); // 애니메이션 시작 상태로 변경
+
+    // 트로피 현재 너비를 구해 저장
+    if (trophyRef.current) {
+      const width = trophyRef.current.getBoundingClientRect().width;
+      console.log("확인");
+      setTrophyWidth(width);
     }
-    
+
+    // showTop10이 true면 'collapsingTop10' 단계로, false면 'shrink' 단계로 변경
+    if (showTop10) { setStep('collapsingTop10'); } else { setStep('shrink'); }
+  }
+
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth <= 700);
+    };
+
+    checkScreenSize(); // 처음 실행
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // step 상태 변화에 따른 애니메이션 단계 처리 및 타이머 관리
+  useEffect(() => {
+    if (hasRunRef.current) return; // 이미 실행 중이면 무시
+    hasRunRef.current = true;
+
+    if (timeoutRef.current) { clearTimeout(timeoutRef.current); }
+
+    const run = () => {
+      console.log("Current step:", step);
+
+      if (step === 'collapsingTop10') {
+        // 1. 1~10위 영역 접기 애니메이션 후 showTop10 숨김, 다음 단계로 진행
+        timeoutRef.current = setTimeout(() => {
+          setShowTop10(false);
+          requestAnimationFrame(() => setStep('expandTrans'));
+        }, 1500);
+      }
+      else if (step === 'expandTrans') {
+        // 2. 영역 확장 애니메이션 후 idle 상태 복귀, 애니메이션 종료 처리
+        timeoutRef.current = setTimeout(() => {
+          setStep('idle');
+          setIsAnimating(false);
+        }, 700);
+      }
+      else if (step === 'shrink') {
+        // 3. 축소 애니메이션 후 1~10위 영역 다시 보이도록 설정, 다음 단계 popup으로 변경
+        timeoutRef.current = setTimeout(() => {
+          setShowTop10(true);
+          setStep((prev) => prev === 'shrink' ? 'popup' : prev);
+        }, 1200);
+      }
+      else if (step === 'popup') {
+        // 4. 팝업 애니메이션 후 idle 상태 및 애니메이션 종료 처리
+        timeoutRef.current = setTimeout(() => {
+          setStep('idle');
+          setIsAnimating(false);
+        }, 1000);
+      }
+    };
+
+    run();
+
+    // 클린업 함수 - 컴포넌트 언마운트 또는 step 변경 시 타이머 제거 및 중복 실행 상태 초기화
+    return () => { hasRunRef.current = false; if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+
   }, [step]);
 
 
-useEffect(() => {
-  if(step === 'shrink'){
-    console.log("Current step:", step);
-    setTimeout(() => {
-        setShowTop10(true);  // Top10 올리기
-        // DOM 반영 뒤 step 변경 (비동기 처리로 다음 프레임에 넘기기)
-        requestAnimationFrame(() => {
-          setStep('popup');  // 이 시점부터 애니메이션 트리거
-        });
-
-      }, 1200); // 0.7초 후 안의 내용을 실행함
-  }else if(step === 'popup') {
-      console.log("Current step:", step);
-        setTimeout(() => {
-
-        setStep('idle');  // 상태 초기화
-        setIsAnimating(false);  // 애니메이션 종료
-
-      }, 1000); // 1.0초 후 안의 내용을 실행함
-    }else if(step === 'idle') {
-      console.log("Current step:", step);
-    }
-}, [step])
-
-
-  // 풀페이지 스크롤 제어용 (비활성화 영역 체크)
-  const rankerParentRef = useRef(null);
-  const rankScrollRef = useRef(null);
-
-  
-
-  // 닉네임 목록
-  const namePrefixes = ['Gamer', 'Player', 'User', 'Hero', 'Champion', 'Master', 'King', 'Queen', 'Star', 'Boss'];
+  // 더미 닉네임 접두사, 접미사 배열
+  const namePrefixes = ['Gamerr', 'Player', 'User', 'Hero', 'Champion', 'Master', 'King', 'Queen', 'Star', 'Boss'];
   const nameSuffixes = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'X', 'Z', 'Alpha', 'Beta'];
 
-  // 100명의 더미 데이터 생성
+  // (length)명의 더미 랭킹 데이터 생성 (랜덤 점수 포함)
   const dummyData = Array.from({ length: 50 }, (_, index) => ({
     id: index + 1,
     name: `${namePrefixes[index % namePrefixes.length]}_${nameSuffixes[index % nameSuffixes.length]}`, // 랜덤하게 닉네임 생성
@@ -126,94 +138,119 @@ useEffect(() => {
   // 내림차순으로 자동정렬
   const sortedData = [...dummyData].sort((a, b) => b.score - a.score);
 
-  // 항상 10개를 만들기 위해
+  // 항상 10개 항목이 있도록 채워주는 배열 (10위 미만은 placeholder)
   const fullData = useMemo(() => {
     const result = [];
     for (let i = 0; i < 10; i++) {
-      if (sortedData[i]) {
-        result.push(sortedData[i]);
-      } else {
-        result.push({ id: `placeholder-${i}`, name: '-', score: '-' });
-      }
+      if (sortedData[i]) { result.push(sortedData[i]);
+      } else { result.push({ id: `placeholder-${i}`, name: '-', score: '-' }); }
     }
     return result;
   }, [sortedData]);
   
+  // 1~100위 전체 화면용 데이터 (sortedData 재활용)
+    const fullData100 = sortedData;
 
-  // 1~100위 화면을 위한 데이터 (있는 사람만 표시)
-  const fullData100 = sortedData; // 이미 내림차순으로 정렬되어 있으므로 그대로 사용
+    const animatedHeight = step === 'expandTrans' || step === 'idle'
+      ? (isSmallScreen ? 280 : 330)
+      : step === 'shrink'
+      ? (isSmallScreen ? 40 : 40)
+      : 0;
 
+    const initialHeight = 
+      step === 'collapsingTop10' || step === 'expandTrans'
+        ? 40
+        : step === 'shrink'
+        ? (isSmallScreen ? 280 : 330)
+        : undefined;
 
+const animatedOpacity = step === 'shrink' ? 0 : 1;
+
+  // 실제 화면에 렌더링 되는 컴포넌트
   function RankingComponent({ showTop10, fullData, fullData100, handleClickRank, theme }) {
+    useEffect(() => {
+  const child = document.querySelector('.rank-scroll');
+  const parent = document.querySelector('#ranker_1_100');
+  if (!child || !parent) return;
 
-    // ⭐ 애니메이션 시작 전에 먼저 fullpage 스크롤 막기
-    // useEffect(() => {
-    //   if (!showTop10 && window.fullpage_api) {
-    //     window.fullpage_api.setAllowScrolling(false);
-    //   }
-    // }, [showTop10]);
+  parent.style.overflow = 'hidden';
 
-    
-    // 풀페이지 스크롤 락
-    const handleRankingEvents = () => {
+  const onWheelParent = (e) => {
+    e.preventDefault();
 
-      const rankerElement100 = document.querySelector('#ranker_1_100');
-      const rankerElement10 = document.querySelector('#ranker_1_10');
-      const rankerParentElement = document.querySelector('.rank-scroll');
+    // 자식 스크롤 조작
+    const newScrollTop = child.scrollTop + e.deltaY;
 
-      console.log('🎯 onAnimationComplete');
-      console.log('rankerElement100:', rankerElement100);
-      console.log('rankerElement10:', rankerElement10);
-      console.log('rankerParentElement:', rankerParentElement);
-      
-      const isVisible = (elem) => {
-        if (!elem) return false;
-        const rect = elem.getBoundingClientRect();
-        return rect.height > 0 && rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
-      };
-      // 둘 다 없거나 화면에 보이지 않으면 스크롤 허용
-      if ((!rankerElement100 && !rankerElement10) || 
-          (!isVisible(rankerElement100) && !isVisible(rankerElement10))) {
-        window.fullpage_api.setAllowScrolling(true);
-        return;
-      }
-      // 마우스 이벤트 바인딩 (하나라도 있는 경우)
-      const activeElement = rankerElement100 || rankerElement10 || rankerParentElement;
-      if (activeElement && window.fullpage_api) {
-        activeElement.addEventListener('mouseenter', () => {
-          console.log('🟡 mouseover triggered');
-          
-          window.fullpage_api.setAllowScrolling(false);
-        });
-        activeElement.addEventListener('mouseleave', () => {
-          console.log('🟢 mouseout triggered');
-          
-          window.fullpage_api.setAllowScrolling(true);
-        });
-        activeElement.addEventListener('wheel', (e) => {
-          e.preventDefault();
-          rankerParentElement.scrollTop += e.deltaY;
-        }, { passive: false });
-      }
-    };
-
-// 애니메이션 상태 변화 처리
-  useEffect(() => {
-    if (step === 'idle') {
-      console.log("Current step:", step);
-      handleRankingEvents(); // 'idle' 상태일 때 handleRankingEvents 호출
+    if (newScrollTop < 0) {
+      child.scrollTop = 0;
+      // 스크롤 최상단 → 부모나 fullpage 스크롤 풀어줘도 됨
+      window.fullpage_api?.setAllowScrolling(true);
+    } else if (newScrollTop > child.scrollHeight - child.clientHeight) {
+      child.scrollTop = child.scrollHeight - child.clientHeight;
+      // 스크롤 최하단 → 부모 스크롤 풀어줘도 됨
+      window.fullpage_api?.setAllowScrolling(true);
+    } else {
+      child.scrollTop = newScrollTop;
+      // 중간 구간에서는 부모 스크롤 잠금 유지
+      window.fullpage_api?.setAllowScrolling(false);
     }
-  }, [step]); // step이 변경될 때마다 실행됨
+  };
+
+  const onWheelChild = (e) => {
+    e.preventDefault();
+
+    const newScrollTop = child.scrollTop + e.deltaY;
+    if (newScrollTop < 0) {
+      child.scrollTop = 0;
+      e.stopPropagation(); // 부모로 이벤트 못가게 막음
+      window.fullpage_api?.setAllowScrolling(true); // 부모 스크롤 허용
+    } else if (newScrollTop > child.scrollHeight - child.clientHeight) {
+      child.scrollTop = child.scrollHeight - child.clientHeight;
+      e.stopPropagation();
+      window.fullpage_api?.setAllowScrolling(true);
+    } else {
+      child.scrollTop = newScrollTop;
+      e.stopPropagation();
+      window.fullpage_api?.setAllowScrolling(false);
+    }
+  };
+
+  const onMouseEnter = () => {
+    window.fullpage_api?.setAllowScrolling(false);
+  };
+
+  const onMouseLeave = () => {
+    window.fullpage_api?.setAllowScrolling(true);
+  };
+
+  parent.addEventListener('wheel', onWheelParent, { passive: false });
+  child.addEventListener('wheel', onWheelChild, { passive: false });
+  parent.addEventListener('mouseenter', onMouseEnter);
+  parent.addEventListener('mouseleave', onMouseLeave);
+
+  return () => {
+    parent.removeEventListener('wheel', onWheelParent);
+    child.removeEventListener('wheel', onWheelChild);
+    parent.removeEventListener('mouseenter', onMouseEnter);
+    parent.removeEventListener('mouseleave', onMouseLeave);
+  };
+}, []);
+
+  // 디버깅용: step 변경 시 로그 출력
+    useEffect(() => {
+      console.log(`🪵 step changed: ${step}`);
+      console.trace('🔍 step change stack trace');
+    }, [step]);
 
 
-
+  // 트로피 애니메이션용 div 컴포넌트
     const TrophyDiv = ({ step, prevWidthProp }) => {
       const divRef = useRef(null);
       const [animatedWidth, setAnimatedWidth] = useState(prevWidthProp);
 
       useEffect(() => {
         if (step === 'collapsingTop10') {
-          // 일단 이전 width 적용
+          // 이전 width를 설정 후 다음 프레임에 부모 요소의 너비로 변경 (애니메이션 트리거)
           setAnimatedWidth(`${prevWidthProp}px`);
     
           // 다음 프레임에 새로운 width 적용 → 애니메이션 유도
@@ -275,7 +312,7 @@ useEffect(() => {
               className={`ranker_grid` }
               initial = {step === 'popup' ? {opacity : 0, y : 5}: {}}
               animate={step === 'collapsingTop10' ? { height: 'auto', gridTemplateRows: 'repeat(6, auto)' } : step === 'popup' ? {opacity : 1, y : 0} : {}}
-              onAnimationComplete={handleRankingEvents}
+
               transition={step === 'popup' ? {duration : 1.0} : {}}
               style={{ position: 'relative' }} // 부모의 relative 설정을 다시 확인
             >
@@ -297,15 +334,15 @@ useEffect(() => {
                         position: 'relative',
                       }}
                     >
-                      {/* 왕관 또는 숫자 */}
+                      {/* 랭킹 숫자 */}
                       <div className="rank_header">
                         <span className="rank_index">{index + 1}</span>
                       </div>
 
                       {/* 이름 및 점수 */}
                       <div className="rank_profile">
-                        <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
-                        <span className="rank_name">{user.name}</span>
+                        <img id="rank_user_profile" src={rank_user_profile} alt="rank_user_profile" />
+                        <HoverName name={user.name} index={index} />
                       </div>
                       <div className="rank_score">{user.score}</div>
                     </motion.li>
@@ -332,28 +369,16 @@ useEffect(() => {
                       position: 'relative',
                     }}
                   >
-                    {/* 왕관 또는 숫자 */}
-                    {index === 0 ? (
-                      <img className="Crown" src={Crown} alt="Crown" />
-                    ) : index === 1 || index === 2 ? (
-                      <div className="rank_header">
-                        <img className="Crown_small" src={Crown} alt="Crown" />
-                      </div>
-                    ) : (
-                      <div className="rank_header">
+                    <div className="rank_header">
                         <span className="rank_index">{index + 1}</span>
                       </div>
-                    )}
 
                     {/* 이름 및 점수 */}
                     <div className="rank_profile">
-                      <img id="ex_user_profile" src={ex_user_profile} alt="ex_user_profile" />
-                      <span className="rank_name">{user.name}</span>
+                      <img id="rank_user_profile" src={rank_user_profile} alt="rank_user_profile" />
+                      <HoverName name={user.name} index={index} />
                     </div>
                     <div className="rank_score">{user.score}</div>
-
-                    {/* 월계관 */}
-                    {index === 0 && <img className="Raurel" src={Raurel} alt="Raurel" />}
                   </motion.li>
                 )
               ))}
@@ -374,7 +399,7 @@ useEffect(() => {
                     step === 'collapsingTop10' ? '1 / span 2' : '2 / span 1',
                   position: (step === 'collapsingTop10')||(step === 'popup') ? 'absolute' : 'relative',
                   top: 'auto',  
-                  height : '48px'
+                  height: isSmallScreen ? '40px' : '48px', // 조건부 height
                 }}
               >
                 <TrophyDiv  step={step} prevWidthProp={trophyWidth} />
@@ -387,8 +412,15 @@ useEffect(() => {
             <motion.ul
               id="ranker_1_100"
               className="ranker_flex"
-              initial={step === 'collapsingTop10' ? { height: 40 } : step === 'expandTrans' ? { height: 40 } : step === 'shrink' ? { height: 330, opacity : 1 } : false}
-              animate={step === 'expandTrans' ? { height : 330 } : step === 'idle' ? { height: 330 } : step === 'shrink' ? {height : 40, opacity : 0} : { height: 0 }}
+              initial={
+                initialHeight !== undefined
+                  ? { height: initialHeight, ...(step === 'shrink' && { opacity: 1 }) }
+                  : false
+              }
+              animate={{
+                height: animatedHeight,
+                opacity: animatedOpacity
+              }}
               exit={false}
               transition={step == 'shrink' ? { 
                 type: 'tween',
@@ -421,7 +453,7 @@ useEffect(() => {
                     <span className="rank_index">{index + 1}</span>
                   </div>
                   <div className="rank_profile">              
-                    <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
+                    <img id='rank_user_profile' src={rank_user_profile} alt='rank_user_profile' />
                     <span className="rank_name">{user.name}</span>
                   </div>
                   <div className="rank_score">{user.score}</div>
@@ -446,7 +478,7 @@ useEffect(() => {
                         <span className="rank_index">{index + 4}</span>
                       </div>
                       <div className="rank_profile">              
-                        <img id='ex_user_profile' src={ex_user_profile} alt='ex_user_profile' />
+                        <img id='rank_user_profile' src={rank_user_profile} alt='rank_user_profile' />
                         <span className="rank_name">{user.name}</span>
                       </div>
                       <div className="rank_score">{user.score}</div>
@@ -462,7 +494,6 @@ useEffect(() => {
                 onClick={handleClickRank}
                 style ={ {height : '48px', zIndex : '10'
                   }}
-                // animate = {step === 'collapsingTop10'? { top : 0, bottom : 'none', y : 0} : step === 'expandTrans' ? {y : 320} : false}
                 transition={{ duration: 0.8 }}
                 
               >

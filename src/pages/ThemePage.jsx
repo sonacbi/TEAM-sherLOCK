@@ -6,6 +6,7 @@ import Profile from '../components/Profile/Profile';
 import Sign_in from '../components/Sign/Sign_inside/Sign_In/Sign_in';
 import Sign_up from '../components/Sign/Sign_inside/Sign_Up/Sign_up';
 import Ranking from '../components/Ranking/Ranking';
+import { lockFullpageScroll, unlockFullpageScroll,  attachScrollControlEvents } from '../components/Ranking/scrollControl.js';
 import Footer from '../components/Footer/Footer';
 import GameInfo from '../components/GameInfo/GameInfo';
 import Loading from '../components/Loading/Loading';
@@ -43,6 +44,32 @@ function ThemePage() {
     const [showSignUp, setShowSignUp] = useState(false);
     const [showGameInfo, setShowGameInfo] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
+
+    // 랭킹 페이지의 풀페이지 충돌 조작 방지용（추가）
+    useEffect(() => {
+    const element = document.querySelector('.theme-scroll-container');
+    const cleanup = attachScrollControlEvents(element, { wheel: true });
+
+    return () => { if (cleanup) cleanup(); };
+    }, []);
+
+    // 전체화면 상태인지 아닌지 감지 (추가)
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth); // 현재 창 너비
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth); // 현재 창 너비 (중복 가능하나 따로 둠)
+    const [themeRankWidth, setThemeRankWidth] = useState(0);           // themeRank의 가로 너비
+    const [themeHitWidth, setThemeHitWidth] = useState();              // themeHit의 가로 너비
+    const [isFullScreen, setIsFullScreen] = useState(true);            // 전체화면 여부
+    
+    const themeRankRef = useRef(null);
+    const themeHitRef = useRef(null);
+    const floorRef = useRef(null);
+
+    // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
+    const scrollRef = useRef(null);
+    const [visibleWarning, setVisibleWarning] = useState(false); // DOM 존재 여부
+    const [showWarning, setShowWarning] = useState(false);       // opacity 표시 여부
+    const [canScrollFullPage, setCanScrollFullPage] = useState(false); // 풀페이지 허용 여부
+    // ---------------------------------------------//
 
     // 로딩 메세지
     const [loadingMessage, setLoadingMessage] = useState('');
@@ -155,6 +182,267 @@ function ThemePage() {
             if (window.fullpage_api) window.fullpage_api.setAllowScrolling(true);
         }
     }, [showSignIn, showSignUp, showGameInfo, showLoading]);
+
+    // 전체 화면 여부 판단 및 창 크기 감지 (최초 렌더 및 resize 이벤트에 대응) (추가)
+        useEffect(() => {
+            // themeRankWidth 초기 측정
+            if (themeHitRef.current) {
+            setThemeRankWidth(themeHitRef.current.offsetWidth);
+            }
+
+            // 현재 창 크기 체크해서 전체화면 여부 판단
+            const checkFullScreen = () => {
+                const width = window.innerWidth;
+                setWindowWidth(width); setScreenWidth(width);
+
+                // 모바일은 전체화면 판단 제외
+                if (width <= 700) return;
+
+                // 전체화면 여부 판단 (현재 창 너비가 화면 전체 너비와 같거나 크면 전체화면)
+                setIsFullScreen(width >= window.screen.width);
+            };
+
+            checkFullScreen();
+
+            window.addEventListener('resize', checkFullScreen);
+            return () => window.removeEventListener('resize', checkFullScreen);
+        }, []);
+
+        
+    // themeHitWidth 계산: 전체화면이거나 모바일(700 이하)이면 undefined, 아니면 (screenWidth - themeRankWidth)
+    useEffect(() => {
+        if (isFullScreen || screenWidth <= 700) {
+            setThemeHitWidth(undefined);
+        } else {
+            setThemeHitWidth(screenWidth - themeRankWidth);
+        }
+    }, [screenWidth, themeRankWidth, isFullScreen]);
+
+// themeHitRef에 가로스크롤 및 휠 이벤트 등록 (700 이하 모바일에서는 등록 안함)
+const onScroll = useCallback(() => {
+    const el = themeHitRef.current;  // el 변수 추가
+    const floorEl = floorRef.current;
+    if (!el || !floorEl) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const hasHorizontalScroll = scrollWidth > clientWidth;
+
+    // 복도 바닥을 스크롤에 맞춰 x축으로 이동
+    floorEl.style.transform = `translateX(${-scrollLeft}px)`;
+
+    if (!hasHorizontalScroll) {
+        if (!canScrollFullPageRef.current) {
+        window.fullpage_api?.setAllowScrolling(true);
+        }
+        return;
+    }
+
+    if (canScrollFullPageRef.current) {
+        window.fullpage_api?.setAllowScrolling(false);
+    }
+
+    const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 10;
+
+    if (isAtRightEnd) {
+        window.fullpage_api?.setAllowScrolling(true);
+    }
+}, []);
+
+const onWheelHandler = useCallback((e) => {
+  const canScroll = canScrollFullPageRef.current;
+  const container = themeHitRef.current;
+  if (!container) return;
+
+  const scrollLeft = container.scrollLeft;
+  const scrollWidth = container.scrollWidth;
+  const clientWidth = container.clientWidth;
+
+  const windowScrollTop = window.scrollY;
+  const delta = e.deltaY;
+  const isScrollingDown = delta > 0;
+
+  const isAtLeftEnd = scrollLeft === 0;
+  const isAtRightEnd = scrollLeft + clientWidth >= scrollWidth - 1;
+
+  if (canScroll) {
+    if (!isScrollingDown) {
+      const firstSectionTop = firstSectionRef.current ? firstSectionRef.current.offsetTop : 0;
+      if (windowScrollTop <= firstSectionTop || isAtLeftEnd) {
+        setCanScrollFullPage(false);
+        canScrollFullPageRef.current = false;
+        return;
+      }
+    }
+    return;
+  }
+
+  const shouldPrevent =
+    (isScrollingDown && !isAtRightEnd) ||
+    (!isScrollingDown && !isAtLeftEnd);
+
+  if (shouldPrevent) {
+    e.preventDefault();
+    e.stopPropagation();
+    container.scrollLeft += delta;
+  }
+}, []);
+
+useEffect(() => {
+  const el = themeHitRef.current;
+  if (!el) return;
+
+  el.addEventListener('scroll', onScroll);
+  el.addEventListener('wheel', onWheelHandler, { passive: false });
+
+  if (window.innerWidth <= 700) {
+    el.removeEventListener('scroll', onScroll);
+    el.removeEventListener('wheel', onWheelHandler);
+    window.fullpage_api?.setAllowScrolling(true);
+    return;
+  }
+
+  setThemeRankWidth(el.offsetWidth);
+
+  return () => {
+    el.removeEventListener('scroll', onScroll);
+    el.removeEventListener('wheel', onWheelHandler);
+  };
+}, [windowWidth, isFullScreen, onScroll, onWheelHandler]);
+
+    // 📱 모바일 버전 TOP3 화면 조건부 풀페이지 (추가)
+        // 첫 번째 fullpage 섹션 DOM 참조용 ref
+        const firstSectionRef = useRef(null); 
+
+        // 타이머를 저장하는 ref (경고 메시지 페이드아웃, 잠금 해제용)
+        const fadeOutTimer = useRef(null);
+        const unlockTimer = useRef(null);
+
+        // 상태 변수를 ref로 저장해 최신 값 참조 가능하게 함
+        const canScrollFullPageRef = useRef(canScrollFullPage);
+        const visibleWarningRef = useRef(visibleWarning);
+        
+        // 모바일 화면 여부 상태 관리
+        const [isMobile, setIsMobile] = useState(window.innerWidth <= 700);
+
+        useEffect(() => {
+        // 화면 크기 변경 이벤트 등록 (리사이즈 대응)
+        const onResize = () => {
+            const width = window.innerWidth;
+            setIsMobile(width <= 700);
+            setIsFullScreen(width >= window.screen.width);
+        };
+
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+        }, []);
+    
+    // 상태 변경 시 ref 값도 동기화
+    useEffect(() => { canScrollFullPageRef.current = canScrollFullPage; }, [canScrollFullPage]);
+    useEffect(() => { visibleWarningRef.current = visibleWarning; }, [visibleWarning]);
+    // 모바일일 때만 wheel 이벤트 등록/해제
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        // 마우스 휠 이벤트 핸들러
+        const onWheel = (e) => {
+            const canScroll = canScrollFullPageRef.current; // 현재 풀페이지 스크롤 가능 여부
+            const visibleWarn = visibleWarningRef.current; // 경고 메시지 표시 여부
+            
+            // 내부 섹션 스크롤 정보
+            const container = scrollRef.current;
+            const themeScrollTop = container ? container.scrollTop : 0;
+            const themeScrollHeight = container ? container.scrollHeight : 0;
+            const themeClientHeight = container ? container.clientHeight : 0;
+            
+            // 전체 윈도우 스크롤 위치
+            const windowScrollTop = window.scrollY;
+
+            // 휠 이벤트 방향 판단
+            const delta = e.deltaY;
+            const isScrollingDown = delta > 0;
+
+            // 내부 섹션 최상단/최하단 도달 여부
+            const isThemeAtTop = themeScrollTop === 0;
+            const isThemeAtBottom = themeScrollTop + themeClientHeight >= themeScrollHeight - 1;
+
+            // 풀페이지 스크롤이 가능할 때 처리
+            if (canScroll) {
+                if (!isScrollingDown) {
+                    // 올라가는 방향일 때 fullpage 첫 섹션 상단 도달 체크
+                    const firstSectionTop = firstSectionRef.current ? firstSectionRef.current.offsetTop : 0;
+                    if (windowScrollTop <= firstSectionTop) { // 첫 섹션 최상단 도달하면 풀페이지 off (스크롤 잠금 해제)
+                        setCanScrollFullPage(false);
+                        return;
+                    }
+                    if (isThemeAtTop) { // 내부 섹션 최상단에 도달했을 때도 풀페이지 off
+                        setCanScrollFullPage(false);
+                        return;
+                    }
+                } // 풀페이지 스크롤 가능하고 조건에 안 걸리면 아무 동작 없이 종료
+                return;
+            }
+
+            // 경고 메시지 보일 때는 스크롤 이벤트 무시
+            if (visibleWarn) { e.preventDefault(); e.stopPropagation(); return; }
+
+            // 내부 섹션 범위 내 스크롤 이동 처리 필요 여부 판단
+            const shouldPrevent =
+                (isScrollingDown && !isThemeAtBottom) || // ↓ 아래로 스크롤 중 내부 섹션 끝 도달 전
+                (!isScrollingDown && !isThemeAtTop);// ↑ 위로 스크롤 중 내부 섹션 최상단 도달 전
+
+            if (shouldPrevent) // 내부 섹션 스크롤 처리 (이벤트 기본 동작 방지 및 내부 scrollTop 조절)
+                { e.preventDefault(); e.stopPropagation();  if (container) container.scrollTop += delta;
+            } else if ( isScrollingDown && isThemeAtBottom && !canScroll ) // 내부 섹션 끝에 도달했고 내려가는 중이며 풀페이지가 off 상태일 때
+                {e.preventDefault(); e.stopPropagation();// 풀페이지를 다시 켜기 위한 경고 표시
+
+                setVisibleWarning(true); setShowWarning(true);
+                
+                // 이전 타이머 초기화
+                if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+                if (unlockTimer.current) clearTimeout(unlockTimer.current);
+
+                // 1초 후 경고 메시지 숨기기
+                fadeOutTimer.current = setTimeout(() => { setShowWarning(false); }, 1000);
+
+                // 1.5초 후 풀페이지 스크롤 활성화
+                unlockTimer.current = setTimeout(() => { 
+                    setVisibleWarning(false); setCanScrollFullPage(true);
+                    canScrollFullPageRef.current = true; 
+                    
+                    // 풀페이지 활성화된 이후 다음 섹션으로 부드럽게 내려줌
+                    if (window.fullpage_api) { window.fullpage_api.moveSectionDown(); }
+                }, 1500);
+            }
+        };
+        
+        // wheel 이벤트 리스너 등록 (passive:false로 스크롤 제어 가능하게)
+        el.addEventListener('wheel', onWheel, { passive: false });
+
+        // 기존 타이머 정리 함수
+        const clearTimers = () => {
+            if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+            if (unlockTimer.current) clearTimeout(unlockTimer.current);
+        };
+
+        if (isMobile) {
+            // 모바일이면 wheel 이벤트 등록
+            el.addEventListener('wheel', onWheel, { passive: false });
+        } else {
+            // 모바일이 아니면 wheel 이벤트 제거 및 타이머 정리
+            el.removeEventListener('wheel', onWheel);
+            clearTimers();
+            window.fullpage_api?.setAllowScrolling(true);
+        }
+
+        // 컴포넌트 언마운트 시 이벤트 리스너 및 타이머 정리
+        return () => {
+            el.removeEventListener('wheel', onWheel);
+            clearTimers();
+        };
+    }, [isMobile]);
+
+    // ---------------------------------------------//
 
     // 새로운 아이템 로드
     const loadMoreGames = useCallback(async () => {
@@ -280,6 +568,18 @@ function ThemePage() {
         return () => observer.disconnect();
     }, [isAnimating]); // isAnimating 상태가 변경될 때마다 감지
 
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        // wheel 이벤트는 attachScrollControlEvents에 위임하지 않음!
+        const cleanup = attachScrollControlEvents(container, { wheel: false });
+
+        return () => {
+            if (cleanup) cleanup();
+        };
+    }, [isAnimating, showSignIn, showSignUp]);
+
     // 휠 이벤트로 가로 스크롤
     useEffect(() => {
         const handleWheel = (e) => {
@@ -394,8 +694,6 @@ function ThemePage() {
             animationFrame.current = requestAnimationFrame(smoothScroll);
         }
     };
-      
-
 
     // 로그인/회원가입 클릭 시 상태 변경
     const handleSignInClick = () => {
@@ -457,7 +755,7 @@ function ThemePage() {
             <div id="fullpage">
                 {/* 첫 번째 섹션 */}
                 <div className="section">
-                    <div className='theme_wrap'>
+                    <div className="theme_wrap section_1"> {/* 테마 구분용 */}
                         {/* 배경 이미지 */}
                         <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
@@ -468,19 +766,42 @@ function ThemePage() {
                         </header>
 
                         {/* 테마 콘텐츠 영역: 랭크 + TOP3 */}
-                        <div className='theme_hit_rank_floor'>
-                            <div className='theme_hit_rank'>
-                                <div className='theme_rank'>
+                        <div className={`theme_hit_rank_floor ${theme} ${!isFullScreen ? 'not_fullscreen' : ''} ${isMobile ? 'mobile_view' : ''}`}>
+                            <div className='theme_hit_rank' ref={scrollRef} >
+                                {visibleWarning && (
+                                    <div
+                                        style={{
+                                        position: 'fixed',           // fixed로 변경해서 화면 고정
+                                        top: '50%',                 // 화면 세로 중앙
+                                        left: '50%',                // 화면 가로 중앙
+                                        transform: 'translate(-50%, -50%)', // 정확한 중앙 정렬
+                                        background: 'rgba(0, 0, 0, 0.8)',
+                                        color: 'white',
+                                        padding: '8px 16px',
+                                        borderRadius: '8px',
+                                        opacity: showWarning ? 1 : 0,
+                                        transition: 'opacity 1s ease-out',
+                                        pointerEvents: 'none',
+                                        zIndex: 9999,              // 다른 요소 위에 표시되도록
+                                        }}
+                                    >
+                                        아래 섹션으로 넘어갑니다...
+                                    </div>
+                                    )}
+
+                                <div className='theme_rank' ref={themeRankRef} >
                                     <Ranking />
                                 </div>
 
-                                <div className='theme_hit'>
-                                    <div className={`theme_door_hit1 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
+                                <div className={`theme_hit ${!isFullScreen ? 'not_fullscreen' : ''}`} ref={themeHitRef} 
+                                style={{  
+                                width: themeHitWidth
+                                }}>
+                                    <div className={`theme_door_hit1 ${theme} ${shouldAnimate ? 'animate' : 'standard'} ${!isFullScreen ? 'not_fullscreen' : ''}`} >
                                         <div className='top1'>
                                             <div className='theme_door_top1'>
-                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
-
-                                                <p onClick={() => setShowGameInfo(true)}>TOP 1</p>
+                                                <img id='theme_door_top_img' className={`${!isFullScreen ? 'not_fullscreen' : ''}`} src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
+                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => setShowGameInfo(true)} >TOP 1</p>
                                             </div>
                                         </div>
 
@@ -512,12 +833,11 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className={`theme_door_hit2 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
+                                    <div className={`theme_door_hit2 ${theme} ${shouldAnimate ? 'animate' : 'standard'} ${!isFullScreen ? 'not_fullscreen' : ''}`} >
                                         <div className='top2'>
                                             <div className='theme_door_top2'>
-                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
-
-                                                <p onClick={() => setShowGameInfo(true)}>TOP 2</p>
+                                                <img id='theme_door_top_img' className={`${!isFullScreen ? 'not_fullscreen' : ''}`} src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
+                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => setShowGameInfo(true)} >TOP 2</p>
                                             </div>
                                         </div>
 
@@ -549,12 +869,11 @@ function ThemePage() {
                                         </div>
                                     </div>
 
-                                    <div className={`theme_door_hit3 ${theme} ${shouldAnimate ? 'animate' : 'standard'}`}>
+                                    <div className={`theme_door_hit3 ${theme} ${shouldAnimate ? 'animate' : 'standard'} ${!isFullScreen ? 'not_fullscreen' : ''}`}>
                                         <div className='top3'>
                                             <div className='theme_door_top3'>
-                                                <img id='theme_door_top_img' src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
-
-                                                <p onClick={() => setShowGameInfo(true)}>TOP 3</p>
+                                                <img id='theme_door_top_img' className={`${!isFullScreen ? 'not_fullscreen' : ''}`} src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)} />
+                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => setShowGameInfo(true)} >TOP 3</p>
                                             </div>
                                         </div>
 
@@ -584,14 +903,19 @@ function ThemePage() {
                                                 <p className='theme_top3_title'>미스터리모험</p>
                                             </div>
                                         </div>
-                                    </div>  
+                                    </div>
+                                    {/* 중간 구조물(계단 + 복도) */}
+                                            <div className='copy_floor'>
+                                                <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
+                                                <div className='hallway'></div>
+                                            </div>
                                 </div>
                             </div>
 
                             <img id='theme_down_arrow' src={downarrowImage} alt='theme_down_arrow' />
 
                             {/* 중간 구조물(계단 + 복도) */}
-                            <div className='floor'>
+                            <div className='floor' ref={floorRef}>
                                 <img id='theme_stairs' src={stairsImage} alt='theme_stairs' />
                                 <div className='hallway'></div>
                             </div>
@@ -601,7 +925,7 @@ function ThemePage() {
 
                 {/* 두 번째 섹션 - 테마 복도 */}
                 <div className="section" ref={section2Ref}>
-                    <div className='theme_wrap'>
+                    <div className="theme_wrap section_2"> {/* 테마 구분용 */}
                         {/* 배경 이미지 */}
                         <img id="theme_background" src={backgroundImage} alt="theme_background" />
 
