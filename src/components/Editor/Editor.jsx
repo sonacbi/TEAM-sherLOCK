@@ -204,17 +204,57 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         };
     }, [isReady]);
 
-    const addFrame = () => {
+        const addFrame = () => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
-        // 정면 (정사각형)
-        const front = new fabric.Rect({
+        const scale = 0.9;
+        const originX = 240; // 기준점 X
+        const originY = 100; // 기준점 Y
+
+        // 정면 정보
+        const front = {
+            left: originX,
+            top: originY,
+            width: 700 * scale,
+            height: 400 * scale,
+        };
+        const ft = { x: front.left, y: front.top };
+        const fb = { x: front.left, y: front.top + front.height };
+        const ftR = { x: front.left + front.width, y: front.top };
+        const fbR = { x: front.left + front.width, y: front.top + front.height };
+
+        // 바닥의 고정된 바깥쪽 좌표
+        const fixedFloorLeft = { x: -320, y: 800 };
+        const fixedFloorRight = { x: 1420, y: 800 };
+
+        // 바닥은 정면 하단과 바깥쪽 고정점으로 구성
+        const floor = [
+            fixedFloorLeft,
+            fb,
+            fbR,
+            fixedFloorRight,
+        ];
+
+        // 바닥 좌표에서 fb와 fixedFloorLeft 사이의 y차이로 천장의 y값 보정
+        const floorOffsetY = fixedFloorLeft.y - fb.y;
+
+        const ceilingOuterLeft = {
+            x: fixedFloorLeft.x,
+            y: ft.y - floorOffsetY,
+        };
+        const ceilingOuterRight = {
+            x: fixedFloorRight.x,
+            y: ft.y - floorOffsetY,
+        };
+
+        // — fabric 객체 생성 —
+        const frontRect = new fabric.Rect({
             ...controlStyle,
-            left: 200,
-            top: 100,
-            width: 700,
-            height: 400,
+            left: front.left,
+            top: front.top,
+            width: front.width,
+            height: front.height,
             fill: 'rgba(255, 0, 0, 0.2)',
             stroke: 'red',
             strokeWidth: 2,
@@ -222,13 +262,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             hoverCursor: 'default',
         });
 
-        // 오른쪽 벽면 (사변형 - perspective)
-        const right = new fabric.Polygon([
-            { x: 900, y: 100 },  // 위쪽, 왼쪽 (top-left)
-            { x: 1120, y: -70 },  // 위쪽, 오른쪽 (top-right)
-            { x: 1120, y: 630 },  // 아래쪽, 오른쪽 (bottom-right)
-            { x: 900, y: 500 },  // 아래쪽, 왼쪽 (bottom-left)
-        ], {
+        const right = new fabric.Polygon([ftR, ceilingOuterRight, fixedFloorRight, fbR], {
             ...controlStyle,
             fill: 'rgba(0, 255, 0, 0.2)',
             stroke: 'green',
@@ -237,13 +271,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             hoverCursor: 'default',
         });
 
-        // 왼쪽 벽면
-        const left = new fabric.Polygon([
-            { x: 200, y: 100 },
-            { x: -20, y: -70 },
-            { x: -20, y: 630 },
-            { x: 200, y: 500 },
-        ], {
+        const left = new fabric.Polygon([ft, ceilingOuterLeft, fixedFloorLeft, fb], {
             ...controlStyle,
             fill: 'rgba(0, 0, 255, 0.2)',
             stroke: 'blue',
@@ -252,13 +280,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             hoverCursor: 'default',
         });
 
-        // 바닥면
-        const bottom = new fabric.Polygon([
-            { x: -320, y: 800 }, // y축 수정하기
-            { x: 200, y: 500 },
-            { x: 900, y: 500 },
-            { x: 1420, y: 800 },
-        ], {
+        const bottom = new fabric.Polygon(floor, {
             ...controlStyle,
             fill: 'rgba(255, 255, 0, 0.2)',
             stroke: 'orange',
@@ -267,13 +289,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             hoverCursor: 'default',
         });
 
-        // 천장
-        const top = new fabric.Polygon([
-            { x: -20, y: -70 },     // 왼쪽 뒤쪽 (left-top outer)
-            { x: 200, y: 100 },    // 왼쪽 앞쪽 (front-left-top)
-            { x: 900, y: 100 },    // 오른쪽 앞쪽 (front-right-top)
-            { x: 1120, y: -70 },    // 오른쪽 뒤쪽 (right-top outer)
-        ], {
+        const top = new fabric.Polygon([ceilingOuterLeft, ft, ftR, ceilingOuterRight], {
             ...controlStyle,
             fill: 'rgba(255, 0, 255, 0.2)',
             stroke: 'purple',
@@ -282,9 +298,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             hoverCursor: 'default',
         });
 
-        // 한 번에 추가
-        canvas.add(top, bottom, right, left, front);
-
+        canvas.add(top, bottom, right, left, frontRect);
         canvas.renderAll();
     };
 
