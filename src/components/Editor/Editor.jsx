@@ -31,11 +31,11 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile }) {
         canvasInstance.current = canvas;
 
         // 초기 textbox 추가
-        const textbox = new fabric.Textbox('tkffuwntpdy...', {
+        const textbox = new fabric.Textbox('텍스트를 입력하세요.', {
             ...controlStyle,
             fontSize: 50,
             fill: '#333',
-            width: 300,
+            width: 450,
             editable: true,
         });
 
