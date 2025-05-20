@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger }) {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
@@ -71,6 +71,12 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile }) {
     useEffect(() => {
         if (isReady) addShape();
     }, [addShapeTrigger]);
+
+    useEffect(() => {
+        if (isReady && addFrameTrigger) {
+            addFrame();
+        }
+    }, [addFrameTrigger]);
 
     const addTextBox = () => {
         const canvas = canvasInstance.current;
@@ -197,6 +203,91 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile }) {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [isReady]);
+
+    const addFrame = () => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        // 정면 (정사각형)
+        const front = new fabric.Rect({
+            ...controlStyle,
+            left: 200,
+            top: 100,
+            width: 700,
+            height: 400,
+            fill: 'rgba(255, 0, 0, 0.2)',
+            stroke: 'red',
+            strokeWidth: 2,
+            selectable: false,
+            hoverCursor: 'default',
+        });
+
+        // 오른쪽 벽면 (사변형 - perspective)
+        const right = new fabric.Polygon([
+            { x: 900, y: 100 },  // 위쪽, 왼쪽 (top-left)
+            { x: 1120, y: -70 },  // 위쪽, 오른쪽 (top-right)
+            { x: 1120, y: 630 },  // 아래쪽, 오른쪽 (bottom-right)
+            { x: 900, y: 500 },  // 아래쪽, 왼쪽 (bottom-left)
+        ], {
+            ...controlStyle,
+            fill: 'rgba(0, 255, 0, 0.2)',
+            stroke: 'green',
+            strokeWidth: 2,
+            selectable: false,
+            hoverCursor: 'default',
+        });
+
+        // 왼쪽 벽면
+        const left = new fabric.Polygon([
+            { x: 200, y: 100 },
+            { x: -20, y: -70 },
+            { x: -20, y: 630 },
+            { x: 200, y: 500 },
+        ], {
+            ...controlStyle,
+            fill: 'rgba(0, 0, 255, 0.2)',
+            stroke: 'blue',
+            strokeWidth: 2,
+            selectable: false,
+            hoverCursor: 'default',
+        });
+
+        // 바닥면
+        const bottom = new fabric.Polygon([
+            { x: -320, y: 800 }, // y축 수정하기
+            { x: 200, y: 500 },
+            { x: 900, y: 500 },
+            { x: 1420, y: 800 },
+        ], {
+            ...controlStyle,
+            fill: 'rgba(255, 255, 0, 0.2)',
+            stroke: 'orange',
+            strokeWidth: 2,
+            selectable: false,
+            hoverCursor: 'default',
+        });
+
+        // 천장
+        const top = new fabric.Polygon([
+            { x: -20, y: -70 },     // 왼쪽 뒤쪽 (left-top outer)
+            { x: 200, y: 100 },    // 왼쪽 앞쪽 (front-left-top)
+            { x: 900, y: 100 },    // 오른쪽 앞쪽 (front-right-top)
+            { x: 1120, y: -70 },    // 오른쪽 뒤쪽 (right-top outer)
+        ], {
+            ...controlStyle,
+            fill: 'rgba(255, 0, 255, 0.2)',
+            stroke: 'purple',
+            strokeWidth: 2,
+            selectable: false,
+            hoverCursor: 'default',
+        });
+
+        // 한 번에 추가
+        canvas.add(top, bottom, right, left, front);
+
+        canvas.renderAll();
+    };
+
 
     useEffect(() => {
         const canvas = canvasInstance.current;

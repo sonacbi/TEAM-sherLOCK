@@ -17,6 +17,7 @@ function EditorPage() {
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState(0);
     const [addImageFile, setAddImageFile] = useState(null);
+    const [addFrameTrigger, setAddFrameTrigger] = useState(0);
     const fileInputRef = useRef(null);
 
     const navigate = useNavigate();
@@ -38,6 +39,10 @@ function EditorPage() {
         if (file) {
             setAddImageFile(file);
         }
+    };
+
+    const handleAddFrame = () => {
+        setAddFrameTrigger(Date.now());
     };
 
     return (
@@ -85,6 +90,11 @@ function EditorPage() {
                             />
                         </div>
 
+                        <div className='picture_area' onClick={handleAddFrame}>
+                            <img id='frame_icon' src={picture_icon} alt='picture_icon' />
+                            <p>프레임</p>
+                        </div>
+
                         <div className='timer_area'>
                             <img id='timer_icon' src={timer_icon} alt='timer_icon' />
                             <p>타이머</p>
@@ -109,7 +119,7 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} />
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger}/>
                         </div>
                     </div>
 
