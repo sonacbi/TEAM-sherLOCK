@@ -19,8 +19,7 @@ import gallery1_img from '../../assets/images/GameInfo/gallery1_img.png';
 import gallery2_img from '../../assets/images/GameInfo/gallery2_img.png';
 import gallery3_img from '../../assets/images/GameInfo/gallery3_img.png';
 
-function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage }) {
-  const {game, roomNumber} = gameInfo;
+function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLoadingMessage }) {
   // URL 파라미터에서 theme 값 가져오기
   const { theme } = useParams();
 
@@ -91,7 +90,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
           <div className={`GameInfo_room ${theme}`}>
             <img id='GameInfo_room_img' src={GameInfo_roomImage} alt='GameInfo_room_img' />
             {/* <p>401</p> */}
-          <p>{roomNumber}</p>
+            <p>{roomNumber}</p>
             <h5 onClick={handleExitClick}>EXIT</h5>
           </div>
 
@@ -99,7 +98,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
             <div className='thumbnail_basic_info'>
               <div className='thumbnail'>
                 {/* <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' /> */}
-                {game ? <img id='thumbnail_img' src={`../server/games/${game.game_id}/${game.thumbnail}`} alt='thumbnail_img' />
+                {gameInfo ? <img id='thumbnail_img' src={`../server/games/${gameInfo.game_id}/${gameInfo.thumbnail}`} alt='thumbnail_img' />
                 : <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' />}
               </div>
 
@@ -107,7 +106,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
                 <div className='door_title'>
                   <h4>제목:</h4>
                   {/* <h4>괴물</h4> */}
-                  <h4>{game?.title ?? '괴물'}</h4>
+                  <h4>{gameInfo?.title ?? '괴물'}</h4>
                 </div>
 
                 <div className='door_rating'>
@@ -121,7 +120,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
 
                   <div className='door_difficulty_img'>
                     {/* {Array.from({ length: GameInfo_difficulty }).map((_, index) => ( */}
-                    {Array.from({ length: game?.difficulty ?? GameInfo_difficulty }).map((_, index) => (
+                    {Array.from({ length: gameInfo?.difficulty ?? GameInfo_difficulty }).map((_, index) => (
                       <img 
                           key={index}
                           id='GameInfo_difficulty' 
@@ -135,7 +134,7 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
                 <div className='door_estimated_time'>
                   <h4>예상 소요 시간:</h4>
                   {/* <h4>80분</h4> */}
-                  <h4>{game?.playTime ?? 80}분</h4>
+                  <h4>{gameInfo?.playTime ?? 80}분</h4>
                 </div>
 
                 <div className='door_creator'>
@@ -146,13 +145,13 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
                 <div className='door_date_created'>
                   <h4>제작날짜:</h4>
                   {/* <h4>2025-05-08</h4> */}
-                  <h4>{game?.created_at.slice(0,10) ?? '2025-05-08'}</h4>
+                  <h4>{gameInfo?.created_at.slice(0,10) ?? '2025-05-08'}</h4>
                 </div>
 
                 <div className='door_play_count'>
                   <img id='player_icon' src={player_icon} alt='player_icon' />
                   {/* <h4>20,450</h4> */}
-                  <h4>{game?.play_count ?? '20,450'}</h4>
+                  <h4>{gameInfo?.play_count ?? '20,450'}</h4>
                 </div>
               </div>
             </div>
@@ -198,9 +197,9 @@ function GameInfo({ gameInfo, setShowGameInfo, setShowLoading, setLoadingMessage
                       가볍게, 재미있게 즐겨주세요!
                       즐거운 플레이 되시길 바랍니다
                       </p>
-                    {/* <p>
-                      {game?.description ?? '설명입니다'}
-                    </p> */}
+                      {/* <p>
+                        {gameInfo?.description ?? '설명입니다'}
+                      </p> */}
                   </div>
                 )}
 

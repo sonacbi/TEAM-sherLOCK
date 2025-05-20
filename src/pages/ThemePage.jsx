@@ -97,6 +97,7 @@ function ThemePage() {
     const timeoutRef = useRef(null); // 타이머 ID 저장용
 
     const [gameInfo, setGameInfo] = useState(null);
+    const [roomNumberState, setRoomNumberState] = useState('TOP');
 
     // 테마별 이미지 매핑
     const backgroundMap = {
@@ -801,7 +802,7 @@ useEffect(() => {
                                         <div className='top1'>
                                             <div className='theme_door_top1'>
                                                 <img id='theme_door_top_img' className={`${!isFullScreen ? 'not_fullscreen' : ''}`} src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
-                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => setShowGameInfo(true)} >TOP 1</p>
+                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => { setRoomNumberState('TOP 1'); setShowGameInfo(true) }} >TOP 1</p>
                                             </div>
                                         </div>
 
@@ -837,7 +838,7 @@ useEffect(() => {
                                         <div className='top2'>
                                             <div className='theme_door_top2'>
                                                 <img id='theme_door_top_img' className={`${!isFullScreen ? 'not_fullscreen' : ''}`} src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)}/>
-                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => setShowGameInfo(true)} >TOP 2</p>
+                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => { setRoomNumberState('TOP 2'); setShowGameInfo(true) }} >TOP 2</p>
                                             </div>
                                         </div>
 
@@ -873,7 +874,7 @@ useEffect(() => {
                                         <div className='top3'>
                                             <div className='theme_door_top3'>
                                                 <img id='theme_door_top_img' className={`${!isFullScreen ? 'not_fullscreen' : ''}`} src={topImage} alt='theme_door_top_img' onClick={() => setShowGameInfo(true)} />
-                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => setShowGameInfo(true)} >TOP 3</p>
+                                                <p className ={`${!isFullScreen ? 'not_fullscreen' : ''}`} onClick={() => { setRoomNumberState('TOP 3'); setShowGameInfo(true) }} >TOP 3</p>
                                             </div>
                                         </div>
 
@@ -945,8 +946,8 @@ useEffect(() => {
                                             {selectedSort.current == FilterSetting.rating_desc && "평점순 (↑)"}
                                             {selectedSort.current == FilterSetting.rating_asc && "평점순 (↓)"}
                                             {selectedSort.current == FilterSetting.latest_desc && "최신순"}
-                                            {selectedSort.current == FilterSetting.play_desc && "플레이순 (↓)"}
-                                            {selectedSort.current == FilterSetting.play_asc && "플레이순 (↑)"}
+                                            {selectedSort.current == FilterSetting.play_desc && "플레이순 (↑)"}
+                                            {selectedSort.current == FilterSetting.play_asc && "플레이순 (↓)"}
                                         </h1>
                                     </div>
 
@@ -966,14 +967,14 @@ useEffect(() => {
 
                                 <div className={`sort_type ${theme} ${showSortType ? 'visible' : 'hidden'}`}>
                                     <div className='sort_type1_wrap'>
-                                        <h2 className={`${FilterSetting.rating_desc}`} onClick={() => handleSelectSort(FilterSetting.rating_desc)}>1. 평점순 (↓)</h2>
-                                        <h2 className={`${FilterSetting.rating_asc}`} onClick={() => handleSelectSort(FilterSetting.rating_asc)}>2. 평점순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.rating_desc}`} onClick={() => handleSelectSort(FilterSetting.rating_desc)}>1. 평점순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.rating_asc}`} onClick={() => handleSelectSort(FilterSetting.rating_asc)}>2. 평점순 (↓)</h2>
                                         <h2 className={`${FilterSetting.view_desc}`} onClick={() => handleSelectSort(FilterSetting.latest_desc)}>3. 최신순</h2>
                                     </div>
 
                                     <div className='sort_type2_wrap'>
-                                        <h2 className={`${FilterSetting.play_desc}`} onClick={() => handleSelectSort(FilterSetting.play_desc)}>4. 플레이순 (↓)</h2>
-                                        <h2 className={`${FilterSetting.play_asc}`} onClick={() => handleSelectSort(FilterSetting.play_asc)}>5. 플레이순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.play_desc}`} onClick={() => handleSelectSort(FilterSetting.play_desc)}>4. 플레이순 (↑)</h2>
+                                        <h2 className={`${FilterSetting.play_asc}`} onClick={() => handleSelectSort(FilterSetting.play_asc)}>5. 플레이순 (↓)</h2>
                                     </div>
                                 </div>
                             </div>
@@ -1003,12 +1004,12 @@ useEffect(() => {
                                             >
                                                 <div className="theme_room">
                                                     <div className='room'>
-                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' onClick={() => {setGameInfo({game: data, roomNumber: roomNumber}); setShowGameInfo(true)}}/>
-                                                        <p onClick={() => {setGameInfo({game: data, roomNumber: roomNumber}); setShowGameInfo(true)}}>{roomNumber}</p>
+                                                        <img id='theme_room_img' src={roomImage} alt='theme_room_img' onClick={() => {setGameInfo(data); setRoomNumberState(roomNumber); setShowGameInfo(true)}}/>
+                                                        <p onClick={() => {setGameInfo(data); setRoomNumberState(roomNumber); setShowGameInfo(true)}}>{roomNumber}</p>
                                                     </div>
                                                 </div>
 
-                                                <div className='theme_door' onClick={() => {setGameInfo({game: data, roomNumber: roomNumber}); setShowGameInfo(true)}}>
+                                                <div className='theme_door' onClick={() => {setGameInfo(data); setRoomNumberState(roomNumber); setShowGameInfo(true)}}>
                                                     <img
                                                         id='theme_door_img'
                                                         src={`../../server/games/${data.game_id}/${data.thumbnail}`}
@@ -1060,7 +1061,7 @@ useEffect(() => {
             {showSignUp && <Sign_up onClose={handleCloseSignUp} onSignInClick={handleSignInClick} />}
 
             {/* 게임 정보 모달 */}
-            {showGameInfo && <GameInfo gameInfo={gameInfo} setShowGameInfo={setShowGameInfo} setShowLoading={setShowLoading} setLoadingMessage={setLoadingMessage} />}
+            {showGameInfo && <GameInfo gameInfo={gameInfo} roomNumber={roomNumberState} setShowGameInfo={setShowGameInfo} setShowLoading={setShowLoading} setLoadingMessage={setLoadingMessage} />}
 
             {/* 로딩 모달 */}
             {showLoading && <Loading message={loadingMessage} />}
