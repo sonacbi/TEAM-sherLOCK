@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { createRoomFrame } from '../../../modules/handelPolygon';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, roomFrameState }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, roomFrameState, frontFrameState, edgeFrameState }) {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
+    const [frontController, setFrontController] = useState(null);
 
     // 공통 스타일
     const controlStyle = {
@@ -208,17 +209,46 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         };
     }, [isReady]);
 
-        const addFrame = () => {
+    const addFrame = () => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
-
-        const roomFrame = createRoomFrame(...roomFrameState);
-        roomFrame.forEach((data) => {
-            canvas.add(data);
-        })
-
+        
+        const target1 = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+        const target2 = canvas.getObjects().find(obj => obj.name === 'SherLockFrontController');
+        // setFrontController(canvas.getObjects().find(obj => obj.name === 'SherLockFrontController'))
+        // console.log(frontController)
+        if (target1) canvas.remove(target1);
+        if (target2) canvas.remove(target2);
+        // if (frontController) canvas.remove(frontController);
+        
+        // if (frontController?.left && frontController?.top && frontController?.width && frontController?.height) {
+            
+        // }
+        const { frontFrame, groupFrame } = createRoomFrame(
+            ...frontFrameState,
+            // frontController?.left,
+            // frontController?.top,
+            // frontController?.width,
+            // frontController?.height,
+            ...edgeFrameState
+        );
+        // const room = new fabric.Group(roomFrame, {
+        //     name: "room"
+        // })
+        
+        canvas.add(frontFrame);
+        canvas.add(groupFrame);
+        
         canvas.renderAll();
     };
+
+    useEffect(() => {
+        addFrame();
+    }, [frontFrameState, edgeFrameState]);
+
+    // useEffect(() => {
+
+    // }, [])
 
 
     useEffect(() => {

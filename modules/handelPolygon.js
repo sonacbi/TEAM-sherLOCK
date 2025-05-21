@@ -1,27 +1,30 @@
 import * as fabric from 'fabric';
 
 const controlStyle = {
-        transparentCorners: false,
-        borderColor: '#A9DB78',
-        editingBorderColor: '#A9DB78',
-        selectionColor: 'rgba(128, 128, 128, 0.3)',
-        cornerStrokeColor: '#A9DB78',
-        cornerColor: 'white',
-        cornerStyle: 'circle',
-        borderScaleFactor: 2,
-    };
+    transparentCorners: false,
+    borderColor: '#A9DB78',
+    editingBorderColor: '#A9DB78',
+    selectionColor: 'rgba(128, 128, 128, 0.3)',
+    cornerStrokeColor: '#A9DB78',
+    cornerColor: 'white',
+    cornerStyle: 'circle',
+    borderScaleFactor: 2,
+    strokeWidth: 2,
+    selectable: false,
+    hoverCursor: 'default',
+};
 
 function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
     const frameFullWidth = 1098;
     const frameFullHeight = 648;
     
     const frontPosition = {
-        left: fpl,
-        top: fpt
+        left: fpl || 220,
+        top: fpt || 120
     }
     const frontSize = {
-        width: frontPosition.left + (fsw),
-        height: frontPosition.top + (fsh)
+        width: frontPosition.left + (fsw || 440),
+        height: frontPosition.top + (fsh || 300)
     }
 
     const frameEdgeWeight = {
@@ -30,7 +33,6 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         right: fewr,
         bottom: fewb
     };
-    console.log(frontPosition)
     const frameEdge = (fpl == undefined && fpt == undefined && fsw == undefined && fsh == undefined && fewt == undefined && fewl == undefined && fewr == undefined && fewb == undefined) ? [
         { x: frontPosition.left - frameEdgeWeight.left,                     y: frontPosition.top - frameEdgeWeight.top },
         { x: frontPosition.left + frontSize.width + frameEdgeWeight.right,  y: frontPosition.top - frameEdgeWeight.top },
@@ -53,10 +55,17 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         ...frontPosition,
         ...frontSize,
+        fill: 'rgba(0, 0, 0, 0)',
+    });
+    const frontController = new fabric.Rect({
+        ...controlStyle,
+        ...frontPosition,
+        ...frontSize,
         fill: 'rgba(255, 0, 0, 0.2)',
         stroke: 'red',
-        strokeWidth: 2,
-        hoverCursor: 'default',
+        selectable: true,
+        hoverCursor: null,
+        name: "SherLockFrontController"
     });
 
     // (사변형 - perspective)
@@ -70,9 +79,6 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(255, 0, 255, 0.2)',
         stroke: 'purple',
-        strokeWidth: 2,
-        // selectable: false,
-        hoverCursor: 'default',
     });
     
     // 왼쪽 벽면
@@ -85,9 +91,6 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(0, 0, 255, 0.2)',
         stroke: 'blue',
-        strokeWidth: 2,
-        // selectable: false,
-        hoverCursor: 'default',
     });
     
     // 오른쪽 벽면
@@ -100,9 +103,6 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(0, 255, 0, 0.2)',
         stroke: 'green',
-        strokeWidth: 2,
-        // selectable: false,
-        hoverCursor: 'default',
     });
     
     // 바닥면
@@ -115,12 +115,14 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(255, 255, 0, 0.2)',
         stroke: 'orange',
-        strokeWidth: 2,
-        // selectable: false,
-        hoverCursor: 'default',
     });
 
-    return [front, top, left, right, bottom];
+    const group = new fabric.Group([front, top, left, right, bottom], {
+        ...controlStyle,
+        name: "SherLockRoomFrame"
+    })
+
+    return { groupFrame: group, frontFrame: frontController };
 }
 
 export { createRoomFrame }
