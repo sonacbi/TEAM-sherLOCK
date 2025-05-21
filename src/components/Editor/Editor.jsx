@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { createRoomFrame } from '../../../modules/handelPolygon';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, roomFrameState, frontFrameState, edgeFrameState }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState }) {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
-    const [frontController, setFrontController] = useState(null);
-
+    const [angle, setAngle] = useState(0);
+    const [position, setPosition] = useState([220, 120]);
+    const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
+    
     // 공통 스타일
     const controlStyle = {
         transparentCorners: false,
@@ -19,6 +21,29 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         cornerStyle: 'circle',
         borderScaleFactor: 2,
     };
+
+    const roomController = new fabric.Rect({
+        ...controlStyle,
+        left: 220,
+        top: 120,
+        fill: 'rgba(255, 0, 0, 0.2)',
+        strokeWidth: 2,
+        stroke: 'red',
+        name: "SherLockFrontController",
+    });
+    roomController.width = roomController.left + 440;
+    roomController.height = roomController.top + 300;
+    roomController.on('rotating', () => {
+        setAngle(roomController.angle);
+        console.log('aa', roomController.angle)
+    });
+    roomController.on('moving', () => {
+        setPosition([roomController.left, roomController.top]);
+    });
+    roomController.on('scaling', () => {
+        setPosition([roomController.left, roomController.top]);
+        setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
+    });
 
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
@@ -75,10 +100,10 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     }, [addShapeTrigger]);
 
     useEffect(() => {
-        if (isReady && addFrameTrigger) {
+        if (isReady) {
             addFrame();
         }
-    }, [addFrameTrigger]);
+    }, [addFrameTrigger, angle, position, size, edgeFrameState]);
 
     const addTextBox = () => {
         const canvas = canvasInstance.current;
@@ -214,42 +239,24 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         if (!canvas) return;
         
         const target1 = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
-        const target2 = canvas.getObjects().find(obj => obj.name === 'SherLockFrontController');
-        // setFrontController(canvas.getObjects().find(obj => obj.name === 'SherLockFrontController'))
-        // console.log(frontController)
         if (target1) canvas.remove(target1);
-        if (target2) canvas.remove(target2);
-        // if (frontController) canvas.remove(frontController);
+        // const bounds = roomController.getBoundingRect();
+        // console.log(bounds)
         
-        // if (frontController?.left && frontController?.top && frontController?.width && frontController?.height) {
-            
-        // }
-        const { frontFrame, groupFrame } = createRoomFrame(
-            ...frontFrameState,
-            // frontController?.left,
-            // frontController?.top,
-            // frontController?.width,
-            // frontController?.height,
+        const roomFrame = createRoomFrame(
+            angle,
+            ...position,
+            ...size,
             ...edgeFrameState
         );
-        // const room = new fabric.Group(roomFrame, {
-        //     name: "room"
-        // })
-        
-        canvas.add(frontFrame);
-        canvas.add(groupFrame);
+        canvas.add(roomFrame);
+        if (!canvas.getObjects().find(obj => obj.name === 'SherLockFrontController')) {
+            canvas.add(roomController);
+            canvas.setActiveObject(roomController);
+        }
         
         canvas.renderAll();
     };
-
-    useEffect(() => {
-        addFrame();
-    }, [frontFrameState, edgeFrameState]);
-
-    // useEffect(() => {
-
-    // }, [])
-
 
     useEffect(() => {
         const canvas = canvasInstance.current;

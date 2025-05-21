@@ -19,10 +19,8 @@ function EditorPage() {
     const [addImageFile, setAddImageFile] = useState(null);
     const [addFrameTrigger, setAddFrameTrigger] = useState(0);
 
-    const roomFrameStateOrigin = [220, 120, 440, 300, 170, 240, 240, 150];
-    const [roomFrameState, setRoomFrameState] = useState(roomFrameStateOrigin);
-    const [frontFrameState, setFrontFrameState] = useState([220, 120, 440, 300]);
-    const [edgeFrameState, setEdgeFrameState] = useState([170, 240, 240, 150]);
+    const roomFrameStateOrigin = [220, 120, 440, 300, 170, 240, 240, 150]; // 원본
+    const [edgeFrameState, setEdgeFrameState] = useState([170, 240, 240, 150]); // 외곽 모서리
 
     const fileInputRef = useRef(null);
 
@@ -51,13 +49,6 @@ function EditorPage() {
         setAddFrameTrigger(Date.now());
     };
 
-    const handleFrontFrameState = (event, index) => {
-        setFrontFrameState(prev => {
-            const newArray = [...prev];
-            newArray[index] = Number(event.target.value);
-            return newArray;
-        });
-    };
     const handleEdgeFrameState = (event, index) => {
         setEdgeFrameState(prev => {
             const newArray = [...prev];
@@ -133,21 +124,17 @@ function EditorPage() {
                     </div>
 
                     <div className='tool_fine_tuning'>
-                        x: <input id="roomFrame0" type="range" min={1} max={330} value={frontFrameState[0]} step={1} onChange={event => handleFrontFrameState(event, 0)}/> {frontFrameState[0]} <br />
-                        y: <input id="roomFrame0" type="range" min={1} max={175} value={frontFrameState[1]} step={1} onChange={event => handleFrontFrameState(event, 1)}/> {frontFrameState[1]} <br />
-                        width: <input id="roomFrame0" type="range" min={1} max={440} value={frontFrameState[2]} step={1} onChange={event => handleFrontFrameState(event, 2)}/> {frontFrameState[2]} <br />
-                        height: <input id="roomFrame0" type="range" min={1} max={330} value={frontFrameState[3]} step={1} onChange={event => handleFrontFrameState(event, 3)}/> {frontFrameState[3]} <br />
-                        top: <input id="roomFrame0" type="range" min={120} max={330} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
-                        left: <input id="roomFrame0" type="range" min={220} max={330} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
-                        right: <input id="roomFrame0" type="range" min={220} max={330} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
-                        bottom: <input id="roomFrame0" type="range" min={110} max={330} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
+                        top: <input id="roomFrame0" type="range" min={120} max={800} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
+                        left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
+                        right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
+                        bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
                     </div>
                 </div>
 
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} roomFrameState={roomFrameState} frontFrameState={frontFrameState} edgeFrameState={edgeFrameState}/>
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState}/>
                         </div>
                     </div>
 

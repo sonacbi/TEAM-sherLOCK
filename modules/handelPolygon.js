@@ -14,25 +14,30 @@ const controlStyle = {
     hoverCursor: 'default',
 };
 
-function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
-    const frameFullWidth = 1098;
-    const frameFullHeight = 648;
+function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
+    // 최대 길이
+    const frameMaxWidth = 1098;
+    const frameMaxHeight = 648;
     
+    // 앞면 위치
     const frontPosition = {
         left: fpl || 220,
         top: fpt || 120
     }
+    // 앞면 크기
     const frontSize = {
-        width: frontPosition.left + (fsw || 440),
-        height: frontPosition.top + (fsh || 300)
+        width: fsw ? (fsw || 50) : frontPosition.left + 440,
+        height: fsh ? (fsh || 50) : frontPosition.top + 300
     }
 
+    // 방 프레임 가중치?
     const frameEdgeWeight = {
         top: fewt,
         left: fewl,
         right: fewr,
         bottom: fewb
     };
+    // 외곽 모서리
     const frameEdge = (fpl == undefined && fpt == undefined && fsw == undefined && fsh == undefined && fewt == undefined && fewl == undefined && fewr == undefined && fewb == undefined) ? [
         { x: frontPosition.left - frameEdgeWeight.left,                     y: frontPosition.top - frameEdgeWeight.top },
         { x: frontPosition.left + frontSize.width + frameEdgeWeight.right,  y: frontPosition.top - frameEdgeWeight.top },
@@ -44,41 +49,32 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         { x: 220 + 660 + frameEdgeWeight.right, y: 120 + 420 + frameEdgeWeight.bottom },
         { x: 220 - frameEdgeWeight.left,        y: 120 + 420 + frameEdgeWeight.bottom }
     ];
-    // const frameEdge = [
-    //     { x: frontPosition.left - frameEdgeWeight.left,                     y: frontPosition.top - frameEdgeWeight.top },
-    //     { x: frontPosition.left + frontSize.width + frameEdgeWeight.right,  y: frontPosition.top - frameEdgeWeight.top },
-    //     { x: frontPosition.left + frontSize.width + frameEdgeWeight.right,  y: frontPosition.top + frontSize.height + frameEdgeWeight.bottom },
-    //     { x: frontPosition.left - frameEdgeWeight.left,                     y: frontPosition.top + frontSize.height + frameEdgeWeight.bottom }
-    // ];
     
+    // 사각형
+    // 앞면
     const front = new fabric.Rect({
         ...controlStyle,
         ...frontPosition,
         ...frontSize,
         fill: 'rgba(0, 0, 0, 0)',
-    });
-    const frontController = new fabric.Rect({
-        ...controlStyle,
-        ...frontPosition,
-        ...frontSize,
-        fill: 'rgba(255, 0, 0, 0.2)',
-        stroke: 'red',
-        selectable: true,
-        hoverCursor: null,
-        name: "SherLockFrontController"
+        name: "SherLockRoomFrame",
     });
 
-    // (사변형 - perspective)
-    // 천장
+
+    // 여기서부터 사변형(perspective)
+    // ↖↗↘↙ 순으로 도형을 그리게 해놨다
+
+    // 천장면
     const top = new fabric.Polygon([
-        frameEdge[0],     // ↖
-        frameEdge[1],    // ↗
-        { x: front.left + front.width, y: front.top },     // ↘
-        { x: front.left, y: front.top },     // ↙
+        frameEdge[0],
+        frameEdge[1],
+        { x: front.left + front.width, y: front.top },
+        { x: front.left, y: front.top },
     ], {
         ...controlStyle,
         fill: 'rgba(255, 0, 255, 0.2)',
         stroke: 'purple',
+        name: "SherLockRoomFrame",
     });
     
     // 왼쪽 벽면
@@ -91,6 +87,7 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(0, 0, 255, 0.2)',
         stroke: 'blue',
+        name: "SherLockRoomFrame",
     });
     
     // 오른쪽 벽면
@@ -103,6 +100,7 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(0, 255, 0, 0.2)',
         stroke: 'green',
+        name: "SherLockRoomFrame",
     });
     
     // 바닥면
@@ -115,14 +113,16 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...controlStyle,
         fill: 'rgba(255, 255, 0, 0.2)',
         stroke: 'orange',
+        name: "SherLockRoomFrame",
     });
 
+    // 그룹화
     const group = new fabric.Group([front, top, left, right, bottom], {
         ...controlStyle,
-        name: "SherLockRoomFrame"
+        name: "SherLockRoomFrame",
     })
 
-    return { groupFrame: group, frontFrame: frontController };
+    return group;
 }
 
 export { createRoomFrame }
