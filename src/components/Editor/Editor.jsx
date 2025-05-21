@@ -208,7 +208,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         };
     }, [isReady]);
 
-    const addFrame = () => {
+        const addFrame = () => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
