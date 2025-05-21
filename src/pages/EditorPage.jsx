@@ -6,6 +6,7 @@ import '../styles/EditorPage.css';
 
 import logo from '../assets/images/logo/footer_logo.png'
 import save_icon from '../assets/images/EditorPage_img/save_icon.png';
+import frame_icon from '../assets/images/EditorPage_img/frame_icon.png';
 import text_icon from '../assets/images/EditorPage_img/text_icon.png';
 import shape_icon from '../assets/images/EditorPage_img/shape_icon.png';
 import picture_icon from '../assets/images/EditorPage_img/picture_icon.png';
@@ -23,18 +24,28 @@ function EditorPage() {
 
     const fileInputRef = useRef(null);
 
+    const [selectedTool, setSelectedTool] = useState('frame');
+
     const navigate = useNavigate();
+
+    const handleAddFrame = () => {
+        setAddFrameTrigger(Date.now());
+        setSelectedTool('frame');
+    };
 
     const handleAddTextBox = () => {
         setAddTextTrigger(Date.now());
+        setSelectedTool('text');
     };
 
     const handleAddShape = () => {
         setAddShapeTrigger(Date.now());
+        setSelectedTool('shape');
     };
 
     const handleAddImage = () => {
         fileInputRef.current.click();
+        setSelectedTool('picture');
     };
 
     const handleFileChange = (e) => {
@@ -44,8 +55,16 @@ function EditorPage() {
         }
     };
 
-    const handleAddFrame = () => {
-        setAddFrameTrigger(Date.now());
+    const handleAddTimer = () => {
+        setSelectedTool('timer');
+    };
+
+    const handleAddHint = () => {
+        setSelectedTool('hint');
+    };
+
+    const handleAddEvent = () => {
+        setSelectedTool('event');
     };
 
     const handelRoomFrameState = (event, index) => {
@@ -79,17 +98,22 @@ function EditorPage() {
             <div className='Editor_content'>
                 <div className='Editor_tool'>
                     <div className='default_tool'>
-                        <div className='text_area' onClick={handleAddTextBox}>
+                        <div className={`frame_area ${selectedTool === 'frame' ? 'active' : ''}`} onClick={handleAddFrame}>
+                            <img id='frame_icon' src={frame_icon} alt='frame_icon' />
+                            <p>프레임</p>
+                        </div>
+
+                        <div className={`text_area ${selectedTool === 'text' ? 'active' : ''}`} onClick={handleAddTextBox}>
                             <img id='text_icon' src={text_icon} alt='text_icon' />
                             <p>텍스트</p>
                         </div>
 
-                        <div className='shape_area' onClick={handleAddShape}>
+                        <div className={`shape_area ${selectedTool === 'shape' ? 'active' : ''}`} onClick={handleAddShape}>
                             <img id='shape_icon' src={shape_icon} alt='shape_icon' />
                             <p>도형</p>
                         </div>
 
-                        <div className='picture_area' onClick={handleAddImage}>
+                        <div className={`picture_area ${selectedTool === 'picture' ? 'active' : ''}`} onClick={handleAddImage}>
                             <img id='picture_icon' src={picture_icon} alt='picture_icon' />
                             <p>사진</p>
                             <input
@@ -101,36 +125,71 @@ function EditorPage() {
                             />
                         </div>
 
-                        <div className='picture_area' onClick={handleAddFrame}>
-                            <img id='frame_icon' src={picture_icon} alt='picture_icon' />
-                            <p>프레임</p>
-                        </div>
-
-                        <div className='timer_area'>
+                        <div className={`timer_area ${selectedTool === 'timer' ? 'active' : ''}`} onClick={handleAddTimer}>
                             <img id='timer_icon' src={timer_icon} alt='timer_icon' />
                             <p>타이머</p>
                         </div>
 
-                        <div className='hint_area'>
+                        <div className={`hint_area ${selectedTool === 'hint' ? 'active' : ''}`} onClick={handleAddHint}>
                             <img id='hint_icon' src={hint_icon} alt='hint_icon' />
                             <p>힌트</p>
                         </div>
 
-                        <div className='event_area'>
+                        <div className={`event_area ${selectedTool === 'event' ? 'active' : ''}`} onClick={handleAddEvent}>
                             <img id='event_icon' src={event_icon} alt='event_icon' />
                             <p>이벤트</p>
                         </div>
                     </div>
 
                     <div className='tool_fine_tuning'>
-                        x: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[0]} step={10} list='' onChange={event => handelRoomFrameState(event, 0)}/> {roomFrameState[0]} <br />
-                        y: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[1]} step={10} list='' onChange={event => handelRoomFrameState(event, 1)}/> {roomFrameState[1]} <br />
-                        width: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[2]} step={10} list='' onChange={event => handelRoomFrameState(event, 2)}/> {roomFrameState[2]} <br />
-                        height: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[3]} step={10} list='' onChange={event => handelRoomFrameState(event, 3)}/> {roomFrameState[3]} <br />
-                        top: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[4]} step={10} list='' onChange={event => handelRoomFrameState(event, 4)}/> {roomFrameState[4]} <br />
-                        left: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[5]} step={10} list='' onChange={event => handelRoomFrameState(event, 5)}/> {roomFrameState[5]} <br />
-                        right: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[6]} step={10} list='' onChange={event => handelRoomFrameState(event, 6)}/> {roomFrameState[6]} <br />
-                        bottom: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[7]} step={10} list='' onChange={event => handelRoomFrameState(event, 7)}/> {roomFrameState[7]} <br />
+                        {selectedTool === 'frame' && (
+                            <div className='frame_fine_tuning'>
+                                x: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[0]} step={10} list='' onChange={event => handelRoomFrameState(event, 0)}/> {roomFrameState[0]} <br />
+                                y: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[1]} step={10} list='' onChange={event => handelRoomFrameState(event, 1)}/> {roomFrameState[1]} <br />
+                                width: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[2]} step={10} list='' onChange={event => handelRoomFrameState(event, 2)}/> {roomFrameState[2]} <br />
+                                height: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[3]} step={10} list='' onChange={event => handelRoomFrameState(event, 3)}/> {roomFrameState[3]} <br />
+                                top: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[4]} step={10} list='' onChange={event => handelRoomFrameState(event, 4)}/> {roomFrameState[4]} <br />
+                                left: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[5]} step={10} list='' onChange={event => handelRoomFrameState(event, 5)}/> {roomFrameState[5]} <br />
+                                right: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[6]} step={10} list='' onChange={event => handelRoomFrameState(event, 6)}/> {roomFrameState[6]} <br />
+                                bottom: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[7]} step={10} list='' onChange={event => handelRoomFrameState(event, 7)}/> {roomFrameState[7]} <br />
+                            </div>
+                        )}
+
+                        {selectedTool === 'text' && (
+                            <div className='text_fine_tuning'>
+                                <h2>텍스트 세부조정</h2>
+                            </div>
+                        )}
+
+                        {selectedTool === 'shape' && (
+                            <div className='shape_fine_tuning'>
+                                <h2>도형 세부조정</h2>
+                            </div>
+                        )}
+
+                        {selectedTool === 'picture' && (
+                            <div className='picture_fine_tuning'>
+                                <h2>사진 세부조정</h2>
+                            </div>
+                        )}
+
+                        {selectedTool === 'timer' && (
+                            <div className='timer_fine_tuning'>
+                                <h2>타이머 세부조정</h2>
+                            </div>
+                        )}
+
+                        {selectedTool === 'hint' && (
+                            <div className='hint_fine_tuning'>
+                                <h2>힌트 세부조정</h2>
+                            </div>
+                        )}
+                        
+                        {selectedTool === 'event' && (
+                            <div className='event_fine_tuning'>
+                                <h2>이벤트 세부조정</h2>
+                            </div>
+                        )}
                     </div>
                 </div>
 
