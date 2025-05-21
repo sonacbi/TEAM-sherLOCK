@@ -18,6 +18,9 @@ function EditorPage() {
     const [addShapeTrigger, setAddShapeTrigger] = useState(0);
     const [addImageFile, setAddImageFile] = useState(null);
     const [addFrameTrigger, setAddFrameTrigger] = useState(0);
+
+    const [roomFrameState, setRoomFrameState] = useState([220, 120, 440, 300, 170, 240, 240, 150]);
+
     const fileInputRef = useRef(null);
 
     const navigate = useNavigate();
@@ -44,6 +47,14 @@ function EditorPage() {
     const handleAddFrame = () => {
         setAddFrameTrigger(Date.now());
     };
+
+    const handelRoomFrameState = (event, index) => {
+        setRoomFrameState(prev => {
+            const newArray = [...prev];
+            newArray[index] = Number(event.target.value);
+            return newArray;
+        })
+    }
 
     return (
         <div className='EditorPage_wrap'>
@@ -112,14 +123,21 @@ function EditorPage() {
                     </div>
 
                     <div className='tool_fine_tuning'>
-
+                        x: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[0]} step={10} list='' onChange={event => handelRoomFrameState(event, 0)}/> {roomFrameState[0]} <br />
+                        y: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[1]} step={10} list='' onChange={event => handelRoomFrameState(event, 1)}/> {roomFrameState[1]} <br />
+                        width: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[2]} step={10} list='' onChange={event => handelRoomFrameState(event, 2)}/> {roomFrameState[2]} <br />
+                        height: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[3]} step={10} list='' onChange={event => handelRoomFrameState(event, 3)}/> {roomFrameState[3]} <br />
+                        top: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[4]} step={10} list='' onChange={event => handelRoomFrameState(event, 4)}/> {roomFrameState[4]} <br />
+                        left: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[5]} step={10} list='' onChange={event => handelRoomFrameState(event, 5)}/> {roomFrameState[5]} <br />
+                        right: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[6]} step={10} list='' onChange={event => handelRoomFrameState(event, 6)}/> {roomFrameState[6]} <br />
+                        bottom: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[7]} step={10} list='' onChange={event => handelRoomFrameState(event, 7)}/> {roomFrameState[7]} <br />
                     </div>
                 </div>
 
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger}/>
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} roomFrameState={roomFrameState}/>
                         </div>
                     </div>
 
