@@ -14,7 +14,7 @@ const controlStyle = {
     hoverCursor: 'default',
 };
 
-function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
+function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, frontEdge ) {
     // 최대 길이
     const frameMaxWidth = 1098;
     const frameMaxHeight = 648;
@@ -49,7 +49,7 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         { x: 220 + 660 + frameEdgeWeight.right, y: 120 + 420 + frameEdgeWeight.bottom },
         { x: 220 - frameEdgeWeight.left,        y: 120 + 420 + frameEdgeWeight.bottom }
     ];
-    
+
     // 사각형
     // 앞면
     const front = new fabric.Rect({
@@ -68,8 +68,10 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
     const top = new fabric.Polygon([
         frameEdge[0],
         frameEdge[1],
-        { x: front.left + front.width, y: front.top },
-        { x: front.left, y: front.top },
+        // { x: front.left + front.width, y: front.top },
+        // { x: front.left, y: front.top },
+        frontEdge[1],
+        frontEdge[0]
     ], {
         ...controlStyle,
         fill: 'rgba(255, 0, 255, 0.2)',
@@ -80,8 +82,10 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
     // 왼쪽 벽면
     const left = new fabric.Polygon([
         frameEdge[0],
-        { x: front.left, y: front.top },
-        { x: front.left, y: front.top + front.height },
+        // { x: front.left, y: front.top },
+        // { x: front.left, y: front.top + front.height },
+        frontEdge[0],
+        frontEdge[3],
         frameEdge[3],
     ], {
         ...controlStyle,
@@ -92,10 +96,12 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
     
     // 오른쪽 벽면
     const right = new fabric.Polygon([
-        { x: front.left + front.width, y: front.top },
+        // { x: front.left + front.width, y: front.top },
+        frontEdge[1],
         frameEdge[1],
         frameEdge[2],
-        { x: front.left + front.width, y: front.top + front.height },
+        // { x: front.left + front.width, y: front.top + front.height },
+        frontEdge[2],
     ], {
         ...controlStyle,
         fill: 'rgba(0, 255, 0, 0.2)',
@@ -105,8 +111,10 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
     
     // 바닥면
     const bottom = new fabric.Polygon([
-        { x: front.left, y: front.top + front.height },
-        { x: front.left + front.width, y: front.top + front.height },
+        // { x: front.left, y: front.top + front.height },
+        // { x: front.left + front.width, y: front.top + front.height },
+        frontEdge[3],
+        frontEdge[2],
         frameEdge[2],
         frameEdge[3],
     ], {
@@ -125,4 +133,50 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
     return group;
 }
 
-export { createRoomFrame }
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+function rotatePoint(px, py, cx, cy, angleRad) {
+  const dx = px - cx;
+  const dy = py - cy;
+
+  const qx = Math.cos(angleRad) * dx - Math.sin(angleRad) * dy + cx;
+  const qy = Math.sin(angleRad) * dx + Math.cos(angleRad) * dy + cy;
+
+  return { x: qx, y: qy };
+}
+
+function getRotatedRectangleCorners(x, y, width, height, angleDeg) {
+  const angleRad = toRadians(angleDeg);
+
+  // 중심 좌표
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+
+  // 원래 꼭짓점들
+  const corners = [
+    { x: x, y: y },                     // 좌상단
+    { x: x + width, y: y },             // 우상단
+    { x: x + width, y: y + height },    // 우하단
+    { x: x, y: y + height }             // 좌하단
+  ];
+
+  // 회전된 꼭짓점들
+  return corners.map(pt => rotatePoint(pt.x, pt.y, cx, cy, angleRad));
+}
+
+function getFabricObjectCorners(obj) {
+    const angle = obj.angle || 0;
+    const width = obj.getScaledWidth();
+    const height = obj.getScaledHeight();
+    const center = obj.getCenterPoint(); // fabric.Point
+    console.log(width)
+
+    const x = center.x - width / 2;
+    const y = center.y - height / 2;
+
+    return getRotatedRectangleCorners(x, y, width, height, angle);
+}
+
+export { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
-import { createRoomFrame } from '../../../modules/handelPolygon';
+import { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners } from '../../../modules/handelPolygon';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState }) {
     const canvasRef = useRef(null);
@@ -9,6 +9,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
+    const [frontEdge, setFrontEdge] = useState(getRotatedRectangleCorners(220, 120, 220+440, 120+300, 0));
     
     // 공통 스타일
     const controlStyle = {
@@ -29,13 +30,13 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         fill: 'rgba(255, 0, 0, 0.2)',
         strokeWidth: 2,
         stroke: 'red',
-        name: "SherLockFrontController",
+        name: "SherLockRoomController",
     });
     roomController.width = roomController.left + 440;
     roomController.height = roomController.top + 300;
     roomController.on('rotating', () => {
         setAngle(roomController.angle);
-        console.log('aa', roomController.angle)
+        setPosition([roomController.left, roomController.top]);
     });
     roomController.on('moving', () => {
         setPosition([roomController.left, roomController.top]);
@@ -101,6 +102,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     useEffect(() => {
         if (isReady) {
+            setFrontEdge(getRotatedRectangleCorners(...position, ...size, angle))
             addFrame();
         }
     }, [addFrameTrigger, angle, position, size, edgeFrameState]);
@@ -238,19 +240,19 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         const canvas = canvasInstance.current;
         if (!canvas) return;
         
-        const target1 = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
-        if (target1) canvas.remove(target1);
-        // const bounds = roomController.getBoundingRect();
-        // console.log(bounds)
+        const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+        if (target) canvas.remove(target);
         
         const roomFrame = createRoomFrame(
-            angle,
             ...position,
             ...size,
-            ...edgeFrameState
+            ...edgeFrameState,
+            frontEdge
         );
+
         canvas.add(roomFrame);
-        if (!canvas.getObjects().find(obj => obj.name === 'SherLockFrontController')) {
+        canvas.sendObjectToBack(roomFrame);
+        if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
             canvas.add(roomController);
             canvas.setActiveObject(roomController);
         }
