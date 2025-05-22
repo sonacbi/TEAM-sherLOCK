@@ -102,7 +102,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     useEffect(() => {
         if (isReady) {
-            setFrontEdge(getRotatedRectangleCorners(...position, ...size, angle))
+            setFrontEdge(getRotatedRectangleCorners(Math.floor(position[0]), Math.floor(position[1]), Math.round(size[0]), Math.round(size[1]), angle.toFixed(1)))
             addFrame();
         }
     }, [addFrameTrigger, angle, position, size, edgeFrameState]);

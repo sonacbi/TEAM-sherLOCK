@@ -37,6 +37,10 @@ enum Theme {
     adventure = "adventure",
     crime     = "crime",
 }
+enum GameInfoType {
+    general = "general",    // 일반
+    PnK     = "PnK",        // 포인트 앤 클릭
+}
 enum Visibility {
     public   = "public",
     unlisted = "unlisted",
@@ -45,8 +49,9 @@ enum Visibility {
 class GameInfo {
     id:             string;         // 아이디
     title:          string;         // 제목
-    thumbnail:      string;         // 게임 썸네일 URL
+    thumbnail:      string;         // 게임 썸네일 주소
     theme:          Theme;          // 테마
+    type:           GameInfoType;   // 타입
     visibility:     Visibility;     // 공개 여부
     description:    string;         // 설명
     difficulty:     number;         // 난이도
@@ -59,6 +64,7 @@ class GameInfo {
         title = '',
         thumbnail = '',
         theme = Theme.horror,
+        type = GameInfoType.general,
         visibility = Visibility.public,
         description = '',
         difficulty = 1,
@@ -70,6 +76,7 @@ class GameInfo {
         this.title = title;
         this.thumbnail = thumbnail;
         this.theme = theme;
+        this.type = type;
         this.visibility = visibility;
         this.description = description;
         this.difficulty = difficulty;
@@ -117,8 +124,8 @@ class Item extends ClassVersion {
     name:               string;     // 아이템 이름
     description:        string;     // 아이템 설명
     type:               string;     // 아이템 타입 (고민 중...)
-    iconURL:            string;     // 아이템 아이콘 url
-    imgURL:             string;     // 아이템 상세 이미지 url
+    iconPath:           string;     // 아이템 아이콘
+    imgPath:            string;     // 아이템 상세 이미지
     quantity:           number;     // 수량
     getItemMessage:     string;     // 아이템 획득 시 뜨는 메세지. 값이 비어 있으면 메시지가 안 뜨게
     uniteItem:          string[];   // 합칠 수 있는 아이템의 이름으로 받음
@@ -127,8 +134,8 @@ class Item extends ClassVersion {
         name = '',
         description = '',
         type = '',
-        iconURL = '',
-        imgURL = '',
+        iconPath = '',
+        imgPath = '',
         quantity = 1,
         getItemMessage = null,
         uniteItem = []
@@ -137,8 +144,8 @@ class Item extends ClassVersion {
         this.name = name;
         this.description = description;
         this.type = type;
-        this.iconURL = iconURL;
-        this.imgURL = imgURL;
+        this.iconPath = iconPath;
+        this.imgPath = imgPath;
         this.quantity = quantity;
         this.getItemMessage = getItemMessage;
         this.uniteItem = uniteItem;
@@ -192,7 +199,7 @@ enum StageType {
 class Stage extends ClassVersion {
     name:               string;
     type:               StageType;      // 스테이지 타입
-    imgURL:             string;         // 이미지 경로
+    imgPath:            string;         // 이미지 경로
     description:        string;         // 설명
     timeLimit:          number;         // 스테이지 시간제한
     gateOpen:           boolean;        // 들어올 수 있는지 여부
@@ -203,7 +210,7 @@ class Stage extends ClassVersion {
     constructor({
         name = '',
         type = StageType.normal,
-        imgURL = '',
+        imgPath = '',
         description = '',
         timeLimit = 0,
         gateOpen = true,
@@ -214,7 +221,7 @@ class Stage extends ClassVersion {
         super()
         this.name = name;
         this.type = type;
-        this.imgURL = imgURL;
+        this.imgPath = imgPath;
         this.description = description;
         this.timeLimit = timeLimit;
         this.gateOpen = gateOpen;
@@ -240,7 +247,7 @@ enum CutType {
 class Cut extends ClassVersion {
     name:           string;     // 상하·동서남북으로도 이름지을 수 있겠다
     type:           CutType;    // 컷 타입
-    imgURL:         string;     // 이미지 url
+    imgPath:        string;     // 이미지
     timeLimit:      number;     // 컷 시간제한
     puzzle:         Puzzle;     // 퍼즐
     connectedCut:   number[];   // 컷 인덱스와 연결한다
@@ -248,7 +255,7 @@ class Cut extends ClassVersion {
     constructor({
         name = '',
         type = CutType.normal,
-        imgURL = '',
+        imgPath = '',
         timeLimit = null,
         puzzle = null,
         connectedCut = [],
@@ -256,7 +263,7 @@ class Cut extends ClassVersion {
         super();
         this.name = name;
         this.type = type;
-        this.imgURL = imgURL;
+        this.imgPath = imgPath;
         this.timeLimit = timeLimit;
         this.puzzle = puzzle;
         this.connectedCut = connectedCut;

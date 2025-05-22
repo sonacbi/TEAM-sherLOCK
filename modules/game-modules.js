@@ -25,6 +25,11 @@ var Theme;
     Theme["adventure"] = "adventure";
     Theme["crime"] = "crime";
 })(Theme || (Theme = {}));
+var GameInfoType;
+(function (GameInfoType) {
+    GameInfoType["general"] = "general";
+    GameInfoType["PnK"] = "PnK";
+})(GameInfoType || (GameInfoType = {}));
 var Visibility;
 (function (Visibility) {
     Visibility["public"] = "public";
@@ -32,11 +37,12 @@ var Visibility;
     Visibility["private"] = "private";
 })(Visibility || (Visibility = {}));
 class GameInfo {
-    constructor({ id = null, title = '', thumbnail = '', theme = Theme.horror, visibility = Visibility.public, description = '', difficulty = 1, playTime = 10, isRanking = false, isHiddenStage = false }) {
+    constructor({ id = null, title = '', thumbnail = '', theme = Theme.horror, type = GameInfoType.general, visibility = Visibility.public, description = '', difficulty = 1, playTime = 10, isRanking = false, isHiddenStage = false }) {
         this.id = id;
         this.title = title;
         this.thumbnail = thumbnail;
         this.theme = theme;
+        this.type = type;
         this.visibility = visibility;
         this.description = description;
         this.difficulty = difficulty;
@@ -65,13 +71,13 @@ class Source extends ClassVersion {
  * 아이템 생성기
  */
 class Item extends ClassVersion {
-    constructor({ name = '', description = '', type = '', iconURL = '', imgURL = '', quantity = 1, getItemMessage = null, uniteItem = [] }) {
+    constructor({ name = '', description = '', type = '', iconPath = '', imgPath = '', quantity = 1, getItemMessage = null, uniteItem = [] }) {
         super();
         this.name = name;
         this.description = description;
         this.type = type;
-        this.iconURL = iconURL;
-        this.imgURL = imgURL;
+        this.iconPath = iconPath;
+        this.imgPath = imgPath;
         this.quantity = quantity;
         this.getItemMessage = getItemMessage;
         this.uniteItem = uniteItem;
@@ -112,11 +118,11 @@ var StageType;
  * 스테이지 생성기
  */
 class Stage extends ClassVersion {
-    constructor({ name = '', type = StageType.normal, imgURL = '', description = '', timeLimit = 0, gateOpen = true, closedGateMessage = null, connectedStage = [], cut = [new Cut({})], }) {
+    constructor({ name = '', type = StageType.normal, imgPath = '', description = '', timeLimit = 0, gateOpen = true, closedGateMessage = null, connectedStage = [], cut = [new Cut({})], }) {
         super();
         this.name = name;
         this.type = type;
-        this.imgURL = imgURL;
+        this.imgPath = imgPath;
         this.description = description;
         this.timeLimit = timeLimit;
         this.gateOpen = gateOpen;
@@ -139,11 +145,11 @@ var CutType;
  * 컷 생성기
  */
 class Cut extends ClassVersion {
-    constructor({ name = '', type = CutType.normal, imgURL = '', timeLimit = null, puzzle = null, connectedCut = [], }) {
+    constructor({ name = '', type = CutType.normal, imgPath = '', timeLimit = null, puzzle = null, connectedCut = [], }) {
         super();
         this.name = name;
         this.type = type;
-        this.imgURL = imgURL;
+        this.imgPath = imgPath;
         this.timeLimit = timeLimit;
         this.puzzle = puzzle;
         this.connectedCut = connectedCut;

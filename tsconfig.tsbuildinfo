@@ -1,1 +1,1 @@
-{"root":["./modules/game-modules.ts"],"version":"5.8.2"}
+{"root":["./modules/game-modules.ts","./modules/editor/gamepnk.ts"],"version":"5.8.2"}
