@@ -58,6 +58,7 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         ...frontSize,
         fill: 'rgba(0, 0, 0, 0)',
         name: "SherLockRoomFrame",
+        wallType: 'front',
     });
 
 
@@ -75,6 +76,7 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         fill: 'rgba(255, 0, 255, 0.2)',
         stroke: 'purple',
         name: "SherLockRoomFrame",
+        wallType: 'top',
     });
     
     // 왼쪽 벽면
@@ -88,6 +90,7 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         fill: 'rgba(0, 0, 255, 0.2)',
         stroke: 'blue',
         name: "SherLockRoomFrame",
+        wallType: 'left',
     });
     
     // 오른쪽 벽면
@@ -101,6 +104,7 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         fill: 'rgba(0, 255, 0, 0.2)',
         stroke: 'green',
         name: "SherLockRoomFrame",
+        wallType: 'right',
     });
     
     // 바닥면
@@ -114,12 +118,14 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         fill: 'rgba(255, 255, 0, 0.2)',
         stroke: 'orange',
         name: "SherLockRoomFrame",
+        wallType: 'bottom',
     });
 
     // 그룹화
     const group = new fabric.Group([front, top, left, right, bottom], {
         ...controlStyle,
         name: "SherLockRoomFrame",
+        wallType: "frame"  // 혹은 적절한 타입
     })
 
     return group;

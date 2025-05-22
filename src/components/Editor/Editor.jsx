@@ -9,7 +9,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
-    
+
     // 공통 스타일
     const controlStyle = {
         transparentCorners: false,
@@ -310,6 +310,149 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
         return canvas;
     }
+
+  // 상태 대신 useRef로 최신 플래그 유지 (이벤트 핸들러는 상태 캡처 이슈 있음)
+  const mergeDeniedFlagsRef = useRef({
+    front: false,
+    top: false,
+    bottom: false,
+    left: false,
+    right: false,
+  });
+
+// 폴리곤 내부 점 포함 검사 함수 (fabric.Polygon에 내장됨)
+function polygonContainsPoint(polygon, point) {
+    const localPoint = new fabric.Point(point.x - polygon.left, point.y - polygon.top);
+    return polygon.containsPoint(localPoint);
+  }
+
+// 이미지 경계 사각형과 폴리곤 충돌 간단 검사
+function isCollision(imageObj, wall) {
+  const imgRect = imageObj.getBoundingRect();
+  const imgPoints = [
+    new fabric.Point(imgRect.left, imgRect.top),
+    new fabric.Point(imgRect.left + imgRect.width, imgRect.top),
+    new fabric.Point(imgRect.left + imgRect.width, imgRect.top + imgRect.height),
+    new fabric.Point(imgRect.left, imgRect.top + imgRect.height),
+  ];
+
+  // 이미지 모서리가 폴리곤 내부에 있으면 충돌
+  for (const pt of imgPoints) {
+    if (polygonContainsPoint(wall, pt)) return true;
+  }
+
+  // 폴리곤의 점들이 이미지 사각형 내부에 있으면 충돌
+  // 여기서 wall이 Polygon인지 확인해야 함
+  if (wall.type === 'polygon') {
+    for (const pt of wall.get('points')) {
+      const absolutePt = new fabric.Point(pt.x + wall.left, pt.y + wall.top);
+      if (
+        absolutePt.x >= imgRect.left &&
+        absolutePt.x <= imgRect.left + imgRect.width &&
+        absolutePt.y >= imgRect.top &&
+        absolutePt.y <= imgRect.top + imgRect.height
+      ) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+
+// 충돌 체크 및 병합 팝업 띄우기
+  function checkCollisionAndPrompt(imageObj, walls) {
+  console.log("wall", walls);
+
+  walls.forEach(wall => {
+    const wallType = wall.wallType;  // 여기서 선언!
+    const isCollided = isCollision(imageObj, wall);
+
+    if (isCollided) {
+      if (!mergeDeniedFlagsRef.current[wallType]) {
+        if (window.confirm(`"${wallType}"에 충돌! 병합하시겠습니까?`)) {
+          console.log(`${wallType}와 병합 처리함`);
+          mergeDeniedFlagsRef.current[wallType] = false;
+        } else {
+          console.log(`${wallType}와 병합 거부`);
+          mergeDeniedFlagsRef.current[wallType] = true;
+        }
+      }
+    } else {
+      if (mergeDeniedFlagsRef.current[wallType]) {
+        console.log(`${wallType} 충돌 벗어남, 병합 거부 플래그 초기화`);
+        mergeDeniedFlagsRef.current[wallType] = false;
+      }
+    }
+  });
+}
+
+
+function getWallsFromCanvas(canvas) {
+  const objects = canvas.getObjects();
+  let walls = [];
+
+  console.log('캔버스 전체 객체 개수:', objects.length);
+
+  objects.forEach((obj, idx) => {
+    console.log(`객체[${idx}]: type=${obj.type}, name=${obj.name}, wallType=${obj.get('wallType')}`);
+
+    if (obj.type === 'group') {
+      const groupWalls = obj._objects.filter(o => ['front','bottom','left','right','top'].includes(o.get('wallType')));
+      console.log(`  그룹 내부 벽 객체 개수: ${groupWalls.length}`);
+
+      groupWalls.forEach((w, i) => {
+        console.log(`    벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
+      });
+
+      walls = walls.concat(groupWalls);
+    } else {
+      if (['front','bottom','left','right','top'].includes(obj.get('wallType'))) {
+        console.log(`  그룹 밖 벽 객체 발견: wallType=${obj.get('wallType')}`);
+        walls.push(obj);
+      }
+    }
+  });
+
+  console.log('최종 벽 객체 개수:', walls.length);
+  walls.forEach((w, i) => {
+    console.log(`벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
+  });
+
+  return walls;
+}
+
+
+  useEffect(() => {
+  const canvas = canvasInstance.current;
+  if (!canvas) return;
+
+    console.log(canvas.getObjects());
+  // 이미지가 항상 위에 있도록 레이어 조정
+  const images = canvas.getObjects().filter(obj => obj.type === 'image');
+  images.forEach(img => canvas.bringToFront(img));
+
+  const onObjectMoving = (e) => {
+    const obj = e.target;
+    if (obj.type === 'image') {
+        const walls = getWallsFromCanvas(canvas);
+        checkCollisionAndPrompt(obj, walls);
+    }
+    };
+
+
+  canvas.on('object:moving', onObjectMoving);
+
+  return () => {
+    canvas.off('object:moving', onObjectMoving);
+  };
+}, []);
+
+
+
+
+
 
     return <canvas ref={canvasRef} width={1100} height={650} />;
 }
