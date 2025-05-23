@@ -41,6 +41,7 @@ function EditorPage() {
     const fileInputRef = useRef(null);
 
     const [selectedTool, setSelectedTool] = useState('frame');
+    const [selectedObject, setSelectedObject] = useState(null);
 
     const navigate = useNavigate();
 
@@ -175,81 +176,89 @@ function EditorPage() {
                     </div>
 
                     <div className='tool_fine_tuning'>
-                        {selectedTool === 'frame' && (
-                            <div className='frame_fine_tuning'>
-                                x: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[0]} step={10} list='' onChange={event => handelRoomFrameState(event, 0)}/> {roomFrameState[0]} <br />
-                                y: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[1]} step={10} list='' onChange={event => handelRoomFrameState(event, 1)}/> {roomFrameState[1]} <br />
-                                width: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[2]} step={10} list='' onChange={event => handelRoomFrameState(event, 2)}/> {roomFrameState[2]} <br />
-                                height: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[3]} step={10} list='' onChange={event => handelRoomFrameState(event, 3)}/> {roomFrameState[3]} <br />
-                                top: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[4]} step={10} list='' onChange={event => handelRoomFrameState(event, 4)}/> {roomFrameState[4]} <br />
-                                left: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[5]} step={10} list='' onChange={event => handelRoomFrameState(event, 5)}/> {roomFrameState[5]} <br />
-                                right: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[6]} step={10} list='' onChange={event => handelRoomFrameState(event, 6)}/> {roomFrameState[6]} <br />
-                                bottom: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[7]} step={10} list='' onChange={event => handelRoomFrameState(event, 7)}/> {roomFrameState[7]} <br />
+                        {selectedObject ? (
+                            <div className='object_edit'>
+                                <h2>하이</h2>
                             </div>
-                        )}
-
-                        {selectedTool === 'text' && (
-                            <div className='text_fine_tuning'>
-                                <h2>텍스트 세부조정</h2>
-                            </div>
-                        )}
-
-                        {selectedTool === 'shape' && (
-                            <div className='shape_fine_tuning'>
-                                <div className='default_shape'>
-                                    <label>기본 도형</label>
-                                    
-                                    <div className='default_shape_wrap'>
-                                        {Object.keys(shapeImages).map((shape) => (
-                                            <img
-                                                key={shape}
-                                                src={shapeImages[shape]}
-                                                alt={shape}
-                                                onClick={() => handleShapeClick(shape)}
-                                            />
-                                        ))}
+                        ) : (
+                            <>
+                                {selectedTool === 'frame' && (
+                                    <div className='frame_fine_tuning'>
+                                        x: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[0]} step={10} list='' onChange={event => handelRoomFrameState(event, 0)}/> {roomFrameState[0]} <br />
+                                        y: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[1]} step={10} list='' onChange={event => handelRoomFrameState(event, 1)}/> {roomFrameState[1]} <br />
+                                        width: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[2]} step={10} list='' onChange={event => handelRoomFrameState(event, 2)}/> {roomFrameState[2]} <br />
+                                        height: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[3]} step={10} list='' onChange={event => handelRoomFrameState(event, 3)}/> {roomFrameState[3]} <br />
+                                        top: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[4]} step={10} list='' onChange={event => handelRoomFrameState(event, 4)}/> {roomFrameState[4]} <br />
+                                        left: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[5]} step={10} list='' onChange={event => handelRoomFrameState(event, 5)}/> {roomFrameState[5]} <br />
+                                        right: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[6]} step={10} list='' onChange={event => handelRoomFrameState(event, 6)}/> {roomFrameState[6]} <br />
+                                        bottom: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[7]} step={10} list='' onChange={event => handelRoomFrameState(event, 7)}/> {roomFrameState[7]} <br />
                                     </div>
-                                </div>
+                                )}
 
-                                <div className='bubble'>
-                                    <label>말풍선</label>
-                                    
-                                    <div className='bubble_wrap'>
-                                        <img id='bubble1' src={bubble1} alt='bubble1' />
-                                        <img id='bubble2' src={bubble2} alt='bubble2' />
-                                        <img id='bubble3' src={bubble3} alt='bubble3' />
-                                        <img id='bubble4' src={bubble4} alt='bubble4' />
-                                        <img id='bubble5' src={bubble5} alt='bubble5' />
-                                        <img id='bubble6' src={bubble6} alt='bubble6' />
-                                        <img id='bubble7' src={bubble7} alt='bubble7' />
-                                        <img id='bubble8' src={bubble8} alt='bubble8' />
+                                {selectedTool === 'text' && (
+                                    <div className='text_fine_tuning'>
+                                        <h2>텍스트 세부조정</h2>
                                     </div>
-                                </div>
-                            </div>
-                        )}
+                                )}
 
-                        {selectedTool === 'picture' && (
-                            <div className='picture_fine_tuning'>
-                                <h2>사진 세부조정</h2>
-                            </div>
-                        )}
+                                {selectedTool === 'shape' && (
+                                    <div className='shape_fine_tuning'>
+                                        <div className='default_shape'>
+                                            <label>기본 도형</label>
+                                            
+                                            <div className='default_shape_wrap'>
+                                                {Object.keys(shapeImages).map((shape) => (
+                                                    <img
+                                                        key={shape}
+                                                        src={shapeImages[shape]}
+                                                        alt={shape}
+                                                        onClick={() => handleShapeClick(shape)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
 
-                        {selectedTool === 'timer' && (
-                            <div className='timer_fine_tuning'>
-                                <h2>타이머 세부조정</h2>
-                            </div>
-                        )}
+                                        <div className='bubble'>
+                                            <label>말풍선</label>
+                                            
+                                            <div className='bubble_wrap'>
+                                                <img id='bubble1' src={bubble1} alt='bubble1' />
+                                                <img id='bubble2' src={bubble2} alt='bubble2' />
+                                                <img id='bubble3' src={bubble3} alt='bubble3' />
+                                                <img id='bubble4' src={bubble4} alt='bubble4' />
+                                                <img id='bubble5' src={bubble5} alt='bubble5' />
+                                                <img id='bubble6' src={bubble6} alt='bubble6' />
+                                                <img id='bubble7' src={bubble7} alt='bubble7' />
+                                                <img id='bubble8' src={bubble8} alt='bubble8' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
-                        {selectedTool === 'hint' && (
-                            <div className='hint_fine_tuning'>
-                                <h2>힌트 세부조정</h2>
-                            </div>
-                        )}
-                        
-                        {selectedTool === 'event' && (
-                            <div className='event_fine_tuning'>
-                                <h2>이벤트 세부조정</h2>
-                            </div>
+                                {selectedTool === 'picture' && (
+                                    <div className='picture_fine_tuning'>
+                                        <h2>사진 세부조정</h2>
+                                    </div>
+                                )}
+
+                                {selectedTool === 'timer' && (
+                                    <div className='timer_fine_tuning'>
+                                        <h2>타이머 세부조정</h2>
+                                    </div>
+                                )}
+
+                                {selectedTool === 'hint' && (
+                                    <div className='hint_fine_tuning'>
+                                        <h2>힌트 세부조정</h2>
+                                    </div>
+                                )}
+                                
+                                {selectedTool === 'event' && (
+                                    <div className='event_fine_tuning'>
+                                        <h2>이벤트 세부조정</h2>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -257,7 +266,14 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} roomFrameState={roomFrameState}/>
+                            <Editor 
+                                addTextTrigger={addTextTrigger} 
+                                addShapeTrigger={addShapeTrigger} 
+                                addImageFile={addImageFile} 
+                                addFrameTrigger={addFrameTrigger} 
+                                roomFrameState={roomFrameState} 
+                                onObjectSelect={setSelectedObject}
+                            />
                         </div>
                     </div>
 

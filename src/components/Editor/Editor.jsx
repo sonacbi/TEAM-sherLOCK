@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { createRoomFrame } from '../../../modules/handelPolygon';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, roomFrameState }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, roomFrameState, onObjectSelect }) {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
@@ -44,8 +44,19 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         canvas.centerObject(textbox);
         textbox.setCoords();
         canvas.add(textbox);
-        canvas.setActiveObject(textbox);
         canvas.renderAll();
+
+        canvas.on('selection:created', (e) => {
+           onObjectSelect(e.selected[0]); // 선택된 객체 전달
+        });
+
+        canvas.on('selection:updated', (e) => {
+            onObjectSelect(e.selected[0]);
+        });
+
+        canvas.on('selection:cleared', () => {
+            onObjectSelect(null); // 선택 해제 시 null
+        });
 
         // 비율 유지하면서 크기 조절
         textbox.on('scaling', () => {
@@ -386,7 +397,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         canvas.renderAll();
     };
 
-
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -414,6 +424,35 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             }
         };
     }, [isReady]);
+
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        // 캔버스 내부 클릭 시 플래그 설정
+        let isCanvasClicked = false;
+
+        const onCanvasMouseDown = () => {
+            isCanvasClicked = true;
+        };
+
+        const onDocumentMouseDown = () => {
+            if (!isCanvasClicked) {
+            canvas.discardActiveObject();
+            canvas.requestRenderAll();
+            onObjectSelect(null);
+            }
+            isCanvasClicked = false;
+        };
+
+        canvas.on('mouse:down', onCanvasMouseDown);
+        document.addEventListener('mousedown', onDocumentMouseDown);
+
+        return () => {
+            canvas.off('mouse:down', onCanvasMouseDown);
+            document.removeEventListener('mousedown', onDocumentMouseDown);
+        };
+    }, []);
 
     function warpImageToTrapezoid(image, topInset = 40) {
         const canvas = document.createElement('canvas');
