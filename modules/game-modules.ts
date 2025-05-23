@@ -39,7 +39,7 @@ enum Theme {
 }
 enum GameInfoType {
     general = "general",    // 일반
-    PnK     = "PnK",        // 포인트 앤 클릭
+    PnC     = "PnC",        // 포인트 앤 클릭
 }
 enum Visibility {
     public   = "public",
@@ -308,4 +308,4 @@ class Puzzle extends ClassVersion {
 
 
 // 모듈 내보내기
-export { ClassVersion, Game, GameInfo, Source, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType }
+export { ClassVersion, Game, GameInfo, Source, Stage, Cut, Theme, Visibility, GameInfoType, StageType, CutType, PuzzleType }

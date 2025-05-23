@@ -4,13 +4,13 @@ class ClassVersion {
 }
 
 // 포인트 앤 클릭 게임
-class GamePnK extends ClassVersion {
+class GamePnC extends ClassVersion {
     room: Room[];
     constructor({
         room = [new Room({})],
     }) {
         super();
-        this.room = room.map(data => data);
+        this.room = room.map(data => new Room(data));
     }
 }
 
@@ -39,18 +39,18 @@ class Side extends ClassVersion {
     name: string;
     description: string;
     frame: Frame;
-    fabric: Fabric;
+    fabric: Fabric[];
     constructor({
         name = '',
         description = '',
         frame = new Frame({}),
-        fabric = new Fabric({}),
+        fabric = [new Fabric({})],
     }) {
         super();
         this.name = name;
         this.description = description;
         this.frame = frame;
-        this.fabric = fabric;
+        this.fabric = fabric.map(data => new Fabric(data));
     }
 }
 
@@ -89,31 +89,14 @@ class Frame extends ClassVersion {
     }
 }
 
-// 도형
-enum FabricType {
-    rect = "rect",
-    circle = "circle",
-    triangle = "triangle",
-    polygon = "polygon",
-    line = "line",
-    textBox = "textBox",
-    image = "image",
-    // (custom)
-}
 class Fabric extends ClassVersion {
-    name: string;
-    type: FabricType;
     option: Object;
     event: Object;
     constructor({
-        name = '',
-        type = FabricType.rect,
         option = {},
         event = {},
     }) {
         super();
-        this.name = name;
-        this.type = type;
         this.option = option;
         this.event = event;
     }
@@ -150,6 +133,8 @@ class Item extends ClassVersion {
         this.quantity = quantity;
         this.getItemMessage = getItemMessage;
         this.uniteItem = uniteItem;
-        this.fabric = fabric || new Fabric({name})
+        this.fabric = new Fabric({...fabric, option: {name: name}});
     }
 }
+
+export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, Item }

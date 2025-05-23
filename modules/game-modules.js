@@ -28,7 +28,7 @@ var Theme;
 var GameInfoType;
 (function (GameInfoType) {
     GameInfoType["general"] = "general";
-    GameInfoType["PnK"] = "PnK";
+    GameInfoType["PnC"] = "PnC";
 })(GameInfoType || (GameInfoType = {}));
 var Visibility;
 (function (Visibility) {
@@ -176,4 +176,4 @@ class Puzzle extends ClassVersion {
     }
 }
 // 모듈 내보내기
-export { ClassVersion, Game, GameInfo, Source, Stage, Cut, Theme, Visibility, StageType, CutType, PuzzleType };
+export { ClassVersion, Game, GameInfo, Source, Stage, Cut, Theme, Visibility, GameInfoType, StageType, CutType, PuzzleType };

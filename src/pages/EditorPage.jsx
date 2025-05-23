@@ -2,6 +2,9 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Editor from '../components/Editor/Editor';
+import SaveToServer from '../components/Editor/SaveToServer';
+import { GamePnC, Room, Side } from '../../modules/editor/gamePnK';
+import { GameInfo } from '../../modules/game-modules';
 import '../styles/EditorPage.css';
 
 import logo from '../assets/images/logo/footer_logo.png'
@@ -14,6 +17,12 @@ import hint_icon from '../assets/images/EditorPage_img/hint_icon.png';
 import event_icon from '../assets/images/EditorPage_img/event_icon.png';
 
 function EditorPage() {
+    const [game, setGame] = useState(new GamePnC({}));
+    const [room, setRoom] = useState(new Room({}));
+    const [side, setSide] = useState(new Side({})); // 임시(나중에 방의 방향을 생성할 때 만들어지게 할 것임)
+    const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
+    const [thumbnail, setThumbnail] = useState(new File([], ''));
+    const [imgs, setImgs] = useState([new File([], '')]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState(0);
     const [addImageFile, setAddImageFile] = useState(null);
@@ -40,6 +49,8 @@ function EditorPage() {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
+        setImgs([...imgs, file]);
+        console.log(imgs)
         if (file) {
             setAddImageFile(file);
         }
@@ -57,6 +68,14 @@ function EditorPage() {
         });
     };
 
+    const saveGame = () => {
+        setGame(prev => (new GamePnC({
+            ...prev,
+            // room: [...prev.room, {...room}], // 나중에 game.room[index] 각 인덱스에 저장하게끔
+            room: [{...room}],
+        })));
+    }
+
     return (
         <div className='EditorPage_wrap'>
             <header className='Editor_header'>
@@ -73,7 +92,7 @@ function EditorPage() {
                         <img id='save_icon' src={save_icon} alt='save_icon' />
                     </p>
                     
-                    <p className='submit_button'>제출</p>
+                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} room={room} saveGame={saveGame}/>
                 </div>
             </header>
 
@@ -134,7 +153,7 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState}/>
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState} saveTool={{game, setGame, room, setRoom, side, setSide}}/>
                         </div>
                     </div>
 

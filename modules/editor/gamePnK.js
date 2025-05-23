@@ -5,10 +5,10 @@ class ClassVersion {
 }
 ClassVersion.this_version = "0.0.1"; // 버전
 // 포인트 앤 클릭 게임
-class GamePnK extends ClassVersion {
+class GamePnC extends ClassVersion {
     constructor({ room = [new Room({})], }) {
         super();
-        this.room = room.map(data => data);
+        this.room = room.map(data => new Room(data));
     }
 }
 // 방
@@ -23,12 +23,12 @@ class Room extends ClassVersion {
 }
 // 방의 방향 | 면
 class Side extends ClassVersion {
-    constructor({ name = '', description = '', frame = new Frame({}), fabric = new Fabric({}), }) {
+    constructor({ name = '', description = '', frame = new Frame({}), fabric = [new Fabric({})], }) {
         super();
         this.name = name;
         this.description = description;
         this.frame = frame;
-        this.fabric = fabric;
+        this.fabric = fabric.map(data => new Fabric(data));
     }
 }
 // 방의 골자
@@ -46,23 +46,9 @@ class Frame extends ClassVersion {
         this.bottom = bottom;
     }
 }
-// 도형
-var FabricType;
-(function (FabricType) {
-    FabricType["rect"] = "rect";
-    FabricType["circle"] = "circle";
-    FabricType["triangle"] = "triangle";
-    FabricType["polygon"] = "polygon";
-    FabricType["line"] = "line";
-    FabricType["textBox"] = "textBox";
-    FabricType["image"] = "image";
-    // (custom)
-})(FabricType || (FabricType = {}));
 class Fabric extends ClassVersion {
-    constructor({ name = '', type = FabricType.rect, option = {}, event = {}, }) {
+    constructor({ option = {}, event = {}, }) {
         super();
-        this.name = name;
-        this.type = type;
         this.option = option;
         this.event = event;
     }
@@ -79,6 +65,7 @@ class Item extends ClassVersion {
         this.quantity = quantity;
         this.getItemMessage = getItemMessage;
         this.uniteItem = uniteItem;
-        this.fabric = fabric || new Fabric({ name });
+        this.fabric = new Fabric(Object.assign(Object.assign({}, fabric), { option: { name: name } }));
     }
 }
+export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, Item };

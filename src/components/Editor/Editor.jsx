@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners } from '../../../modules/handelPolygon';
+import { Room, Side, Fabric } from '../../../modules/editor/gamePnK';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, saveTool }) {
+    const {game, setGame, room, setRoom, side, setSide} = saveTool;
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
@@ -56,6 +58,19 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             selectionBorderColor: '#A9DB78',
         });
 
+        canvas.on('object:added', (e) => {
+            console.log('added')
+            handelSide();
+        })
+        canvas.on('object:modified', (e) => {
+            console.log('modified')
+            handelSide();
+        })
+        canvas.on('object:removed', (e) => {
+            console.log('removed')
+            handelSide();
+        })
+
         canvasInstance.current = canvas;
 
         // 초기 textbox 추가
@@ -102,7 +117,13 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     useEffect(() => {
         if (isReady) {
-            setFrontEdge(getRotatedRectangleCorners(Math.floor(position[0]), Math.floor(position[1]), Math.round(size[0]), Math.round(size[1]), angle.toFixed(1)))
+            setFrontEdge(getRotatedRectangleCorners(
+                Number(position[0].toFixed(2)),
+                Number(position[1].toFixed(2)),
+                Number(size[0].toFixed(2)),
+                Number(size[1].toFixed(2)),
+                Number(angle.toFixed(2)))
+            );
             addFrame();
         }
     }, [addFrameTrigger, angle, position, size, edgeFrameState]);
@@ -251,11 +272,12 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         );
 
         canvas.add(roomFrame);
-        canvas.sendObjectToBack(roomFrame);
         if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
             canvas.add(roomController);
             canvas.setActiveObject(roomController);
+            canvas.sendObjectToBack(roomController);
         }
+        canvas.sendObjectToBack(roomFrame);
         
         canvas.renderAll();
     };
@@ -287,6 +309,83 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             }
         };
     }, [isReady]);
+
+    const handelSide = () => {
+        const canvas = canvasInstance.current;
+        const updatedFabric = [];
+
+        canvas._objects.forEach((data) => {
+            if (data.name == 'SherLockRoomController' || data.name == 'SherLockRoomFrame') return;
+
+            updatedFabric.push(
+                new Fabric({
+                    name: data?.name,
+                    option: {
+                        x: Number(data?.left.toFixed(2)),
+                        y: Number(data?.top.toFixed(2)),
+                        width: Number(data?.width.toFixed(2)),
+                        height: Number(data?.height.toFixed(2)),
+                        angle: Number(data?.angle.toFixed(2)),
+                        scaleX: data?.scaleX,
+                        scaleY: data?.scaleY,
+                        fill: data?.fill,
+                        fillRule: data?.fillRule,
+                        backgroundColor: data?.backgroundColor,
+                        borderColor: data?.borderColor,
+                        text: data?.text,
+                        textAlign: data?.textAlign,
+                        textBackgroundColor: data?.textBackgroundColor,
+                        textLines: data?.textLines,
+                        fontFamily: data?.fontFamily,
+                        fontSize: data?.fontSize,
+                        fontStyle: data?.fontStyle,
+                        fontWeight: data?.fontWeight,
+                        strokeWidth: data?.strokeWidth,
+                        stroke: data?.stroke,
+                        strokeUniform: data?.strokeUniform,
+                        editable: data?.editable,
+                        type: data?.type,
+                    },
+                    event: data?.event
+                })
+            );
+        });
+
+        setSide(prevSide => {
+            const updatedSide = new Side({
+                name: prevSide.name,
+                description: prevSide.description,
+                frame: prevSide.frame,
+                fabric: [...updatedFabric]
+            });
+
+            setRoom(prevRoom => {
+                const newRoom = new Room({
+                ...prevRoom,
+                side: prevRoom.side.map(s =>
+                    s.name === updatedSide.name ? updatedSide : s
+                )
+                });
+                return newRoom;
+            });
+
+            return updatedSide;
+        });
+        // setSide(prev => (
+        //     new Side({
+        //         name: prev.name,
+        //         description: prev.description,
+        //         frame: prev.frame,
+        //         fabric: [...updatedFabric] // 안전하게 배열 확장
+        //     })
+        // ));
+        // setRoom(prev => {
+        //     const newData = { ...prev };
+        //     newData.side = side;
+        //     return newData;
+        // });
+    };
+    useEffect(()=>console.log(room), [room])
 
     function warpImageToTrapezoid(image, topInset = 40) {
         const canvas = document.createElement('canvas');
