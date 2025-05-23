@@ -14,7 +14,7 @@ const controlStyle = {
     hoverCursor: 'default',
 };
 
-function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, frontEdge ) {
+function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
     // 최대 길이
     const frameMaxWidth = 1098;
     const frameMaxHeight = 648;
@@ -49,6 +49,14 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, frontEdge 
         { x: 220 + 660 + frameEdgeWeight.right, y: 120 + 420 + frameEdgeWeight.bottom },
         { x: 220 - frameEdgeWeight.left,        y: 120 + 420 + frameEdgeWeight.bottom }
     ];
+
+    const frontEdge = getRotatedRectangleCorners(
+        Number(fpl.toFixed(2)),
+        Number(fpt.toFixed(2)),
+        Number(fsw.toFixed(2)),
+        Number(fsh.toFixed(2)),
+        Number(angle.toFixed(2))
+    )
 
     // 사각형
     // 앞면

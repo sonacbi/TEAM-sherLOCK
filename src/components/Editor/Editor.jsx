@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners } from '../../../modules/handelPolygon';
-import { Room, Side, Fabric } from '../../../modules/editor/gamePnK';
+import { Room, Side, Frame, Fabric } from '../../../modules/editor/gamePnK';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, saveTool }) {
     const {game, setGame, room, setRoom, side, setSide} = saveTool;
@@ -117,13 +117,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     useEffect(() => {
         if (isReady) {
-            setFrontEdge(getRotatedRectangleCorners(
-                Number(position[0].toFixed(2)),
-                Number(position[1].toFixed(2)),
-                Number(size[0].toFixed(2)),
-                Number(size[1].toFixed(2)),
-                Number(angle.toFixed(2)))
-            );
             addFrame();
         }
     }, [addFrameTrigger, angle, position, size, edgeFrameState]);
@@ -209,6 +202,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                         top: 150,
                         scaleX: 0.4,
                         scaleY: 0.4,
+                        name: addImageFile.name
                     });
 
                     canvasInstance.current.add(fabricImage);
@@ -268,8 +262,22 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             ...position,
             ...size,
             ...edgeFrameState,
-            frontEdge
+            angle
         );
+        setSide(prev => ({
+            ...prev,
+            frame: new Frame({
+                x: Number(position[0].toFixed(2)),
+                y: Number(position[1].toFixed(2)),
+                width: Number(size[0].toFixed(2)),
+                height: Number(size[1].toFixed(2)),
+                angle: Number(angle.toFixed(2)),
+                top: Number(edgeFrameState[0].toFixed(2)),
+                left: Number(edgeFrameState[1].toFixed(2)),
+                right: Number(edgeFrameState[2].toFixed(2)),
+                bottom: Number(edgeFrameState[3].toFixed(2))
+            })
+        }));
 
         canvas.add(roomFrame);
         if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
@@ -344,6 +352,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                         stroke: data?.stroke,
                         strokeUniform: data?.strokeUniform,
                         editable: data?.editable,
+                        name: data?.name,
                         type: data?.type,
                     },
                     event: data?.event
@@ -371,19 +380,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
             return updatedSide;
         });
-        // setSide(prev => (
-        //     new Side({
-        //         name: prev.name,
-        //         description: prev.description,
-        //         frame: prev.frame,
-        //         fabric: [...updatedFabric] // 안전하게 배열 확장
-        //     })
-        // ));
-        // setRoom(prev => {
-        //     const newData = { ...prev };
-        //     newData.side = side;
-        //     return newData;
-        // });
     };
     useEffect(()=>console.log(room), [room])
 

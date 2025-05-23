@@ -50,7 +50,6 @@ function EditorPage() {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setImgs([...imgs, file]);
-        console.log(imgs)
         if (file) {
             setAddImageFile(file);
         }
