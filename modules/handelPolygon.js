@@ -32,10 +32,10 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
 
     // 방 프레임 가중치?
     const frameEdgeWeight = {
-        top: fewt,
-        left: fewl,
-        right: fewr,
-        bottom: fewb
+        top: fewt || 0,
+        left: fewl || 0,
+        right: fewr || 0,
+        bottom: fewb || 0,
     };
     // 외곽 모서리
     const frameEdge = (fpl == undefined && fpt == undefined && fsw == undefined && fsh == undefined && fewt == undefined && fewl == undefined && fewr == undefined && fewb == undefined) ? [
@@ -59,6 +59,8 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         fill: 'rgba(0, 0, 0, 0)',
         name: "SherLockRoomFrame",
         wallType: 'front',
+        originX: 'left',   
+        originY: 'top',
     });
 
 
@@ -77,6 +79,8 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         stroke: 'purple',
         name: "SherLockRoomFrame",
         wallType: 'top',
+        originX: 'left',   
+        originY: 'top',
     });
     
     // 왼쪽 벽면
@@ -91,6 +95,8 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         stroke: 'blue',
         name: "SherLockRoomFrame",
         wallType: 'left',
+        originX: 'left',   
+        originY: 'top',
     });
     
     // 오른쪽 벽면
@@ -105,6 +111,8 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         stroke: 'green',
         name: "SherLockRoomFrame",
         wallType: 'right',
+        originX: 'left',   
+        originY: 'top',
     });
     
     // 바닥면
@@ -119,13 +127,17 @@ function createRoomFrame( angle, fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb ) {
         stroke: 'orange',
         name: "SherLockRoomFrame",
         wallType: 'bottom',
+        originX: 'left',   
+        originY: 'top',
     });
 
     // 그룹화
     const group = new fabric.Group([front, top, left, right, bottom], {
         ...controlStyle,
         name: "SherLockRoomFrame",
-        wallType: "frame"  // 혹은 적절한 타입
+        wallType: "frame",  // 혹은 적절한 타입
+        originX: 'left',   
+        originY: 'top',
     })
 
     return group;
