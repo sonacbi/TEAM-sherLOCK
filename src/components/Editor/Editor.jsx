@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { createRoomFrame } from '../../../modules/handelPolygon';
+import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState }) {
     const canvasRef = useRef(null);
@@ -9,6 +10,16 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
+
+    // 3D 배경 처리용
+     // 벽 객체 목록 상태
+    const [walls, setWalls] = useState([]);
+    // 현재 호버된 벽 객체 상태
+    const [hoveredWall, setHoveredWall] = useState(null);
+    // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
+    const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
+    // 이미지 URL (드래그 중인 이미지)
+    const [imageUrl, setImageUrl] = useState(null);
 
     // 공통 스타일
     const controlStyle = {
@@ -173,6 +184,8 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                     return;
                 }
 
+                setImageUrl(e.target.result); // 이미지 URL 상태 저장
+
                 const imgElement = new Image();
                 imgElement.src = e.target.result;
 
@@ -311,35 +324,49 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         return canvas;
     }
 
+    // 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산
+    function getWallVertices(wall) {
+        const points = wall.get('points');
+        if (!points) return [];
+
+        const matrix = wall.calcTransformMatrix(); // 전체 변환 행렬
+
+        return points.map(p =>
+            fabric.util.transformPoint(new fabric.Point(p.x, p.y), matrix)
+        );
+    }
+
     // 캔버스에서 벽 객체들만 추출하는 함수
     function getWallsFromCanvas(canvas) {
-      const objects = canvas.getObjects();
-      let walls = [];
+        if (!canvas) return [];
 
-      console.log('캔버스 전체 객체 개수:', objects.length);
+        const objects = canvas.getObjects();
+        let walls = [];
 
-      objects.forEach((obj, idx) => {
-        console.log(`객체[${idx}]: type=${obj.type}, name=${obj.name}, wallType=${obj.get('wallType')}`);
+        console.log('캔버스 전체 객체 개수:', objects.length);
+
+        objects.forEach((obj, idx) => {
+            console.log(`객체[${idx}]: type=${obj.type}, name=${obj.name}, wallType=${obj.get('wallType')}`);
 
         // 그룹 객체인 경우
         if (obj.type === 'group') {
           // 그룹 내부에서 wallType이 특정 값인 객체만 필터링
-          const groupWalls = obj._objects.filter(o =>
-            ['front', 'bottom', 'left', 'right', 'top'].includes(o.get('wallType'))
-          );
-          console.log(`  그룹 내부 벽 객체 개수: ${groupWalls.length}`);
+            const groupWalls = obj._objects.filter(o =>
+                ['front', 'bottom', 'left', 'right', 'top'].includes(o.get('wallType'))
+            );
+            console.log(`  그룹 내부 벽 객체 개수: ${groupWalls.length}`);
 
-          groupWalls.forEach((w, i) => {
-            console.log(`    벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
-          });
+            groupWalls.forEach((w, i) => {
+                console.log(`    벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
+            });
 
-          walls = walls.concat(groupWalls);
+            walls = walls.concat(groupWalls);
         } else {
           // 그룹이 아닌 객체 중 wallType이 벽에 해당하는 경우
-          if (['front', 'bottom', 'left', 'right', 'top'].includes(obj.get('wallType'))) {
-            console.log(`  그룹 밖 벽 객체 발견: wallType=${obj.get('wallType')}`);
-            walls.push(obj);
-          }
+            if (['front', 'bottom', 'left', 'right', 'top'].includes(obj.get('wallType'))) {
+                console.log(`  그룹 밖 벽 객체 발견: wallType=${obj.get('wallType')}`);
+                walls.push(obj);
+            }
         }
       });
 
@@ -351,95 +378,142 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
       return walls;
     }
 
-    useEffect(() => {
-      const canvas = canvasInstance.current;
-      if (!canvas) return;
+    // 드래그 중인지 상태 저장용 (useRef)
+    const isDragging = useRef(false);
+    // 현재 호버 중인 벽 객체 로컬 변수 (이벤트 핸들러 내부용)
+    const hoveredWallLocal = useRef(null);
+    // 원래 스타일 저장용 맵
+    const originalStyles = useRef(new Map());
 
-      let isDragging = false; // 드래그 중인지 여부
-      let hoveredWall = null; // 현재 hover된 벽 객체
-      const originalStyles = new Map(); // 벽의 원래 스타일 저장용
-
-      // 객체가 움직이기 시작하면 드래그 상태로 전환
-      canvas.on('object:moving', (e) => {
-        isDragging = true;
-      });
-
-      // 마우스 업 시 드래그 상태 해제 및 스타일 복원
-      canvas.on('mouse:up', () => {
-        isDragging = false;
-        restoreWallStyle();
-      });
-
-      // 마우스 이동 중일 때 벽 위에 포인터가 있는지 확인
-      canvas.on('mouse:move', (opt) => {
-        if (!isDragging) return; // 드래그 중일 때만 반응
-
-        const pointer = canvas.getPointer(opt.e); // 현재 마우스 위치
-        const walls = getWallsFromCanvas(canvas); // 모든 벽 객체 가져오기 (그룹 내부 포함)
-
-        // 포인터 아래 있는 벽 찾기
-        const wallUnderPointer = walls.find(wall => wall.containsPoint(pointer));
-
-        // 새로운 벽 위로 이동한 경우
-        if (wallUnderPointer && wallUnderPointer !== hoveredWall) {
-          restoreWallStyle(); // 이전 hover 벽 스타일 복원
-
-          // 원래 스타일을 저장해둔다
-          if (!originalStyles.has(wallUnderPointer)) {
-            originalStyles.set(wallUnderPointer, {
-              fill: wallUnderPointer.fill,
-              stroke: wallUnderPointer.stroke,
-            });
-          }
-
-          // hover 스타일로 변경
-          wallUnderPointer.set({
-            fill: 'rgba(180,180,180,0.7)',
-            stroke: '#555',
-          });
-
-          // 벽 타입 로그 출력
-          console.log('Hovered wallType:', wallUnderPointer.get('wallType'));
-
-          hoveredWall = wallUnderPointer;
-          canvas.renderAll();
-        }
-
-        // 벽에서 포인터가 벗어난 경우 스타일 복원
-        if (!wallUnderPointer && hoveredWall) {
-          restoreWallStyle();
-          hoveredWall = null;
-        }
-      });
-
-      // 벽 객체 스타일을 원래대로 되돌리는 함수
-      const restoreWallStyle = () => {
-        if (!hoveredWall) return;
-
-        const original = originalStyles.get(hoveredWall);
+    function restoreWallStyle() {
+        if (!hoveredWallLocal.current) return;
+        const original = originalStyles.current.get(hoveredWallLocal.current);
         if (original) {
-          hoveredWall.set({
+        hoveredWallLocal.current.set({
             fill: original.fill,
             stroke: original.stroke,
-          });
-          originalStyles.delete(hoveredWall);
-          canvas.renderAll();
+        });
+        originalStyles.current.delete(hoveredWallLocal.current);
+        canvasInstance.current.renderAll();
         }
-      };
-
-      // cleanup: 이벤트 리스너 해제
-      return () => {
-        canvas.off('mouse:move');
-        canvas.off('object:moving');
-        canvas.off('mouse:up');
-      };
-    }, [isReady]);
+    }
+    // 캔버스 이벤트 등록
+    useEffect(() => {
+    const canvas = canvasInstance.current;
+    if (!canvas) return;
 
 
+    // 벽 목록 초기 설정
+    setWalls(getWallsFromCanvas(canvas));
+
+    // 이벤트 핸들러
+    const onObjectMoving = () => {
+      isDragging.current = true;
+    };
+
+    const onMouseUp = () => {
+      isDragging.current = false;
+      restoreWallStyle();
+
+      // 드롭 시점에서 hoveredWallLocal 이 존재하면 (벽 위에 드롭) WebGL 4점 왜곡 확정 로직 가능
+      // 예) setImageUrl(null) 등으로 상태 정리하거나, 드래그 완료 후 추가 처리
+      // 드롭이 벽 밖이라면 4점 왜곡 렌더링 취소(hoveredWallVertices 비우기 등)
+    };
+
+    const onMouseMove = opt => {
+        if (!isDragging.current) return;
+
+        const pointer = canvas.getPointer(opt.e);
+        const currentWalls = getWallsFromCanvas(canvas);
+
+        // pointer 가 포함된 벽 객체 찾기 (containsPoint 함수가 fabric에 존재해야 함)
+        const wallUnderPointer = currentWalls.find(wall => wall.containsPoint(pointer));
+
+        console.log('points:', wallUnderPointer?.get('points'));
+
+        if (wallUnderPointer && wallUnderPointer !== hoveredWallLocal.current) {
+            restoreWallStyle();
+
+            if (!originalStyles.current.has(wallUnderPointer)) {
+            originalStyles.current.set(wallUnderPointer, {
+                fill: wallUnderPointer.fill,
+                stroke: wallUnderPointer.stroke,
+            });
+            }
+
+            wallUnderPointer.set({
+            fill: 'rgba(180,180,180,0.7)',
+            stroke: '#555',
+            });
+
+            hoveredWallLocal.current = wallUnderPointer;
+            setHoveredWall(wallUnderPointer);
+
+            const vertices = getWallVertices(wallUnderPointer);
+            console.log('계산된 vertices:', vertices);
+            setHoveredWallVertices(vertices);
+
+            canvas.renderAll();
+        }
+
+        if (!wallUnderPointer && hoveredWallLocal.current) {
+            restoreWallStyle();
+            hoveredWallLocal.current = null;
+            setHoveredWall(null);
+            setHoveredWallVertices([]);
+        }
+        };
+
+    canvas.on('object:moving', onObjectMoving);
+    canvas.on('mouse:up', onMouseUp);
+    canvas.on('mouse:move', onMouseMove);
+
+    return () => {
+      canvas.off('object:moving', onObjectMoving);
+      canvas.off('mouse:up', onMouseUp);
+      canvas.off('mouse:move', onMouseMove);
+    };
+  }, []);
 
 
 
-    return <canvas ref={canvasRef} width={1100} height={650} />;
+
+
+
+    return (
+    <div style={{ position: 'relative' }}>
+  {/* fabric 캔버스 */}
+  <canvas
+    ref={canvasRef}
+    id="my-canvas"
+    width={1100}
+    height={650}
+    style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+  />
+
+  {/* WebGL 컴포넌트, pointer-events:none 처리 */}
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 2,
+      pointerEvents: 'none', // 여기 중요!
+      width: 1100,
+      height: 650,
+    }}
+  >
+    <WebGLPerspectiveComponent
+        vertices={hoveredWallVertices}
+        imageUrl={imageUrl}
+        wallType={hoveredWall ? hoveredWall.get('wallType') : null}
+        width={1100}
+        height={650}
+      />
+  </div>
+</div>
+    );
+
 }
 
 export default Editor;
