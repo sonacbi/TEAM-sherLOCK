@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Editor from '../components/Editor/Editor';
 import SaveToServer from '../components/Editor/SaveToServer';
-import { GamePnC, Room, Side } from '../../modules/editor/gamePnK';
+import { GamePnC, Room, Side } from '../../modules/editor/gamePnC';
 import { GameInfo } from '../../modules/game-modules';
 import '../styles/EditorPage.css';
 

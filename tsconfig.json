@@ -8,6 +8,6 @@
   },
   "include": [
     "modules/game-modules.ts",
-    "modules/editor/gamePnK.ts"
+    "modules/editor/gamePnC.ts"
   ]
 }

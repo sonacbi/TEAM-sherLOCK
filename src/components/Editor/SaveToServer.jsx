@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 import { GameInfo, GameInfoType } from "../../../modules/game-modules";
-import { GamePnC, Room } from "../../../modules/editor/gamePnK";
+import { GamePnC, Room } from "../../../modules/editor/gamePnC";
 
 export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs, room, saveGame}) {
     function getSavedGameJSON(game) {
