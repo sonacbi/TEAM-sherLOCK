@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
-import { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners } from '../../../modules/handelPolygon';
+import { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners } from '../../../modules/handlePolygon';
 import { Room, Side, Frame, Fabric } from '../../../modules/editor/gamePnC';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, saveTool }) {
