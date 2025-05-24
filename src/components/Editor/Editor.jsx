@@ -3,13 +3,54 @@ import * as fabric from 'fabric';
 import { createRoomFrame } from '../../../modules/handelPolygon';
 import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, editorOffset }) {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
+
+    //디버깅용
+const containerRef = useRef(null);
+
+const [offset, setOffset] = useState({ left: 0, top: 0 });
+
+useEffect(() => {
+  if (containerRef.current) {
+    const rect = containerRef.current.getBoundingClientRect();
+    setOffset({ left: rect.left, top: rect.top });
+  }
+}, []);
+
+function isPointInPolygon(point, polygon) {
+  let x = point.x, y = point.y;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    let xi = polygon[i].x, yi = polygon[i].y;
+    let xj = polygon[j].x, yj = polygon[j].y;
+
+    let intersect = ((yi > y) !== (yj > y)) &&
+                    (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+    // 예: 마우스 클릭 좌표가 window 기준일 때, 화면 내 좌표로 변환
+const handleCanvasClick = (e) => {
+  const x = e.clientX - offset.left;
+  const y = e.clientY - offset.top;
+  console.log('보정된 좌표:', x, y);
+
+  walls.forEach(wall => {
+    const points = wall.get('points'); // fabric polygon일 경우 get('points')로 접근
+    if (isPointInPolygon({ x, y }, points)) {
+      console.log('이 벽 안에 클릭됨:', wall.get('wallType'));
+    }
+  });
+};
+
 
     // 3D 배경 처리용
      // 벽 객체 목록 상태
@@ -331,10 +372,60 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
         const matrix = wall.calcTransformMatrix(); // 전체 변환 행렬
 
-        return points.map(p =>
-            fabric.util.transformPoint(new fabric.Point(p.x, p.y), matrix)
+        const transformedPoints = points.map(p =>
+        fabric.util.transformPoint(new fabric.Point(p.x, p.y), matrix)
         );
+
+        console.log('캔버스 기준 꼭지점:', transformedPoints);
+
+        return transformedPoints;
     }
+
+    function getRectVertices(rect) {
+        const left = rect.left;
+        const top = rect.top;
+        const width = rect.width;
+        const height = rect.height;
+
+        const corners = [
+            new fabric.Point(left, top),
+            new fabric.Point(left + width, top),
+            new fabric.Point(left + width, top + height),
+            new fabric.Point(left, top + height)
+        ];
+
+        const matrix = rect.calcTransformMatrix();
+        return corners.map(p => fabric.util.transformPoint(p, matrix));
+    }
+
+    function applyOffsetToVertices(vertices, wallType) {
+    let offsetX = 0;
+    let offsetY = 0;
+
+    switch(wallType) {
+        case 'left':
+            offsetX = -100;
+            offsetY = -320;
+            break;
+        case 'top':
+            offsetX = -550;
+            offsetY = -34;
+            break;
+        case 'right':
+            offsetX = -1000;
+            offsetY = -320;
+            break;
+        case 'bottom':
+            offsetX = -550;
+            offsetY = -617;
+            break;
+        default:
+            break;
+    }
+
+        return vertices.map(pt => new fabric.Point(pt.x + offsetX, pt.y + offsetY));
+    }
+
 
     // 캔버스에서 벽 객체들만 추출하는 함수
     function getWallsFromCanvas(canvas) {
@@ -368,14 +459,14 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                 walls.push(obj);
             }
         }
-      });
+            });
 
-      console.log('최종 벽 객체 개수:', walls.length);
-      walls.forEach((w, i) => {
-        console.log(`벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
-      });
+            console.log('최종 벽 객체 개수:', walls.length);
+            walls.forEach((w, i) => {
+                console.log(`벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
+            });
 
-      return walls;
+        return walls;
     }
 
     // 드래그 중인지 상태 저장용 (useRef)
@@ -399,26 +490,28 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     }
     // 캔버스 이벤트 등록
     useEffect(() => {
-    const canvas = canvasInstance.current;
-    if (!canvas) return;
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
 
+            const canvasWidth = canvas.getWidth();
+            const canvasHeight = canvas.getHeight();
+            
+        // 벽 목록 초기 설정
+        setWalls(getWallsFromCanvas(canvas));
 
-    // 벽 목록 초기 설정
-    setWalls(getWallsFromCanvas(canvas));
+        // 이벤트 핸들러
+        const onObjectMoving = () => {
+            isDragging.current = true;
+        };
 
-    // 이벤트 핸들러
-    const onObjectMoving = () => {
-      isDragging.current = true;
-    };
+        const onMouseUp = () => {
+            isDragging.current = false;
+            restoreWallStyle();
 
-    const onMouseUp = () => {
-      isDragging.current = false;
-      restoreWallStyle();
-
-      // 드롭 시점에서 hoveredWallLocal 이 존재하면 (벽 위에 드롭) WebGL 4점 왜곡 확정 로직 가능
-      // 예) setImageUrl(null) 등으로 상태 정리하거나, 드래그 완료 후 추가 처리
-      // 드롭이 벽 밖이라면 4점 왜곡 렌더링 취소(hoveredWallVertices 비우기 등)
-    };
+        // 드롭 시점에서 hoveredWallLocal 이 존재하면 (벽 위에 드롭) WebGL 4점 왜곡 확정 로직 가능
+        // 예) setImageUrl(null) 등으로 상태 정리하거나, 드래그 완료 후 추가 처리
+        // 드롭이 벽 밖이라면 4점 왜곡 렌더링 취소(hoveredWallVertices 비우기 등)
+        };
 
     const onMouseMove = opt => {
         if (!isDragging.current) return;
@@ -451,8 +544,9 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
             const vertices = getWallVertices(wallUnderPointer);
             console.log('계산된 vertices:', vertices);
-            setHoveredWallVertices(vertices);
-
+            const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer.get('wallType'));
+            setHoveredWallVertices(offsetVertices);
+            console.log('WebGL에 넘긴 꼭지점:', vertices);
             canvas.renderAll();
         }
 
@@ -476,43 +570,42 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
   }, []);
 
 
-
-
-
-
     return (
-    <div style={{ position: 'relative' }}>
-  {/* fabric 캔버스 */}
-  <canvas
-    ref={canvasRef}
-    id="my-canvas"
-    width={1100}
-    height={650}
-    style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-  />
+        <div
+        style={{ position: 'relative' }}
+        ref={containerRef}
+        onClick={handleCanvasClick} // 여기로 옮김
+        >
+        <canvas
+            ref={canvasRef}
+            id="my-canvas"
+            width={1100}
+            height={650}
+            style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+            
+        />
 
-  {/* WebGL 컴포넌트, pointer-events:none 처리 */}
-  <div
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      zIndex: 2,
-      pointerEvents: 'none', // 여기 중요!
-      width: 1100,
-      height: 650,
-    }}
-  >
-    <WebGLPerspectiveComponent
-        vertices={hoveredWallVertices}
-        imageUrl={imageUrl}
-        wallType={hoveredWall ? hoveredWall.get('wallType') : null}
-        width={1100}
-        height={650}
-      />
-  </div>
-</div>
-    );
+        <div
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 2,
+                pointerEvents: 'none',
+                width: 1100,
+                height: 650,
+            }}
+        >
+        <WebGLPerspectiveComponent
+            vertices={hoveredWallVertices}
+            imageUrl={imageUrl}
+            wallType={hoveredWall ? hoveredWall.get('wallType') : null}
+            width={1100}
+            height={650}
+        />
+        </div>
+    </div>
+);
 
 }
 
