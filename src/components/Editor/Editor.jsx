@@ -12,10 +12,10 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
 
     //디버깅용
-const containerRef = useRef(null);
+    const containerRef = useRef(null);
 
-const [offset, setOffset] = useState({ left: 0, top: 0 });
-const [top, left, right, bottom] = edgeFrameState;
+    const [offset, setOffset] = useState({ left: 0, top: 0 });
+    const [top, left, right, bottom] = edgeFrameState;
 
 useEffect(() => {
   if (containerRef.current) {
@@ -404,21 +404,21 @@ const handleCanvasClick = (e) => {
     let offsetY = 0;
 
     switch(wallType) {
-        case 'left':
+        case 'left': // x에 right 값 넣지 않기
             offsetX = -220+(left/2);
-            offsetY = -405+(top/2);
+            offsetY = -330+(top/2)-(bottom/2);
             break;
-        case 'top':
-            offsetX = -670+(left/2);
+        case 'top': // Y에 bottom 값 넣지 않기기
+            offsetX = -550+(left/2)-(right/2);
             offsetY = -119+(top/2);
             break;
-        case 'right':
-            offsetX = -1120+(left/2);
-            offsetY = -405+(top/2);
+        case 'right': // x에 left 값 넣지 않기
+            offsetX = -880-(right/2);
+            offsetY = -330+(top/2)-(bottom/2);
             break;
-        case 'bottom':
-            offsetX = -670+(left/2);
-            offsetY = -617-2;
+        case 'bottom': //Y에 top 값 넣지 않기
+            offsetX = -550+(left/2)-(right/2);
+            offsetY = -540-(bottom/2);
             break;
         default:
             break;
