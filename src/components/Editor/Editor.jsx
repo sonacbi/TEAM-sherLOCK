@@ -15,6 +15,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 const containerRef = useRef(null);
 
 const [offset, setOffset] = useState({ left: 0, top: 0 });
+const [top, left, right, bottom] = edgeFrameState;
 
 useEffect(() => {
   if (containerRef.current) {
@@ -398,26 +399,26 @@ const handleCanvasClick = (e) => {
         return corners.map(p => fabric.util.transformPoint(p, matrix));
     }
 
-    function applyOffsetToVertices(vertices, wallType) {
+    function applyOffsetToVertices(vertices, wallType, top, left, right, bottom) {
     let offsetX = 0;
     let offsetY = 0;
 
     switch(wallType) {
         case 'left':
-            offsetX = -100;
-            offsetY = -320;
+            offsetX = -220+(left/2);
+            offsetY = -405+(top/2);
             break;
         case 'top':
-            offsetX = -550;
-            offsetY = -34;
+            offsetX = -670+(left/2);
+            offsetY = -119+(top/2);
             break;
         case 'right':
-            offsetX = -1000;
-            offsetY = -320;
+            offsetX = -1120+(left/2);
+            offsetY = -405+(top/2);
             break;
         case 'bottom':
-            offsetX = -550;
-            offsetY = -617;
+            offsetX = -670+(left/2);
+            offsetY = -617-2;
             break;
         default:
             break;
@@ -544,7 +545,7 @@ const handleCanvasClick = (e) => {
 
             const vertices = getWallVertices(wallUnderPointer);
             console.log('계산된 vertices:', vertices);
-            const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer.get('wallType'));
+            const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer.get('wallType'), top, left, right, bottom);
             setHoveredWallVertices(offsetVertices);
             console.log('WebGL에 넘긴 꼭지점:', vertices);
             canvas.renderAll();
@@ -567,7 +568,7 @@ const handleCanvasClick = (e) => {
       canvas.off('mouse:up', onMouseUp);
       canvas.off('mouse:move', onMouseMove);
     };
-  }, []);
+  }, [edgeFrameState]);
 
 
     return (
