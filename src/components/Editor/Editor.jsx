@@ -14,47 +14,48 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
 
+
+    // 프레임 원근법 배경 왜곡 디버깅 코드 + 상태 관리 코드 ------------ (section 1) (정다정)
     //디버깅용
     const containerRef = useRef(null);
 
     const [offset, setOffset] = useState({ left: 0, top: 0 });
     const [top, left, right, bottom] = edgeFrameState;
 
-useEffect(() => {
-  if (containerRef.current) {
-    const rect = containerRef.current.getBoundingClientRect();
-    setOffset({ left: rect.left, top: rect.top });
-  }
-}, []);
+    useEffect(() => {
+    if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setOffset({ left: rect.left, top: rect.top });
+    }
+    }, []);
 
-function isPointInPolygon(point, polygon) {
-  let x = point.x, y = point.y;
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    let xi = polygon[i].x, yi = polygon[i].y;
-    let xj = polygon[j].x, yj = polygon[j].y;
+    function isPointInPolygon(point, polygon) {
+        let x = point.x, y = point.y;
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            let xi = polygon[i].x, yi = polygon[i].y;
+            let xj = polygon[j].x, yj = polygon[j].y;
 
-    let intersect = ((yi > y) !== (yj > y)) &&
-                    (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
+            let intersect = ((yi > y) !== (yj > y)) &&
+                            (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+            
+        }
+        return inside;
+    }
 
     // 예: 마우스 클릭 좌표가 window 기준일 때, 화면 내 좌표로 변환
-const handleCanvasClick = (e) => {
-  const x = e.clientX - offset.left;
-  const y = e.clientY - offset.top;
-  console.log('보정된 좌표:', x, y);
+    const handleCanvasClick = (e) => {
+    const x = e.clientX - offset.left;
+    const y = e.clientY - offset.top;
+    console.log('보정된 좌표:', x, y);
 
-  walls.forEach(wall => {
-    const points = wall.get('points'); // fabric polygon일 경우 get('points')로 접근
-    if (isPointInPolygon({ x, y }, points)) {
-      console.log('이 벽 안에 클릭됨:', wall.get('wallType'));
-    }
-  });
-};
-
+    walls.forEach(wall => {
+        const points = wall.get('points'); // fabric polygon일 경우 get('points')로 접근
+        if (isPointInPolygon({ x, y }, points)) {
+        console.log('이 벽 안에 클릭됨:', wall.get('wallType'));
+        }
+    });
+    };
 
     // 3D 배경 처리용
      // 벽 객체 목록 상태
@@ -67,7 +68,9 @@ const handleCanvasClick = (e) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
 
-    // 공통 스타일
+    // -------------------------------------------------------------- (section 1) (정다정)
+
+    // 공통 스타일 ---------------------------------------------------(section 2) ?
     const controlStyle = {
         transparentCorners: false,
         borderColor: '#A9DB78',
@@ -78,7 +81,9 @@ const handleCanvasClick = (e) => {
         cornerStyle: 'circle',
         borderScaleFactor: 2,
     };
+    // ---------------------------------------------------------------(section 2) ?
 
+    // 프레임 설정 기본값 세팅 ---------------------------------------(section 3) (노은성)
     const roomController = new fabric.Rect({
         ...controlStyle,
         left: 220,
@@ -102,7 +107,8 @@ const handleCanvasClick = (e) => {
         setPosition([roomController.left, roomController.top]);
         setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
     });
-
+    // ---------------------------------------------------------------(section 3) (노은성)
+    // 캔버스 랜더링 기본값 세팅 -------------------------------------(section 4) ?
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
             width: 1100,
@@ -142,7 +148,8 @@ const handleCanvasClick = (e) => {
         textbox.setCoords();
         canvas.add(textbox);
         canvas.renderAll();
-
+        // ---------------------------------------------------------------(section 4) 
+        //                           -------------------------------------(section 5) 
         canvas.on('selection:created', (e) => {
            onObjectSelect(e.selected[0]); // 선택된 객체 전달
         });
@@ -172,7 +179,8 @@ const handleCanvasClick = (e) => {
         setIsReady(true);
         return () => canvas.dispose();
     }, []);
-
+    //                           -------------------------------------(section 5) 
+    // 랜더링 준비되면 추가버튼 활성화 -------------------------------(section 6) 
     useEffect(() => {
         if (isReady) addTextBox();
     }, [addTextTrigger]);
@@ -188,7 +196,9 @@ const handleCanvasClick = (e) => {
             addFrame();
         }
     }, [addFrameTrigger, angle, position, size, edgeFrameState]);
+    //                           -------------------------------------(section 6)
 
+    // 텍스트 추가  --------------------------------------------------(section 7)
     const addTextBox = () => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -221,7 +231,8 @@ const handleCanvasClick = (e) => {
             canvas.renderAll();
         });
     };
-
+    // ---------------------------------------------------------------(section 7)
+    // 도형 추가  ----------------------------------------------------(section 8)
     const addShape = (shapeType) => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -406,7 +417,8 @@ const handleCanvasClick = (e) => {
         canvas.setActiveObject(shape);
         canvas.renderAll();
     };
-
+    // ---------------------------------------------------------------(section 8)
+    // 프레임 추가  --------------------------------------------------(section 9)
     const addFrame = () => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -445,7 +457,7 @@ const handleCanvasClick = (e) => {
         
         canvas.renderAll();
     };
-
+    // ☑️ 오타있음 --------------------------------------------------(section 10)
     const handelSide = () => {
         const canvas = canvasInstance.current;
         const updatedFabric = [];
@@ -719,7 +731,8 @@ const handleCanvasClick = (e) => {
             (false);
         }
     }, [gameZip]);
-
+    // ☑️ 오타있음 --------------------------------------------------(section 10)
+    // 이미지 추가 ---------------------------------------------------(section 11)
     useEffect(() => {
         if (isReady && addImageFile) {
             if (!addImageFile.type.startsWith('image/')) {
@@ -734,7 +747,7 @@ const handleCanvasClick = (e) => {
                     return;
                 }
 
-                setImageUrl(e.target.result); // 이미지 URL 상태 저장
+                setImageUrl(e.target.result); // 이미지 URL 상태 저장 (프레임 조작용- 추가예정✨)
 
                 const imgElement = new Image();
                 imgElement.src = e.target.result;
@@ -769,7 +782,8 @@ const handleCanvasClick = (e) => {
             reader.readAsDataURL(addImageFile);
         }
     }, [addImageFile]);
-
+    // 이미지 추가 ---------------------------------------------------(section 11)
+    // delete --------------------------------------------------------(section 12)
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -797,7 +811,8 @@ const handleCanvasClick = (e) => {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [isReady]);
-
+    // ---------------------------------------------------------------(section 12)
+    // zoom in zoom out ----------------------------------------------(section 13)
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -825,7 +840,8 @@ const handleCanvasClick = (e) => {
             }
         };
     }, [isReady]);
-
+    // ---------------------------------------------------------------(section 13)
+    // 클릭 이벤트----- ----------------------------------------------(section 14)
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -854,7 +870,8 @@ const handleCanvasClick = (e) => {
             document.removeEventListener('mousedown', onDocumentMouseDown);
         };
     }, []);
-
+    // ---------------------------------------------------------------(section 14)
+    // 용도 불명 -----------------------------------------------------(section 15)
     function warpImageToTrapezoid(image, topInset = 40) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -879,6 +896,8 @@ const handleCanvasClick = (e) => {
 
         return canvas;
     }
+    // ---------------------------------------------------------------(section 15)
+    // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     // 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산하는 함수
     function getWallVertices(wall) {
@@ -1119,9 +1138,9 @@ const handleCanvasClick = (e) => {
             canvas.off('mouse:move', onMouseMove);
         };
     }, [edgeFrameState]); // edgeFrameState 변경 시 재실행
+    // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
-
-
+    // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
         <div
         style={{ position: 'relative' }}
