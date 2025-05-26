@@ -128,7 +128,8 @@ function WebGLPerspectiveComponent({ vertices, imageUrl, wallType, width, height
     // (필요하면 더 정교하게 계산 가능)
     const texCoords = [
       // [0, 0], [1, 0], [1, 1], [0, 1]  뒤집어서 나옴. 원본값
-      [1, 1], [0, 1], [0, 0], [1, 0]
+      // [1, 1], [0, 1], [0, 0], [1, 0] 좌우 반전
+      [0, 1], [1, 1], [1, 0], [0, 0]
     ];
 
     // 두 삼각형으로 나누기 (0,1,2)와 (2,3,0)
@@ -141,6 +142,21 @@ function WebGLPerspectiveComponent({ vertices, imageUrl, wallType, width, height
       ...texCoords[0], ...texCoords[1], ...texCoords[2],
       ...texCoords[2], ...texCoords[3], ...texCoords[0]
     ];
+
+    // 삼각형 4개 (12점)
+    // const positions = [
+    //   ...clipPoints[0], ...clipPoints[1], ...clipPoints[2], // 삼각형 1
+    //   ...clipPoints[2], ...clipPoints[3], ...clipPoints[0], // 삼각형 2
+    //   ...clipPoints[0], ...clipPoints[2], ...clipPoints[1], // 삼각형 3
+    //   ...clipPoints[1], ...clipPoints[2], ...clipPoints[3], // 삼각형 4
+    // ];
+
+    // const texCoordinates = [
+    //   ...texCoords[0], ...texCoords[1], ...texCoords[2],
+    //   ...texCoords[2], ...texCoords[3], ...texCoords[0],
+    //   ...texCoords[0], ...texCoords[2], ...texCoords[1],
+    //   ...texCoords[1], ...texCoords[2], ...texCoords[3],
+    // ];
 
     return { positions, texCoordinates };
   };

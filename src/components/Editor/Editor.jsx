@@ -368,18 +368,7 @@ const handleCanvasClick = (e) => {
 
     // 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산
     function getWallVertices(wall) {
-        const points = wall.get('points');
-        if (!points) return [];
-
-        const matrix = wall.calcTransformMatrix(); // 전체 변환 행렬
-
-        const transformedPoints = points.map(p =>
-        fabric.util.transformPoint(new fabric.Point(p.x, p.y), matrix)
-        );
-
-        console.log('캔버스 기준 꼭지점:', transformedPoints);
-
-        return transformedPoints;
+        return wall.get('points') || [];
     }
 
     function getRectVertices(rect) {
@@ -399,34 +388,27 @@ const handleCanvasClick = (e) => {
         return corners.map(p => fabric.util.transformPoint(p, matrix));
     }
 
-    function applyOffsetToVertices(vertices, wallType, top, left, right, bottom) {
-    let offsetX = 0;
-    let offsetY = 0;
+    function applyOffsetToVertices(vertices, wall) {
+        const offsetX = wall.left || 0;
+        const offsetY = wall.top || 0;
+        const angle = wall.angle || 0;
 
-    switch(wallType) {
-        case 'left': // x에 right 값 넣지 않기
-            offsetX = -220+(left/2);
-            offsetY = -330+(top/2)-(bottom/2);
-            break;
-        case 'top': // Y에 bottom 값 넣지 않기기
-            offsetX = -550+(left/2)-(right/2);
-            offsetY = -119+(top/2);
-            break;
-        case 'right': // x에 left 값 넣지 않기
-            offsetX = -880-(right/2);
-            offsetY = -330+(top/2)-(bottom/2);
-            break;
-        case 'bottom': //Y에 top 값 넣지 않기
-            offsetX = -550+(left/2)-(right/2);
-            offsetY = -540-(bottom/2);
-            break;
-        default:
-            break;
+        function rotatePoint(point, angleRad) {
+            const cos = Math.cos(angleRad);
+            const sin = Math.sin(angleRad);
+            return new fabric.Point(
+                point.x * cos - point.y * sin,
+                point.x * sin + point.y * cos
+            );
+        }
+
+        const angleRad = fabric.util.degreesToRadians(angle);
+
+        return vertices.map(pt => {
+            const rotated = rotatePoint(pt, angleRad);
+            return new fabric.Point(rotated.x + offsetX, rotated.y + offsetY);
+        });
     }
-
-        return vertices.map(pt => new fabric.Point(pt.x + offsetX, pt.y + offsetY));
-    }
-
 
     // 캔버스에서 벽 객체들만 추출하는 함수
     function getWallsFromCanvas(canvas) {
@@ -545,7 +527,7 @@ const handleCanvasClick = (e) => {
 
             const vertices = getWallVertices(wallUnderPointer);
             console.log('계산된 vertices:', vertices);
-            const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer.get('wallType'), top, left, right, bottom);
+            const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer.get('wallType'), top, left, right, bottom, roomController);
             setHoveredWallVertices(offsetVertices);
             console.log('WebGL에 넘긴 꼭지점:', vertices);
             canvas.renderAll();
