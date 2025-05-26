@@ -91,10 +91,10 @@ class Frame extends ClassVersion {
 
 class Fabric extends ClassVersion {
     option: Object;
-    event: Object;
+    event: Object[];
     constructor({
         option = {},
-        event = {},
+        event = [{}],
     }) {
         super();
         this.option = option;

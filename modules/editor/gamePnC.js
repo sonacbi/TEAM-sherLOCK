@@ -47,7 +47,7 @@ class Frame extends ClassVersion {
     }
 }
 class Fabric extends ClassVersion {
-    constructor({ option = {}, event = {}, }) {
+    constructor({ option = {}, event = [{}], }) {
         super();
         this.option = option;
         this.event = event;

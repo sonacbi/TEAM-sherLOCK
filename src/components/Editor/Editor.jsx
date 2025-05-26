@@ -457,8 +457,8 @@ const handleCanvasClick = (e) => {
                 new Fabric({
                     name: data?.name,
                     option: {
-                        left: Number(data?.left.toFixed(2)),
-                        top: Number(data?.top.toFixed(2)),
+                        x: Number(data?.left.toFixed(2)),
+                        y: Number(data?.top.toFixed(2)),
                         width: Number(data?.width.toFixed(2)),
                         height: Number(data?.height.toFixed(2)),
                         angle: Number(data?.angle.toFixed(2)),
@@ -528,69 +528,69 @@ const handleCanvasClick = (e) => {
                     return data;
                 })
                 .then(data => {
-                    setPosition([data.frame.x, data.frame.y])
-                    setSize([data.frame.width, data.frame.height])
-                    setAngle(data.frame.angle)
-                    setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom])
+                    setPosition([data.frame.x, data.frame.y]);
+                    setSize([data.frame.width, data.frame.height]);
+                    setAngle(data.frame.angle);
+                    setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom]);
                 })
                 .finally(addFrame());
                 sideData.fabric.forEach((fabricData, fabricIndex) => {
-                    console.log('fabricData',fabricData)
-                    switch (fabricData.option.type) {
+                    const opt = fabricData.option;
+                    switch (opt.type) {
                         case "textbox":
-                            const textbox = new fabric.Textbox(fabricData.option.text, {
+                            const textbox = new fabric.Textbox(opt.text, {
                                 ...controlStyle,
-                                left: fabricData.option.left,
-                                top: fabricData.option.top,
-                                width: fabricData.option.width,
-                                height: fabricData.option.height,
-                                angle: fabricData.option.angle,
-                                scaleX: fabricData.option.scaleX,
-                                scaleY: fabricData.option.scaleY,
-                                fill: fabricData.option.fill,
-                                fillRule: fabricData.option.fillRule,
-                                backgroundColor: fabricData.option.backgroundColor,
-                                borderColor: fabricData.option.borderColor,
-                                text: fabricData.option.text,
-                                textAlign: fabricData.option.textAlign,
-                                textBackgroundColor: fabricData.option.textBackgroundColor,
-                                textLines: fabricData.option.textLines,
-                                fontFamily: fabricData.option.fontFamily,
-                                fontSize: fabricData.option.fontSize,
-                                fontStyle: fabricData.option.fontStyle,
-                                fontWeight: fabricData.option.fontWeight,
-                                strokeWidth: fabricData.option.strokeWidth,
-                                stroke: fabricData.option.stroke,
-                                strokeUniform: fabricData.option.strokeUniform,
-                                editable: fabricData.option.editable,
-                                name: fabricData.option.name,
-                                shapeType: fabricData.option.shapeType,
+                                left: opt.left,
+                                top: opt.top,
+                                width: opt.width,
+                                height: opt.height,
+                                angle: opt.angle,
+                                scaleX: opt.scaleX,
+                                scaleY: opt.scaleY,
+                                fill: opt.fill,
+                                fillRule: opt.fillRule,
+                                backgroundColor: opt.backgroundColor,
+                                borderColor: opt.borderColor,
+                                text: opt.text,
+                                textAlign: opt.textAlign,
+                                textBackgroundColor: opt.textBackgroundColor,
+                                textLines: opt.textLines,
+                                fontFamily: opt.fontFamily,
+                                fontSize: opt.fontSize,
+                                fontStyle: opt.fontStyle,
+                                fontWeight: opt.fontWeight,
+                                strokeWidth: opt.strokeWidth,
+                                stroke: opt.stroke,
+                                strokeUniform: opt.strokeUniform,
+                                editable: opt.editable,
+                                name: opt.name,
+                                shapeType: opt.shapeType,
                             });
                             canvas.add(textbox);
                             canvas.setActiveObject(textbox);
                             break;
                         case "line":
-                            const line = new fabric.Line({...controlStyle, ...fabricData.option});
+                            const line = new fabric.Line({...controlStyle, ...opt});
                             canvas.add(line);
                             canvas.setActiveObject(line);
                             break;
                         case "rect":
-                            const rect = new fabric.Rect({...controlStyle, ...fabricData.option});
+                            const rect = new fabric.Rect({...controlStyle, ...opt});
                             canvas.add(rect);
                             canvas.setActiveObject(rect);
                             break;
                         case "triangle":
-                            const triangle = new fabric.Triangle({...controlStyle, ...fabricData.option});
+                            const triangle = new fabric.Triangle({...controlStyle, ...opt});
                             canvas.add(triangle);
                             canvas.setActiveObject(triangle);
                             break;
                         case "circle":
-                            const circle = new fabric.Circle({...controlStyle, ...fabricData.option});
+                            const circle = new fabric.Circle({...controlStyle, ...opt});
                             canvas.add(circle);
                             canvas.setActiveObject(circle);
                             break;
                         case "image":
-                            const foundImg = imgs.find(img => img.name === fabricData.option.name);
+                            const foundImg = imgs.find(img => img.name === opt.name);
                             console.log('foundImg',foundImg)
                             if (foundImg) {
                                 const reader = new FileReader();
@@ -602,7 +602,7 @@ const handleCanvasClick = (e) => {
                                         // const warpedCanvas = warpImageToTrapezoid(imgElement, 40);
                                         // const fabricImage = new fabric.Image(warpedCanvas, {
                                         const fabricImage = new fabric.Image(imgElement, {
-                                            ...controlStyle, ...fabricData.option
+                                            ...controlStyle, ...opt
                                         });
                                         canvasInstance.current.add(fabricImage);
                                         canvasInstance.current.setActiveObject(fabricImage);
@@ -616,21 +616,21 @@ const handleCanvasClick = (e) => {
                                 };
                                 reader.readAsDataURL(foundImg);
                             } else {
-                                console.warn('이미지 소스를 찾을 수 없습니다.', fabricData.option.name);
+                                console.warn('이미지 소스를 찾을 수 없습니다.', opt.name);
                             }
                             break;
                         case "polygon":
-                            const polygon = new fabric.Polygon({...controlStyle, ...fabricData.option});
+                            const polygon = new fabric.Polygon({...controlStyle, ...opt});
                             canvas.add(polygon);
                             canvas.setActiveObject(polygon);
                             break;
                         case "path":
-                            const path = new fabric.Path({...controlStyle, ...fabricData.option});
+                            const path = new fabric.Path({...controlStyle, ...opt});
                             canvas.add(path);
                             canvas.setActiveObject(path);
                             break;
                         default:
-                            console.error(`${fabricData.option.type} 잘못된 도형입니다`)
+                            console.error(`${opt.type} 잘못된 도형입니다`)
                             break;
                     }
                     canvas.renderAll();
