@@ -74,19 +74,6 @@ function EditorPage() {
         }
     }, []);
 
-
-    // 디버깅용 보정치 체크 (- 삭제예정 -)
-    const editorContainerRef = useRef(null);
-    const [editorOffset, setEditorOffset] = useState({ left: 0, top: 0 });
-
-    useEffect(() => {
-        if (editorContainerRef.current) {
-        const rect = editorContainerRef.current.getBoundingClientRect();
-        setEditorOffset({ left: rect.left, top: rect.top });
-        console.log('Editor container offset:', rect.left, rect.top);
-        }
-    }, []);
-
     const handleAddTextBox = () => {
         setAddTextTrigger(Date.now());
         setSelectedTool('text');
