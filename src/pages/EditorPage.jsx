@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Editor from '../components/Editor/Editor';
@@ -27,6 +27,7 @@ function EditorPage() {
     const [addShapeTrigger, setAddShapeTrigger] = useState(0);
     const [addImageFile, setAddImageFile] = useState(null);
     const [addFrameTrigger, setAddFrameTrigger] = useState(0);
+    const [gameZip, setGameZip] = useState(null);
 
     const roomFrameStateOrigin = [220, 120, 440, 300, 170, 240, 240, 150]; // 원본
     const [edgeFrameState, setEdgeFrameState] = useState([170, 240, 240, 150]); // 외곽 모서리
@@ -75,11 +76,15 @@ function EditorPage() {
         })));
     }
 
+    useEffect(()=>console.log('imgs',imgs), [imgs])
+
     return (
         <div className='EditorPage_wrap'>
             <header className='Editor_header'>
                 <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                 <img id='logo' src={logo} alt='logo' />
+
+                <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
                 <div className='room_status_title'>
                     <p className='room_status_button'>방탈출 정보</p>
@@ -152,7 +157,7 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState} saveTool={{game, setGame, room, setRoom, side, setSide}}/>
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState} setEdgeFrameState={setEdgeFrameState} saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}} gameZip={gameZip} setGameZip={setGameZip}/>
                         </div>
                     </div>
 
