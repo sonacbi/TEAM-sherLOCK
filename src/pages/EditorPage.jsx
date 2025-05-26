@@ -36,6 +36,19 @@ function EditorPage() {
 
     const navigate = useNavigate();
 
+
+    // 디버깅용 보정치 체크 (- 삭제예정 -)
+    const editorContainerRef = useRef(null);
+    const [editorOffset, setEditorOffset] = useState({ left: 0, top: 0 });
+
+    useEffect(() => {
+        if (editorContainerRef.current) {
+        const rect = editorContainerRef.current.getBoundingClientRect();
+        setEditorOffset({ left: rect.left, top: rect.top });
+        console.log('Editor container offset:', rect.left, rect.top);
+        }
+    }, []);
+
     const handleAddTextBox = () => {
         setAddTextTrigger(Date.now());
     };
@@ -157,7 +170,7 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState} setEdgeFrameState={setEdgeFrameState} saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}} gameZip={gameZip} setGameZip={setGameZip}/>
+                            <Editor addTextTrigger={addTextTrigger} addShapeTrigger={addShapeTrigger} addImageFile={addImageFile} addFrameTrigger={addFrameTrigger} edgeFrameState={edgeFrameState} editorOffset={editorOffset} setEdgeFrameState={setEdgeFrameState} saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}} gameZip={gameZip} setGameZip={setGameZip}/>
                         </div>
                     </div>
 

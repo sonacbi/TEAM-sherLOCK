@@ -32,10 +32,10 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
 
     // 방 프레임 가중치?
     const frameEdgeWeight = {
-        top: fewt,
-        left: fewl,
-        right: fewr,
-        bottom: fewb
+        top: fewt || 0,
+        left: fewl || 0,
+        right: fewr || 0,
+        bottom: fewb || 0,
     };
     // 외곽 모서리
     const frameEdge = (fpl == undefined && fpt == undefined && fsw == undefined && fsh == undefined && fewt == undefined && fewl == undefined && fewr == undefined && fewb == undefined) ? [
@@ -66,6 +66,9 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
         ...frontSize,
         fill: 'rgba(0, 0, 0, 0)',
         name: "SherLockRoomFrame",
+        wallType: 'front',
+        originX: 'left',   
+        originY: 'top',
     });
 
 
@@ -85,6 +88,9 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
         fill: 'rgba(255, 0, 255, 0.2)',
         stroke: 'purple',
         name: "SherLockRoomFrame",
+        wallType: 'top',
+        originX: 'left',   
+        originY: 'top',
     });
     
     // 왼쪽 벽면
@@ -100,6 +106,9 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
         fill: 'rgba(0, 0, 255, 0.2)',
         stroke: 'blue',
         name: "SherLockRoomFrame",
+        wallType: 'left',
+        originX: 'left',   
+        originY: 'top',
     });
     
     // 오른쪽 벽면
@@ -115,6 +124,9 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
         fill: 'rgba(0, 255, 0, 0.2)',
         stroke: 'green',
         name: "SherLockRoomFrame",
+        wallType: 'right',
+        originX: 'left',   
+        originY: 'top',
     });
     
     // 바닥면
@@ -130,12 +142,18 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
         fill: 'rgba(255, 255, 0, 0.2)',
         stroke: 'orange',
         name: "SherLockRoomFrame",
+        wallType: 'bottom',
+        originX: 'left',   
+        originY: 'top',
     });
 
     // 그룹화
     const group = new fabric.Group([front, top, left, right, bottom], {
         ...controlStyle,
         name: "SherLockRoomFrame",
+        wallType: "frame",  // 혹은 적절한 타입
+        originX: 'left',   
+        originY: 'top',
     })
 
     return group;
