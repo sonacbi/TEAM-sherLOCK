@@ -1,7 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Editor from '../components/Editor/Editor';
+import SaveToServer from '../components/Editor/SaveToServer';
+import { GamePnC, Room, Side } from '../../modules/editor/gamePnC';
+import { GameInfo } from '../../modules/game-modules';
 import '../styles/EditorPage.css';
 
 import logo from '../assets/images/logo/footer_logo.png'
@@ -31,12 +34,20 @@ import bubble7 from '../assets/images/EditorPage_img/bubble/bubble7.png';
 import bubble8 from '../assets/images/EditorPage_img/bubble/bubble8.png';
 
 function EditorPage() {
+    const [game, setGame] = useState(new GamePnC({}));
+    const [room, setRoom] = useState(new Room({}));
+    const [side, setSide] = useState(new Side({})); // 임시(나중에 방의 방향을 생성할 때 만들어지게 할 것임)
+    const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
+    const [thumbnail, setThumbnail] = useState(new File([], ''));
+    const [imgs, setImgs] = useState([new File([], '')]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
     const [addFrameTrigger, setAddFrameTrigger] = useState(0);
+    const [gameZip, setGameZip] = useState(null);
 
-    const [roomFrameState, setRoomFrameState] = useState([220, 120, 440, 300, 170, 240, 240, 150]);
+    const roomFrameStateOrigin = [220, 120, 440, 300, 170, 240, 240, 150]; // 원본
+    const [edgeFrameState, setEdgeFrameState] = useState([170, 240, 240, 150]); // 외곽 모서리
 
     const fileInputRef = useRef(null);
 
@@ -49,6 +60,32 @@ function EditorPage() {
         setAddFrameTrigger(Date.now());
         setSelectedTool('frame');
     };
+
+
+    // 디버깅용 보정치 체크 (- 삭제예정 -)
+    const editorContainerRef = useRef(null);
+    const [editorOffset, setEditorOffset] = useState({ left: 0, top: 0 });
+
+    useEffect(() => {
+        if (editorContainerRef.current) {
+        const rect = editorContainerRef.current.getBoundingClientRect();
+        setEditorOffset({ left: rect.left, top: rect.top });
+        console.log('Editor container offset:', rect.left, rect.top);
+        }
+    }, []);
+
+
+    // 디버깅용 보정치 체크 (- 삭제예정 -)
+    const editorContainerRef = useRef(null);
+    const [editorOffset, setEditorOffset] = useState({ left: 0, top: 0 });
+
+    useEffect(() => {
+        if (editorContainerRef.current) {
+        const rect = editorContainerRef.current.getBoundingClientRect();
+        setEditorOffset({ left: rect.left, top: rect.top });
+        console.log('Editor container offset:', rect.left, rect.top);
+        }
+    }, []);
 
     const handleAddTextBox = () => {
         setAddTextTrigger(Date.now());
@@ -84,6 +121,7 @@ function EditorPage() {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
+        setImgs([...imgs, file]);
         if (file) {
             setAddImageFile(file);
         }
@@ -101,19 +139,31 @@ function EditorPage() {
         setSelectedTool('event');
     };
 
-    const handelRoomFrameState = (event, index) => {
-        setRoomFrameState(prev => {
+    const handleEdgeFrameState = (event, index) => {
+        setEdgeFrameState(prev => {
             const newArray = [...prev];
             newArray[index] = Number(event.target.value);
             return newArray;
-        })
+        });
+    };
+
+    const saveGame = () => {
+        setGame(prev => (new GamePnC({
+            ...prev,
+            // room: [...prev.room, {...room}], // 나중에 game.room[index] 각 인덱스에 저장하게끔
+            room: [{...room}],
+        })));
     }
+
+    useEffect(()=>console.log('imgs',imgs), [imgs])
 
     return (
         <div className='EditorPage_wrap'>
             <header className='Editor_header'>
                 <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                 <img id='logo' src={logo} alt='logo' />
+
+                <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
                 <div className='room_status_title'>
                     <p className='room_status_button'>방탈출 정보</p>
@@ -125,7 +175,7 @@ function EditorPage() {
                         <img id='save_icon' src={save_icon} alt='save_icon' />
                     </p>
                     
-                    <p className='submit_button'>제출</p>
+                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} room={room} saveGame={saveGame}/>
                 </div>
             </header>
 
@@ -184,14 +234,10 @@ function EditorPage() {
                             <>
                                 {selectedTool === 'frame' && (
                                     <div className='frame_fine_tuning'>
-                                        x: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[0]} step={10} list='' onChange={event => handelRoomFrameState(event, 0)}/> {roomFrameState[0]} <br />
-                                        y: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[1]} step={10} list='' onChange={event => handelRoomFrameState(event, 1)}/> {roomFrameState[1]} <br />
-                                        width: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[2]} step={10} list='' onChange={event => handelRoomFrameState(event, 2)}/> {roomFrameState[2]} <br />
-                                        height: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[3]} step={10} list='' onChange={event => handelRoomFrameState(event, 3)}/> {roomFrameState[3]} <br />
-                                        top: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[4]} step={10} list='' onChange={event => handelRoomFrameState(event, 4)}/> {roomFrameState[4]} <br />
-                                        left: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[5]} step={10} list='' onChange={event => handelRoomFrameState(event, 5)}/> {roomFrameState[5]} <br />
-                                        right: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[6]} step={10} list='' onChange={event => handelRoomFrameState(event, 6)}/> {roomFrameState[6]} <br />
-                                        bottom: <input id="roomFrame0" type="range" min={0} max={330} value={roomFrameState[7]} step={10} list='' onChange={event => handelRoomFrameState(event, 7)}/> {roomFrameState[7]} <br />
+                                        top: <input id="roomFrame0" type="range" min={120} max={800} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
+                                        left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
+                                        right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
+                                        bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
                                     </div>
                                 )}
 
@@ -266,13 +312,17 @@ function EditorPage() {
                 <div className='Editor_screen'>
                     <div className='screen_area'>
                         <div className='screen'>
-                            <Editor 
-                                addTextTrigger={addTextTrigger} 
-                                addShapeTrigger={addShapeTrigger} 
-                                addImageFile={addImageFile} 
+                            <Editor
+                                addTextTrigger={addTextTrigger}
+                                addShapeTrigger={addShapeTrigger}
+                                addImageFile={addImageFile}
                                 addFrameTrigger={addFrameTrigger} 
-                                roomFrameState={roomFrameState} 
                                 onObjectSelect={setSelectedObject}
+                                edgeFrameState={edgeFrameState}
+                                editorOffset={editorOffset}
+                                setEdgeFrameState={setEdgeFrameState}
+                                saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}}
+                                gameZip={gameZip} setGameZip={setGameZip}
                             />
                         </div>
                     </div>

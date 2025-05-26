@@ -1,6 +1,6 @@
 import { useState } from "react";
 import JSZip from 'jszip';
-import { Game, GameInfo, Source, Stage, Cut, Theme, Visibility, StageType  } from "../../modules/game-modules"
+import { Game, GameInfo, Source, Stage, Cut, Theme, Visibility, GameInfoType, StageType  } from "../../modules/game-modules"
 import "../styles/Workspace.css"
 import SaveZIPGameToLocal from "../components/Workspace/SaveZIPGameToLocal";
 import SaveGameToServer from "../components/Workspace/SaveGameToServer";
@@ -133,6 +133,7 @@ export default function Workspace() {
         const thumbnail = formData.get("thumbnail").name;
         setThumbnailImg(formData.get("thumbnail"));
         const theme = formData.get("theme");
+        const type = formData.get("type");
         const visibility = formData.get("visibility");
         const description = formData.get("description");
         const difficulty = formData.get("difficulty");
@@ -144,11 +145,12 @@ export default function Workspace() {
                 ...prev,
                 title: title,
                 thumbnail: thumbnail,
-                description: description,
                 theme: theme,
+                type: type,
+                visibility: visibility,
+                description: description,
                 difficulty: difficulty,
                 playTime: playTime,
-                visibility: visibility,
                 isRanking: isRanking,
                 isHiddenStage: isHiddenStage
             };
@@ -279,6 +281,16 @@ export default function Workspace() {
                             </label>
                             <label>범죄
                                 <input type="radio" name="theme" value={Theme.crime} defaultChecked={gameInfo.theme == Theme.crime} key={gameInfo.theme}/>
+                            </label>
+                        </label>
+                    </div>
+                    <div>
+                        <label>타입:
+                            <label>일반
+                                <input type="radio" name="type" value={GameInfoType.general} defaultChecked={gameInfo.type == GameInfoType.general} key={gameInfo.type}/>
+                            </label>
+                            <label>포인트 앤 클릭
+                                <input type="radio" name="type" value={GameInfoType.general} defaultChecked={gameInfo.type == GameInfoType.general} key={gameInfo.type}/>
                             </label>
                         </label>
                     </div>

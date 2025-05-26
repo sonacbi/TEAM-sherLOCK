@@ -15,6 +15,7 @@ router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
   console.log('param',req.params)
   // console.log('파일',req)
   const gameId = req.params.game_id
+  const { type } = JSON.parse(req.body.gameInfo);
   try {
     const zipPath = req.file.path;
     const zip = new AdmZip(zipPath);
@@ -27,9 +28,9 @@ router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
       return res.status(400).json({ message: 'ZIP 안에 JSON 파일이 없습니다.' });
     }
     
-    zip.extractAllTo(`server/games/${gameId}`, true);
+    zip.extractAllTo(`server/games/${type}/${gameId}`, true);
     
-    fs.copyFileSync(zipPath, `server/games/${gameId}/game.zip`);
+    fs.copyFileSync(zipPath, `server/games/${type}/${gameId}/game.zip`);
 
     console.log("🎉서버에 게임파일이 저장되었습니다!")
   } catch (err) {
@@ -56,7 +57,7 @@ router.put('/:game_id', async (req, res) => {
   const gameId = req.params.game_id;
   const {title, thumbnail, theme, type, visibility, description, difficulty, playTime, isRanking, isHiddenStage} = JSON.parse(req.body.gameInfo)
   try {
-    await db.query("UPDATE game SET updated_at = CURRENT_TIMESTAMP, title = ?, thumbnail = ?, theme = ?, type = ?, visibility = ?, description = ?, difficulty = ?, playTime = ?, isLanking = ?, isHiddenStage = ? WHERE game_id = ?;",
+    await db.query("UPDATE game SET updated_at = CURRENT_TIMESTAMP, title = ?, thumbnail = ?, theme = ?, type = ? visibility = ?, description = ?, difficulty = ?, playTime = ?, isLanking = ?, isHiddenStage = ? WHERE game_id = ?;",
       [title, thumbnail, theme, type, visibility, description, difficulty, playTime, isRanking, isHiddenStage, gameId])
   } catch (err) {
     return res.status(500).send(err);
