@@ -366,33 +366,65 @@ const handleCanvasClick = (e) => {
         return canvas;
     }
 
-    // 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산
+    // 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산하는 함수
     function getWallVertices(wall) {
-        return wall.get('points') || [];
+        if (!wall || !wall.get('points')) return [];
+
+        const points = wall.get('points'); // polygon의 로컬 좌표 (path 좌표)
+        const matrix = wall.calcTransformMatrix(); // 벽 객체의 전체 변환 행렬 (이동, 회전, 스케일 포함)
+
+        // polygon의 기준점인 pathOffset (left/top 기준 보정값)
+        const offsetX = wall.pathOffset?.x || 0;
+        const offsetY = wall.pathOffset?.y || 0;
+
+        // 각 로컬 좌표에서 pathOffset 보정 후, 전체 변환 행렬을 적용하여 캔버스 좌표계로 변환
+        return points.map(p => {
+            const localPoint = new fabric.Point(p.x - offsetX, p.y - offsetY);
+            const transformed = fabric.util.transformPoint(localPoint, matrix);
+            return transformed;
+        });
     }
 
+    // 사각형(rect) 객체의 4개 꼭지점 좌표를 계산하는 함수
     function getRectVertices(rect) {
         const left = rect.left;
         const top = rect.top;
-        const width = rect.width;
-        const height = rect.height;
+        const width = rect.width * rect.scaleX;   // 스케일 적용된 실제 너비
+        const height = rect.height * rect.scaleY; // 스케일 적용된 실제 높이
 
-        const corners = [
+        // 좌상단, 우상단, 우하단, 좌하단 꼭지점 배열 리턴
+        return [
             new fabric.Point(left, top),
             new fabric.Point(left + width, top),
             new fabric.Point(left + width, top + height),
-            new fabric.Point(left, top + height)
+            new fabric.Point(left, top + height),
         ];
-
-        const matrix = rect.calcTransformMatrix();
-        return corners.map(p => fabric.util.transformPoint(p, matrix));
     }
 
-    function applyOffsetToVertices(vertices, wall) {
-        const offsetX = wall.left || 0;
-        const offsetY = wall.top || 0;
-        const angle = wall.angle || 0;
+    // 방 프레임 그룹 생성 후, 내부 객체들을 순회하며 각 객체의 꼭지점 구하기
+    const roomFrameGroup = createRoomFrame();
 
+    roomFrameGroup.getObjects().forEach((obj) => {
+        let vertices;
+        if (obj.type === 'polygon') {
+            // 폴리곤은 points 배열을 fabric.Point로 변환
+            vertices = obj.points.map(pt => new fabric.Point(pt.x, pt.y));
+        } else if (obj.type === 'rect') {
+            // 사각형은 getRectVertices 함수 사용
+            vertices = getRectVertices(obj);
+        }
+        console.log(obj.wallType, vertices);
+    });
+
+    // 꼭지점에 오프셋(이동)과 회전을 적용하는 함수
+    function applyOffsetToVertices(vertices, wall) {
+        if (!vertices || vertices.length === 0) return [];
+
+        const offsetX = wall.left || 0;    // 벽 객체의 캔버스 좌표 X
+        const offsetY = wall.top || 0;     // 벽 객체의 캔버스 좌표 Y
+        const angle = wall.angle || 0;     // 벽 객체의 회전 각도 (도 단위)
+
+        // 점 하나를 주어진 각도만큼 회전시키는 내부 함수 (rad 단위)
         function rotatePoint(point, angleRad) {
             const cos = Math.cos(angleRad);
             const sin = Math.sin(angleRad);
@@ -404,6 +436,7 @@ const handleCanvasClick = (e) => {
 
         const angleRad = fabric.util.degreesToRadians(angle);
 
+        // 각 꼭지점에 대해 회전 후, offset(이동) 적용하여 캔버스 좌표계로 변환
         return vertices.map(pt => {
             const rotated = rotatePoint(pt, angleRad);
             return new fabric.Point(rotated.x + offsetX, rotated.y + offsetY);
@@ -422,135 +455,152 @@ const handleCanvasClick = (e) => {
         objects.forEach((obj, idx) => {
             console.log(`객체[${idx}]: type=${obj.type}, name=${obj.name}, wallType=${obj.get('wallType')}`);
 
-        // 그룹 객체인 경우
-        if (obj.type === 'group') {
-          // 그룹 내부에서 wallType이 특정 값인 객체만 필터링
-            const groupWalls = obj._objects.filter(o =>
-                ['front', 'bottom', 'left', 'right', 'top'].includes(o.get('wallType'))
-            );
-            console.log(`  그룹 내부 벽 객체 개수: ${groupWalls.length}`);
+            // 그룹 객체인 경우, 그룹 내부 객체 중 벽 유형에 해당하는 객체만 필터링
+            if (obj.type === 'group') {
+                const groupWalls = obj._objects.filter(o =>
+                    ['front', 'bottom', 'left', 'right', 'top'].includes(o.get('wallType'))
+                );
+                console.log(`  그룹 내부 벽 객체 개수: ${groupWalls.length}`);
 
-            groupWalls.forEach((w, i) => {
-                console.log(`    벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
-            });
+                groupWalls.forEach((w, i) => {
+                    console.log(`    벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
+                });
 
-            walls = walls.concat(groupWalls);
-        } else {
-          // 그룹이 아닌 객체 중 wallType이 벽에 해당하는 경우
-            if (['front', 'bottom', 'left', 'right', 'top'].includes(obj.get('wallType'))) {
-                console.log(`  그룹 밖 벽 객체 발견: wallType=${obj.get('wallType')}`);
-                walls.push(obj);
+                walls = walls.concat(groupWalls);
+            } else {
+                // 그룹이 아닌 단일 객체 중 벽 유형에 해당하는 경우 바로 추가
+                if (['front', 'bottom', 'left', 'right', 'top'].includes(obj.get('wallType'))) {
+                    console.log(`  그룹 밖 벽 객체 발견: wallType=${obj.get('wallType')}`);
+                    walls.push(obj);
+                }
             }
-        }
-            });
+        });
 
-            console.log('최종 벽 객체 개수:', walls.length);
-            walls.forEach((w, i) => {
-                console.log(`벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
-            });
+        console.log('최종 벽 객체 개수:', walls.length);
+        walls.forEach((w, i) => {
+            console.log(`벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
+        });
 
         return walls;
     }
 
-    // 드래그 중인지 상태 저장용 (useRef)
+    // React 훅에서 드래그 상태 저장용 useRef
     const isDragging = useRef(false);
-    // 현재 호버 중인 벽 객체 로컬 변수 (이벤트 핸들러 내부용)
+    // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
     const hoveredWallLocal = useRef(null);
-    // 원래 스타일 저장용 맵
+    // 원래 스타일을 저장하는 Map (객체별)
     const originalStyles = useRef(new Map());
 
+    // 호버 상태가 끝났을 때 원래 스타일로 복원하는 함수
     function restoreWallStyle() {
         if (!hoveredWallLocal.current) return;
         const original = originalStyles.current.get(hoveredWallLocal.current);
         if (original) {
-        hoveredWallLocal.current.set({
-            fill: original.fill,
-            stroke: original.stroke,
-        });
-        originalStyles.current.delete(hoveredWallLocal.current);
-        canvasInstance.current.renderAll();
+            hoveredWallLocal.current.set({
+                fill: original.fill,
+                stroke: original.stroke,
+            });
+            originalStyles.current.delete(hoveredWallLocal.current);
+            canvasInstance.current.renderAll();
         }
     }
-    // 캔버스 이벤트 등록
+
+    // 캔버스 이벤트 등록 및 상태 관리용 useEffect
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
-            const canvasWidth = canvas.getWidth();
-            const canvasHeight = canvas.getHeight();
-            
-        // 벽 목록 초기 설정
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+
+        // 초기 벽 목록을 상태로 세팅
         setWalls(getWallsFromCanvas(canvas));
 
-        // 이벤트 핸들러
+        // 오브젝트 이동 시작 시 드래그 상태 true
         const onObjectMoving = () => {
             isDragging.current = true;
         };
 
+        // 마우스 버튼 떼면 드래그 종료, 스타일 복원
         const onMouseUp = () => {
             isDragging.current = false;
             restoreWallStyle();
 
-        // 드롭 시점에서 hoveredWallLocal 이 존재하면 (벽 위에 드롭) WebGL 4점 왜곡 확정 로직 가능
-        // 예) setImageUrl(null) 등으로 상태 정리하거나, 드래그 완료 후 추가 처리
-        // 드롭이 벽 밖이라면 4점 왜곡 렌더링 취소(hoveredWallVertices 비우기 등)
+            // 드롭 시점에서 hoveredWallLocal 존재하면
+            // WebGL 4점 왜곡 확정 로직 가능 (추가 처리 위치)
         };
 
-    const onMouseMove = opt => {
-        if (!isDragging.current) return;
+        // 마우스 이동 시, 드래그 중이면 벽 위에 마우스가 있는지 체크
+        const onMouseMove = opt => {
+            if (!isDragging.current) return;
 
-        const pointer = canvas.getPointer(opt.e);
-        const currentWalls = getWallsFromCanvas(canvas);
+            const pointer = canvas.getPointer(opt.e);
+            const currentWalls = getWallsFromCanvas(canvas);
 
-        // pointer 가 포함된 벽 객체 찾기 (containsPoint 함수가 fabric에 존재해야 함)
-        const wallUnderPointer = currentWalls.find(wall => wall.containsPoint(pointer));
+            // 마우스 위치가 포함된 벽 객체 찾기 (containsPoint 함수 사용)
+            const wallUnderPointer = currentWalls.find(wall => wall.containsPoint(pointer));
 
-        console.log('points:', wallUnderPointer?.get('points'));
+            if (wallUnderPointer && wallUnderPointer !== hoveredWallLocal.current) {
+                // 이전 호버 스타일 복원
+                restoreWallStyle();
 
-        if (wallUnderPointer && wallUnderPointer !== hoveredWallLocal.current) {
-            restoreWallStyle();
+                // 새로 호버된 객체 스타일 원본 저장
+                if (!originalStyles.current.has(wallUnderPointer)) {
+                    originalStyles.current.set(wallUnderPointer, {
+                        fill: wallUnderPointer.fill,
+                        stroke: wallUnderPointer.stroke,
+                    });
+                }
 
-            if (!originalStyles.current.has(wallUnderPointer)) {
-            originalStyles.current.set(wallUnderPointer, {
-                fill: wallUnderPointer.fill,
-                stroke: wallUnderPointer.stroke,
-            });
+                // 새 호버된 벽 객체 스타일 변경 (하이라이트)
+                wallUnderPointer.set({
+                    fill: 'rgba(180,180,180,0.7)',
+                    stroke: '#555',
+                });
+
+                hoveredWallLocal.current = wallUnderPointer;
+                setHoveredWall(wallUnderPointer);
+
+                // 1) 벽의 로컬 좌표 꼭지점 배열 계산
+                const vertices = getWallVertices(wallUnderPointer);
+                console.log('원본 vertices:', vertices);
+
+                // 2) 벽 위치, 회전값 가져오기
+                const left = wallUnderPointer.left || 0;
+                const top = wallUnderPointer.top || 0;
+                const angle = wallUnderPointer.angle || 0;
+
+                // 3) 꼭지점 좌표에 오프셋(회전+이동) 적용
+                const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer);
+                console.log('offsetVertices:', offsetVertices);
+
+                setHoveredWallVertices(vertices);
+
+                canvas.renderAll();
             }
 
-            wallUnderPointer.set({
-            fill: 'rgba(180,180,180,0.7)',
-            stroke: '#555',
-            });
-
-            hoveredWallLocal.current = wallUnderPointer;
-            setHoveredWall(wallUnderPointer);
-
-            const vertices = getWallVertices(wallUnderPointer);
-            console.log('계산된 vertices:', vertices);
-            const offsetVertices = applyOffsetToVertices(vertices, wallUnderPointer.get('wallType'), top, left, right, bottom, roomController);
-            setHoveredWallVertices(offsetVertices);
-            console.log('WebGL에 넘긴 꼭지점:', vertices);
-            canvas.renderAll();
-        }
-
-        if (!wallUnderPointer && hoveredWallLocal.current) {
-            restoreWallStyle();
-            hoveredWallLocal.current = null;
-            setHoveredWall(null);
-            setHoveredWallVertices([]);
-        }
+            // 벽 객체가 없으면 호버 상태 초기화
+            if (!wallUnderPointer && hoveredWallLocal.current) {
+                restoreWallStyle();
+                hoveredWallLocal.current = null;
+                setHoveredWall(null);
+                setHoveredWallVertices([]);
+            }
         };
 
-    canvas.on('object:moving', onObjectMoving);
-    canvas.on('mouse:up', onMouseUp);
-    canvas.on('mouse:move', onMouseMove);
+        // 이벤트 등록
+        canvas.on('object:moving', onObjectMoving);
+        canvas.on('mouse:up', onMouseUp);
+        canvas.on('mouse:move', onMouseMove);
 
-    return () => {
-      canvas.off('object:moving', onObjectMoving);
-      canvas.off('mouse:up', onMouseUp);
-      canvas.off('mouse:move', onMouseMove);
-    };
-  }, [edgeFrameState]);
+        // 클린업 함수 (컴포넌트 언마운트 시 이벤트 제거)
+        return () => {
+            canvas.off('object:moving', onObjectMoving);
+            canvas.off('mouse:up', onMouseUp);
+            canvas.off('mouse:move', onMouseMove);
+        };
+    }, [edgeFrameState]); // edgeFrameState 변경 시 재실행
+
 
 
     return (
