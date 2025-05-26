@@ -710,7 +710,12 @@ const handleCanvasClick = (e) => {
     }
 
     // 방 프레임 그룹 생성 후, 내부 객체들을 순회하며 각 객체의 꼭지점 구하기
-    const roomFrameGroup = createRoomFrame();
+    const roomFrameGroup = createRoomFrame(
+        ...position,
+        ...size,
+        ...edgeFrameState,
+        angle
+    );
 
     roomFrameGroup.getObjects().forEach((obj) => {
         let vertices;
