@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
-import JSZip from 'jszip';
 import { createRoomFrame } from '../../../modules/handlePolygon';
-import { GamePnC, Room, Side, Frame, Fabric } from '../../../modules/editor/gamePnC';
-import { handleSide, loadGame, loadGameZip } from '../../../modules/editor/hadleGame';
+import { Frame } from '../../../modules/editor/gamePnC';
+import { handleSide, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, editorOffset, setEdgeFrameState, saveTool, gameZip, setGameZip, onObjectSelect }) {
-    const {game, setGame, room, setRoom, side, setSide, imgs, setImgs} = saveTool;
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect }) {
+    const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
@@ -20,46 +19,15 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     //디버깅용
     const containerRef = useRef(null);
 
-    const [offset, setOffset] = useState({ left: 0, top: 0 });
-    const [top, left, right, bottom] = edgeFrameState;
-
     useEffect(() => {
-    if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setOffset({ left: rect.left, top: rect.top });
-    }
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            setOffset({ left: rect.left, top: rect.top });
+        }
     }, []);
 
-    function isPointInPolygon(point, polygon) {
-        let x = point.x, y = point.y;
-        let inside = false;
-        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-            let xi = polygon[i].x, yi = polygon[i].y;
-            let xj = polygon[j].x, yj = polygon[j].y;
-
-            let intersect = ((yi > y) !== (yj > y)) &&
-                            (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
-            
-        }
-        return inside;
-    }
-
-    // 예: 마우스 클릭 좌표가 window 기준일 때, 화면 내 좌표로 변환
-    const handleCanvasClick = (e) => {
-    const x = e.clientX - offset.left;
-    const y = e.clientY - offset.top;
-    console.log('보정된 좌표:', x, y);
-
-    walls.forEach(wall => {
-        const points = wall.get('points'); // fabric polygon일 경우 get('points')로 접근
-        if (isPointInPolygon({ x, y }, points)) {
-        console.log('이 벽 안에 클릭됨:', wall.get('wallType'));
-        }
-    });
-    };
-
     // 3D 배경 처리용
-     // 벽 객체 목록 상태
+    // 벽 객체 목록 상태
     const [walls, setWalls] = useState([]);
     // 현재 호버된 벽 객체 상태
     const [hoveredWall, setHoveredWall] = useState(null);
@@ -856,40 +824,35 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
-        <div
-        style={{ position: 'relative' }}
-        ref={containerRef}
-        onClick={handleCanvasClick} // 여기로 옮김
-        >
-        <canvas
-            ref={canvasRef}
-            id="my-canvas"
-            width={1100}
-            height={650}
-            style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-            
-        />
+        <>
+            <canvas
+                ref={canvasRef}
+                id="my-canvas"
+                width={1100}
+                height={650}
+                style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+            />
 
-        <div
-            style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                zIndex: 2,
-                pointerEvents: 'none',
-                width: 1100,
-                height: 650,
-            }}
-        >
-        <WebGLPerspectiveComponent
-            vertices={hoveredWallVertices}
-            imageUrl={imageUrl}
-            wallType={hoveredWall ? hoveredWall.get('wallType') : null}
-            width={1100}
-            height={650}
-        />
-        </div>
-    </div>
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                    width: 1100,
+                    height: 650,
+                }}
+            >
+                <WebGLPerspectiveComponent
+                    vertices={hoveredWallVertices}
+                    imageUrl={imageUrl}
+                    wallType={hoveredWall ? hoveredWall.get('wallType') : null}
+                    width={1100}
+                    height={650}
+                />
+            </div>
+        </>
 );
 
 }

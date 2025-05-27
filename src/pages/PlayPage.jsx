@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import * as fabric from 'fabric';
 
 import { GamePnC } from '../../modules/editor/gamePnC';
-import { loadGameZip } from '../../modules/editor/hadleGame';
+import { loadGameZip } from '../../modules/editor/handleGame';
 import '../styles/PlayPage.css';
 
 function PlayPage() {
