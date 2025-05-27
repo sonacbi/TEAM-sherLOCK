@@ -1,5 +1,6 @@
 import * as fabric from 'fabric';
 
+
 // 📝 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산하는 함수
 export function getWallVertices(wall) {
     if (!wall || !wall.get('points')) return [];
@@ -23,7 +24,7 @@ export function getWallVertices(wall) {
 export function getRectVertices(rect) {
     const left = rect.left;
     const top = rect.top;
-const width = rect.width * rect.scaleX;   // 스케일 적용된 실제 너비
+    const width = rect.width * rect.scaleX;   // 스케일 적용된 실제 너비
     const height = rect.height * rect.scaleY; // 스케일 적용된 실제 높이
 
 // 좌상단, 우상단, 우하단, 좌하단 꼭지점 배열 리턴
