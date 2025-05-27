@@ -34,12 +34,14 @@ import bubble7 from '../assets/images/EditorPage_img/bubble/bubble7.png';
 import bubble8 from '../assets/images/EditorPage_img/bubble/bubble8.png';
 
 function EditorPage() {
+    const canvasRef = useRef(null);
+    const canvasInstance = useRef(null);
     const [game, setGame] = useState(new GamePnC({}));
     const [room, setRoom] = useState(new Room({}));
     const [side, setSide] = useState(new Side({})); // 임시(나중에 방의 방향을 생성할 때 만들어지게 할 것임)
     const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
     const [thumbnail, setThumbnail] = useState(new File([], ''));
-    const [imgs, setImgs] = useState([new File([], '')]);
+    const [imgs, setImgs] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -142,6 +144,57 @@ function EditorPage() {
         })));
     }
 
+    const editOption = (event, option) => {
+        const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
+        switch (option) {
+            case 'name':
+                foundFabric.name = event.target.value;
+                break;
+            case 'textAlign':
+                foundFabric.textAlign = event.target.value;
+                break;
+            case 'textBackgroundColor':
+                foundFabric.textBackgroundColor = event.target.value;
+                break;
+            case 'fontFamily':
+                foundFabric.fontFamily = event.target.value;
+                break;
+            case 'fontSize':
+                foundFabric.fontSize = event.target.value;
+                break;
+            case 'fontStyle':
+                foundFabric.fontStyle = event.target.value;
+                break;
+            case 'fontWeight':
+                foundFabric.fontWeight = event.target.value;
+                break;
+            case 'fill':
+                foundFabric.fill = event.target.value;
+                break;
+            case 'strokeWidth':
+                foundFabric.strokeWidth = event.target.value;
+                break;
+            case 'stroke':
+                foundFabric.stroke = event.target.value;
+                break;
+            case 'strokeUniform':
+                foundFabric.strokeUniform = event.target.value ? true : false;
+                break;
+            case 'event':
+                foundFabric.event = event.target.value;
+                break;
+            default:
+                console.warn(`${option} 잘못된 option입니다`)
+                break;
+        }
+    }
+
+    const moveItem = (array, fromIndex, toIndex) => {
+        const item = array.splice(fromIndex, 1)[0]; // fromIndex 위치에서 요소 제거
+        array.splice(toIndex, 0, item);             // toIndex 위치에 삽입
+        return array;
+    }
+
     useEffect(()=>console.log('imgs',imgs), [imgs])
 
     return (
@@ -216,6 +269,61 @@ function EditorPage() {
                         {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
                             <div className='object_edit'>
                                 <h2>하이</h2>
+                                {selectedObject.type !== "image" && (
+                                    <>
+                                    name<br/>
+                                    └<input type="text" value={selectedObject.name} onChange={e => editOption(e, "name")}/> <br/>
+                                    fill<br/>
+                                    └<input type="color" value={selectedObject.fill} onChange={e => editOption(e, "fill")}/><br/>
+                                    stroke<br/>
+                                    └<input type="color" value={selectedObject.stroke} onChange={e => editOption(e, "stroke")}/><br/>
+                                    strokeWidth<br/>
+                                    └<input type="number" value={Number(selectedObject.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/><br/>
+                                    strokeUniform<br/>
+                                    └<input type="checkbox" value={selectedObject.strokeUniform} onChange={e => editOption(e, "strokeUniform")}/><br/>
+                                    </>
+                                )}
+                                {selectedObject.type == "textbox" && (
+                                    <>
+                                    textAlign<br/>
+                                    └<select value={selectedObject.textAlign} onChange={e => editOption(e, "textAlign")}>
+                                        <option value="left">left</option>
+                                        <option value="center">center</option>
+                                        <option value="right">right</option>
+                                    </select><br/>
+                                    textBackgroundColor<br/>
+                                    └<input type="color" value={selectedObject.textBackgroundColor} onChange={e => editOption(e, "textBackgroundColor")}/><br/>
+                                    fontFamily<br/>
+                                    └<select value={selectedObject.fontFamily} onChange={e => editOption(e, "fontFamily")}>
+                                        <option value="맑은 고딕">맑은 고딕</option>
+                                        <option value="굴림">굴림</option>
+                                        <option value="바탕">바탕</option>
+                                        <option value="궁서">궁서</option>
+                                        <option value="Arial">Arial</option>
+                                        <option value="Arial Black">Airal Black</option>
+                                        <option value="Comic Sans MS">Comic Sans MS</option>
+                                        <option value="Courier New">Courier New</option>
+                                        <option value="Impact">Impact</option>
+                                        <option value="Tahoma">Tahoma</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                    </select><br/>
+                                    fontSize<br/>
+                                    └<input type="number" value={Number(selectedObject.fontSize)} onChange={e => editOption(e, "fontSize")}/><br/>
+                                    fontStyle<br/>
+                                    └<select value={selectedObject.fontStyle} onChange={e => editOption(e, "fontStyle")}>
+                                        <option value="normal">normal</option>
+                                        <option value="italic">italic</option>
+                                        <option value="bold">bold</option>
+                                    </select><br/>
+                                    fontWeight<br/>
+                                    └<select value={selectedObject.fontWeight} onChange={e => editOption(e, "fontWeight")}>
+                                        <option value="normal">normal</option>
+                                        <option value="bold">bold</option>
+                                        <option value="lighter">lighter</option>
+                                    </select><br/>
+                                    </>
+                                )}
+                                <button onClick={handleAddEvent}>event</button>
                             </div>
                         ) : (
                             <>
@@ -311,6 +419,7 @@ function EditorPage() {
                                 saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}}
                                 gameZip={gameZip} setGameZip={setGameZip}
                                 selectedTool={selectedTool}
+                                canvases={{canvasRef, canvasInstance}}
                             />
                         </div>
                     </div>

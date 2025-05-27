@@ -12,7 +12,7 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 fill: '#A9DB78',
                 width: 100,
                 height: 100,
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
             });
@@ -25,7 +25,7 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 top: 100,
                 fill: '#A9DB78',
                 radius: 50,
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
             });
@@ -39,7 +39,7 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 fill: '#A9DB78',
                 width: 100,
                 height: 100,
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
             });
@@ -56,9 +56,10 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 left: 100,
                 top: 100,
                 fill: '#A9DB78',
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
+                shapeType: 'rhombus',
             });
             break;
 
@@ -83,9 +84,10 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 left: 100,
                 top: 100,
                 fill: '#A9DB78',
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
+                shapeType: 'star',
             });
             break;
 
@@ -103,11 +105,12 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 left: 100,
                 top: 100,
                 fill: '#A9DB78',
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
-                scaleX: 1.3,
-                scaleY: 1.3,
+                // scaleX: 1.3,
+                // scaleY: 1.3,
+                shapeType: 'heart',
             });
             break;
 
@@ -128,13 +131,14 @@ export const getShapeByType = (shapeType, controlStyle) => {
             shape = new fabric.Polygon(pentagonPoints, {
                 ...controlStyle,
                 fill: '#A9DB78',
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
                 left: pentagonCenterX,
                 top: pentagonCenterY,
                 originX: 'center',
                 originY: 'center',
+                shapeType: 'pentagon',
             });
             break;
 
@@ -156,13 +160,14 @@ export const getShapeByType = (shapeType, controlStyle) => {
             ], {
                 ...controlStyle,
                 fill: '#A9DB78',
-                stroke: 'rgb(0, 140, 26)',
+                stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
                 left: 150,
                 top: 150,
                 originX: 'center',
                 originY: 'center',
+                shapeType: 'trapezoid',
             });
             break;
 

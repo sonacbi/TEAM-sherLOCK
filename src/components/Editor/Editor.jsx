@@ -9,10 +9,11 @@ import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
 import { useWallHoverHandler } from './useWallHoverhandler';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
-    const canvasRef = useRef(null);
-    const canvasInstance = useRef(null);
+    const {canvasRef, canvasInstance} = canvases;
+    // const canvasRef = useRef(null);
+    // const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
@@ -91,6 +92,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
         canvas.on('object:added', (e) => {
             console.log('added')
+            // console.log('canvas', canvas)
             handleSide(canvasInstance.current, setSide, setRoom);
         })
         canvas.on('object:modified', (e) => {
@@ -106,7 +108,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         const textbox = new fabric.Textbox('텍스트를 입력하세요.', {
             ...controlStyle,
             fontSize: 50,
-            fill: '#333',
+            fill: '#333333',
             width: 450,
             editable: true,
         });
@@ -174,7 +176,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         const textbox = new fabric.Textbox('새 텍스트', {
             ...controlStyle,
             fontSize: 40,
-            fill: '#333',
+            fill: '#333333',
             width: 160,
             editable: true,
         });

@@ -20,8 +20,6 @@ const handleSide = (canvas, setSide, setRoom) => {
                     scaleY: data?.scaleY,
                     fill: data?.fill,
                     fillRule: data?.fillRule,
-                    backgroundColor: data?.backgroundColor,
-                    borderColor: data?.borderColor,
                     text: data?.text,
                     textAlign: data?.textAlign,
                     textBackgroundColor: data?.textBackgroundColor,
@@ -36,7 +34,8 @@ const handleSide = (canvas, setSide, setRoom) => {
                     editable: data?.editable,
                     name: data?.name,
                     type: data?.type,
-                    shapeType: data?.shapeType
+                    shapeType: data?.shapeType,
+                    event: data?.event
                 },
                 event: data?.event
             })
@@ -100,8 +99,6 @@ const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition,
                             scaleY: opt.scaleY,
                             fill: opt.fill,
                             fillRule: opt.fillRule,
-                            backgroundColor: opt.backgroundColor,
-                            borderColor: opt.borderColor,
                             text: opt.text,
                             textAlign: opt.textAlign,
                             textBackgroundColor: opt.textBackgroundColor,
@@ -116,6 +113,7 @@ const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition,
                             editable: opt.editable,
                             name: opt.name,
                             shapeType: opt.shapeType,
+                            event: opt.event,
                         });
                         break;
                     case "line":
