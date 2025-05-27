@@ -179,7 +179,7 @@ function getScaleMatrix(s) {
 
   const renderScene = () => {
     if (!vertices || vertices.length !== 4) {
-  console.warn('vertices가 4개가 아닙니다:', vertices);
+  // console.warn('vertices가 4개가 아닙니다:', vertices);
   return;
 }
     const gl = glRef.current;
