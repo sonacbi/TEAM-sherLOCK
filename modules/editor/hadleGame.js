@@ -7,7 +7,6 @@ const handleSide = (canvas, setSide, setRoom) => {
 
     canvas._objects.forEach((data) => {
         if (data.name == 'SherLockRoomController' || data.name == 'SherLockRoomFrame') return; // 프레임은 저장 안 됨
-console.log('data',data)
         updatedFabric.push(
             new Fabric({
                 name: data?.name,
@@ -65,7 +64,6 @@ console.log('data',data)
 
 const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame) => {
     console.log('loadGame - game', game)
-    console.log('loadGame - canvas', canvas)
     game.room.forEach((roomData, roomIndex) => {
         roomData.side.forEach((sideData, sideIndex) => {
             canvas.clear();
