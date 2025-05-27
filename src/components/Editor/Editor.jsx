@@ -350,8 +350,8 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // ---------------------------------------------------------------(section 14)
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
-    useWallHoverHandler({  canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
-        setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle
+    useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
+        setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle, selectedTool
     });
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 

@@ -11,7 +11,8 @@ export function useWallHoverHandler({
   setHoveredWall,
   setHoveredWallVertices,
   setWalls,
-  position, size, edgeFrameState, angle
+  position, size, edgeFrameState, angle,
+  selectedTool 
 }){
 
   // 방 프레임 그룹 생성 후, 내부 객체들을 순회하며 각 객체의 꼭지점 구하기
@@ -39,6 +40,8 @@ export function useWallHoverHandler({
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
+
+        if(!(selectedTool === 'frame')) return; // 선택된 툴이 frame이 아니라면 작동X
 
         const canvasWidth = canvas.getWidth();
         const canvasHeight = canvas.getHeight();
@@ -126,5 +129,5 @@ export function useWallHoverHandler({
             canvas.off('mouse:up', onMouseUp);
             canvas.off('mouse:move', onMouseMove);
         };
-    }, [canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall, setHoveredWallVertices, setWalls]); // edgeFrameState 변경 시 재실행
+    }, [canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall, setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle, selectedTool ]); // edgeFrameState 변경 시 재실행
 }
