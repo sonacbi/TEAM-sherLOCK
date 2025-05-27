@@ -19,13 +19,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     //디버깅용
     const containerRef = useRef(null);
 
-    useEffect(() => {
-        if (containerRef.current) {
-            const rect = containerRef.current.getBoundingClientRect();
-            setOffset({ left: rect.left, top: rect.top });
-        }
-    }, []);
-
     // 3D 배경 처리용
     // 벽 객체 목록 상태
     const [walls, setWalls] = useState([]);
@@ -764,6 +757,9 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                 // 이전 호버 스타일 복원
                 restoreWallStyle();
 
+                 // 새 호버 객체로 교체
+                hoveredWallLocal.current = wallUnderPointer;
+
                 // 새로 호버된 객체 스타일 원본 저장
                 if (!originalStyles.current.has(wallUnderPointer)) {
                     originalStyles.current.set(wallUnderPointer, {
@@ -824,7 +820,10 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
-        <>
+        <div 
+        style={{ position: 'relative' }}
+        ref={containerRef}
+        >
             <canvas
                 ref={canvasRef}
                 id="my-canvas"
@@ -852,7 +851,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                     height={650}
                 />
             </div>
-        </>
+        </div>
 );
 
 }
