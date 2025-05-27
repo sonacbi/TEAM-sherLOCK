@@ -9,7 +9,7 @@ import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
 import { useWallHoverHandler } from './useWallHoverhandler';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect }) {
+function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool }) {
     const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
@@ -252,6 +252,27 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         
         canvas.renderAll();
     };
+
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        const roomController = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        if (!roomController) return;
+
+        // 'frame' 선택일 때만 selectable 활성화
+        roomController.selectable = selectedTool === 'frame';
+        
+        if (selectedTool === 'frame') {
+            roomController.hoverCursor = 'move';
+            roomController.moveCursor = 'move';
+        } else {
+            roomController.hoverCursor = 'default';
+            roomController.moveCursor = 'default';
+        }
+
+        canvas.renderAll();
+    }, [selectedTool]);
 
     useEffect(() => {
         if (isReadyToLoad && game) {

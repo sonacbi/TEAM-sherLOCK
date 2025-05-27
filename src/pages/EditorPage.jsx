@@ -310,6 +310,7 @@ function EditorPage() {
                                 setEdgeFrameState={setEdgeFrameState}
                                 saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}}
                                 gameZip={gameZip} setGameZip={setGameZip}
+                                selectedTool={selectedTool}
                             />
                         </div>
                     </div>
