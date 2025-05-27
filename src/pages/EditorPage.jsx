@@ -213,7 +213,7 @@ function EditorPage() {
                     </div>
 
                     <div className='tool_fine_tuning'>
-                        {selectedObject ? (
+                        {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
                             <div className='object_edit'>
                                 <h2>하이</h2>
                             </div>

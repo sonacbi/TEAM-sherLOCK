@@ -7,7 +7,6 @@ import { handleSide, loadGame, loadGameZip } from '../../../modules/editor/handl
 import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
-import { getWallVertices, getRectVertices, applyOffsetToVertices, getWallsFromCanvas, restoreWallStyle} from './perspectiveBackground';
 import { useWallHoverHandler } from './useWallHoverhandler';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect }) {
