@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import * as fabric from 'fabric';
 
-import '../styles/PlayPage.css';
 import { GamePnC } from '../../modules/editor/gamePnC';
+import { loadGameZip } from '../../modules/editor/hadleGame';
+import '../styles/PlayPage.css';
 
 function PlayPage() {
     const canvasRef = useRef(null);
@@ -11,7 +12,7 @@ function PlayPage() {
     const [game, setGame] = useState(new GamePnC({}));
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
-    const [imgs, setImgs] = useState([new File([], '')]);
+    const [imgs, setImgs] = useState([]);
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
     const [gameZip, setGameZip] = useState(null);
 
@@ -28,50 +29,16 @@ function PlayPage() {
         return () => canvas.dispose();
     }, [])
 
-    const loadGameZip = async (file) => {
-        if (file && file.name.endsWith('.zip')) {
-            const zip = await JSZip.loadAsync(file);
-
-            let gameData = null;
-            const imagePromises = [];
-
-            zip.forEach((relativePath, zipEntry) => {
-            if (zipEntry.name.endsWith('.json')) {
-                imagePromises.push(
-                zipEntry.async('string').then((content) => {
-                    gameData = new GamePnC(JSON.parse(content));
-                })
-                );
-            } else if (zipEntry.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                const imagePromise = zipEntry.async('blob').then((blob) => {
-                    return new File([blob], zipEntry.name);
-                });
-                imagePromises.push(imagePromise);
-            }
-            });
-
-            const results = await Promise.all(imagePromises);
-            const imgFiles = results.filter(f => f instanceof File);
-
-            setGame(gameData);
-            setImgs(imgFiles);
-
-            // 이미지와 게임 데이터를 모두 셋업한 후 준비 완료 표시
-            setIsReadyToLoad(true);
-        }
-    };
-
     const loadGamePlay = () => {
         const canvas = canvasInstance.current;
+        console.clear();
         // canvas.clear();
-        // const ctx = canvas.getContext("2d");
         game.room[currentRoom].side[currentSide].fabric.forEach((shape, index) => {
             const opt = shape.option;
-            switch (shape.option.type) {
+            let fabricObj;
+            switch (opt.type) {
                 case "textbox":
-                    // ctx.font = `${opt.fontSize}px ${opt.fontFamily}`;
-                    // ctx.fillText(opt.text, opt.x, opt.y);
-                    const textbox = new fabric.Textbox(opt.text, {
+                    fabricObj = new fabric.Textbox(opt.text, {
                         left: opt.x,
                         top: opt.y,
                         width: opt.width,
@@ -98,22 +65,18 @@ function PlayPage() {
                         name: opt.name,
                         shapeType: opt.shapeType,
                     });
-                    textbox.selectable = false;
-                    canvas.add(textbox);
                     break;
                 case "line":
+                    fabricObj = new fabric.Line({...opt});
                     break;
                 case "rect":
-                    // ctx.fillRect(shape.option.x, shape.option.y, shape.option.width, shape.option.height);
-                    // // ctx.lineWidth = 2;
-                    // // ctx.strokeRect(shape.option.x, shape.option.y, shape.option.width, shape.option.height);
-                    const rect = new fabric.Rect({...opt});
-                    rect.selectable = false;
-                    canvas.add(rect);
+                    fabricObj = new fabric.Rect({...opt});
                     break;
                 case "triangle":
+                    fabricObj = new fabric.Triangle({...opt});
                     break;
                 case "circle":
+                    fabricObj = new fabric.Circle({...opt});
                     break;
                 case "image":
                     const foundImg = imgs.find(img => img.name === opt.name);
@@ -124,10 +87,9 @@ function PlayPage() {
                             const imgElement = new Image();
                             imgElement.src = e.target.result;
                             imgElement.onload = () => {
-                                // ctx.drawImage(imgElement, opt.x, opt.y);
-                                const image = new fabric.Image(imgElement, {left: opt.x, top: opt.y});
-                                image.selectable = false;
-                                canvas.add(image);
+                                fabricObj = new fabric.Image(imgElement, {...opt, left: opt.x, top: opt.y});
+                                fabricObj.selectable = false;
+                                canvas.add(fabricObj);
                             };
                             imgElement.onerror = () => {
                                 console.error('이미지 로드 실패');
@@ -140,21 +102,44 @@ function PlayPage() {
                     } else {
                         console.warn('이미지 소스를 찾을 수 없습니다.', opt.name);
                     }
-                    break;
+                    return;
                 case "polygon":
+                    switch (opt.shapeType) {
+                        case "rhombus":
+                            break;
+                        case "star":
+                            break;
+                        case "pentagon":
+                            break;
+                        case "trapezoid":
+                            break;
+                        default:
+                            console.warn(`${opt.shapeType} 잘못된 도형입니다`);
+                    }
                     break;
                 case "path":
+                    switch (opt.shapeType) {
+                        case "heart":
+                            break;
+                        default:
+                            console.warn(`${opt.shapeType} 잘못된 도형입니다`);
+                            break;
+                    }
                     break;
                 default:
-                    console.error(`${opt.type} 잘못된 도형입니다`);
+                    console.warn(`${opt.type} 잘못된 도형입니다`);
                     break;
             }
+            if (fabricObj) {
+                fabricObj.selectable = false;
+                canvas.add(fabricObj);
+            } else console.warn('!!! fabricObj가 이상함', fabricObj)
         });
         canvas.renderAll();
     }
 
     useEffect(() => {
-        if(gameZip) loadGameZip(gameZip);
+        if(gameZip) loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);
     }, [gameZip])
 
     useEffect(() => {
