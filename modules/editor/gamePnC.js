@@ -23,7 +23,7 @@ class Room extends ClassVersion {
 }
 // 방의 방향 | 면
 class Side extends ClassVersion {
-    constructor({ name = '', description = '', frame = new Frame({}), fabric = [new Fabric({})], }) {
+    constructor({ name = '', description = '', frame = null, fabric = [new Fabric({})], }) {
         super();
         this.name = name;
         this.description = description;
@@ -33,7 +33,7 @@ class Side extends ClassVersion {
 }
 // 방의 골자
 class Frame extends ClassVersion {
-    constructor({ x = 220, y = 120, width = 220 + 440, height = 120 + 330, angle = 0, top = 0, left = 0, right = 0, bottom = 0, }) {
+    constructor({ x = 220, y = 120, width = 220 + 440, height = 120 + 330, angle = 0, top = 170, left = 240, right = 240, bottom = 150, }) {
         super();
         this.x = Math.round(x);
         this.y = Math.round(y);
@@ -46,6 +46,7 @@ class Frame extends ClassVersion {
         this.bottom = bottom;
     }
 }
+// 도형
 class Fabric extends ClassVersion {
     constructor({ option = {}, event = [{}], }) {
         super();

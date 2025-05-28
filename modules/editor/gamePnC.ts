@@ -43,7 +43,7 @@ class Side extends ClassVersion {
     constructor({
         name = '',
         description = '',
-        frame = new Frame({}),
+        frame = null,
         fabric = [new Fabric({})],
     }) {
         super();
@@ -71,10 +71,10 @@ class Frame extends ClassVersion {
         width = 220 + 440,
         height = 120 + 330,
         angle = 0,
-        top = 0,
-        left = 0,
-        right = 0,
-        bottom = 0,
+        top = 170,
+        left = 240,
+        right = 240,
+        bottom = 150,
     }) {
         super();
         this.x = Math.round(x);
@@ -89,6 +89,7 @@ class Frame extends ClassVersion {
     }
 }
 
+// 도형
 class Fabric extends ClassVersion {
     option: Object;
     event: Object[];

@@ -108,8 +108,8 @@ export const getShapeByType = (shapeType, controlStyle) => {
                 stroke: '#008C1A',
                 strokeWidth: 2,
                 strokeUniform: true,
-                // scaleX: 1.3,
-                // scaleY: 1.3,
+                scaleX: 1.25,
+                scaleY: 1.25,
                 shapeType: 'heart',
             });
             break;

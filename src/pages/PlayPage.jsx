@@ -48,8 +48,6 @@ function PlayPage() {
                         scaleY: opt.scaleY,
                         fill: opt.fill,
                         fillRule: opt.fillRule,
-                        backgroundColor: opt.backgroundColor,
-                        borderColor: opt.borderColor,
                         text: opt.text,
                         textAlign: opt.textAlign,
                         textBackgroundColor: opt.textBackgroundColor,
@@ -61,22 +59,21 @@ function PlayPage() {
                         strokeWidth: opt.strokeWidth,
                         stroke: opt.stroke,
                         strokeUniform: opt.strokeUniform,
-                        editable: opt.editable,
                         name: opt.name,
                         shapeType: opt.shapeType,
                     });
                     break;
                 case "line":
-                    fabricObj = new fabric.Line({...opt});
+                    fabricObj = new fabric.Line({...opt, left: opt.x, top: opt.y});
                     break;
                 case "rect":
-                    fabricObj = new fabric.Rect({...opt});
+                    fabricObj = new fabric.Rect({...opt, left: opt.x, top: opt.y});
                     break;
                 case "triangle":
-                    fabricObj = new fabric.Triangle({...opt});
+                    fabricObj = new fabric.Triangle({...opt, left: opt.x, top: opt.y});
                     break;
                 case "circle":
-                    fabricObj = new fabric.Circle({...opt});
+                    fabricObj = new fabric.Circle({...opt, left: opt.x, top: opt.y});
                     break;
                 case "image":
                     const foundImg = imgs.find(img => img.name === opt.name);
@@ -106,12 +103,60 @@ function PlayPage() {
                 case "polygon":
                     switch (opt.shapeType) {
                         case "rhombus":
+                            fabricObj = new fabric.Polygon([
+                                { x: 50, y: 0 },
+                                { x: 100, y: 50 },
+                                { x: 50, y: 100 },
+                                { x: 0, y: 50 }
+                            ], {...opt, left: opt.x, top: opt.y})
                             break;
                         case "star":
+                            const centerX = 50;
+                            const centerY = 50;
+                            const outerRadius = 50;
+                            const innerRadius = 25;
+                            const points = [];
+                            for (let i = 0; i < 10; i++) {
+                                const angle = (Math.PI / 5) * i;
+                                const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                                points.push({
+                                    x: centerX + radius * Math.cos(angle - Math.PI / 2),
+                                    y: centerY + radius * Math.sin(angle - Math.PI / 2),
+                                });
+                            }
+                            fabricObj = new fabric.Polygon(points, {...opt, left: opt.x, top: opt.y});
                             break;
                         case "pentagon":
+                            const pentagonSize = 60;
+                            const pentagonCenterX = 150;
+                            const pentagonCenterY = 150;
+                            const pentagonPoints = [];
+
+                            for (let i = 0; i < 5; i++) {
+                                const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                                pentagonPoints.push({
+                                    x: pentagonCenterX + pentagonSize * Math.cos(angle),
+                                    y: pentagonCenterY + pentagonSize * Math.sin(angle),
+                                });
+                            }
+                            fabricObj = new fabric.Polygon(pentagonPoints, {...opt, left: opt.x, top: opt.y});
                             break;
                         case "trapezoid":
+                            const topLeftX = 70;
+                            const topRightX = 130;
+                            const topY = 20;
+                            const bottomY = 120;
+                            const bottomWidth = 100;
+                            const centerXPos = (topLeftX + topRightX) / 2;
+                            const bottomLeftX = centerXPos - bottomWidth / 2;
+                            const bottomRightX = centerXPos + bottomWidth / 2;
+
+                            fabricObj = new fabric.Polygon([
+                                { x: topLeftX, y: topY },
+                                { x: topRightX, y: topY },
+                                { x: bottomRightX, y: bottomY },
+                                { x: bottomLeftX, y: bottomY },
+                            ], {...opt, left: opt.x, top: opt.y});
                             break;
                         default:
                             console.warn(`${opt.shapeType} 잘못된 도형입니다`);
@@ -120,6 +165,15 @@ function PlayPage() {
                 case "path":
                     switch (opt.shapeType) {
                         case "heart":
+                            fabricObj = new fabric.Path(`
+                                    M 10,30
+                                    A 20,20 0 0,1 50,30
+                                    A 20,20 0 0,1 90,30
+                                    Q 90,60 50,90
+                                    Q 10,60 10,30
+                                    Z
+                                `, {...opt, left: opt.x, top: opt.y}
+                            )
                             break;
                         default:
                             console.warn(`${opt.shapeType} 잘못된 도형입니다`);
@@ -130,6 +184,7 @@ function PlayPage() {
                     console.warn(`${opt.type} 잘못된 도형입니다`);
                     break;
             }
+            console.log('fabricObj',fabricObj)
             if (fabricObj) {
                 fabricObj.selectable = false;
                 canvas.add(fabricObj);

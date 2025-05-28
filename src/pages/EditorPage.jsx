@@ -150,6 +150,18 @@ function EditorPage() {
             case 'name':
                 foundFabric.name = event.target.value;
                 break;
+            case 'fill':
+                foundFabric.fill = event.target.value;
+                break;
+            case 'strokeWidth':
+                foundFabric.strokeWidth = event.target.value;
+                break;
+            case 'stroke':
+                foundFabric.stroke = event.target.value;
+                break;
+            case 'strokeUniform':
+                foundFabric.strokeUniform = event.target.value ? true : false;
+                break;
             case 'textAlign':
                 foundFabric.textAlign = event.target.value;
                 break;
@@ -168,18 +180,6 @@ function EditorPage() {
             case 'fontWeight':
                 foundFabric.fontWeight = event.target.value;
                 break;
-            case 'fill':
-                foundFabric.fill = event.target.value;
-                break;
-            case 'strokeWidth':
-                foundFabric.strokeWidth = event.target.value;
-                break;
-            case 'stroke':
-                foundFabric.stroke = event.target.value;
-                break;
-            case 'strokeUniform':
-                foundFabric.strokeUniform = event.target.value ? true : false;
-                break;
             case 'event':
                 foundFabric.event = event.target.value;
                 break;
@@ -187,12 +187,41 @@ function EditorPage() {
                 console.warn(`${option} 잘못된 option입니다`)
                 break;
         }
+        canvasInstance.current.requestRenderAll();
     }
 
-    const moveItem = (array, fromIndex, toIndex) => {
+    const moveItem = (fromIndex, toIndex) => {
+        const array = canvasInstance.current.getObjects()
         const item = array.splice(fromIndex, 1)[0]; // fromIndex 위치에서 요소 제거
         array.splice(toIndex, 0, item);             // toIndex 위치에 삽입
         return array;
+    }
+
+    const handleUp = () => {
+        const canvas = canvasInstance.current;
+        const obj = canvas.getActiveObject();
+
+        if (canvas && obj) {
+            canvas.bringForward(obj);
+            canvas.requestRenderAll();
+        } else {
+            console.warn("선택된 객체가 없거나 canvas가 초기화되지 않았습니다.");
+        }
+        // console.log('!!',canvasInstance.current instanceof fabric.Canvas)
+        // canvasInstance.current.bringForward(selectedObject)
+    }
+    const handleDown = () => {
+        const canvas = canvasInstance.current;
+        const obj = canvas.getActiveObject();
+
+        if (canvas && obj) {
+            canvas.sendBackwards(obj);
+            canvas.requestRenderAll();
+        } else {
+            console.warn("선택된 객체가 없거나 canvas가 초기화되지 않았습니다.");
+        }
+        // console.log('!!',canvasInstance.current instanceof fabric.Canvas)
+        // canvasInstance.current.sendBackwards(selectedObject)
     }
 
     useEffect(()=>console.log('imgs',imgs), [imgs])
@@ -276,7 +305,7 @@ function EditorPage() {
                                     fill<br/>
                                     └<input type="color" value={selectedObject.fill} onChange={e => editOption(e, "fill")}/><br/>
                                     stroke<br/>
-                                    └<input type="color" value={selectedObject.stroke} onChange={e => editOption(e, "stroke")}/><br/>
+                                    └<input type="color" value={selectedObject.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/><br/>
                                     strokeWidth<br/>
                                     └<input type="number" value={Number(selectedObject.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/><br/>
                                     strokeUniform<br/>
@@ -292,7 +321,7 @@ function EditorPage() {
                                         <option value="right">right</option>
                                     </select><br/>
                                     textBackgroundColor<br/>
-                                    └<input type="color" value={selectedObject.textBackgroundColor} onChange={e => editOption(e, "textBackgroundColor")}/><br/>
+                                    └<input type="color" value={selectedObject.textBackgroundColor ? selectedObject.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/><br/>
                                     fontFamily<br/>
                                     └<select value={selectedObject.fontFamily} onChange={e => editOption(e, "fontFamily")}>
                                         <option value="맑은 고딕">맑은 고딕</option>
@@ -323,6 +352,8 @@ function EditorPage() {
                                     </select><br/>
                                     </>
                                 )}
+                                <button onClick={handleUp}>위로</button>
+                                <button onClick={handleDown}>아래로</button>
                                 <button onClick={handleAddEvent}>event</button>
                             </div>
                         ) : (

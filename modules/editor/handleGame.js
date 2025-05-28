@@ -18,6 +18,9 @@ const handleSide = (canvas, setSide, setRoom) => {
                     angle: Number(data?.angle.toFixed(2)),
                     scaleX: data?.scaleX,
                     scaleY: data?.scaleY,
+                    originX: data?.originX,
+                    originY: data?.originY,
+                    radius: data?.radius,
                     fill: data?.fill,
                     fillRule: data?.fillRule,
                     text: data?.text,
@@ -66,23 +69,25 @@ const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition,
     game.room.forEach((roomData, roomIndex) => {
         roomData.side.forEach((sideData, sideIndex) => {
             canvas.clear();
-            new Promise((resolve, reject) => {
-                resolve(sideData);
-            })
-            .then(data => {
-                roomController.left = data.frame.x;
-                roomController.top = data.frame.y;
-                roomController.width = data.frame.width;
-                roomController.height = data.frame.height;
-                return data;
-            })
-            .then(data => {
-                setPosition([data.frame.x, data.frame.y]);
-                setSize([data.frame.width, data.frame.height]);
-                setAngle(data.frame.angle);
-                setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom]);
-            })
-            .finally(addFrame());
+            if (sideData.frame) {
+                new Promise((resolve, reject) => {
+                    resolve(sideData);
+                })
+                .then(data => {
+                    roomController.left = data.frame.x;
+                    roomController.top = data.frame.y;
+                    roomController.width = data.frame.width;
+                    roomController.height = data.frame.height;
+                    return data;
+                })
+                .then(data => {
+                    setPosition([data.frame.x, data.frame.y]);
+                    setSize([data.frame.width, data.frame.height]);
+                    setAngle(data.frame.angle);
+                    setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom]);
+                })
+                .finally(addFrame());
+            }
             sideData.fabric.forEach((fabricData, fabricIndex) => {
                 const opt = fabricData.option;
                 let shape;
@@ -117,16 +122,16 @@ const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition,
                         });
                         break;
                     case "line":
-                        shape = new fabric.Line({...controlStyle, ...opt});
+                        shape = new fabric.Line({...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     case "rect":
-                        shape = new fabric.Rect({...controlStyle, ...opt});
+                        shape = new fabric.Rect({...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     case "triangle":
-                        shape = new fabric.Triangle({...controlStyle, ...opt});
+                        shape = new fabric.Triangle({...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     case "circle":
-                        shape = new fabric.Circle({...controlStyle, ...opt});
+                        shape = new fabric.Circle({...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     case "image":
                         const foundImg = imgs.find(img => img.name === opt.name);
@@ -159,10 +164,84 @@ const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition,
                         }
                         return;
                     case "polygon":
-                        shape = new fabric.Polygon({...controlStyle, ...opt});
+                        switch (opt.shapeType) {
+                            case "rhombus":
+                                shape = new fabric.Polygon([
+                                    { x: 50, y: 0 },
+                                    { x: 100, y: 50 },
+                                    { x: 50, y: 100 },
+                                    { x: 0, y: 50 }
+                                ], {...opt, left: opt.x, top: opt.y})
+                                break;
+                            case "star":
+                                const centerX = 50;
+                                const centerY = 50;
+                                const outerRadius = 50;
+                                const innerRadius = 25;
+                                const points = [];
+                                for (let i = 0; i < 10; i++) {
+                                    const angle = (Math.PI / 5) * i;
+                                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                                    points.push({
+                                        x: centerX + radius * Math.cos(angle - Math.PI / 2),
+                                        y: centerY + radius * Math.sin(angle - Math.PI / 2),
+                                    });
+                                }
+                                shape = new fabric.Polygon(points, {...opt, left: opt.x, top: opt.y});
+                                break;
+                            case "pentagon":
+                                const pentagonSize = 60;
+                                const pentagonCenterX = 150;
+                                const pentagonCenterY = 150;
+                                const pentagonPoints = [];
+    
+                                for (let i = 0; i < 5; i++) {
+                                    const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                                    pentagonPoints.push({
+                                        x: pentagonCenterX + pentagonSize * Math.cos(angle),
+                                        y: pentagonCenterY + pentagonSize * Math.sin(angle),
+                                    });
+                                }
+                                shape = new fabric.Polygon(pentagonPoints, {...opt, left: opt.x, top: opt.y});
+                                break;
+                            case "trapezoid":
+                                const topLeftX = 70;
+                                const topRightX = 130;
+                                const topY = 20;
+                                const bottomY = 120;
+                                const bottomWidth = 100;
+                                const centerXPos = (topLeftX + topRightX) / 2;
+                                const bottomLeftX = centerXPos - bottomWidth / 2;
+                                const bottomRightX = centerXPos + bottomWidth / 2;
+    
+                                shape = new fabric.Polygon([
+                                    { x: topLeftX, y: topY },
+                                    { x: topRightX, y: topY },
+                                    { x: bottomRightX, y: bottomY },
+                                    { x: bottomLeftX, y: bottomY },
+                                ], {...opt, left: opt.x, top: opt.y});
+                                break;
+                            default:
+                                console.warn(`${opt.shapeType} 잘못된 도형입니다`);
+                        }
                         break;
                     case "path":
-                        shape = new fabric.Path({...controlStyle, ...opt});
+                        switch (opt.shapeType) {
+                            case "heart":
+                                shape = new fabric.Path(`
+                                        M 10,30
+                                        A 20,20 0 0,1 50,30
+                                        A 20,20 0 0,1 90,30
+                                        Q 90,60 50,90
+                                        Q 10,60 10,30
+                                        Z
+                                    `,{...opt, left: opt.x, top: opt.y}
+                                )
+                                break;
+                            default:
+                                console.warn(`${opt.shapeType} 잘못된 도형입니다`);
+                                break;
+                        }
                         break;
                     default:
                         console.error(`${opt.type} 잘못된 도형입니다`)
