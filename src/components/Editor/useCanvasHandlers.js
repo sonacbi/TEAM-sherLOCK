@@ -76,8 +76,11 @@ export const useCanvasClickDeselect = (canvasInstance, onObjectSelect) => {
             isCanvasClicked = true;
         };
 
-        const onDocumentMouseDown = () => {
-            if (!isCanvasClicked) {
+        const onDocumentMouseDown = (e) => {
+            const target = e.target;
+            const isInsideTool = target.closest?.('.tool_fine_tuning');
+
+            if (!isCanvasClicked && !isInsideTool) {
                 canvas.discardActiveObject();
                 canvas.requestRenderAll();
                 onObjectSelect(null);
