@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Editor from '../components/Editor/Editor';
 import SaveToServer from '../components/Editor/SaveToServer';
 import EditObjOptions from '../components/Editor/EditObjOptions';
+import RoomInfo from '../components/RoomInfo/RoomInfo';
 
 import { GamePnC, Room, Side } from '../../modules/editor/gamePnC';
 import { GameInfo } from '../../modules/game-modules';
@@ -149,181 +150,185 @@ function EditorPage() {
     useEffect(()=>console.log('imgs',imgs), [imgs])
 
     return (
-        <div className='EditorPage_wrap'>
-            <header className='Editor_header'>
-                <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
-                <img id='logo' src={logo} alt='logo' />
+        <>
+            <div className='EditorPage_wrap'>
+                <header className='Editor_header'>
+                    <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
+                    <img id='logo' src={logo} alt='logo' />
 
-                <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
+                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
-                <div className='room_status_title'>
-                    <p className='room_status_button'>방탈출 정보</p>
-                    <label>제목: ???</label>
-                </div>
-
-                <div className='save_submit'>
-                    <p className='save_button' title='저장하기'>
-                        <img id='save_icon' src={save_icon} alt='save_icon' />
-                    </p>
-                    
-                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} room={room} saveGame={saveGame}/>
-                </div>
-            </header>
-
-            <div className='Editor_content'>
-                <div className='Editor_tool'>
-                    <div className='default_tool'>
-                        <div className={`frame_area ${selectedTool === 'frame' ? 'active' : ''}`} onClick={handleAddFrame}>
-                            <img id='frame_icon' src={frame_icon} alt='frame_icon' />
-                            <p>프레임</p>
-                        </div>
-
-                        <div className={`text_area ${selectedTool === 'text' ? 'active' : ''}`} onClick={handleAddTextBox}>
-                            <img id='text_icon' src={text_icon} alt='text_icon' />
-                            <p>텍스트</p>
-                        </div>
-
-                        <div className={`shape_area ${selectedTool === 'shape' ? 'active' : ''}`} onClick={handleShapeFineTuning}>
-                            <img id='shape_icon' src={shape_icon} alt='shape_icon' />
-                            <p>도형</p>
-                        </div>
-
-                        <div className={`picture_area ${selectedTool === 'picture' ? 'active' : ''}`} onClick={handleAddImage}>
-                            <img id='picture_icon' src={picture_icon} alt='picture_icon' />
-                            <p>사진</p>
-                            <input
-                                type='file'
-                                accept='image/*'
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                style={{ display: 'none' }}
-                            />
-                        </div>
-
-                        <div className={`timer_area ${selectedTool === 'timer' ? 'active' : ''}`} onClick={handleAddTimer}>
-                            <img id='timer_icon' src={timer_icon} alt='timer_icon' />
-                            <p>타이머</p>
-                        </div>
-
-                        <div className={`hint_area ${selectedTool === 'hint' ? 'active' : ''}`} onClick={handleAddHint}>
-                            <img id='hint_icon' src={hint_icon} alt='hint_icon' />
-                            <p>힌트</p>
-                        </div>
-
-                        <div className={`event_area ${selectedTool === 'event' ? 'active' : ''}`} onClick={handleAddEvent}>
-                            <img id='event_icon' src={event_icon} alt='event_icon' />
-                            <p>이벤트</p>
-                        </div>
+                    <div className='room_status_title'>
+                        <p className='room_status_button'>방탈출 정보</p>
+                        <label>제목: ???</label>
                     </div>
 
-                    <div className='tool_fine_tuning'>
-                        {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
-                            <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} handleAddEvent={handleAddEvent}/>
-                        ) : (
-                            <>
-                                {selectedTool === 'frame' && (
-                                    <div className='frame_fine_tuning'>
-                                        top: <input id="roomFrame0" type="range" min={120} max={800} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
-                                        left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
-                                        right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
-                                        bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
-                                    </div>
-                                )}
+                    <div className='save_submit'>
+                        <p className='save_button' title='저장하기'>
+                            <img id='save_icon' src={save_icon} alt='save_icon' />
+                        </p>
+                        
+                        <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} room={room} saveGame={saveGame}/>
+                    </div>
+                </header>
 
-                                {selectedTool === 'text' && (
-                                    <div className='text_fine_tuning'>
-                                        <h2>텍스트 세부조정</h2>
-                                    </div>
-                                )}
+                <div className='Editor_content'>
+                    <div className='Editor_tool'>
+                        <div className='default_tool'>
+                            <div className={`frame_area ${selectedTool === 'frame' ? 'active' : ''}`} onClick={handleAddFrame}>
+                                <img id='frame_icon' src={frame_icon} alt='frame_icon' />
+                                <p>프레임</p>
+                            </div>
 
-                                {selectedTool === 'shape' && (
-                                    <div className='shape_fine_tuning'>
-                                        <div className='default_shape'>
-                                            <label>기본 도형</label>
-                                            
-                                            <div className='default_shape_wrap'>
-                                                {Object.keys(shapeImages).map((shape) => (
-                                                    <img
-                                                        key={shape}
-                                                        src={shapeImages[shape]}
-                                                        alt={shape}
-                                                        onClick={() => handleShapeClick(shape)}
-                                                    />
-                                                ))}
+                            <div className={`text_area ${selectedTool === 'text' ? 'active' : ''}`} onClick={handleAddTextBox}>
+                                <img id='text_icon' src={text_icon} alt='text_icon' />
+                                <p>텍스트</p>
+                            </div>
+
+                            <div className={`shape_area ${selectedTool === 'shape' ? 'active' : ''}`} onClick={handleShapeFineTuning}>
+                                <img id='shape_icon' src={shape_icon} alt='shape_icon' />
+                                <p>도형</p>
+                            </div>
+
+                            <div className={`picture_area ${selectedTool === 'picture' ? 'active' : ''}`} onClick={handleAddImage}>
+                                <img id='picture_icon' src={picture_icon} alt='picture_icon' />
+                                <p>사진</p>
+                                <input
+                                    type='file'
+                                    accept='image/*'
+                                    ref={fileInputRef}
+                                    onChange={handleFileChange}
+                                    style={{ display: 'none' }}
+                                />
+                            </div>
+
+                            <div className={`timer_area ${selectedTool === 'timer' ? 'active' : ''}`} onClick={handleAddTimer}>
+                                <img id='timer_icon' src={timer_icon} alt='timer_icon' />
+                                <p>타이머</p>
+                            </div>
+
+                            <div className={`hint_area ${selectedTool === 'hint' ? 'active' : ''}`} onClick={handleAddHint}>
+                                <img id='hint_icon' src={hint_icon} alt='hint_icon' />
+                                <p>힌트</p>
+                            </div>
+
+                            <div className={`event_area ${selectedTool === 'event' ? 'active' : ''}`} onClick={handleAddEvent}>
+                                <img id='event_icon' src={event_icon} alt='event_icon' />
+                                <p>이벤트</p>
+                            </div>
+                        </div>
+
+                        <div className='tool_fine_tuning'>
+                            {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
+                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} handleAddEvent={handleAddEvent}/>
+                            ) : (
+                                <>
+                                    {selectedTool === 'frame' && (
+                                        <div className='frame_fine_tuning'>
+                                            top: <input id="roomFrame0" type="range" min={120} max={800} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
+                                            left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
+                                            right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
+                                            bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
+                                        </div>
+                                    )}
+
+                                    {selectedTool === 'text' && (
+                                        <div className='text_fine_tuning'>
+                                            <h2>텍스트 세부조정</h2>
+                                        </div>
+                                    )}
+
+                                    {selectedTool === 'shape' && (
+                                        <div className='shape_fine_tuning'>
+                                            <div className='default_shape'>
+                                                <label>기본 도형</label>
+                                                
+                                                <div className='default_shape_wrap'>
+                                                    {Object.keys(shapeImages).map((shape) => (
+                                                        <img
+                                                            key={shape}
+                                                            src={shapeImages[shape]}
+                                                            alt={shape}
+                                                            onClick={() => handleShapeClick(shape)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className='bubble'>
+                                                <label>말풍선</label>
+                                                
+                                                <div className='bubble_wrap'>
+                                                    <img id='bubble1' src={bubble1} alt='bubble1' />
+                                                    <img id='bubble2' src={bubble2} alt='bubble2' />
+                                                    <img id='bubble3' src={bubble3} alt='bubble3' />
+                                                    <img id='bubble4' src={bubble4} alt='bubble4' />
+                                                    <img id='bubble5' src={bubble5} alt='bubble5' />
+                                                    <img id='bubble6' src={bubble6} alt='bubble6' />
+                                                    <img id='bubble7' src={bubble7} alt='bubble7' />
+                                                    <img id='bubble8' src={bubble8} alt='bubble8' />
+                                                </div>
                                             </div>
                                         </div>
+                                    )}
 
-                                        <div className='bubble'>
-                                            <label>말풍선</label>
-                                            
-                                            <div className='bubble_wrap'>
-                                                <img id='bubble1' src={bubble1} alt='bubble1' />
-                                                <img id='bubble2' src={bubble2} alt='bubble2' />
-                                                <img id='bubble3' src={bubble3} alt='bubble3' />
-                                                <img id='bubble4' src={bubble4} alt='bubble4' />
-                                                <img id='bubble5' src={bubble5} alt='bubble5' />
-                                                <img id='bubble6' src={bubble6} alt='bubble6' />
-                                                <img id='bubble7' src={bubble7} alt='bubble7' />
-                                                <img id='bubble8' src={bubble8} alt='bubble8' />
-                                            </div>
+                                    {selectedTool === 'picture' && (
+                                        <div className='picture_fine_tuning'>
+                                            <h2>사진 세부조정</h2>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {selectedTool === 'picture' && (
-                                    <div className='picture_fine_tuning'>
-                                        <h2>사진 세부조정</h2>
-                                    </div>
-                                )}
+                                    {selectedTool === 'timer' && (
+                                        <div className='timer_fine_tuning'>
+                                            <h2>타이머 세부조정</h2>
+                                        </div>
+                                    )}
 
-                                {selectedTool === 'timer' && (
-                                    <div className='timer_fine_tuning'>
-                                        <h2>타이머 세부조정</h2>
-                                    </div>
-                                )}
-
-                                {selectedTool === 'hint' && (
-                                    <div className='hint_fine_tuning'>
-                                        <h2>힌트 세부조정</h2>
-                                    </div>
-                                )}
-                                
-                                {selectedTool === 'event' && (
-                                    <div className='event_fine_tuning'>
-                                        <h2>이벤트 세부조정</h2>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                <div className='Editor_screen'>
-                    <div className='screen_area'>
-                        <div className='screen'>
-                            <Editor
-                                addTextTrigger={addTextTrigger}
-                                addShapeTrigger={addShapeTrigger}
-                                addImageFile={addImageFile}
-                                addFrameTrigger={addFrameTrigger} 
-                                onObjectSelect={setSelectedObject}
-                                edgeFrameState={edgeFrameState}
-                                editorOffset={editorOffset}
-                                setEdgeFrameState={setEdgeFrameState}
-                                saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}}
-                                gameZip={gameZip} setGameZip={setGameZip}
-                                selectedTool={selectedTool}
-                                canvases={{canvasRef, canvasInstance}}
-                            />
+                                    {selectedTool === 'hint' && (
+                                        <div className='hint_fine_tuning'>
+                                            <h2>힌트 세부조정</h2>
+                                        </div>
+                                    )}
+                                    
+                                    {selectedTool === 'event' && (
+                                        <div className='event_fine_tuning'>
+                                            <h2>이벤트 세부조정</h2>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    <div className='stage_area'>
+                    <div className='Editor_screen'>
+                        <div className='screen_area'>
+                            <div className='screen'>
+                                <Editor
+                                    addTextTrigger={addTextTrigger}
+                                    addShapeTrigger={addShapeTrigger}
+                                    addImageFile={addImageFile}
+                                    addFrameTrigger={addFrameTrigger} 
+                                    onObjectSelect={setSelectedObject}
+                                    edgeFrameState={edgeFrameState}
+                                    editorOffset={editorOffset}
+                                    setEdgeFrameState={setEdgeFrameState}
+                                    saveTool={{game, setGame, room, setRoom, side, setSide, imgs, setImgs}}
+                                    gameZip={gameZip} setGameZip={setGameZip}
+                                    selectedTool={selectedTool}
+                                    canvases={{canvasRef, canvasInstance}}
+                                />
+                            </div>
+                        </div>
 
+                        <div className='stage_area'>
+
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <RoomInfo />
+        </>
     );
 }
 

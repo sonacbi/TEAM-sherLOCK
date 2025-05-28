@@ -1,0 +1,69 @@
+.RoomInfo_wrap {
+    position: absolute;
+    width: 100dvw;
+    height: 100dvh;
+    top: 0;
+    left: 0;
+    background-color: #0a0a0ada;
+    z-index: 999;
+}
+
+#RoomInfo_background {
+    position: absolute;
+    top: -30%;
+    left: 50%;
+    transform: translate(-50%);
+    width: 70%;
+}
+
+.Room_door_wrap {
+    position: absolute;
+    bottom: 0;
+    width: 100dvw;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.Room_door {
+    width: 35%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 500px;
+}
+
+.Room_room {
+    height: 10%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Room_room p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: default;
+}
+
+.Room_room h5 {
+    position: absolute;
+    right: 5%;
+    color: white;
+    cursor: pointer;
+}
+
+.Room_content {
+    height: 90%;
+    background-color: black;
+    padding: 10px;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
