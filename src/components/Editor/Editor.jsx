@@ -20,7 +20,9 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
     const hoveredWallLocal = useRef(null); // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
     const originalStyles = useRef(new Map()); // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
-
+    // 최종 저장된 이미지와 꼭짓점
+    const [perspective, setPerspective] = useState({
+        front: {}, left: {}, right: {}, top: {}, bottom: {} });
 
     // 프레임 원근법 배경 왜곡 디버깅 코드 + 상태 관리 코드 ------------ (section 1) (정다정)
     //디버깅용
@@ -28,14 +30,63 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     // 3D 배경 처리용
     // 벽 객체 목록 상태
-    const [walls, setWalls] = useState([]);
+    const [walls, setWalls] = useState([ ]);
     // 현재 호버된 벽 객체 상태
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
     // 이미지 URL (드래그 중인 이미지)
-    const [imageUrl, setImageUrl] = useState(null);
+    const [imageUrl, setImageUrl] = useState([]);
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
+
+    // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
+    useEffect(() => {
+    if (!hoveredWall) return;
+
+    setPerspective(prev => ({
+        ...prev,
+        [hoveredWall.wallType]: {
+        ...prev[hoveredWall.wallType],
+        vertices: hoveredWallVertices,
+        imageUrl: prev[hoveredWall.wallType]?.imageUrl || '기존 또는 새 URL'
+        }
+    }));
+    }, [hoveredWall, hoveredWallVertices]);
+
+    // perspectiveWalls를 벽 객체 배열로 관리 (walls는 따로 필요없음)
+const perspectiveWalls = React.useMemo(() => {
+  return Object.entries(perspective)
+    .map(([wallType, data]) => {
+      if (!data) return null;
+      // hoveredWall인지 판단하여 꼭짓점 교체
+      if (hoveredWall && hoveredWall.wallType === wallType && hoveredWallVertices.length === 4) {
+        return {
+          wallType,
+          imageUrl: data.imageUrl,  // imageUrl 꼭 포함
+          ...data,
+          vertices: hoveredWallVertices,
+        };
+      }
+      return { wallType, ...data };
+    })
+    .filter(Boolean);
+}, [perspective, hoveredWall, hoveredWallVertices]);
+
+    // hoveredWall이 있을 때 vertices를 hoveredWallVertices로 대체해서 넘기도록 items 생성
+    const items = React.useMemo(() => {
+  const result = perspectiveWalls.map(wall => {
+    if (hoveredWall && hoveredWall.wallType === wall.wallType) {
+      return {
+        ...wall,
+        vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
+      };
+    }
+    return wall;
+  });
+
+  console.log('[useMemo] items:', result);
+  return result;
+}, [perspectiveWalls, hoveredWall, hoveredWallVertices]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
@@ -303,8 +354,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                     return;
                 }
 
-                setImageUrl(e.target.result); // 이미지 URL 상태 저장 (프레임 조작용- 추가예정✨)
-
                 const imgElement = new Image();
                 imgElement.src = e.target.result;
 
@@ -318,12 +367,15 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                         top: 150,
                         scaleX: 0.4,
                         scaleY: 0.4,
-                        name: addImageFile.name
+                        name: addImageFile.name,
+                        imageUrl: e.target.result // 배경 랜더링용
                     });
 
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
                     canvasInstance.current.renderAll();
+
+                    setImageUrls(prev => [...prev, e.target.result]);
                 };
 
                 imgElement.onerror = () => {
@@ -351,45 +403,44 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
-        setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle, selectedTool
+        setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle, selectedTool, setPerspective, setImageUrl
     });
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
-        <div 
-        style={{ position: 'relative' }}
-        ref={containerRef}
-        >
-            <canvas
-                ref={canvasRef}
-                id="my-canvas"
-                width={1100}
-                height={650}
-                style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-            />
-
-            <div
+        <div ref={containerRef} style={{ position: 'relative', width: 1100, height: 650 }}>
+            <canvas ref={canvasRef} id="my-canvas" width={1100} height={650} style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
+            {perspectiveWalls.map((wall) => {
+            const isHovered = hoveredWall && hoveredWall.wallType === wall.wallType;
+            return (
+                <div
+                key={wall.wallType}
                 style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    zIndex: 2,
-                    pointerEvents: 'none',
                     width: 1100,
                     height: 650,
+                    pointerEvents: 'none',
+                    zIndex: 2,
+                    opacity: isHovered ? 1 : 0.5,
                 }}
-            >
+                >
                 <WebGLPerspectiveComponent
-                    vertices={hoveredWallVertices}
-                    imageUrl={imageUrl}
-                    wallType={hoveredWall ? hoveredWall.get('wallType') : null}
+                    items={[{
+                    imageUrl: wall.imageUrl,
+                    vertices: wall.vertices,
+                    wallType: wall.wallType,
+                    }]}
                     width={1100}
                     height={650}
                 />
-            </div>
+                </div>
+            );
+            })}
         </div>
-);
+        );
 
 }
 
