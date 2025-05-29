@@ -5,27 +5,20 @@ import { createRoomFrame } from '../../../modules/handlePolygon';
 
 export function useWallHoverHandler({
     canvasInstance,
-    hoveredWallLocal,
-    originalStyles,
-    isDragging,
-    setHoveredWall,
-    setHoveredWallVertices,
-    setWalls,
-    position, size, edgeFrameState, angle,
+    hoveredWallLocal, // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
+    originalStyles, // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
+    isDragging, // React 훅에서 드래그 상태 저장용 useRef
+    setHoveredWall, // 현재 호버된 벽 객체 상태
+    setHoveredWallVertices, // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     selectedTool,
     setPerspective,
-    
+
 }) {
     // 내부 상태로 imageUrl 관리
   const [imageUrl, setImageUrl] = useState('');
   useEffect(() => {
     const canvas = canvasInstance.current;
     if (!canvas || selectedTool !== 'frame') return;
-
-    // 마운트 시 벽 리스트 저장
-    const walls = getWallsFromCanvas(canvas);
-    setWalls(walls);
-    console.log('[useWallHoverHandler] 초기 벽 리스트 저장:', walls);
 
     const onObjectMoving = (e) => {
         isDragging.current = true;

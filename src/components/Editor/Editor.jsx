@@ -18,26 +18,22 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
-    const hoveredWallLocal = useRef(null); // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
-    const originalStyles = useRef(new Map()); // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
-    // 최종 저장된 이미지와 꼭짓점
-    const [perspective, setPerspective] = useState({
-        front: {}, left: {}, right: {}, top: {}, bottom: {} });
+    const [isReadyToLoad, setIsReadyToLoad] = useState(false);
 
     // 프레임 원근법 배경 왜곡 디버깅 코드 + 상태 관리 코드 ------------ (section 1) (정다정)
     //디버깅용
     const containerRef = useRef(null);
 
     // 3D 배경 처리용
-    // 벽 객체 목록 상태
-    const [walls, setWalls] = useState([ ]);
+    const hoveredWallLocal = useRef(null); // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
+    const originalStyles = useRef(new Map()); // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
+    // 최종 저장된 이미지와 꼭짓점
+    const [perspective, setPerspective] = useState({
+        front: {}, left: {}, right: {}, top: {}, bottom: {} });
     // 현재 호버된 벽 객체 상태
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
-    // 이미지 URL (드래그 중인 이미지)
-    const [imageUrl, setImageUrl] = useState([]);
-    const [isReadyToLoad, setIsReadyToLoad] = useState(false);
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -53,40 +49,41 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     }));
     }, [hoveredWall, hoveredWallVertices]);
 
-    // perspectiveWalls를 벽 객체 배열로 관리 (walls는 따로 필요없음)
-const perspectiveWalls = React.useMemo(() => {
-  return Object.entries(perspective)
-    .map(([wallType, data]) => {
-      if (!data) return null;
-      // hoveredWall인지 판단하여 꼭짓점 교체
-      if (hoveredWall && hoveredWall.wallType === wallType && hoveredWallVertices.length === 4) {
-        return {
-          wallType,
-          imageUrl: data.imageUrl,  // imageUrl 꼭 포함
-          ...data,
-          vertices: hoveredWallVertices,
-        };
-      }
-      return { wallType, ...data };
-    })
-    .filter(Boolean);
-}, [perspective, hoveredWall, hoveredWallVertices]);
+    // perspectiveWalls를 벽 객체 배열로 관리
+    const perspectiveWalls = React.useMemo(() => {
+        return Object.entries(perspective)
+            .map(([wallType, data]) => {
+            if (!data) return null;
+            // hoveredWall인지 판단하여 꼭짓점 교체
+            if (hoveredWall && hoveredWall.wallType === wallType && hoveredWallVertices.length === 4) {
+                return {
+                wallType,
+                imageUrl: data.imageUrl,  // imageUrl 꼭 포함
+                ...data,
+                vertices: hoveredWallVertices,
+                };
+            }
+            return { wallType, ...data };
+            })
+            .filter(Boolean);
+    }, [perspective, hoveredWall, hoveredWallVertices]);
 
     // hoveredWall이 있을 때 vertices를 hoveredWallVertices로 대체해서 넘기도록 items 생성
     const items = React.useMemo(() => {
-  const result = perspectiveWalls.map(wall => {
-    if (hoveredWall && hoveredWall.wallType === wall.wallType) {
-      return {
-        ...wall,
-        vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
-      };
-    }
-    return wall;
-  });
+    const result = perspectiveWalls.map(wall => {
+            if (hoveredWall && hoveredWall.wallType === wall.wallType) {
+                return {
+                ...wall,
+                vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
+                imageUrl: perspective[wall.wallType]?.imageUrl ?? '',
+                };
+            }
+            return wall;
+        });
 
-  console.log('[useMemo] items:', result);
-  return result;
-}, [perspectiveWalls, hoveredWall, hoveredWallVertices]);
+        console.log('[useMemo] items:', result);
+        return result;
+    }, [perspectiveWalls, hoveredWall, hoveredWallVertices]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
@@ -374,8 +371,6 @@ const perspectiveWalls = React.useMemo(() => {
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
                     canvasInstance.current.renderAll();
-
-                    setImageUrls(prev => [...prev, e.target.result]);
                 };
 
                 imgElement.onerror = () => {
@@ -403,7 +398,7 @@ const perspectiveWalls = React.useMemo(() => {
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
-        setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle, selectedTool, setPerspective, setImageUrl
+        setHoveredWallVertices, selectedTool, setPerspective
     });
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
@@ -424,7 +419,7 @@ const perspectiveWalls = React.useMemo(() => {
                     height: 650,
                     pointerEvents: 'none',
                     zIndex: 2,
-                    opacity: isHovered ? 1 : 0.5,
+                    opacity: isHovered ? 1 : 1,
                 }}
                 >
                 <WebGLPerspectiveComponent
