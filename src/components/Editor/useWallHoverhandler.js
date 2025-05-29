@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as fabric from 'fabric';
 import { getWallsFromCanvas, getWallVertices, restoreWallStyle, getRectVertices } from './perspectiveBackground';
 import { createRoomFrame } from '../../../modules/handlePolygon';
@@ -10,23 +10,33 @@ export function useWallHoverHandler({
     isDragging, // React 훅에서 드래그 상태 저장용 useRef
     setHoveredWall, // 현재 호버된 벽 객체 상태
     setHoveredWallVertices, // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
+    edgeFrameState,
     selectedTool,
     setPerspective,
 
 }) {
     // 내부 상태로 imageUrl 관리
   const [imageUrl, setImageUrl] = useState('');
+  // 이전 호버한 벽 정보
+  const preHoveredWall = useRef(null);
+
   useEffect(() => {
     const canvas = canvasInstance.current;
     if (!canvas || selectedTool !== 'frame') return;
 
     const onObjectMoving = (e) => {
-        isDragging.current = true;
         const movingObj = e.target;
         if (!movingObj) return;
-        console.log('[object:moving] 드래그 시작');
 
-        setImageUrl(movingObj.imageUrl);
+        // 이미지 객체인지 확인 (예: movingObj.type === 'image')
+        if (movingObj.type === 'image') {
+          isDragging.current = true;
+          console.log('[object:moving] 이미지 드래그 시작');
+
+          setImageUrl(movingObj.imageUrl);
+        } else {
+          isDragging.current = false; // 이미지가 아니면 드래그 아님
+        }
     };
 
     const onMouseUp = () => {
@@ -34,7 +44,6 @@ export function useWallHoverHandler({
       console.log('[mouse:up] 드래그 종료');
       restoreWallStyle(hoveredWallLocal, originalStyles, canvasInstance);
 
-      
       if (hoveredWallLocal.current) {
         const wall = hoveredWallLocal.current;
         const vertices = getWallVertices(wall);
@@ -72,8 +81,18 @@ export function useWallHoverHandler({
       restoreWallStyle(hoveredWallLocal, originalStyles, canvasInstance);
       console.log('[mouse:move] 이전 벽 스타일 복원 완료');
 
+        // 이전 벽의 perspective 정보 초기화
+        const prevWallType = preHoveredWall.current?.wallType;
+          if (prevWallType) {
+            setPerspective(prev => ({
+              ...prev,
+              [prevWallType]: { vertices: [], imageUrl: '' },
+            }));
+          }
+
       if (wallUnderPointer) {
         hoveredWallLocal.current = wallUnderPointer;
+        preHoveredWall.current = wallUnderPointer;  // 업데이트
 
         if (!originalStyles.current.has(wallUnderPointer)) {
           originalStyles.current.set(wallUnderPointer, {
@@ -93,16 +112,25 @@ export function useWallHoverHandler({
         setHoveredWallVertices(vertices);
         canvas.renderAll();
 
+        // 실시간 미리보기 업데이트
+        setPerspective(prev => ({
+          ...prev,
+          [wallUnderPointer.wallType]: {
+            vertices,
+            imageUrl: imageUrl || prev[wallUnderPointer.wallType]?.imageUrl || '',
+          },
+        }));
+
         console.log('[mouse:move] 새로운 벽 호버됨:', wallUnderPointer.wallType);
         console.log('[mouse:move] 꼭짓점 좌표:', vertices);
       } else {
-        hoveredWallLocal.current = null;
-        setHoveredWall(null);
-        setHoveredWallVertices([]);
-        console.log('[mouse:move] 벽에서 벗어남');
+      hoveredWallLocal.current = null;
+      preHoveredWall.current = null;
+      setHoveredWall(null);
+      setHoveredWallVertices([]);
+      console.log('[mouse:move] 벽에서 벗어남');
       }
-    };
-
+  };
     canvas.on('object:moving', onObjectMoving);
     canvas.on('mouse:up', onMouseUp);
     canvas.on('mouse:move', onMouseMove);
@@ -113,5 +141,5 @@ export function useWallHoverHandler({
       canvas.off('mouse:move', onMouseMove);
       console.log('[useWallHoverHandler] 이벤트 제거 완료');
     };
-  }, [canvasInstance, selectedTool, imageUrl]);
+  }, [canvasInstance, edgeFrameState, selectedTool, imageUrl]);
 }
