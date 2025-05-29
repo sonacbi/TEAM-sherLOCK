@@ -44,7 +44,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         [hoveredWall.wallType]: {
         ...prev[hoveredWall.wallType],
         vertices: hoveredWallVertices,
-        imageUrl: prev[hoveredWall.wallType]?.imageUrl || '기존 또는 새 URL'
+        imageUrl: prev[hoveredWall.wallType]?.imageUrl || ''
         }
     }));
     }, [hoveredWall, hoveredWallVertices]);
@@ -397,8 +397,9 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // ---------------------------------------------------------------(section 14)
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
-    const { previewPerspective } = useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall, edgeFrameState,
-        setHoveredWallVertices, selectedTool, setPerspective
+    const { previewPerspective } = useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
+        position, size, edgeFrameState, angle,
+        setHoveredWallVertices, selectedTool, perspective, setPerspective, 
     });
 
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)

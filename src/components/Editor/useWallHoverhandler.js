@@ -10,13 +10,33 @@ export function useWallHoverHandler({
     isDragging, // React 훅에서 드래그 상태 저장용 useRef
     setHoveredWall, // 현재 호버된 벽 객체 상태
     setHoveredWallVertices, // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
-    edgeFrameState,
+    position, size, edgeFrameState, angle,
     selectedTool,
+    perspective,
     setPerspective,
-
+  
 }) {
-    // 내부 상태로 imageUrl 관리
-  const [imageUrl, setImageUrl] = useState('');
+
+  // 방 프레임 그룹 생성 후, 내부 객체들을 순회하며 각 객체의 꼭지점 구하기
+  const roomFrameGroup = createRoomFrame(
+      ...position,
+      ...size,
+      ...edgeFrameState,
+      angle
+  );
+
+  roomFrameGroup.getObjects().forEach((obj) => {
+      let vertices;
+      if (obj.type === 'polygon') {
+          // 폴리곤은 points 배열을 fabric.Point로 변환
+          vertices = obj.points.map(pt => new fabric.Point(pt.x, pt.y));
+      } else if (obj.type === 'rect') {
+          // 사각형은 getRectVertices 함수 사용
+          vertices = getRectVertices(obj);
+      }
+      // console.log(obj.wallType, vertices);
+  });
+
   const [previewPerspective, setPreviewPerspective] = useState({}); // 임시 미리보기용
   // 이전 호버한 벽 정보
   const preHoveredWall = useRef(null);
@@ -38,7 +58,14 @@ export function useWallHoverHandler({
           const src = movingObj.getSrc ? movingObj.getSrc() : movingObj.imageUrl;
           latestImageUrl.current = src;  // 최신 값을 useRef로 저장
 
-          setImageUrl(movingObj.imageUrl);
+          // 현재 호버중인 벽이 있고, 그 벽에 이미지가 이미 확정되어 있다면 변경 막기
+          const currentWall = hoveredWallLocal.current;
+          if (currentWall && perspective[currentWall.wallType]?.imageUrl) {
+            // 이미지가 이미 확정된 벽 → 이미지 변경 막음
+            return;
+          }
+
+
         } else {
           isDragging.current = false; // 이미지가 아니면 드래그 아님
           latestImageUrl.current = '';
@@ -54,17 +81,24 @@ export function useWallHoverHandler({
         const wall = hoveredWallLocal.current;
         const vertices = getWallVertices(wall);
 
+        // 확정된 이미지가 있으면 변경 안 함
+        if (perspective[wall.wallType]?.imageUrl) {
+          console.log(`[mouse:up] 이미지가 이미 확정되어 변경하지 않음: ${wall.wallType}`);
+          setPreviewPerspective({});
+          return;
+        }
+
         // ✅ 여기서 드래그한 벽과 이미지 URL을 perspective에 저장
         setPerspective(prev => ({
           ...prev,
           [wall.wallType]: {
             ...prev[wall.wallType],
             vertices: vertices,
-            imageUrl: imageUrl || prev[wall.wallType]?.imageUrl || ''
+            imageUrl: latestImageUrl.current || prev[wall.wallType]?.imageUrl || ''
           }
         }));
         setPreviewPerspective({});  // 미리보기 초기화
-        console.log(`[mouse:up] perspective 저장됨: ${wall.wallType}`, vertices, imageUrl);
+        console.log(`[mouse:up] perspective 저장됨: ${wall.wallType}`, vertices, latestImageUrl.current);
       }
     };
 
@@ -159,7 +193,7 @@ export function useWallHoverHandler({
       canvas.off('mouse:move', onMouseMove);
       console.log('[useWallHoverHandler] 이벤트 제거 완료');
     };
-  }, [canvasInstance, edgeFrameState, selectedTool, imageUrl]);
+  }, [canvasInstance, edgeFrameState, selectedTool,]);
 
   return { previewPerspective };  // 미리보기 데이터 반환
 }
