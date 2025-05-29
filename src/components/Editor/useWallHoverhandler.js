@@ -17,8 +17,10 @@ export function useWallHoverHandler({
 }) {
     // 내부 상태로 imageUrl 관리
   const [imageUrl, setImageUrl] = useState('');
+  const [previewPerspective, setPreviewPerspective] = useState({}); // 임시 미리보기용
   // 이전 호버한 벽 정보
   const preHoveredWall = useRef(null);
+  const latestImageUrl = useRef('');
 
   useEffect(() => {
     const canvas = canvasInstance.current;
@@ -32,10 +34,14 @@ export function useWallHoverHandler({
         if (movingObj.type === 'image') {
           isDragging.current = true;
           console.log('[object:moving] 이미지 드래그 시작');
+          
+          const src = movingObj.getSrc ? movingObj.getSrc() : movingObj.imageUrl;
+          latestImageUrl.current = src;  // 최신 값을 useRef로 저장
 
           setImageUrl(movingObj.imageUrl);
         } else {
           isDragging.current = false; // 이미지가 아니면 드래그 아님
+          latestImageUrl.current = '';
         }
     };
 
@@ -57,7 +63,7 @@ export function useWallHoverHandler({
             imageUrl: imageUrl || prev[wall.wallType]?.imageUrl || ''
           }
         }));
-
+        setPreviewPerspective({});  // 미리보기 초기화
         console.log(`[mouse:up] perspective 저장됨: ${wall.wallType}`, vertices, imageUrl);
       }
     };
@@ -81,10 +87,10 @@ export function useWallHoverHandler({
       restoreWallStyle(hoveredWallLocal, originalStyles, canvasInstance);
       console.log('[mouse:move] 이전 벽 스타일 복원 완료');
 
-        // 이전 벽의 perspective 정보 초기화
+        // // 이전 벽의 perspective 정보 초기화
         const prevWallType = preHoveredWall.current?.wallType;
           if (prevWallType) {
-            setPerspective(prev => ({
+            setPreviewPerspective(prev => ({
               ...prev,
               [prevWallType]: { vertices: [], imageUrl: '' },
             }));
@@ -112,22 +118,34 @@ export function useWallHoverHandler({
         setHoveredWallVertices(vertices);
         canvas.renderAll();
 
-        // 실시간 미리보기 업데이트
-        setPerspective(prev => ({
-          ...prev,
-          [wallUnderPointer.wallType]: {
-            vertices,
-            imageUrl: imageUrl || prev[wallUnderPointer.wallType]?.imageUrl || '',
-          },
-        }));
+        // 여기서는 실제 상태 변경이 아닌 미리보기만 업데이트
+         // 이전 상태와 같은지 비교
+        setPreviewPerspective(prev => {
+          const prevData = prev[wallUnderPointer.wallType] || {};
+          const isSameVertices = JSON.stringify(prevData.vertices) === JSON.stringify(vertices);
+          const isSameImage = prevData.imageUrl === (latestImageUrl.current || '');
+
+          if (isSameVertices && isSameImage) {
+            // 변경 없음 -> 상태 변경 안 함
+            return prev;
+          }
+
+          return {
+            ...prev,
+            [wallUnderPointer.wallType]: {
+              vertices,
+              imageUrl: latestImageUrl.current || prevData.imageUrl || '',
+            },
+          };
+        });
 
         console.log('[mouse:move] 새로운 벽 호버됨:', wallUnderPointer.wallType);
         console.log('[mouse:move] 꼭짓점 좌표:', vertices);
       } else {
       hoveredWallLocal.current = null;
-      preHoveredWall.current = null;
       setHoveredWall(null);
       setHoveredWallVertices([]);
+      setPreviewPerspective({});
       console.log('[mouse:move] 벽에서 벗어남');
       }
   };
@@ -142,4 +160,6 @@ export function useWallHoverHandler({
       console.log('[useWallHoverHandler] 이벤트 제거 완료');
     };
   }, [canvasInstance, edgeFrameState, selectedTool, imageUrl]);
+
+  return { previewPerspective };  // 미리보기 데이터 반환
 }

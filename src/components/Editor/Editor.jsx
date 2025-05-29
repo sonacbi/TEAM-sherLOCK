@@ -397,15 +397,23 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // ---------------------------------------------------------------(section 14)
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
-    useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall, edgeFrameState,
+    const { previewPerspective } = useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall, edgeFrameState,
         setHoveredWallVertices, selectedTool, setPerspective
     });
+
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
         <div ref={containerRef} style={{ position: 'relative', width: 1100, height: 650 }}>
-            <canvas ref={canvasRef} id="my-canvas" width={1100} height={650} style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
+            <canvas
+            ref={canvasRef}
+            id="my-canvas"
+            width={1100}
+            height={650}
+            style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+            />
+
             {perspectiveWalls.map((wall) => {
             const isHovered = hoveredWall && hoveredWall.wallType === wall.wallType;
             return (
@@ -419,7 +427,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                     height: 650,
                     pointerEvents: 'none',
                     zIndex: 2,
-                    opacity: isHovered ? 1 : 1,
+                    opacity: 1,
                 }}
                 >
                 <WebGLPerspectiveComponent
@@ -434,8 +442,40 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                 </div>
             );
             })}
+
+            {/* 미리보기용 perspective 렌더링 추가 */}
+            {Object.entries(previewPerspective).map(([wallType, { vertices, imageUrl }]) => {
+            if (!vertices || vertices.length === 0) return null;
+
+            return (
+                <div
+                key={`preview-${wallType}`}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: 1100,
+                    height: 650,
+                    pointerEvents: 'none',
+                    zIndex: 3, // 실제 perspective 위에 렌더링
+                    opacity: 0.5, // 미리보기는 반투명
+                }}
+                >
+                <WebGLPerspectiveComponent
+                    items={[{
+                    imageUrl,
+                    vertices,
+                    wallType,
+                    }]}
+                    width={1100}
+                    height={650}
+                />
+                </div>
+            );
+            })}
         </div>
-        );
+    );
+
 
 }
 
