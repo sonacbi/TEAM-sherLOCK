@@ -1,45 +1,75 @@
+import { useEffect, useState } from "react";
+import "./EditObjOptions.css"
+
 export default function EditObjOptions({canvasInstance, selectedObject, handleAddEvent}) {
+    const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
+    const [optionStyle, setOptionStyle] = useState(foundFabric);
+
     const editOption = (event, option) => {
         const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
+        if(!foundFabric) return;
+        setOptionStyle(foundFabric);
+        
+        let value = event.target.value;
+        const numberOptions = ['strokeWidth', 'fontSize'];
+        if(numberOptions.includes(option)) value = Number(value);
+
         switch (option) {
             case 'name':
-                foundFabric.name = event.target.value;
+                foundFabric.name = value;
+                setOptionStyle(prev => ({...prev, name: value}));
                 break;
             case 'fill':
-                foundFabric.fill = event.target.value;
-                break;
+                foundFabric.fill = value;
+                setOptionStyle(prev => ({...prev, fill: value}));
                 break;
             case 'stroke':
-                foundFabric.stroke = event.target.value;
+                foundFabric.stroke = value;
+                setOptionStyle(prev => ({...prev, stroke: value}));
                 break;
             case 'strokeWidth':
-                foundFabric.strokeWidth = event.target.value;
+                foundFabric.strokeWidth = value;
+                setOptionStyle(prev => ({...prev, strokeWidth: value}))
+                break;
             case 'textAlign':
-                foundFabric.textAlign = event.target.value;
+                foundFabric.textAlign = value;
+                setOptionStyle(prev => ({...prev, textAlign: value}));
                 break;
             case 'textBackgroundColor':
-                foundFabric.textBackgroundColor = event.target.value;
+                foundFabric.textBackgroundColor = value;
+                setOptionStyle(prev => ({...prev, textBackgroundColor: value}));
                 break;
             case 'fontFamily':
-                foundFabric.fontFamily = event.target.value;
+                foundFabric.fontFamily = value;
+                setOptionStyle(prev => ({...prev, fontFamily: value}));
                 break;
             case 'fontSize':
-                foundFabric.fontSize = event.target.value;
+                foundFabric.fontSize = value;
+                setOptionStyle(prev => ({...prev, fontSize: value}));
                 break;
             case 'fontStyle':
-                foundFabric.fontStyle = event.target.value;
+                value = event.target.checked ? "italic" : "normal"
+                foundFabric.fontStyle = value;
+                setOptionStyle(prev => ({...prev, fontStyle: value}));
                 break;
             case 'fontWeight':
-                foundFabric.fontWeight = event.target.value;
+                foundFabric.fontWeight = value;
+                setOptionStyle(prev => ({...prev, fontWeight: value}));
                 break;
             case 'event':
-                foundFabric.event = event.target.value;
+                foundFabric.event = value;
                 break;
             default:
                 console.warn(`${option} 잘못된 option입니다`)
                 break;
         }
-        canvasInstance.current.requestRenderAll();
+        try {
+            foundFabric.set(option, value);
+            foundFabric.dirty = true;
+            canvasInstance.current.requestRenderAll();
+        } catch (error) {
+            console.error(`속성 '${option}' 설정 중 오류:`, error);
+        }
     }
     
     const moveItem = (fromIndex, toIndex) => {
@@ -59,8 +89,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, handleAd
         } else {
             console.warn("선택된 객체가 없거나 canvas가 초기화되지 않았습니다.");
         }
-        // console.log('!!',canvasInstance.current instanceof fabric.Canvas)
-        // canvasInstance.current.bringForward(selectedObject)
     }
     const handleDown = () => {
         const canvas = canvasInstance.current;
@@ -72,40 +100,39 @@ export default function EditObjOptions({canvasInstance, selectedObject, handleAd
         } else {
             console.warn("선택된 객체가 없거나 canvas가 초기화되지 않았습니다.");
         }
-        // console.log('!!',canvasInstance.current instanceof fabric.Canvas)
-        // canvasInstance.current.sendBackwards(selectedObject)
     }
+
+    useEffect(() => {
+        setOptionStyle(canvasInstance.current.getObjects().find(obj => obj === selectedObject));
+    }, [selectedObject])
 
     return(
         <div className='object_edit'>
-            <h2>하이</h2>
             {selectedObject.type !== "image" && (
                 <>
-                이름<br/>
-                └<input type="text" value={selectedObject.name} onChange={e => editOption(e, "name")}/> <br/>
-                색<br/>
-                └<input type="color" value={selectedObject.fill} onChange={e => editOption(e, "fill")}/><br/>
-                윤곽선 색<br/>
-                └<input type="color" value={selectedObject.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/><br/>
-                윤곽선 두께<br/>
-                └<input type="number" value={Number(selectedObject.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/><br/>
+                <h3>이름</h3>
+                └<input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
+                <br/><br/>
+                <h3>색</h3>
+                └<input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
+                <h3>윤곽선 색</h3>
+                └<input type="color" value={optionStyle.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/>
+                <h3>윤곽선 두께</h3>
+                └<input type="number" value={Number(optionStyle.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/>
+                <br/><br/>
                 </>
             )}
             {selectedObject.type == "textbox" && (
                 <>
-                textAlign<br/>
-                {/* <label>left<input type="radio" name="textAlign" value={selectedObject.textAlign == "left"}/></label>
-                <label>center<input type="radio" name="textAlign" value={selectedObject.textAlign == "center"}/></label>
-                <label>right<input type="radio" name="textAlign" value={selectedObject.textAlign == "right"}/></label><br/> */}
-                └<select value={selectedObject.textAlign} onChange={e => editOption(e, "textAlign")}>
-                    <option value="left">left</option>
-                    <option value="center">center</option>
-                    <option value="right">right</option>
-                </select><br/>
-                글 배경<br/>
-                └<input type="color" value={selectedObject.textBackgroundColor ? selectedObject.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/><br/>
-                글꼴<br/>
-                └<select style={{fontFamily: `${selectedObject.fontFamily}`}} value={selectedObject.fontFamily} onChange={e => editOption(e, "fontFamily")}>
+                <h3>정렬</h3>
+                └<label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>left<input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/></label>
+                <label className={`editOpt_textAlign ${optionStyle.textAlign == "center" ? "selected" : ""}`}>center<input type="radio" name="textAlign" value="center" checked={selectedObject.textAlign == "center"} onChange={e => editOption(e, "textAlign")}/></label>
+                <label className={`editOpt_textAlign ${optionStyle.textAlign == "right" ? "selected" : ""}`}>right<input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/></label>
+                <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>justify<input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/></label>
+                <h3>글 배경</h3>
+                └<input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
+                <h3>글꼴</h3>
+                └<select style={{fontFamily: `${optionStyle.fontFamily}`}} value={optionStyle.fontFamily} onChange={e => editOption(e, "fontFamily")}>
                     <option style={{fontFamily: "맑은 고딕"}} value="맑은 고딕">맑은 고딕</option>
                     <option style={{fontFamily: "굴림"}} value="굴림">굴림</option>
                     <option style={{fontFamily: "바탕"}} value="바탕">바탕</option>
@@ -117,24 +144,21 @@ export default function EditObjOptions({canvasInstance, selectedObject, handleAd
                     <option style={{fontFamily: "Impact"}} value="Impact">Impact</option>
                     <option style={{fontFamily: "Tahoma"}} value="Tahoma">Tahoma</option>
                     <option style={{fontFamily: "Times New Roman"}} value="Times New Roman">Times New Roman</option>
-                </select><br/>
-                글꼴 크기<br/>
-                └<input type="number" value={Number(selectedObject.fontSize)} onChange={e => editOption(e, "fontSize")}/><br/>
-                글꼴 유형<br/>
-                └<select value={selectedObject.fontStyle} onChange={e => editOption(e, "fontStyle")}>
-                    <option value="normal">normal</option>
-                    <option value="italic">italic</option>
-                </select><br/>
-                글꼴 굵기<br/>
-                └<select value={selectedObject.fontWeight} onChange={e => editOption(e, "fontWeight")}>
+                </select>
+                <h3>글꼴 크기</h3>
+                └<input type="number" value={Number(optionStyle.fontSize)} onChange={e => editOption(e, "fontSize")}/>
+                <h3>글꼴 유형</h3>
+                └<label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
+                <h3>글꼴 굵기</h3>
+                └<select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
                     <option value="normal">normal</option>
                     <option value="bold">bold</option>
                     <option value="lighter">lighter</option>
-                </select><br/>
+                </select><br/><br/>
                 </>
             )}
-            <button onClick={handleUp}>위로</button>
-            <button onClick={handleDown}>아래로</button>
+            <button onClick={handleUp}>위로(미구현)</button>
+            <button onClick={handleDown}>아래로(미구현)</button>
             <button onClick={handleAddEvent}>event</button>
         </div>
     )

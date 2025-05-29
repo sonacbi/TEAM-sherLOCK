@@ -103,6 +103,54 @@ class Fabric extends ClassVersion {
     }
 }
 
+// 이벤트
+class Event extends ClassVersion {
+    // 이동========================
+    moveRoom: number | string; // 방의 번호|이름 입력
+    moveSide: number | string; // 방향의 번호|이름 입력
+    // 오브젝트====================
+    getObj: { name: string, x: number, y: number, scaleX: number, scaleY: number }; // 객체의 이름을 찾고 그 객체를 생성한다
+    setObj: { from: string, to: { name: string, x: number, y: number, scaleX: number, scaleY: number } }; // 객체의 이름을 찾고 바꿀 객체를 찾은 다음에 좌표와 크기를 맞춘다
+    dropObj: string; // 객체의 이름을 찾고 그 객체를 삭제한다
+    // 아이템======================
+    getItem: string; // 아이템을 얻는다
+    dropItem: string; // 아이템을 삭제한다
+    // 시간========================
+    startTime: { name: string, limit: number}; // 특정 시간을 제한만큼 설정한다
+    endTime: string; // 특정 시간을 멈춘다
+    // 소리========================
+    startSound: { name: string, volume: number }; // 특정 소리를 볼륨만큼 재생한다
+    endSound: string; // 특정 소리를 멈춘다
+    constructor({
+        moveRoom = null,
+        moveSide = null,
+        getObj = null,
+        setObj = null,
+        dropObj = null,
+        getItem = null,
+        dropItem = null,
+        startTime = null,
+        endTime = null,
+        startSound = null,
+        endSound = null
+    }) {
+        super();
+        this.moveRoom = moveRoom;
+        this.moveSide = moveSide;
+        this.getObj = getObj;
+        this.setObj = setObj;
+        this.dropObj = dropObj;
+        this.getItem = getItem;
+        this.dropItem = dropItem;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.startSound = startSound;
+        this.endSound = endSound;
+    }
+    save() {}
+    load() {}
+}
+
 // 아이템
 class Item extends ClassVersion {
     name: string;
