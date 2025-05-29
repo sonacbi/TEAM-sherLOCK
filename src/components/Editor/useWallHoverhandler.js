@@ -100,6 +100,10 @@ export function useWallHoverHandler({
         setPreviewPerspective({});  // 미리보기 초기화
         console.log(`[mouse:up] perspective 저장됨: ${wall.wallType}`, vertices, latestImageUrl.current);
       }
+      // 호버 플래그 초기화
+      hoveredWallLocal.current = null;
+      setHoveredWall(null);
+      setHoveredWallVertices([]);
     };
 
     const onMouseMove = opt => {
