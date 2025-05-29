@@ -8,6 +8,7 @@ import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
 import { useWallHoverHandler } from './useWallHoverhandler';
+import { getWallsFromCanvas, getWallVertices } from './perspectiveBackground';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool }) {
     const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
@@ -34,6 +35,8 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
+    // 모든 벽 객체 받아옴
+    const [walls, setWalls] = useState([]);
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -401,6 +404,57 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         position, size, edgeFrameState, angle,
         setHoveredWallVertices, selectedTool, perspective, setPerspective, 
     });
+
+    useEffect(() => {
+    const canvas = canvasInstance.current;
+    if (!canvas) return;
+
+    const updatePerspectiveVertices = () => {
+        const walls = getWallsFromCanvas(canvas);
+        if (!walls.length) return;
+
+        setPerspective(prev => {
+        const updatedPerspective = { ...prev };
+
+        walls.forEach(wall => {
+            const wallType = wall.get('wallType');
+            const vertices = getWallVertices(wall);
+
+            if (vertices.length) {
+            updatedPerspective[wallType] = {
+                ...(prev[wallType] || {}),
+                vertices: [...vertices],
+            };
+
+            //   console.log(`[mouse:up] perspective 저장됨: ${wallType}`, vertices);
+            }
+        });
+
+        //   // 배열 형태로 바꾸어서 useMemo 용 예시 로그 출력
+        //   const itemsArray = Object.entries(updatedPerspective).map(([key, val]) => ({
+        //     wallType: key,
+        //     vertices: val.vertices || [],
+        //     imageUrl: val.imageUrl || '',
+        //   }));
+
+        //   console.log('[useMemo] items:', itemsArray);
+
+        return updatedPerspective;
+        });
+    };
+
+    canvas.on('object:added', updatePerspectiveVertices);
+    canvas.on('object:modified', updatePerspectiveVertices);
+    canvas.on('object:removed', updatePerspectiveVertices);
+
+    updatePerspectiveVertices();
+
+    return () => {
+        canvas.off('object:added', updatePerspectiveVertices);
+        canvas.off('object:modified', updatePerspectiveVertices);
+        canvas.off('object:removed', updatePerspectiveVertices);
+    };
+    }, []);
 
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 

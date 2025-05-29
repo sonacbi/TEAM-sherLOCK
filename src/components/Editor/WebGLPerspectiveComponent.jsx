@@ -29,6 +29,11 @@ const fragmentShaderSource = `
 
 // 4x4 행렬 곱 함수
 function multiplyMatrices(a, b) {
+  if (!a || !b) {
+    console.warn('multiplyMatrices: 입력 행렬이 유효하지 않습니다.', { a, b });
+    return null;
+  }
+
   const out = new Float32Array(16);
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < 4; col++) {
@@ -93,8 +98,14 @@ function getPerspectiveTransformMatrix(src, dst) {
       }
 
       // 0인 경우 역행렬 없음
+      // if (Math.abs(M[i][i]) < 1e-12) {
+      //   throw new Error('Matrix is singular and cannot be inverted.');
+      // }
+      // 0인 경우 역행렬 없음, 근사 처리 혹은 에러 대신 안전 처리
       if (Math.abs(M[i][i]) < 1e-12) {
-        throw new Error('Matrix is singular and cannot be inverted.');
+        console.warn('경고: 행렬 피벗이 너무 작아서 역행렬 계산 중단, 근사 처리합니다.');
+        // 예외를 던지지 말고 null 또는 단위 행렬 반환 등으로 처리 가능
+        return null;
       }
 
       // 피벗 1로 만들기
@@ -120,6 +131,10 @@ function getPerspectiveTransformMatrix(src, dst) {
 
   // 벡터 곱셈 함수
   function multiplyMatrixVector(m, v) {
+    if (!m || !v) {
+      console.warn('multiplyMatrixVector: 입력값이 유효하지 않습니다.', { m, v });
+      return null; // 또는 빈 배열, 혹은 기본값을 반환해도 됨
+    }
     const res = new Array(m.length).fill(0);
     for (let i = 0; i < m.length; i++) {
       for (let j = 0; j < v.length; j++) {
@@ -130,8 +145,15 @@ function getPerspectiveTransformMatrix(src, dst) {
   }
 
   const invA = invertMatrix(A);
+  if (!invA) {
+    console.error('역행렬 계산 실패: 특이행렬입니다.');
+    return null;  // 실패 시 적절히 처리
+  }
   const h = multiplyMatrixVector(invA, b); // h0~h7
-
+  if (!h) {
+    console.error('행렬-벡터 곱셈 실패');
+    return null;
+  }
   // h8 = 1 고정
   h.push(1);
 
@@ -247,6 +269,11 @@ function getScaleMatrix(s) {
       const perspectiveMatrix = getPerspectiveTransformMatrix(src, dst);
       const scaleMatrix = getScaleMatrix(1);
       const matrix = multiplyMatrices(perspectiveMatrix, scaleMatrix);
+
+      if (!matrix) {
+        console.error('matrix 계산 실패, rendering을 건너뜁니다.', { perspectiveMatrix, scaleMatrix });
+        return; // 또는 continue; if inside forEach
+      }
 
       gl.uniformMatrix4fv(matrixLoc, false, matrix);
 
