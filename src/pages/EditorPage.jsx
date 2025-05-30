@@ -45,6 +45,7 @@ function EditorPage() {
     const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
     const [thumbnail, setThumbnail] = useState(new File([], ''));
     const [imgs, setImgs] = useState([]);
+    const [imageSrcs, setImageSrcs] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -107,9 +108,12 @@ function EditorPage() {
     };
 
     const handleAddImage = () => {
-        fileInputRef.current.click();
         setSelectedTool('picture');
     };
+    
+    const handleAddImageFile = () => {
+        fileInputRef.current.click();
+    }
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -149,6 +153,21 @@ function EditorPage() {
 
     useEffect(()=>console.log('imgs',imgs), [imgs])
 
+    useEffect(() => {
+        const promises = imgs.map((file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+        });
+
+        Promise.all(promises)
+        .then((results) => setImageSrcs(results))
+        .catch((err) => console.error('이미지 읽기 실패', err));
+    }, [imgs]);
+
     return (
         <>
             <div className='EditorPage_wrap'>
@@ -156,11 +175,11 @@ function EditorPage() {
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
 
-                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
+                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
                     <div className='room_status_title'>
                         <p className='room_status_button'>방탈출 정보</p>
-                        <RoomInfo />
+                        {/* <RoomInfo /> */}
                         <label>제목: ???</label>
                     </div>
 
@@ -194,13 +213,6 @@ function EditorPage() {
                             <div className={`picture_area ${selectedTool === 'picture' ? 'active' : ''}`} onClick={handleAddImage}>
                                 <img id='picture_icon' src={picture_icon} alt='picture_icon' />
                                 <p>사진</p>
-                                <input
-                                    type='file'
-                                    accept='image/*'
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                    style={{ display: 'none' }}
-                                />
                             </div>
 
                             <div className={`timer_area ${selectedTool === 'timer' ? 'active' : ''}`} onClick={handleAddTimer}>
@@ -274,8 +286,23 @@ function EditorPage() {
                                     )}
 
                                     {selectedTool === 'picture' && (
-                                        <div className='picture_fine_tuning'>
+                                        <div className='picture_fine_tuning' onClick={handleAddImageFile}>
                                             <h2>사진 세부조정</h2>
+                                            <div style={{backgroundColor: "green"}}>
+                                                <p>
+                                                    나는 사진 추가하는 버튼이야
+                                                </p>
+                                                <input
+                                                    type='file'
+                                                    accept='image/*'
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileChange}
+                                                    style={{ display: 'none' }}
+                                                />
+                                            </div>
+                                            {imageSrcs.map((src, idx) => (
+                                                <img key={idx} src={src} alt={`img-${idx}`} />
+                                            ))}
                                         </div>
                                     )}
 
