@@ -8,7 +8,8 @@ import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
 import { useWallHoverHandler } from './useWallHoverhandler';
-import { getWallsFromCanvas, getWallVertices, getRectVertices } from './perspectiveBackground';
+import { getWallsFromCanvas, getWallVertices } from './perspectiveBackground';
+import useSyncPerspective from './useSyncPerspective';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool }) {
     const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
@@ -29,13 +30,14 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const hoveredWallLocal = useRef(null); // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
     const originalStyles = useRef(new Map()); // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
     // 최종 저장된 이미지와 꼭짓점
-    const [perspective, setPerspective] = useState({
-        front: {}, left: {}, right: {}, top: {}, bottom: {} });
+    const [perspective, setPerspective] = useState({ front: {}, left: {}, right: {}, top: {}, bottom: {}, });
+    // perspective 항상 최신값을 유지하도록 관리
+    const perspectiveRef = useRef(perspective);
+    useEffect(() => { perspectiveRef.current = perspective; }, [perspective]);
     // 현재 호버된 벽 객체 상태
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
-
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -423,61 +425,11 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     const { previewPerspective } = useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
         position, size, edgeFrameState, angle,
-        setHoveredWallVertices, selectedTool, perspective, setPerspective, 
+        setHoveredWallVertices, selectedTool, perspective, perspectiveRef, setPerspective, 
     });
 
-    useEffect(() => {
-    const canvas = canvasInstance.current;
-    if (!canvas) return;
-
-    const updatePerspectiveVertices = () => {
-        const walls = getWallsFromCanvas(canvas);
-        const rects = canvas.getObjects().filter(obj => obj.type === 'rect');
-
-        if (!walls.length && !rects.length) return;
-
-        setPerspective(prev => {
-        const updatedPerspective = { ...prev };
-
-        walls.forEach(wall => {
-            const wallType = wall.get('wallType');
-            const vertices = getWallVertices(wall);
-
-            if (vertices.length) {
-            updatedPerspective[wallType] = {
-                ...(prev[wallType] || {}),
-                vertices: [...vertices],
-            };
-
-            //   console.log(`[mouse:up] perspective 저장됨: ${wallType}`, vertices);
-            }
-        });
-
-        //   // 배열 형태로 바꾸어서 useMemo 용 예시 로그 출력
-        //   const itemsArray = Object.entries(updatedPerspective).map(([key, val]) => ({
-        //     wallType: key,
-        //     vertices: val.vertices || [],
-        //     imageUrl: val.imageUrl || '',
-        //   }));
-
-        //   console.log('[useMemo] items:', itemsArray);
-
-        return updatedPerspective;
-        });
-    };
-
-    canvas.on('object:added', updatePerspectiveVertices);
-    canvas.on('object:modified', updatePerspectiveVertices);
-    canvas.on('object:removed', updatePerspectiveVertices);
-
-    updatePerspectiveVertices();
-
-    return () => {
-        canvas.off('object:added', updatePerspectiveVertices);
-        canvas.off('object:modified', updatePerspectiveVertices);
-        canvas.off('object:removed', updatePerspectiveVertices);
-    };
-    }, []);
+    // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
+    useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective);
 
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 

@@ -12,7 +12,7 @@ export function useWallHoverHandler({
     setHoveredWallVertices, // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     position, size, edgeFrameState, angle,
     selectedTool,
-    perspective,
+    perspective, perspectiveRef,
     setPerspective,
   
 }) {
@@ -82,12 +82,15 @@ export function useWallHoverHandler({
         const vertices = getWallVertices(wall);
 
         // 확정된 이미지가 있으면 변경 안 함
-        if (perspective[wall.wallType]?.imageUrl) {
+        if (perspectiveRef.current[wall.wallType]?.imageUrl) {
           console.log(`[mouse:up] 이미지가 이미 확정되어 변경하지 않음: ${wall.wallType}`);
           setPreviewPerspective({});
+          // 호버 플래그 초기화
+          hoveredWallLocal.current = null;
+          setHoveredWall(null);
+          setHoveredWallVertices([]);
           return;
         }
-
         // ✅ 여기서 드래그한 벽과 이미지 URL을 perspective에 저장
         setPerspective(prev => ({
           ...prev,
