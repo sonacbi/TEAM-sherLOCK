@@ -8,7 +8,7 @@ import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
 import { useWallHoverHandler } from './useWallHoverhandler';
-import { getWallsFromCanvas, getWallVertices } from './perspectiveBackground';
+import { getWallsFromCanvas, getWallVertices, getRectVertices } from './perspectiveBackground';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool }) {
     const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
@@ -411,7 +411,9 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     const updatePerspectiveVertices = () => {
         const walls = getWallsFromCanvas(canvas);
-        if (!walls.length) return;
+        const rects = canvas.getObjects().filter(obj => obj.type === 'rect');
+
+        if (!walls.length && !rects.length) return;
 
         setPerspective(prev => {
         const updatedPerspective = { ...prev };
@@ -430,6 +432,17 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             }
         });
 
+        rects.forEach((rect, idx) => {
+            const rectKey = rect.get('wallType') || `rect-${idx}`;
+            const vertices = getRectVertices(rect);
+
+            if (vertices.length) {
+                updatedPerspective[rectKey] = {
+                    ...(prev[rectKey] || {}),
+                    vertices: [...vertices],
+                };
+            }
+        });
         //   // 배열 형태로 바꾸어서 useMemo 용 예시 로그 출력
         //   const itemsArray = Object.entries(updatedPerspective).map(([key, val]) => ({
         //     wallType: key,

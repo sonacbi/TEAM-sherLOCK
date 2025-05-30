@@ -3,37 +3,45 @@ import * as fabric from 'fabric';
 
 // 📝 벽 객체의 4개 꼭지점 좌표를 canvas 좌표계 기준으로 계산하는 함수
 export function getWallVertices(wall) {
-    if (!wall || !wall.get('points')) return [];
+    // if (!wall || !wall.get('points')) return [];
+    if (!wall) return [];
+    if (wall.type === 'rect') {
+        return getRectVertices(wall);
+    }
+    // polygon 타입인 경우 (기존 방식)
+    if (wall.get('points')) {
+        const points = wall.get('points'); // polygon의 로컬 좌표 (path 좌표)
+        const matrix = wall.calcTransformMatrix(); // 벽 객체의 전체 변환 행렬 (이동, 회전, 스케일 포함)
 
-    const points = wall.get('points'); // polygon의 로컬 좌표 (path 좌표)
-    const matrix = wall.calcTransformMatrix(); // 벽 객체의 전체 변환 행렬 (이동, 회전, 스케일 포함)
+        // polygon의 기준점인 pathOffset (left/top 기준 보정값)
+        const offsetX = wall.pathOffset?.x || 0;
+        const offsetY = wall.pathOffset?.y || 0;
 
-    // polygon의 기준점인 pathOffset (left/top 기준 보정값)
-    const offsetX = wall.pathOffset?.x || 0;
-    const offsetY = wall.pathOffset?.y || 0;
-
-    // 각 로컬 좌표에서 pathOffset 보정 후, 전체 변환 행렬을 적용하여 캔버스 좌표계로 변환
-    return points.map(p => {
-        const localPoint = new fabric.Point(p.x - offsetX, p.y - offsetY);
-        const transformed = fabric.util.transformPoint(localPoint, matrix);
-        return transformed;
-    });
+        // 각 로컬 좌표에서 pathOffset 보정 후, 전체 변환 행렬을 적용하여 캔버스 좌표계로 변환
+        return points.map(p => {
+            const localPoint = new fabric.Point(p.x - offsetX, p.y - offsetY);
+            const transformed = fabric.util.transformPoint(localPoint, matrix);
+            return transformed;
+        });
+    }
 }
 
 // 📝 사각형(rect) 객체의 4개 꼭지점 좌표를 계산하는 함수
 export function getRectVertices(rect) {
-    const left = rect.left;
-    const top = rect.top;
-    const width = rect.width * rect.scaleX;   // 스케일 적용된 실제 너비
-    const height = rect.height * rect.scaleY; // 스케일 적용된 실제 높이
+    // 도형의 로컬 꼭짓점 좌표 (origin 기준)
+    const strokeWidth = rect.strokeWidth || 0;
+    const halfStroke = strokeWidth / 2;
 
-// 좌상단, 우상단, 우하단, 좌하단 꼭지점 배열 리턴
-    return [
-        new fabric.Point(left, top),
-        new fabric.Point(left + width, top),
-        new fabric.Point(left + width, top + height),
-        new fabric.Point(left, top + height),
+    const points = [
+        new fabric.Point(-rect.width / 2 - halfStroke, -rect.height / 2 - halfStroke),
+        new fabric.Point(rect.width / 2 + halfStroke, -rect.height / 2 - halfStroke),
+        new fabric.Point(rect.width / 2 + halfStroke, rect.height / 2 + halfStroke),
+        new fabric.Point(-rect.width / 2 - halfStroke, rect.height / 2 + halfStroke),
     ];
+
+    const matrix = rect.calcTransformMatrix();
+
+    return points.map(p => fabric.util.transformPoint(p, matrix));
 }
 
 // 📝 꼭지점에 오프셋(이동)과 회전을 적용하는 함수
@@ -100,7 +108,7 @@ export function getWallsFromCanvas(canvas) {
     walls.forEach((w, i) => {
         // console.log(`벽[${i}]: type=${w.type}, wallType=${w.get('wallType')}`);
     });
-
+    // console.log(walls.map(w => w.type))
     return walls;
 }
 
