@@ -102,7 +102,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // ---------------------------------------------------------------(section 2) ?
 
     // 프레임 설정 기본값 세팅 ---------------------------------------(section 3) (노은성)
-    const roomController = new fabric.Rect({
+    const [roomController, setRoomController] = useState(new fabric.Rect({
         ...controlStyle,
         left: 220,
         top: 120,
@@ -110,21 +110,23 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         strokeWidth: 2,
         stroke: 'red',
         name: "SherLockRoomController",
-    });
-    roomController.width = roomController.left + 440;
-    roomController.height = roomController.top + 300;
-    roomController.on('rotating', () => {
-        setAngle(roomController.angle);
-        setPosition([roomController.left, roomController.top]);
-    });
-    roomController.on('moving', () => {
-        setPosition([roomController.left, roomController.top]);
-        setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
-    });
-    roomController.on('scaling', () => {
-        setPosition([roomController.left, roomController.top]);
-        setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
-    });
+    }));
+    useEffect(()=> {
+        roomController.width = roomController.left + 440;
+        roomController.height = roomController.top + 300;
+        roomController.on('rotating', () => {
+            setAngle(roomController.angle);
+            setPosition([roomController.left, roomController.top]);
+        });
+        roomController.on('moving', () => {
+            setPosition([roomController.left, roomController.top]);
+            setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
+        });
+        roomController.on('scaling', () => {
+            setPosition([roomController.left, roomController.top]);
+            setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
+        });
+    }, [])
     // ---------------------------------------------------------------(section 3) (노은성)
     // 캔버스 랜더링 기본값 세팅 -------------------------------------(section 4) ?
     useEffect(() => {
@@ -297,6 +299,27 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             canvas.setActiveObject(roomController);
             canvas.sendObjectToBack(roomController);
         }
+
+        const result = perspectiveWalls.map(wall => {
+            if (hoveredWall && hoveredWall.wallType === wall.wallType) {
+                return {
+                ...wall,
+                vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
+                imageUrl: perspective[wall.wallType]?.imageUrl ?? '',
+                };
+            }
+            return wall;
+        });
+        const frameObjects = roomFrame.getObjects?.() ?? [];
+        frameObjects.forEach(obj => {
+            if (result.find(data => data.imageUrl && data.wallType === obj.wallType)) {
+                obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+            }
+        });
+        if (result.find(data => data.imageUrl && data.wallType === 'front' )) {
+            roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+        }
+        
         canvas.sendObjectToBack(roomFrame);
         
         canvas.renderAll();

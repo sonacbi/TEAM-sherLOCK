@@ -98,18 +98,29 @@ export function useWallHoverHandler({
           }
         }));
         
-// 이미지 확정된 벽을 투명하게 만들기
-if (latestImageUrl.current) {
-  wall.set({
-    fill: 'rgba(0,0,0,0)',
-    stroke: null,
-    selectable: false,
-    evented: false,
-  });
-  canvas.renderAll();
+      // 이미지 확정된 벽을 투명하게 만들기
+      if (latestImageUrl.current) {
+        wall.set({
+          fill: 'rgba(0,0,0,0)',
+          stroke: null,
+          selectable: false,
+          evented: false,
+        });
+        if (wall.wallType === 'front') {
+        // 캔버스 상의 roomController 인스턴스에 직접 적용
+        const controllerObj = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        if (controllerObj) {
+          controllerObj.set({
+            fill: 'rgba(0,0,0,0)',
+            stroke: 'rgba(0,0,0,0)',
+          });
+        }
+      }
 
-  console.log(`[mouse:up] ${wall.wallType} 벽을 이미지 확정으로 투명하게 설정`);
-}
+        canvas.renderAll();
+
+        console.log(`[mouse:up] ${wall.wallType} 벽을 이미지 확정으로 투명하게 설정`);
+      }
         setPreviewPerspective({});  // 미리보기 초기화
         console.log(`[mouse:up] perspective 저장됨: ${wall.wallType}`, vertices, latestImageUrl.current);
       }
