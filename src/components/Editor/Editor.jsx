@@ -50,6 +50,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         cornerColor: 'white',
         cornerStyle: 'circle',
         borderScaleFactor: 2,
+        gameEvent: [],
     };
     // ---------------------------------------------------------------(section 2) ?
 

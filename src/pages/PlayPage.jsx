@@ -61,6 +61,7 @@ function PlayPage() {
                         strokeUniform: opt.strokeUniform,
                         name: opt.name,
                         shapeType: opt.shapeType,
+                        gameEvent: opt.gameEvent,
                     });
                     break;
                 case "line":

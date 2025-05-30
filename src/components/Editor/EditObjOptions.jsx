@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
+
+import EditEventItem from "./EditEventItem";
+
+import { GameEventType } from "../../../modules/editor/gamePnC";
+
 import "./EditObjOptions.css"
 
-export default function EditObjOptions({canvasInstance, selectedObject, handleAddEvent}) {
+export default function EditObjOptions({canvasInstance, selectedObject, selectedTool}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
     const [optionStyle, setOptionStyle] = useState(foundFabric);
 
@@ -102,36 +107,65 @@ export default function EditObjOptions({canvasInstance, selectedObject, handleAd
         }
     }
 
+    const addEvent = () => {
+        const event = { move: GameEventType["move"] };
+        const canvas = canvasInstance.current;
+        const foundFabric = canvas.getObjects().find(obj => obj === selectedObject);
+        if (!foundFabric) return;
+
+        // 기존 gameEvent가 없으면 초기화
+        if (!Array.isArray(foundFabric.gameEvent)) {
+            foundFabric.gameEvent = [];
+        }
+
+        // 직접 복사본 생성 후 set
+        foundFabric.gameEvent = [...foundFabric.gameEvent, event];
+
+        // 상태도 마찬가지로 불변성 유지
+        setOptionStyle(prev => ({
+            ...prev,
+            gameEvent: [...(prev.gameEvent || []), event]
+        }));
+
+        canvas.requestRenderAll();
+    }
+
     useEffect(() => {
-        setOptionStyle(canvasInstance.current.getObjects().find(obj => obj === selectedObject));
+        const found = canvasInstance.current?.getObjects().find(obj => obj === selectedObject);
+        if (found) {
+            if (!found.gameEvent) found.gameEvent = [];
+            setOptionStyle({ ...found });
+        }
     }, [selectedObject])
 
     return(
         <div className='object_edit'>
+            {!(selectedTool === 'event') ?
+            (<>
             {selectedObject.type !== "image" && (
                 <>
-                <h3>이름</h3>
+                <h4>이름</h4>
                 └<input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
                 <br/><br/>
-                <h3>색</h3>
+                <h4>색</h4>
                 └<input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
-                <h3>윤곽선 색</h3>
+                <h4>윤곽선 색</h4>
                 └<input type="color" value={optionStyle.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/>
-                <h3>윤곽선 두께</h3>
+                <h4>윤곽선 두께</h4>
                 └<input type="number" value={Number(optionStyle.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/>
                 <br/><br/>
                 </>
             )}
             {selectedObject.type == "textbox" && (
                 <>
-                <h3>정렬</h3>
+                <h4>정렬</h4>
                 └<label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>left<input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/></label>
                 <label className={`editOpt_textAlign ${optionStyle.textAlign == "center" ? "selected" : ""}`}>center<input type="radio" name="textAlign" value="center" checked={selectedObject.textAlign == "center"} onChange={e => editOption(e, "textAlign")}/></label>
                 <label className={`editOpt_textAlign ${optionStyle.textAlign == "right" ? "selected" : ""}`}>right<input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/></label>
                 <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>justify<input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/></label>
-                <h3>글 배경</h3>
+                <h4>글 배경</h4>
                 └<input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
-                <h3>글꼴</h3>
+                <h4>글꼴</h4>
                 └<select style={{fontFamily: `${optionStyle.fontFamily}`}} value={optionStyle.fontFamily} onChange={e => editOption(e, "fontFamily")}>
                     <option style={{fontFamily: "맑은 고딕"}} value="맑은 고딕">맑은 고딕</option>
                     <option style={{fontFamily: "굴림"}} value="굴림">굴림</option>
@@ -145,11 +179,11 @@ export default function EditObjOptions({canvasInstance, selectedObject, handleAd
                     <option style={{fontFamily: "Tahoma"}} value="Tahoma">Tahoma</option>
                     <option style={{fontFamily: "Times New Roman"}} value="Times New Roman">Times New Roman</option>
                 </select>
-                <h3>글꼴 크기</h3>
+                <h4>글꼴 크기</h4>
                 └<input type="number" value={Number(optionStyle.fontSize)} onChange={e => editOption(e, "fontSize")}/>
-                <h3>글꼴 유형</h3>
+                <h4>글꼴 유형</h4>
                 └<label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
-                <h3>글꼴 굵기</h3>
+                <h4>글꼴 굵기</h4>
                 └<select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
                     <option value="normal">normal</option>
                     <option value="bold">bold</option>
@@ -157,9 +191,53 @@ export default function EditObjOptions({canvasInstance, selectedObject, handleAd
                 </select><br/><br/>
                 </>
             )}
-            <button onClick={handleUp}>위로(미구현)</button>
-            <button onClick={handleDown}>아래로(미구현)</button>
-            <button onClick={handleAddEvent}>event</button>
+            {/* <button onClick={handleUp}>위로(미구현)</button>
+            <button onClick={handleDown}>아래로(미구현)</button> */}
+            </>)
+            :
+            (<>
+            {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 ? (
+                <>
+                {optionStyle.gameEvent?.map((data, index) => {
+                    const obj = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
+                    return (
+                        <div key={`event-${index}`}>
+                            <EditEventItem
+                                event={data}
+                                index={index}
+                                onChange={(updatedEvent) => {
+                                    const newGameEvents = [...optionStyle.gameEvent];
+                                    newGameEvents[index] = updatedEvent;
+                                    if (obj) {
+                                        obj.gameEvent = newGameEvents;
+                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                        canvasInstance.current.requestRenderAll();
+                                    }
+                                }}
+                                onRemove = {() => {
+                                    const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
+                                    if (obj) {
+                                        obj.gameEvent = newGameEvents;
+                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                        canvasInstance.current.requestRenderAll();
+                                    }
+                                }}
+                            />
+                        </div>
+                    );
+                })}
+                <button className="add_event not" onClick={addEvent}>
+                    이벤트 추가하기
+                </button>
+                </>
+            )
+            :
+            (
+                <button className="add_event" onClick={addEvent}>
+                    이벤트 추가하기
+                </button>
+            )}
+            </>)}
         </div>
     )
 }

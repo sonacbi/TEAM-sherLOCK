@@ -48,31 +48,26 @@ class Frame extends ClassVersion {
 }
 // 도형
 class Fabric extends ClassVersion {
-    constructor({ option = {}, event = [{}], }) {
+    constructor({ option = {}, event = [], }) {
         super();
         this.option = option;
         this.event = event;
     }
 }
 // 이벤트
-class Event extends ClassVersion {
-    constructor({ moveRoom = null, moveSide = null, getObj = null, setObj = null, dropObj = null, getItem = null, dropItem = null, startTime = null, endTime = null, startSound = null, endSound = null }) {
-        super();
-        this.moveRoom = moveRoom;
-        this.moveSide = moveSide;
-        this.getObj = getObj;
-        this.setObj = setObj;
-        this.dropObj = dropObj;
-        this.getItem = getItem;
-        this.dropItem = dropItem;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.startSound = startSound;
-        this.endSound = endSound;
-    }
-    save() { }
-    load() { }
-}
+const GameEventType = {
+    move: { room: 0, side: 0 },
+    getObj: { name: "", x: 0, y: 0, scaleX: 1, scaleY: 1 },
+    setObj: { from: "", to: { name: "", scaleX: 1, scaleY: 1 } },
+    dropObj: "",
+    getItem: "",
+    dropItem: "",
+    startTime: { name: "", limit: 0 },
+    endTime: "",
+    startSound: { name: "", volume: 1 },
+    endSound: "",
+    save: {}
+};
 // 아이템
 class Item extends ClassVersion {
     constructor({ name = '', description = '', type = '', iconPath = '', imgPath = '', quantity = 1, getItemMessage = null, uniteItem = [], fabric = new Fabric({}), }) {
@@ -88,4 +83,4 @@ class Item extends ClassVersion {
         this.fabric = new Fabric(Object.assign(Object.assign({}, fabric), { option: { name: name } }));
     }
 }
-export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, Item };
+export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, GameEventType, Item };

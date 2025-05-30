@@ -220,7 +220,7 @@ function EditorPage() {
 
                         <div className='tool_fine_tuning'>
                             {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
-                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} handleAddEvent={handleAddEvent}/>
+                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool}/>
                             ) : (
                                 <>
                                     {selectedTool === 'frame' && (
@@ -257,7 +257,7 @@ function EditorPage() {
 
                                             <div className='bubble'>
                                                 <label>말풍선</label>
-                                                
+
                                                 <div className='bubble_wrap'>
                                                     <img id='bubble1' src={bubble1} alt='bubble1' />
                                                     <img id='bubble2' src={bubble2} alt='bubble2' />

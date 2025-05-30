@@ -38,9 +38,8 @@ const handleSide = (canvas, setSide, setRoom) => {
                     name: data?.name,
                     type: data?.type,
                     shapeType: data?.shapeType,
-                    event: data?.event
+                    gameEvent: data?.gameEvent
                 },
-                event: data?.event
             })
         );
     });
@@ -118,7 +117,7 @@ const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition,
                             editable: opt.editable,
                             name: opt.name,
                             shapeType: opt.shapeType,
-                            event: opt.event,
+                            gameEvent: opt.gameEvent,
                         });
                         break;
                     case "line":
