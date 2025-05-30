@@ -432,17 +432,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             }
         });
 
-        rects.forEach((rect, idx) => {
-            const rectKey = rect.get('wallType') || `rect-${idx}`;
-            const vertices = getRectVertices(rect);
-
-            if (vertices.length) {
-                updatedPerspective[rectKey] = {
-                    ...(prev[rectKey] || {}),
-                    vertices: [...vertices],
-                };
-            }
-        });
         //   // 배열 형태로 바꾸어서 useMemo 용 예시 로그 출력
         //   const itemsArray = Object.entries(updatedPerspective).map(([key, val]) => ({
         //     wallType: key,
