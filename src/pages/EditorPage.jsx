@@ -156,10 +156,11 @@ function EditorPage() {
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
 
-                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
+                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
 
                     <div className='room_status_title'>
                         <p className='room_status_button'>방탈출 정보</p>
+                        <RoomInfo />
                         <label>제목: ???</label>
                     </div>
 
@@ -326,8 +327,6 @@ function EditorPage() {
                     </div>
                 </div>
             </div>
-
-            <RoomInfo />
         </>
     );
 }

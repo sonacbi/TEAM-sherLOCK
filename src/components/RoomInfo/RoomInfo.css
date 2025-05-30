@@ -1,69 +1,101 @@
 .RoomInfo_wrap {
+    background-color: rgb(57, 57, 57);
+    width: 500px;
+    height: 800px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
     position: absolute;
-    width: 100dvw;
-    height: 100dvh;
-    top: 0;
-    left: 0;
-    background-color: #0a0a0ada;
+    top: 8%;
     z-index: 999;
-}
-
-#RoomInfo_background {
-    position: absolute;
-    top: -30%;
-    left: 50%;
-    transform: translate(-50%);
-    width: 70%;
-}
-
-.Room_door_wrap {
-    position: absolute;
-    bottom: 0;
-    width: 100dvw;
-    height: 100%;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
+    padding: 30px 0;
 }
 
-.Room_door {
-    width: 35%;
+.RoomInfo_content {
     height: 100%;
     display: flex;
     flex-direction: column;
-    min-width: 500px;
+    gap: 40px;
 }
 
-.Room_room {
-    height: 10%;
-    position: relative;
+.RoomInfo_content > div {
+    width: 300px;
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.RoomInfo_content > div > p {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.3);
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.RoomInfo_content > div > input {
+    height: 40px;
+    margin: 0 6px;
+    border-radius: 5px;
+    border: 1px solid rgb(160, 160, 160);
+    padding: 10px;
+    font-size: 15px;
+}
+
+.RoomInfo_content > div > input:focus {
+    outline: 2px solid rgb(160, 160, 160);
+}
+
+.Room_thumbnail_img_button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.Room_thumbnail_img_wrap {
+    width: 280px;
+    height: 350px;
+    border: 2px dashed white;
+    position: relative;
+}
+
+.Room_thumbnail_basic_wrap {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-
-.Room_room p {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-weight: bold;
-    font-size: 20px;
-    cursor: default;
 }
 
-.Room_room h5 {
-    position: absolute;
-    right: 5%;
+.Room_thumbnail_img_wrap.has-thumbnail {
+    border: 2px solid white;
+}
+
+#Room_thumbnail_basic_img {
+    width: 140px;
+}
+
+#Room_thumbnail_img {
+    width: 100%;
+    height: 100%;
+}
+
+.Room_thumbnail_img_button > button {
+    background-color: green;
+    border: 0;
     color: white;
-    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 
-.Room_content {
-    height: 90%;
-    background-color: black;
-    padding: 10px;
-    padding-bottom: 0;
-    display: flex;
-    flex-direction: column;
+.Room_thumbnail_img_button > button:hover {
+    opacity: 0.7;
 }
