@@ -97,9 +97,23 @@ export function useWallHoverHandler({
             imageUrl: latestImageUrl.current || prev[wall.wallType]?.imageUrl || ''
           }
         }));
+        
+// 이미지 확정된 벽을 투명하게 만들기
+if (latestImageUrl.current) {
+  wall.set({
+    fill: 'rgba(0,0,0,0)',
+    stroke: null,
+    selectable: false,
+    evented: false,
+  });
+  canvas.renderAll();
+
+  console.log(`[mouse:up] ${wall.wallType} 벽을 이미지 확정으로 투명하게 설정`);
+}
         setPreviewPerspective({});  // 미리보기 초기화
         console.log(`[mouse:up] perspective 저장됨: ${wall.wallType}`, vertices, latestImageUrl.current);
       }
+      
       // 호버 플래그 초기화
       hoveredWallLocal.current = null;
       setHoveredWall(null);

@@ -35,8 +35,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
-    // 모든 벽 객체 받아옴
-    const [walls, setWalls] = useState([]);
+
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -83,7 +82,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             }
             return wall;
         });
-
         console.log('[useMemo] items:', result);
         return result;
     }, [perspectiveWalls, hoveredWall, hoveredWallVertices]);
@@ -133,7 +131,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         const canvas = new fabric.Canvas(canvasRef.current, {
             width: 1100,
             height: 650,
-            backgroundColor: 'white',
+            backgroundColor: 'transparent',
             selection: true,
             selectionColor: 'rgba(169, 219, 120, 0.3)',
             selectionBorderColor: '#A9DB78',
@@ -468,7 +466,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             id="my-canvas"
             width={1100}
             height={650}
-            style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+            style={{ position: 'absolute', top: 0, left: 0, zIndex: 2,}}
             />
 
             {perspectiveWalls.map((wall) => {
@@ -483,7 +481,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                     width: 1100,
                     height: 650,
                     pointerEvents: 'none',
-                    zIndex: 2,
+                    zIndex: 1,
                     opacity: 1,
                 }}
                 >
