@@ -137,7 +137,7 @@ export function useWallHoverHandler({
     const onMouseMove = opt => {
       if (!isDragging.current) return;
 
-      const pointer = canvas.getPointer(opt.e);
+      const pointer = opt.absolutePointer || canvas.getPointer(opt.e);
       const currentWalls = getWallsFromCanvas(canvas);
       const wallUnderPointer = currentWalls.find(wall => wall.containsPoint(pointer));
 
@@ -215,14 +215,77 @@ export function useWallHoverHandler({
       console.log('[mouse:move] 벽에서 벗어남');
       }
   };
+
+  const onMouseDblClick = (opt) => {
+    const canvas = canvasInstance.current;
+    const pointer = opt.absolutePointer || canvas.getPointer(opt.e);
+    const currentWalls = getWallsFromCanvas(canvas);
+    const wallUnderPointer = currentWalls.find(wall => wall.containsPoint(pointer));
+
+    if (!wallUnderPointer) return;
+
+    const wallType = wallUnderPointer.wallType;
+    const currentImageUrl = perspectiveRef.current[wallType]?.imageUrl;
+
+    const wallStyles = {
+      top:    { fill: 'rgba(255, 0, 255, 0.2)', stroke: 'purple' },
+      left:   { fill: 'rgba(0, 0, 255, 0.2)', stroke: 'blue' },
+      right:  { fill: 'rgba(0, 255, 0, 0.2)', stroke: 'green' },
+      bottom: { fill: 'rgba(255, 255, 0, 0.2)', stroke: 'orange' },
+      front:  { fill: 'rgba(0, 0, 0, 0)', stroke: undefined },
+    };
+
+    if (currentImageUrl) {
+      console.log(`[dblclick] ${wallType} 벽에서 이미지 제거`);
+
+      // perspective에서 이미지 및 꼭지점 제거
+      setPerspective(prev => ({
+        ...prev,
+        [wallType]: {
+          ...prev[wallType],
+          imageUrl: '',
+          vertices: [],
+        },
+      }));
+
+      // 벽 스타일 복원
+      const style = wallStyles[wallType] || {};
+      wallUnderPointer.set({
+        ...style,
+        selectable: true,
+        evented: true,
+      });
+
+      // front 벽일 때 컨트롤러도 함께 복원
+      if (wallType === 'front') {
+        const controllerName = 'SherLockRoomController';
+        const controllerStyle = {
+          fill: 'rgba(255, 0, 0, 0.2)',
+          stroke: 'red',
+        };
+
+        const controllerObj = canvas.getObjects().find(obj => obj.name === controllerName);
+        if (controllerObj) {
+          controllerObj.set(controllerStyle);
+        }
+      }
+
+      canvas.renderAll();
+      console.log(`[dblclick] ${wallType} 벽 이미지 제거 및 스타일 복원 완료`);
+    }
+  };
+
+
     canvas.on('object:moving', onObjectMoving);
     canvas.on('mouse:up', onMouseUp);
     canvas.on('mouse:move', onMouseMove);
+    canvas.on('mouse:dblclick', onMouseDblClick);
 
     return () => {
       canvas.off('object:moving', onObjectMoving);
       canvas.off('mouse:up', onMouseUp);
       canvas.off('mouse:move', onMouseMove);
+      canvas.off('mouse:dblclick', onMouseDblClick);
       console.log('[useWallHoverHandler] 이벤트 제거 완료');
     };
   }, [canvasInstance, edgeFrameState, selectedTool,]);
