@@ -1,6 +1,5 @@
 .RoomInfo_wrap {
     background-color: rgb(57, 57, 57);
-    width: 500px;
     height: 800px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
     position: absolute;
@@ -12,11 +11,31 @@
     padding: 30px 0;
 }
 
+.RoomInfo_content::-webkit-scrollbar {
+    width: 8px;
+    margin-right: 10px;
+}
+
+.RoomInfo_content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.RoomInfo_content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
 .RoomInfo_content {
     height: 100%;
     display: flex;
     flex-direction: column;
     gap: 40px;
+    overflow-y: auto; 
+    overflow-x: hidden;
+    padding-right: 30px;
+    margin-left: 50px;
+    margin-right: 10px;
 }
 
 .RoomInfo_content > div {
@@ -36,16 +55,27 @@
     border-radius: 10px;
 }
 
-.RoomInfo_content > div > input {
-    height: 40px;
-    margin: 0 6px;
+.text_precautions, .introduction_precautions {
+    padding: 0 6px;
+    display: flex;
+    flex-direction: column;
+}
+
+.text_precautions > input,
+.introduction_precautions > textarea {
+    width: 100%;
     border-radius: 5px;
     border: 1px solid rgb(160, 160, 160);
     padding: 10px;
     font-size: 15px;
 }
 
-.RoomInfo_content > div > input:focus {
+.text_precautions > input {
+    height: 40px;
+}
+
+.text_precautions > input:focus,
+.introduction_precautions > textarea:focus {
     outline: 2px solid rgb(160, 160, 160);
 }
 
@@ -61,6 +91,7 @@
     height: 350px;
     border: 2px dashed white;
     position: relative;
+    border-radius: 10px;
 }
 
 .Room_thumbnail_basic_wrap {
@@ -86,6 +117,7 @@
 #Room_thumbnail_img {
     width: 100%;
     height: 100%;
+    border-radius: 10px;
 }
 
 .Room_thumbnail_img_button > button {
@@ -98,4 +130,165 @@
 
 .Room_thumbnail_img_button > button:hover {
     opacity: 0.7;
+}
+
+.introduction_precautions > textarea {
+    height: 300px;
+    font-family: sans-serif;
+    resize: none;
+}
+
+.Room_difficulty, .Room_theme, .Room_visibility {
+    gap: 20px !important;
+}
+
+.Room_difficulty_select, .Room_theme_select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.Room_difficulty_select > p, 
+.Room_theme_select > p {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.3);
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.Room_difficulty_select > span,
+.Room_theme_select > span {
+    color: rgb(163, 163, 163);
+}
+
+.difficulty_wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    gap: 20px;
+}
+
+.difficulty_wrap > div {
+    width: 40px;
+    height: 100%;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+}
+
+.difficulty_one {background-color: rgb(80, 80, 80);}
+.difficulty_two {background-color: rgb(70, 70, 70);}
+.difficulty_three {background-color: rgb(40, 40, 40);}
+.difficulty_four {background-color: rgb(30, 30, 30);}
+.difficulty_five {background-color: rgb(0, 0, 0);}
+
+.Room_playtime {
+    flex-direction: row !important;
+}
+
+.playtime_wrap, .playtime_wrap > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.playtime_wrap {
+    margin: auto;
+    gap: 15px;
+}
+
+.playtime_wrap > div {
+    gap: 5px;
+    color: white;
+}
+
+.playtime_wrap > div > input {
+    width: 40px;
+    height: 30px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    padding: 0 5px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.playtime_wrap > div > input:focus {
+    outline: none;
+}
+
+.theme_wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 55px;
+    gap: 60px;
+}
+
+.theme_wrap > div {
+    width: 50px;
+    height: 100%;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.theme_wrap > div > img {
+    width: 30px;
+}
+
+#theme_horror_img, #theme_adventure_img {
+    opacity: 0.5;
+}
+
+.visibility_wrap, .visibility_wrap > div {
+    display: grid;
+}
+
+.visibility_wrap {
+    gap: 20px;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    padding: 0 10px;
+}
+
+.visibility_wrap > div {
+    grid-template-columns: 1fr 22px;
+    color: white;
+    font-size: 13px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    padding: 8px 0;
+}
+
+.icon_wrap, .visibility_wrap > div > p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.visibility_wrap > div > input {
+    grid-column: 2;
+    grid-row: 1 /span 2;
+    width: 15px;
+}
+
+.visibility_wrap > div > input[type="radio"] {
+    accent-color: black;
+}
+
+.visibility_wrap > div img {
+    width: 30px;
 }
