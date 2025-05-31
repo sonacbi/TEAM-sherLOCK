@@ -292,7 +292,12 @@ function getScaleMatrix(s) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext('webgl', { alpha: true });
+    const gl = canvas.getContext('webgl', {
+      alpha: true,
+      antialias: false,        // 안티앨리어싱 끔
+      premultipliedAlpha: false // 프리멀티플라이드 알파 false로 설정 (투명도 계산 방식 변경)
+    });
+    
     if (!gl) {
       console.error('WebGL not supported');
       return;
