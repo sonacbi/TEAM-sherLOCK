@@ -1,28 +1,52 @@
 import JSZip from "jszip";
 import { nanoid } from "nanoid";
-import { useEffect } from "react";
-import { GameInfo, GameInfoType } from "../../../modules/game-modules";
-import { GamePnC, Room } from "../../../modules/editor/gamePnC";
+import { GameInfo } from "../../../modules/game-modules";
+import { Room } from "../../../modules/editor/gamePnC";
+import { handleSide } from "../../../modules/editor/handleGame";
 
-export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs, room, saveGame}) {
-    function getSavedGameJSON(game) {
-        // return new GamePnC({
-        //     ...game,
-        //     // room: game.room.map(data => new Room(data)),
-        //     room: room.map(data => new Room(data)),
-        // });
-        return new GamePnC({
-            ...game,
-            // room: [...prev.room, {...room}], // 나중에 game.room[index] 각 인덱스에 저장하게끔
-            room: [{...room}],
-        });
+import save_icon from '../../assets/images/EditorPage_img/save_icon.png';
+
+export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs, canvases}) {
+    function saveCanvasToSide() {
+        const {canvasRef, canvasInstance, setRoom, currentRoom, setSide, currentSide, setSideImgSrcs} = canvases;
+        const updatedFabric = handleSide(canvasInstance.current, setSide);
+        setRoom(prev => {
+            const newData = new Room({
+                ...prev
+            })
+            newData.side[currentSide] = updatedFabric;
+            return newData;
+        })
+        setSideImgSrcs(prev => {
+            const newData = { ...prev };
+            newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
+                format: 'jpeg',
+                quality: 0.1,
+            });
+            return newData;
+        })
     }
+
+    function saveFilesToLocal() {
+        const zip = new JSZip();
+        // ZIP에 파일 추가
+        zip.file("game.json", JSON.stringify(game, null, 2));
+        zip.file(thumbnail.name, thumbnail);
+        imgs.map(data => {
+            zip.file(data.name, data)
+        })
+
+        // zip 파일 생성 후 다운로드
+        zip.generateAsync({ type: 'blob' }).then((content) => {
+            saveAs(content, 'game.zip');
+        });
+    };
 
     async function uploadFilesToServer() {
         const formData = new FormData();
         const zip = new JSZip();
         // zip.file("game.json", JSON.stringify(game), null, 2);
-        zip.file("game.json", JSON.stringify(getSavedGameJSON(game), null, 2));
+        zip.file("game.json", JSON.stringify(game, null, 2));
         zip.file(`${thumbnail.name}`, thumbnail);
         imgs.map(data => {
           zip.file(`${data.name}`, data)
@@ -56,13 +80,18 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
             console.error("업로드 실패:", error);
         }
     }
-    useEffect(() => {
-        console.log(game)
-    }, [game])
     
     return(
-        <p className='submit_button' onClick={uploadFilesToServer}>
-            제출
-        </p>
+        <div className='save_submit'>
+            <p className='save_canvas_button' onClick={saveCanvasToSide}>
+                캔버스 저장
+            </p>
+            <p className='save_button' title='저장하기' onClick={saveFilesToLocal}>
+                <img id='save_icon' src={save_icon} alt='save_icon' />
+            </p>
+            <p className='submit_button' onClick={uploadFilesToServer}>
+                제출
+            </p>
+        </div>
     )
 }

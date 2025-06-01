@@ -91,20 +91,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         });
         canvasInstance.current = canvas;
 
-        canvas.on('object:added', (e) => {
-            console.log('added')
-            // console.log('canvas', canvas)
-            handleSide(canvasInstance.current, setSide, setRoom);
-        })
-        canvas.on('object:modified', (e) => {
-            console.log('modified')
-            handleSide(canvasInstance.current, setSide, setRoom);
-        })
-        canvas.on('object:removed', (e) => {
-            console.log('removed')
-            handleSide(canvasInstance.current, setSide, setRoom);
-        })
-
         // 초기 textbox 추가
         const textbox = new fabric.Textbox('텍스트를 입력하세요.', {
             ...controlStyle,
@@ -230,20 +216,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             ...edgeFrameState,
             angle
         );
-        setSide(prev => ({
-            ...prev,
-            frame: new Frame({
-                x: Number(position[0].toFixed(2)),
-                y: Number(position[1].toFixed(2)),
-                width: Number(size[0].toFixed(2)),
-                height: Number(size[1].toFixed(2)),
-                angle: Number(angle.toFixed(2)),
-                top: Number(edgeFrameState[0].toFixed(2)),
-                left: Number(edgeFrameState[1].toFixed(2)),
-                right: Number(edgeFrameState[2].toFixed(2)),
-                bottom: Number(edgeFrameState[3].toFixed(2))
-            })
-        }));
 
         canvas.add(roomFrame);
         if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
