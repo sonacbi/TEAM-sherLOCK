@@ -14,7 +14,7 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
             const newData = new Room({
                 ...prev
             })
-            newData.side[currentSide] = updatedFabric;
+            newData.side[currentSide].fabric = updatedFabric;
             return newData;
         })
         setSideImgSrcs(prev => {

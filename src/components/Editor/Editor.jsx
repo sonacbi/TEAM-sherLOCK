@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 
 import { createRoomFrame } from '../../../modules/handlePolygon';
-import { Frame } from '../../../modules/editor/gamePnC';
-import { handleSide, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
+import { GamePnC, Room, Side } from '../../../modules/editor/gamePnC';
+import { loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
@@ -11,8 +11,8 @@ import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 
-function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
-    const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
+function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
+    const {game, setGame, room, setRoom, side, setSide, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     // const canvasRef = useRef(null);
     // const canvasInstance = useRef(null);
@@ -304,6 +304,80 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         canvas.renderAll();
     };
 
+    const handleAddGameRoom = () => {
+        setGame(prev => (new GamePnC({
+            ...prev, room: [...prev.room, new Room({})]
+        })));
+        setSideImgSrcs(prev => [...prev, ['']])
+    }
+
+    const handleAddGameSide = () => {
+        setRoom(prev => ({
+            ...prev, side: [...prev.side, new Side({})]
+        }));
+    }
+
+    const handleDeleteGameRoom = () => {
+        if (game.room.length <= 1) return; // 최소 1개는 유지
+        setGame(prev => {
+            const newRooms = [...prev.room];
+            newRooms.splice(currentRoom, 1); // 현재 방 삭제
+            return new GamePnC({ ...prev, room: newRooms });
+        });
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            newImgs.splice(currentRoom, 1);
+            return newImgs;
+        });
+        // 인덱스 조정
+        setCurrentRoom(prev => Math.max(0, prev - 1));
+    }
+
+    const handleDeleteGameSide = () => {
+        if (room.side.length <= 1) return; // 최소 1개는 유지
+        setRoom(prev => {
+            const newSides = [...prev.side];
+            newSides.splice(currentSide, 1); // 현재 면 삭제
+            return { ...prev, side: newSides };
+        });
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            if (!newImgs[currentRoom]) return prev;
+            const updatedSides = [...newImgs[currentRoom]];
+            updatedSides.splice(currentSide, 1);
+            newImgs[currentRoom] = updatedSides;
+            return newImgs;
+        });
+        // 인덱스 조정
+        setCurrentSide(prev => Math.max(0, prev - 1));
+    }
+
+    const handleCurrentRoom = (roomIndex) => {
+        setCurrentRoom(roomIndex);
+    }
+
+    const handleCurrentSide = (roomIndex) => {
+        setCurrentSide(roomIndex);
+    }
+
+    const handleChangeRoomName = (name) => {
+        setGame(prev => {
+            const newData = { ...prev };
+            newData.room[currentRoom].name = name;
+            return new GamePnC(newData);
+        })
+    }
+
+    const handleChangeSideName = (name) => {
+        setGame(prev => {
+            const newData = { ...prev };
+            newData.room[currentRoom].side[currentSide].name = name;
+            return new GamePnC(newData);
+        })
+    }
+
+    useEffect(()=>console.log('sideImgSrcs',sideImgSrcs), [sideImgSrcs])
+
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -389,6 +463,22 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         }
     }, [addImageFile]);
     // 이미지 추가 ---------------------------------------------------(section 11)
+    // ---------------------------------------------------------------(section)
+    useEffect(() => {
+        setGame(prev => {
+            if (prev.room[currentRoom] === room) return prev; // 변화 없으면 그대로 반환
+            const newGameData = { ...prev };
+            newGameData.room[currentRoom] = room;
+            return new GamePnC(newGameData);
+        });
+    }, [room]);
+    
+    useEffect(() => {
+        if (game.room[currentRoom] && game.room[currentRoom] !== room) {
+            setRoom(game.room[currentRoom]);
+        }
+    }, [currentRoom, game]);
+    // ---------------------------------------------------------------(section)
     // delete --------------------------------------------------------(section 12)
     useDeleteKeyHandler(canvasInstance, isReady);
     // ---------------------------------------------------------------(section 12)
@@ -413,60 +503,115 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
-        <div ref={containerRef} style={{ position: 'relative', width: 1100, height: 650 }}>
-            <canvas
-                ref={canvasRef} id="my-canvas" width={1100} height={650}
-                style={{ position: 'absolute', top: 0, left: 0, zIndex: 2,}}
-            />
+        <div
+            className='Editor_screen'
+            onDragOver={e => e.preventDefault()}
+            onDrop={handleDrop}
+        >
+            <div className='screen_area'>
+                <div className='screen'>
+                    <div ref={containerRef} style={{ position: 'relative', width: 1100, height: 650 }}>
+                        <canvas
+                            ref={canvasRef} id="my-canvas" width={1100} height={650}
+                            style={{ position: 'absolute', top: 0, left: 0, zIndex: 2,}}
+                        />
 
-            {perspectiveWalls.map((wall) => {
-                return (
-                    <div
-                    key={wall.wallType}
-                    style={{
-                        position: 'absolute',
-                        top: 0, left: 0, width: 1100, height: 650,
-                        pointerEvents: 'none',
-                        zIndex: 1,
-                        opacity: 1,
-                    }}
-                    >
-                    <WebGLPerspectiveComponent
-                        items={[{
-                        imageUrl: wall.imageUrl,
-                        vertices: wall.vertices,
-                        wallType: wall.wallType,
-                        }]}
-                        width={1100}
-                        height={650}
-                    />
-                    </div>
-                );
-            })}
+                        {perspectiveWalls.map((wall) => {
+                            return (
+                                <div
+                                key={wall.wallType}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0, left: 0, width: 1100, height: 650,
+                                    pointerEvents: 'none',
+                                    zIndex: 1,
+                                    opacity: 1,
+                                }}
+                                >
+                                <WebGLPerspectiveComponent
+                                    items={[{
+                                    imageUrl: wall.imageUrl,
+                                    vertices: wall.vertices,
+                                    wallType: wall.wallType,
+                                    }]}
+                                    width={1100}
+                                    height={650}
+                                />
+                                </div>
+                            );
+                        })}
 
-            {/* 미리보기용 perspective 렌더링 추가 */}
-            {Object.entries(previewPerspective).map(([wallType, { vertices, imageUrl }]) => {
-            if (!vertices || vertices.length === 0) {return null;}
-                return (
-                    <div
-                        key={`preview-${wallType}`}
-                        style={{
-                            position: 'absolute',
-                            top: 0, left: 0, width: 1100, height: 650,
-                            pointerEvents: 'none',
-                            zIndex: 3, // 실제 perspective 위에 렌더링
-                            opacity: 0.5, // 미리보기는 반투명
-                        }}
-                    >
-                    <WebGLPerspectiveComponent
-                        items={[{ imageUrl, vertices, wallType, }]}
-                        width={1100}
-                        height={650}
-                    />
+                        {/* 미리보기용 perspective 렌더링 추가 */}
+                        {Object.entries(previewPerspective).map(([wallType, { vertices, imageUrl }]) => {
+                        if (!vertices || vertices.length === 0) {return null;}
+                            return (
+                                <div
+                                    key={`preview-${wallType}`}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0, left: 0, width: 1100, height: 650,
+                                        pointerEvents: 'none',
+                                        zIndex: 3, // 실제 perspective 위에 렌더링
+                                        opacity: 0.5, // 미리보기는 반투명
+                                    }}
+                                >
+                                <WebGLPerspectiveComponent
+                                    items={[{ imageUrl, vertices, wallType, }]}
+                                    width={1100}
+                                    height={650}
+                                />
+                                </div>
+                            );
+                        })}
                     </div>
-                );
-            })}
+                </div>
+            </div>
+
+            {/*
+            태그 구조
+            div.room_area
+                ┝div.room * n
+                │ ┝h2 방 번호
+                │ ┝input 방 이름
+                │ └div.side_area
+                │   ┝div.side * n
+                │   │ ┝h4 방향 번호
+                │   │ └input 방향 이름
+                │   └button 방향 추가
+                └button 방 추가
+            */}
+            <div className='room_area'>
+                {game.room.map((roomData, roomIndex) => {
+                    return (
+                        <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
+                            <h2>{roomIndex}</h2>
+                            <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='방의 이름'/>
+                                {roomIndex == currentRoom && (
+                                    <div className='side_area'>
+                                        {room.side.map((sideData, sideIndex) => {
+                                            return(
+                                                <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
+                                                    {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
+                                                    <div className="info">
+                                                        <h4>{sideIndex}</h4>
+                                                        <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
+                                                    </div>
+                                                    <button onClick={handleDeleteGameSide}>방향 삭제</button>
+                                                </div>
+                                            )
+                                        })}
+                                        <button onClick={handleAddGameSide}>방향 추가</button>
+                                        <button onClick={handleDeleteGameRoom}>방 삭제</button>
+                                    </div>
+                                )}
+                        </div>
+                    )
+                })}
+                <button onClick={handleAddGameRoom}>방 추가</button>
+                <button onClick={() =>console.log('game',game)}>게임</button>
+            </div>
         </div>
+        
     );
 
 

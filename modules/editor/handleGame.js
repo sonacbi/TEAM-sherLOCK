@@ -156,7 +156,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
                             { x: 100, y: 50 },
                             { x: 50, y: 100 },
                             { x: 0, y: 50 }
-                        ], {...opt, left: opt.x, top: opt.y})
+                        ], {...controlStyle, ...opt, left: opt.x, top: opt.y})
                         break;
                     case "star":
                         const centerX = 50;
@@ -172,7 +172,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
                                 y: centerY + radius * Math.sin(angle - Math.PI / 2),
                             });
                         }
-                        shape = new fabric.Polygon(points, {...opt, left: opt.x, top: opt.y});
+                        shape = new fabric.Polygon(points, {...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     case "pentagon":
                         const pentagonSize = 60;
@@ -187,7 +187,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
                                 y: pentagonCenterY + pentagonSize * Math.sin(angle),
                             });
                         }
-                        shape = new fabric.Polygon(pentagonPoints, {...opt, left: opt.x, top: opt.y});
+                        shape = new fabric.Polygon(pentagonPoints, {...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     case "trapezoid":
                         const topLeftX = 70;
@@ -204,7 +204,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
                             { x: topRightX, y: topY },
                             { x: bottomRightX, y: bottomY },
                             { x: bottomLeftX, y: bottomY },
-                        ], {...opt, left: opt.x, top: opt.y});
+                        ], {...controlStyle, ...opt, left: opt.x, top: opt.y});
                         break;
                     default:
                         console.warn(`${opt.shapeType} 잘못된 도형입니다`);
@@ -220,7 +220,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
                                 Q 90,60 50,90
                                 Q 10,60 10,30
                                 Z
-                            `,{...opt, left: opt.x, top: opt.y}
+                            `,{...controlStyle, ...opt, left: opt.x, top: opt.y}
                         )
                         break;
                     default:
