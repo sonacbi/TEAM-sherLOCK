@@ -9,9 +9,34 @@ import Room_theme_crime_img from '../../assets/images/MainPage_img/crime_icon.pn
 import public_icon from '../../assets/images/RoomInfo/public_icon.png';
 import private_icon from '../../assets/images/RoomInfo/private_icon.png';
 import limited_icon from '../../assets/images/RoomInfo/limited_icon.png';
+import creator_profile from '../../assets/images/Profile/ex_user_profile.png';
 
 function RoomInfo() {
   const [thumbnail, setThumbnail] = useState(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+  const [selectedTheme, setSelectedTheme] = useState(null);
+
+  const difficultyText = {
+    1: '최하',
+    2: '하',
+    3: '중',
+    4: '상',
+    5: '최상',
+  };
+
+  const themeTextMap = {
+    horror: '호러',
+    adventure: '모험',
+    crime: '범죄',
+  };
+
+  const handleDifficultyClick = (level) => {
+    setSelectedDifficulty(level);
+  };
+
+  const handleThemeClick = (theme) => {
+    setSelectedTheme(theme);
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -25,16 +50,19 @@ function RoomInfo() {
     <div className='RoomInfo_wrap'>
       <div className='RoomInfo_content'>
         <div className='Room_title'>
-          <p>제목</p>
-
-          <div className='text_precautions'>
-            <input type='text' placeholder='제목을 입력하세요.'></input>
-            <p></p>
+          <div className='title_precautions'>
+            <p>제목</p>
+            <span></span>
           </div>
+
+          <input type='text' placeholder='제목을 입력하세요.'></input>
         </div>
 
         <div className='Room_thumbnail'>
-          <p>썸네일</p>
+          <div className='thumbnail_precautions'>
+            <p>썸네일</p>
+            <span></span>
+          </div>
 
           <div className='Room_thumbnail_img_button'>
             <div className={`Room_thumbnail_img_wrap ${thumbnail ? 'has-thumbnail' : ''}`}>
@@ -63,29 +91,36 @@ function RoomInfo() {
         </div>
 
         <div className='Room_introduction'>
-          <p>소개글</p>
-
           <div className='introduction_precautions'>
-            <textarea placeholder='내용을 입력하세요.'>
-
-            </textarea>
-
-            <p></p>
+            <p>소개글</p>
+            <span></span>
           </div>
+
+          <textarea placeholder='내용을 입력하세요.'></textarea>
         </div>
 
         <div className='Room_difficulty'>
           <div className='Room_difficulty_select'>
             <p>난이도</p>
-            <span>선택: ??</span>
+            <span>선택: {selectedDifficulty ? difficultyText[selectedDifficulty] : '??'}</span>
           </div>
 
           <div className='difficulty_wrap'>
-            <div className='difficulty_one'><p>1</p></div>
-            <div className='difficulty_two'><p>2</p></div>
-            <div className='difficulty_three'><p>3</p></div>
-            <div className='difficulty_four'><p>4</p></div>
-            <div className='difficulty_five'><p>5</p></div>
+            {[1, 2, 3, 4, 5].map((level) => {
+              const className = `difficulty_${['one', 'two', 'three', 'four', 'five'][level - 1]} ${
+                selectedDifficulty === level ? 'selected' : ''
+              }`;
+
+              return (
+                <div
+                  key={level}
+                  className={className}
+                  onClick={() => handleDifficultyClick(level)}
+                >
+                  <p>{level}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -108,26 +143,38 @@ function RoomInfo() {
         <div className='Room_theme'>
           <div className='Room_theme_select'>
             <p>테마</p>
-            <span>선택: ??</span>
+            <span>선택: {selectedTheme ? themeTextMap[selectedTheme] : '??'}</span>
           </div>
 
-          <div className='theme_wrap'>
-            <div className='theme_horror'>
+          <div className='Room_theme_wrap'>
+            <div
+              className={`theme_horror ${selectedTheme === 'horror' ? 'selected' : ''}`}
+              onClick={() => handleThemeClick('horror')}
+            >
               <img id='theme_horror_img' src={Room_theme_horror_img} alt='theme_horror_img' />
             </div>
 
-            <div className='theme_adventure'>
+            <div
+              className={`theme_adventure ${selectedTheme === 'adventure' ? 'selected' : ''}`}
+              onClick={() => handleThemeClick('adventure')}
+            >
               <img id='theme_adventure_img' src={Room_theme_adventure_img} alt='theme_adventure_img' />
             </div>
 
-            <div className='theme_crime'>
+            <div
+              className={`theme_crime ${selectedTheme === 'crime' ? 'selected' : ''}`}
+              onClick={() => handleThemeClick('crime')}
+            >
               <img id='theme_crime_img' src={Room_theme_crime_img} alt='theme_crime_img' />
             </div>
           </div>
         </div>
 
         <div className='Room_visibility'>
-          <p>공개여부</p>
+          <div className='visibility_precautions'>
+            <p>공개여부</p>
+            <span></span>
+          </div>
 
           <div className='visibility_wrap'>
             <div className='public'>
@@ -161,6 +208,20 @@ function RoomInfo() {
 
         <div className='Room_creator'>
           <p>제작</p>
+
+          <div className='Room_profile_creator'>
+            <div className='Room_profile'>
+              <img id='creator_profile' src={creator_profile} alt='creator_profile' />
+            </div>
+
+            <div className='creator_name'>
+              <p>승혀기혀기</p>
+            </div>
+          </div>
+        </div>
+
+        <div className='Room_save_button'>
+          <button>저장</button>
         </div>
       </div>
     </div>

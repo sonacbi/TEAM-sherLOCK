@@ -61,11 +61,13 @@ function EditorPage() {
 
     const navigate = useNavigate();
 
+    const [showRoomInfo, setShowRoomInfo] = useState(true); // 처음에 무조건 보이게
+    const roomInfoRef = useRef(null);
+
     const handleAddFrame = () => {
         setAddFrameTrigger(Date.now());
         setSelectedTool('frame');
     };
-
 
     // 디버깅용 보정치 체크 (- 삭제예정 -)
     const editorContainerRef = useRef(null);
@@ -113,9 +115,27 @@ function EditorPage() {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setImgs([...imgs, file]);
         if (file) {
+            setImgs(prev => [...prev, file]);
             setAddImageFile(file);
+
+            // ✅ 핵심: input value를 수동으로 비워서 같은 파일도 연속 선택 가능하게 함
+            e.target.value = ''; 
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.type.startsWith('image/')) {
+            setImgs(prev => [...prev, file]);
+            setAddImageFile(file);
+            setTimeout(() => setAddImageFile(null), 0);
+            }
+        }
         }
     };
 
@@ -149,6 +169,27 @@ function EditorPage() {
 
     useEffect(()=>console.log('imgs',imgs), [imgs])
 
+    const toggleRoomInfo = () => {
+        setShowRoomInfo(prev => !prev);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                showRoomInfo &&
+                roomInfoRef.current &&
+                !roomInfoRef.current.contains(event.target)
+            ) {
+                setShowRoomInfo(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showRoomInfo]);
+
     return (
         <>
             <div className='EditorPage_wrap'>
@@ -158,9 +199,9 @@ function EditorPage() {
 
                     {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
 
-                    <div className='room_status_title'>
-                        <p className='room_status_button'>방탈출 정보</p>
-                        <RoomInfo />
+                    <div className='room_status_title' ref={roomInfoRef}>
+                        <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
+                        {showRoomInfo && <RoomInfo />}
                         <label>제목: ???</label>
                     </div>
 
@@ -301,7 +342,11 @@ function EditorPage() {
                         </div>
                     </div>
 
-                    <div className='Editor_screen'>
+                    <div
+                        className='Editor_screen'
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={handleDrop}
+                    >
                         <div className='screen_area'>
                             <div className='screen'>
                                 <Editor
