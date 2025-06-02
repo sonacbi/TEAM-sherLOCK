@@ -29,6 +29,11 @@ const fragmentShaderSource = `
 
 // 4x4 행렬 곱 함수
 function multiplyMatrices(a, b) {
+  if (!a || !b) {
+    console.warn('multiplyMatrices: 입력 행렬이 유효하지 않습니다.', { a, b });
+    return null;
+  }
+
   const out = new Float32Array(16);
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < 4; col++) {
@@ -93,8 +98,14 @@ function getPerspectiveTransformMatrix(src, dst) {
       }
 
       // 0인 경우 역행렬 없음
+      // if (Math.abs(M[i][i]) < 1e-12) {
+      //   throw new Error('Matrix is singular and cannot be inverted.');
+      // }
+      // 0인 경우 역행렬 없음, 근사 처리 혹은 에러 대신 안전 처리
       if (Math.abs(M[i][i]) < 1e-12) {
-        throw new Error('Matrix is singular and cannot be inverted.');
+        console.warn('경고: 행렬 피벗이 너무 작아서 역행렬 계산 중단, 근사 처리합니다.');
+        // 예외를 던지지 말고 null 또는 단위 행렬 반환 등으로 처리 가능
+        return null;
       }
 
       // 피벗 1로 만들기
@@ -120,6 +131,10 @@ function getPerspectiveTransformMatrix(src, dst) {
 
   // 벡터 곱셈 함수
   function multiplyMatrixVector(m, v) {
+    if (!m || !v) {
+      console.warn('multiplyMatrixVector: 입력값이 유효하지 않습니다.', { m, v });
+      return null; // 또는 빈 배열, 혹은 기본값을 반환해도 됨
+    }
     const res = new Array(m.length).fill(0);
     for (let i = 0; i < m.length; i++) {
       for (let j = 0; j < v.length; j++) {
@@ -130,8 +145,15 @@ function getPerspectiveTransformMatrix(src, dst) {
   }
 
   const invA = invertMatrix(A);
+  if (!invA) {
+    console.error('역행렬 계산 실패: 특이행렬입니다.');
+    return null;  // 실패 시 적절히 처리
+  }
   const h = multiplyMatrixVector(invA, b); // h0~h7
-
+  if (!h) {
+    console.error('행렬-벡터 곱셈 실패');
+    return null;
+  }
   // h8 = 1 고정
   h.push(1);
 
@@ -151,12 +173,15 @@ function getPerspectiveTransformMatrix(src, dst) {
 
 
 
-function WebGLPerspectiveComponent({ width, height, vertices, imageUrl }) {
+function WebGLPerspectiveComponent({ width, height, items = [] }) {
+  // items = [{ vertices: [...], imageUrl: '...' }, ...]
+
   const canvasRef = useRef(null);
   const glRef = useRef(null);
-  const textureRef = useRef(null);
+  const texturesRef = useRef({}); // imageUrl 별 텍스처 캐싱
 
-  // 4개 점을 clip space 좌표(-1~1)로 변환
+  // ... getClipSpacePoints, getScaleMatrix, multiplyMatrices, getPerspectiveTransformMatrix 동일 ...
+    // 4개 점을 clip space 좌표(-1~1)로 변환
   const getClipSpacePoints = (verts) => {
   if (!verts || verts.length !== 4) {
     throw new Error('verts 배열이 4개 요소를 포함하지 않습니다.');
@@ -178,12 +203,8 @@ function getScaleMatrix(s) {
 }
 
   const renderScene = () => {
-    if (!vertices || vertices.length !== 4) {
-  // console.warn('vertices가 4개가 아닙니다:', vertices);
-  return;
-}
     const gl = glRef.current;
-    if (!gl || !textureRef.current || !vertices) return;
+    if (!gl) return;
 
     gl.viewport(0, 0, width, height);
     gl.clearColor(0, 0, 0, 0);
@@ -192,29 +213,25 @@ function getScaleMatrix(s) {
 
     const program = gl.program;
     if (!program) return;
-
     gl.useProgram(program);
 
-    // 기본 정사각형 좌표 (clip space, -1~1)
+    // 기본 사각형 위치 및 텍스처 좌표 (같음)
     const positions = new Float32Array([
       -1, -1, 0, 1,
       1, -1, 0, 1,
       1, 1, 0, 1,
-
       1, 1, 0, 1,
       -1, 1, 0, 1,
       -1, -1, 0, 1,
     ]);
     const texCoords = new Float32Array([
-      0, 1,  // ← 왼쪽 아래
-      1, 1,  // ← 오른쪽 아래
-      1, 0,  // ← 오른쪽 위
-
+      0, 1,
+      1, 1,
+      1, 0,
       1, 0,
       0, 0,
       0, 1,
     ]);
-
 
     // position buffer
     const posBuffer = gl.createBuffer();
@@ -232,34 +249,40 @@ function getScaleMatrix(s) {
     gl.enableVertexAttribArray(texLoc);
     gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 0, 0);
 
-    // 투영 행렬 계산
-    // 원본 사각형 (clip space 정사각형 좌표)
-    const src = [
-      { x: -1, y: 1 },
-      { x: 1, y: 1 },
-      { x: 1, y: -1 },
-      { x: -1, y: -1 },
-    ];
-    // 변형시킬 좌표 (clip space)
-    const dst = getClipSpacePoints(vertices);
-
-    const perspectiveMatrix = getPerspectiveTransformMatrix(src, dst);
-
-    const scale = 1; // 1보다 크면 더 멀어짐, 1보다 작으면 더 가까워짐 (0.8 정도 시도해보세요)
-    const scaleMatrix = getScaleMatrix(scale);
-
-    const matrix = multiplyMatrices(perspectiveMatrix, scaleMatrix);
-    
-
     const matrixLoc = gl.getUniformLocation(program, 'u_matrix');
-    gl.uniformMatrix4fv(matrixLoc, false, matrix);
+    const imageLoc = gl.getUniformLocation(program, 'u_image');
 
-    // 텍스처 바인딩
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, textureRef.current);
-    gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 0);
+    items.forEach(({ vertices, imageUrl }) => {
+      if (!vertices || vertices.length !== 4) return;
+      const texture = texturesRef.current[imageUrl];
+      if (!texture) return;
 
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+      // 투영 변환 행렬 계산
+      const src = [
+        { x: -1, y: 1 },
+        { x: 1, y: 1 },
+        { x: 1, y: -1 },
+        { x: -1, y: -1 },
+      ];
+      const dst = getClipSpacePoints(vertices);
+
+      const perspectiveMatrix = getPerspectiveTransformMatrix(src, dst);
+      const scaleMatrix = getScaleMatrix(1);
+      const matrix = multiplyMatrices(perspectiveMatrix, scaleMatrix);
+
+      if (!matrix) {
+        console.error('matrix 계산 실패, rendering을 건너뜁니다.', { perspectiveMatrix, scaleMatrix });
+        return; // 또는 continue; if inside forEach
+      }
+
+      gl.uniformMatrix4fv(matrixLoc, false, matrix);
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.uniform1i(imageLoc, 0);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    });
 
     gl.deleteBuffer(posBuffer);
     gl.deleteBuffer(texBuffer);
@@ -269,14 +292,23 @@ function getScaleMatrix(s) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext('webgl', { alpha: true });
+    const gl = canvas.getContext('webgl', {
+      alpha: true,
+      antialias: false,        // 안티앨리어싱 끔
+      premultipliedAlpha: false // 프리멀티플라이드 알파 false로 설정 (투명도 계산 방식 변경)
+    });
+    
     if (!gl) {
       console.error('WebGL not supported');
       return;
     }
     glRef.current = gl;
 
-  function createShader(gl, type, source) {
+    // 쉐이더, 프로그램 생성 (이전 코드와 동일)
+
+    // 생략: createShader, createProgram, vertexShaderSource, fragmentShaderSource 함수 동일
+
+      function createShader(gl, type, source) {
     const shader = gl.createShader(type);
     if (!shader) {
       console.error('Failed to create shader');
@@ -313,7 +345,6 @@ function getScaleMatrix(s) {
     return program;
   }
 
-
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
     if (!vertexShader || !fragmentShader) return;
@@ -322,34 +353,61 @@ function getScaleMatrix(s) {
     if (!program) return;
 
     gl.program = program;
+  }, []);
 
-    const texture = gl.createTexture();
-    const image = new Image();
-    image.crossOrigin = '';
-    image.onload = () => {
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  // 이미지들 로딩 및 텍스처 생성
+  useEffect(() => {
+    const gl = glRef.current;
+    if (!gl) return;
 
-      textureRef.current = texture;
-      renderScene();
-    };
-    image.src = imageUrl;
-  }, [imageUrl]);
+    // 새로운 텍스처 사전 만들기
+    const newTextures = {};
+
+    let loadedCount = 0;
+    
+    items.forEach(({ imageUrl }) => {
+      if (texturesRef.current[imageUrl]) {
+        newTextures[imageUrl] = texturesRef.current[imageUrl];
+        loadedCount++;
+        if (loadedCount === items.length) {
+          texturesRef.current = newTextures;
+          renderScene();
+        }
+        return;
+      }
+
+      const texture = gl.createTexture();
+      const image = new Image();
+      image.crossOrigin = '';
+      image.onload = () => {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        newTextures[imageUrl] = texture;
+        loadedCount++;
+        if (loadedCount === items.length) {
+          texturesRef.current = newTextures;
+          renderScene();
+        }
+      };
+      image.src = imageUrl;
+    });
+  }, [items]);
 
   useEffect(() => {
     renderScene();
-  }, [vertices, imageUrl]);
+  }, [items]);
 
   return (
     <canvas
       ref={canvasRef}
       width={width}
       height={height}
-      style={{ width, height, display: vertices ? 'block' : 'none' }}
+      style={{ width, height, display: Array.isArray(items) && items.length ? 'block' : 'none' }}
     />
   );
 }

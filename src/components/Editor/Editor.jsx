@@ -4,10 +4,12 @@ import * as fabric from 'fabric';
 import { createRoomFrame } from '../../../modules/handlePolygon';
 import { Frame } from '../../../modules/editor/gamePnC';
 import { handleSide, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
-import WebGLPerspectiveComponent from './WebGLPerspectiveComponent';
+import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
-import { useWallHoverHandler } from './useWallHoverhandler';
+import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
+import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
+import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 
 function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, setRoom, setSide, imgs, setImgs} = saveTool;
@@ -19,24 +21,75 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     const [position, setPosition] = useState([220, 120]);
     const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
-    const hoveredWallLocal = useRef(null); // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
-    const originalStyles = useRef(new Map()); // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
-
+    const [isReadyToLoad, setIsReadyToLoad] = useState(false);
 
     // 프레임 원근법 배경 왜곡 디버깅 코드 + 상태 관리 코드 ------------ (section 1) (정다정)
     //디버깅용
     const containerRef = useRef(null);
 
     // 3D 배경 처리용
-    // 벽 객체 목록 상태
-    const [walls, setWalls] = useState([]);
+    const hoveredWallLocal = useRef(null); // 현재 마우스가 호버중인 벽 객체 저장 (이벤트 핸들러 전용)
+    const originalStyles = useRef(new Map()); // 호버된 벽의 원래 스타일을 저장하는 Map (객체별)
+    // 최종 저장된 이미지와 꼭짓점
+    const [perspective, setPerspective] = useState({ front: {}, left: {}, right: {}, top: {}, bottom: {}, });
+    // perspective 항상 최신값을 유지하도록 관리
+    const perspectiveRef = useRef(perspective);
+    useEffect(() => { perspectiveRef.current = perspective; }, [perspective]);
     // 현재 호버된 벽 객체 상태
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
-    // 이미지 URL (드래그 중인 이미지)
-    const [imageUrl, setImageUrl] = useState(null);
-    const [isReadyToLoad, setIsReadyToLoad] = useState(false);
+
+    // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
+    useEffect(() => {
+    if (!hoveredWall) return;
+
+    setPerspective(prev => ({
+        ...prev,
+        [hoveredWall.wallType]: {
+        ...prev[hoveredWall.wallType],
+        vertices: hoveredWallVertices,
+        imageUrl: prev[hoveredWall.wallType]?.imageUrl || ''
+        }
+    }));
+    }, [hoveredWall, hoveredWallVertices]);
+
+    // perspectiveWalls를 벽 객체 배열로 관리
+    const perspectiveWalls = React.useMemo(() => {
+        return Object.entries(perspective)
+            .map(([wallType, data]) => {
+            if (!data) return null;
+            // hoveredWall인지 판단하여 꼭짓점 교체
+            if (hoveredWall && hoveredWall.wallType === wallType && hoveredWallVertices.length === 4) {
+                return {
+                wallType,
+                imageUrl: data.imageUrl,  // imageUrl 꼭 포함
+                ...data,
+                vertices: hoveredWallVertices,
+                };
+            }
+            return { wallType, ...data };
+            })
+            .filter(Boolean);
+    }, [perspective, hoveredWall, hoveredWallVertices]);
+
+    // hoveredWall이 있을 때 vertices를 hoveredWallVertices로 대체해서 넘기도록 items 생성
+    const items = React.useMemo(() => {
+    const result = perspectiveWalls.map(wall => {
+            if (hoveredWall && hoveredWall.wallType === wall.wallType) {
+                return {
+                ...wall,
+                vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
+                imageUrl: perspective[wall.wallType]?.imageUrl ?? '',
+                };
+            }
+            return wall;
+        });
+        if (process.env.NODE_ENV === 'development' && hoveredWall) {
+            console.log('[useMemo] items:', result);
+        }
+        return result;
+    }, [perspectiveWalls, hoveredWall, hoveredWallVertices]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
@@ -55,7 +108,7 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // ---------------------------------------------------------------(section 2) ?
 
     // 프레임 설정 기본값 세팅 ---------------------------------------(section 3) (노은성)
-    const roomController = new fabric.Rect({
+    const [roomController, setRoomController] = useState(new fabric.Rect({
         ...controlStyle,
         left: 220,
         top: 120,
@@ -63,28 +116,30 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
         strokeWidth: 2,
         stroke: 'red',
         name: "SherLockRoomController",
-    });
-    roomController.width = roomController.left + 440;
-    roomController.height = roomController.top + 300;
-    roomController.on('rotating', () => {
-        setAngle(roomController.angle);
-        setPosition([roomController.left, roomController.top]);
-    });
-    roomController.on('moving', () => {
-        setPosition([roomController.left, roomController.top]);
-        setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
-    });
-    roomController.on('scaling', () => {
-        setPosition([roomController.left, roomController.top]);
-        setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
-    });
+    }));
+    useEffect(()=> {
+        roomController.width = roomController.left + 440;
+        roomController.height = roomController.top + 300;
+        roomController.on('rotating', () => {
+            setAngle(roomController.angle);
+            setPosition([roomController.left, roomController.top]);
+        });
+        roomController.on('moving', () => {
+            setPosition([roomController.left, roomController.top]);
+            setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
+        });
+        roomController.on('scaling', () => {
+            setPosition([roomController.left, roomController.top]);
+            setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
+        });
+    }, [])
     // ---------------------------------------------------------------(section 3) (노은성)
     // 캔버스 랜더링 기본값 세팅 -------------------------------------(section 4) ?
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
             width: 1100,
             height: 650,
-            backgroundColor: 'white',
+            backgroundColor: 'transparent',
             selection: true,
             selectionColor: 'rgba(169, 219, 120, 0.3)',
             selectionBorderColor: '#A9DB78',
@@ -251,6 +306,27 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
             canvas.setActiveObject(roomController);
             canvas.sendObjectToBack(roomController);
         }
+
+        const result = perspectiveWalls.map(wall => {
+            if (hoveredWall && hoveredWall.wallType === wall.wallType) {
+                return {
+                ...wall,
+                vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
+                imageUrl: perspective[wall.wallType]?.imageUrl ?? '',
+                };
+            }
+            return wall;
+        });
+        const frameObjects = roomFrame.getObjects?.() ?? [];
+        frameObjects.forEach(obj => {
+            if (result.find(data => data.imageUrl && data.wallType === obj.wallType)) {
+                obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+            }
+        });
+        if (result.find(data => data.imageUrl && data.wallType === 'front' )) {
+            roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+        }
+        
         canvas.sendObjectToBack(roomFrame);
         
         canvas.renderAll();
@@ -306,8 +382,6 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                     return;
                 }
 
-                setImageUrl(e.target.result); // 이미지 URL 상태 저장 (프레임 조작용- 추가예정✨)
-
                 const imgElement = new Image();
                 imgElement.src = e.target.result;
 
@@ -321,7 +395,8 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
                         top: 150,
                         scaleX: 0.4,
                         scaleY: 0.4,
-                        name: addImageFile.name
+                        name: addImageFile.name,
+                        imageUrl: e.target.result // 배경 랜더링용
                     });
 
                     canvasInstance.current.add(fabricImage);
@@ -353,46 +428,75 @@ function Editor({ addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger
     // ---------------------------------------------------------------(section 14)
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
-    useWallHoverHandler({ canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
-        setHoveredWallVertices, setWalls, position, size, edgeFrameState, angle, selectedTool
+    const { previewPerspective } = useWallHoverHandler({
+        canvasInstance, hoveredWallLocal, originalStyles, isDragging, setHoveredWall,
+        position, size, edgeFrameState, angle,
+        setHoveredWallVertices, selectedTool, perspective, perspectiveRef, setPerspective, 
     });
+
+        // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
+        useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective);
+
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
     return (
-        <div 
-        style={{ position: 'relative' }}
-        ref={containerRef}
-        >
+        <div ref={containerRef} style={{ position: 'relative', width: 1100, height: 650 }}>
             <canvas
-                ref={canvasRef}
-                id="my-canvas"
-                width={1100}
-                height={650}
-                style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                ref={canvasRef} id="my-canvas" width={1100} height={650}
+                style={{ position: 'absolute', top: 0, left: 0, zIndex: 2,}}
             />
 
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    zIndex: 2,
-                    pointerEvents: 'none',
-                    width: 1100,
-                    height: 650,
-                }}
-            >
-                <WebGLPerspectiveComponent
-                    vertices={hoveredWallVertices}
-                    imageUrl={imageUrl}
-                    wallType={hoveredWall ? hoveredWall.get('wallType') : null}
-                    width={1100}
-                    height={650}
-                />
-            </div>
+            {perspectiveWalls.map((wall) => {
+                return (
+                    <div
+                    key={wall.wallType}
+                    style={{
+                        position: 'absolute',
+                        top: 0, left: 0, width: 1100, height: 650,
+                        pointerEvents: 'none',
+                        zIndex: 1,
+                        opacity: 1,
+                    }}
+                    >
+                    <WebGLPerspectiveComponent
+                        items={[{
+                        imageUrl: wall.imageUrl,
+                        vertices: wall.vertices,
+                        wallType: wall.wallType,
+                        }]}
+                        width={1100}
+                        height={650}
+                    />
+                    </div>
+                );
+            })}
+
+            {/* 미리보기용 perspective 렌더링 추가 */}
+            {Object.entries(previewPerspective).map(([wallType, { vertices, imageUrl }]) => {
+            if (!vertices || vertices.length === 0) {return null;}
+                return (
+                    <div
+                        key={`preview-${wallType}`}
+                        style={{
+                            position: 'absolute',
+                            top: 0, left: 0, width: 1100, height: 650,
+                            pointerEvents: 'none',
+                            zIndex: 3, // 실제 perspective 위에 렌더링
+                            opacity: 0.5, // 미리보기는 반투명
+                        }}
+                    >
+                    <WebGLPerspectiveComponent
+                        items={[{ imageUrl, vertices, wallType, }]}
+                        width={1100}
+                        height={650}
+                    />
+                    </div>
+                );
+            })}
         </div>
-);
+    );
+
 
 }
 
