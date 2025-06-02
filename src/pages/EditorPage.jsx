@@ -157,17 +157,48 @@ function EditorPage() {
         setGame(prev => (new GamePnC({
             ...prev, room: [...prev.room, new Room({})]
         })));
-        setSideImgSrcs(prev => {
-            const newData = [ ...prev ];
-            newData.push([]);
-            return newData;
-        })
+        setSideImgSrcs(prev => [...prev, ['']])
     }
 
     const handleAddGameSide = () => {
         setRoom(prev => ({
             ...prev, side: [...prev.side, new Side({})]
         }));
+    }
+
+    const handleDeleteGameRoom = () => {
+        if (game.room.length <= 1) return; // 최소 1개는 유지
+        setGame(prev => {
+            const newRooms = [...prev.room];
+            newRooms.splice(currentRoom, 1); // 현재 방 삭제
+            return new GamePnC({ ...prev, room: newRooms });
+        });
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            newImgs.splice(currentRoom, 1);
+            return newImgs;
+        });
+        // 인덱스 조정
+        setCurrentRoom(prev => Math.max(0, prev - 1));
+    }
+
+    const handleDeleteGameSide = () => {
+        if (room.side.length <= 1) return; // 최소 1개는 유지
+        setRoom(prev => {
+            const newSides = [...prev.side];
+            newSides.splice(currentSide, 1); // 현재 면 삭제
+            return { ...prev, side: newSides };
+        });
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            if (!newImgs[currentRoom]) return prev;
+            const updatedSides = [...newImgs[currentRoom]];
+            updatedSides.splice(currentSide, 1);
+            newImgs[currentRoom] = updatedSides;
+            return newImgs;
+        });
+        // 인덱스 조정
+        setCurrentSide(prev => Math.max(0, prev - 1));
     }
 
     const handleCurrentRoom = (roomIndex) => {
@@ -427,13 +458,16 @@ function EditorPage() {
                                                         return(
                                                             <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
                                                                 {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} /*onClick={loadCanvas(canvasInstance.current)}*//>}
-                                                                <h4>{sideIndex}</h4>
-                                                                <input type="text" value={sideData.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
-                                                                {}
+                                                                <div className="info">
+                                                                    <h4>{sideIndex}</h4>
+                                                                    <input type="text" value={sideData.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
+                                                                </div>
+                                                                <button onClick={handleDeleteGameSide}>방향 삭제</button>
                                                             </div>
                                                         )
                                                     })}
                                                     <button onClick={handleAddGameSide}>방향 추가</button>
+                                                    <button onClick={handleDeleteGameRoom}>방 삭제</button>
                                                 </div>
                                             )}
                                     </div>

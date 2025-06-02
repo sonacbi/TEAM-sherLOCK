@@ -18,11 +18,12 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
             return newData;
         })
         setSideImgSrcs(prev => {
-            const newData = { ...prev };
+            const newData = [ ...prev ];
             newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
                 format: 'jpeg',
                 quality: 0.1,
             });
+            console.log('newData',newData)
             return newData;
         })
     }

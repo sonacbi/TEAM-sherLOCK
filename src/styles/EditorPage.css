@@ -209,7 +209,16 @@
     height: 65px;
     background-color: #4accff;
 }
-.room_area .side h4,
-.room_area .side img {
+.room_area .side img ,
+.room_area .side .info,
+.room_area .side button {
     position: absolute;
+}
+.room_area .side button {
+    top: 60px
+}
+.room_area .side .info h4,
+.room_area .side .info input[type="text"],
+.room_area .side .info button {
+    display: inline;
 }
