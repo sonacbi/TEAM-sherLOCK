@@ -33,6 +33,7 @@ router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
     fs.copyFileSync(zipPath, `server/games/${type}/${gameId}/game.zip`);
 
     console.log("🎉서버에 게임파일이 저장되었습니다!")
+    res.status(200).json({ message: '게임 업로드 및 저장 성공', gameId });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: '서버 에러', error: err.message });

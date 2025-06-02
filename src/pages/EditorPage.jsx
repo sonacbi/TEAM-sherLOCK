@@ -8,10 +8,10 @@ import RoomInfo from '../components/RoomInfo/RoomInfo';
 
 import { GamePnC, Room, Side } from '../../modules/editor/gamePnC';
 import { GameInfo } from '../../modules/game-modules';
+import { loadCanvas } from '../../modules/editor/handleGame';
 import '../styles/EditorPage.css';
 
 import logo from '../assets/images/logo/footer_logo.png'
-import save_icon from '../assets/images/EditorPage_img/save_icon.png';
 import frame_icon from '../assets/images/EditorPage_img/frame_icon.png';
 import text_icon from '../assets/images/EditorPage_img/text_icon.png';
 import shape_icon from '../assets/images/EditorPage_img/shape_icon.png';
@@ -42,9 +42,13 @@ function EditorPage() {
     const [game, setGame] = useState(new GamePnC({}));
     const [room, setRoom] = useState(new Room({}));
     const [side, setSide] = useState(new Side({})); // 임시(나중에 방의 방향을 생성할 때 만들어지게 할 것임)
+    const [currentRoom, setCurrentRoom] = useState(0);
+    const [currentSide, setCurrentSide] = useState(0);
+    const [sideImgSrcs, setSideImgSrcs] = useState([['']]);
     const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
     const [thumbnail, setThumbnail] = useState(new File([], ''));
     const [imgs, setImgs] = useState([]);
+    const [imageSrcs, setImageSrcs] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -109,9 +113,12 @@ function EditorPage() {
     };
 
     const handleAddImage = () => {
-        fileInputRef.current.click();
         setSelectedTool('picture');
     };
+    
+    const handleAddImageFile = () => {
+        fileInputRef.current.click();
+    }
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -159,15 +166,117 @@ function EditorPage() {
         });
     };
 
-    const saveGame = () => {
+    const removeFrame = () => {
+        const target1 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+        const target2 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController')
+        if (target1) canvasInstance.current.remove(target1);
+        if (target2) canvasInstance.current.remove(target2);
+    }
+
+    const handleAddGameRoom = () => {
         setGame(prev => (new GamePnC({
-            ...prev,
-            // room: [...prev.room, {...room}], // 나중에 game.room[index] 각 인덱스에 저장하게끔
-            room: [{...room}],
+            ...prev, room: [...prev.room, new Room({})]
         })));
+        setSideImgSrcs(prev => [...prev, ['']])
+    }
+
+    const handleAddGameSide = () => {
+        setRoom(prev => ({
+            ...prev, side: [...prev.side, new Side({})]
+        }));
+    }
+
+    const handleDeleteGameRoom = () => {
+        if (game.room.length <= 1) return; // 최소 1개는 유지
+        setGame(prev => {
+            const newRooms = [...prev.room];
+            newRooms.splice(currentRoom, 1); // 현재 방 삭제
+            return new GamePnC({ ...prev, room: newRooms });
+        });
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            newImgs.splice(currentRoom, 1);
+            return newImgs;
+        });
+        // 인덱스 조정
+        setCurrentRoom(prev => Math.max(0, prev - 1));
+    }
+
+    const handleDeleteGameSide = () => {
+        if (room.side.length <= 1) return; // 최소 1개는 유지
+        setRoom(prev => {
+            const newSides = [...prev.side];
+            newSides.splice(currentSide, 1); // 현재 면 삭제
+            return { ...prev, side: newSides };
+        });
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            if (!newImgs[currentRoom]) return prev;
+            const updatedSides = [...newImgs[currentRoom]];
+            updatedSides.splice(currentSide, 1);
+            newImgs[currentRoom] = updatedSides;
+            return newImgs;
+        });
+        // 인덱스 조정
+        setCurrentSide(prev => Math.max(0, prev - 1));
+    }
+
+    const handleCurrentRoom = (roomIndex) => {
+        setCurrentRoom(roomIndex);
+    }
+
+    const handleCurrentSide = (roomIndex) => {
+        setCurrentSide(roomIndex);
+    }
+
+    const handleChangeRoomName = (name) => {
+        setGame(prev => {
+            const newData = { ...prev };
+            newData.room[currentRoom].name = name;
+            return new GamePnC(newData);
+        })
+    }
+
+    const handleChangeSideName = (name) => {
+        setGame(prev => {
+            const newData = { ...prev };
+            newData.room[currentRoom].side[currentSide].name = name;
+            return new GamePnC(newData);
+        })
     }
 
     useEffect(()=>console.log('imgs',imgs), [imgs])
+    useEffect(()=>console.log('sideImgSrcs',sideImgSrcs), [sideImgSrcs])
+
+    useEffect(() => {
+        const promises = imgs.map((file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        });
+
+        Promise.all(promises)
+        .then((results) => setImageSrcs(results))
+        .catch((err) => console.error('이미지 읽기 실패', err));
+    }, [imgs]);
+
+    useEffect(() => {
+        setGame(prev => {
+            if (prev.room[currentRoom] === room) return prev; // 변화 없으면 그대로 반환
+            const newGameData = { ...prev };
+            newGameData.room[currentRoom] = room;
+            return new GamePnC(newGameData);
+        });
+    }, [room]);
+    
+    useEffect(() => {
+        if (game.room[currentRoom] && game.room[currentRoom] !== room) {
+            setRoom(game.room[currentRoom]);
+        }
+    }, [currentRoom, game]);
 
     const toggleRoomInfo = () => {
         setShowRoomInfo(prev => !prev);
@@ -197,7 +306,7 @@ function EditorPage() {
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
 
-                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
+                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
@@ -205,13 +314,7 @@ function EditorPage() {
                         <label>제목: ???</label>
                     </div>
 
-                    <div className='save_submit'>
-                        <p className='save_button' title='저장하기'>
-                            <img id='save_icon' src={save_icon} alt='save_icon' />
-                        </p>
-                        
-                        <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} room={room} saveGame={saveGame}/>
-                    </div>
+                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} canvases={{canvasRef, canvasInstance, setRoom, currentRoom, setSide, currentSide, setSideImgSrcs}}/>
                 </header>
 
                 <div className='Editor_content'>
@@ -235,13 +338,6 @@ function EditorPage() {
                             <div className={`picture_area ${selectedTool === 'picture' ? 'active' : ''}`} onClick={handleAddImage}>
                                 <img id='picture_icon' src={picture_icon} alt='picture_icon' />
                                 <p>사진</p>
-                                <input
-                                    type='file'
-                                    accept='image/*'
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                    style={{ display: 'none' }}
-                                />
                             </div>
 
                             <div className={`timer_area ${selectedTool === 'timer' ? 'active' : ''}`} onClick={handleAddTimer}>
@@ -271,6 +367,7 @@ function EditorPage() {
                                             left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
                                             right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
                                             bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
+                                            <button onClick={removeFrame}>프레임 삭제</button>
                                         </div>
                                     )}
 
@@ -315,8 +412,23 @@ function EditorPage() {
                                     )}
 
                                     {selectedTool === 'picture' && (
-                                        <div className='picture_fine_tuning'>
+                                        <div className='picture_fine_tuning' onClick={handleAddImageFile}>
                                             <h2>사진 세부조정</h2>
+                                            <div style={{backgroundColor: "green"}}>
+                                                <p>
+                                                    나는 사진 추가하는 버튼이야
+                                                </p>
+                                                <input
+                                                    type='file'
+                                                    accept='image/*'
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileChange}
+                                                    style={{ display: 'none' }}
+                                                />
+                                            </div>
+                                            {imageSrcs.map((src, idx) => (
+                                                <img key={idx} src={src} alt={`img-${idx}`} />
+                                            ))}
                                         </div>
                                     )}
 
@@ -366,8 +478,48 @@ function EditorPage() {
                             </div>
                         </div>
 
-                        <div className='stage_area'>
-
+                        {/*
+                        태그 구조
+                        div.room_area
+                          ┝div.room * n
+                          │ ┝h2 방 번호
+                          │ ┝input 방 이름
+                          │ └div.side_area
+                          │   ┝div.side * n
+                          │   │ ┝h4 방향 번호
+                          │   │ └input 방향 이름
+                          │   └button 방향 추가
+                          └button 방 추가
+                        */}
+                        <div className='room_area'>
+                            {game.room.map((roomData, roomIndex) => {
+                                return (
+                                    <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
+                                        <h2>{roomIndex}</h2>
+                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='방의 이름'/>
+                                            {roomIndex == currentRoom && (
+                                                <div className='side_area'>
+                                                    {room.side.map((sideData, sideIndex) => {
+                                                        return(
+                                                            <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
+                                                                {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} /*onClick={loadCanvas(canvasInstance.current)}*//>}
+                                                                <div className="info">
+                                                                    <h4>{sideIndex}</h4>
+                                                                    <input type="text" value={sideData.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
+                                                                </div>
+                                                                <button onClick={handleDeleteGameSide}>방향 삭제</button>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                    <button onClick={handleAddGameSide}>방향 추가</button>
+                                                    <button onClick={handleDeleteGameRoom}>방 삭제</button>
+                                                </div>
+                                            )}
+                                    </div>
+                                )
+                            })}
+                            <button onClick={handleAddGameRoom}>방 추가</button>
+                            <button onClick={() =>console.log('game',game)}>게임</button>
                         </div>
                     </div>
                 </div>

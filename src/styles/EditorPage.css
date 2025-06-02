@@ -45,6 +45,11 @@
     cursor: pointer;
 }
 
+.save_canvas_button {
+    padding: 5px 15px;
+    background-color: #ff9100;
+}
+
 .save_submit {
     display: flex;
     gap: 20px;
@@ -52,7 +57,7 @@
     color: white;
 }
 
-.save_button, .submit_button {
+.save_canvas_button, .save_button, .submit_button {
     border-radius: 5px;
     cursor: pointer;
 }
@@ -168,7 +173,52 @@
     background-color: white;
 }
 
-.stage_area {
+.room_area {
     height: 15%;
     border-top: 2px solid #434343;
+    text-align: center;
+}
+
+.room_area .room {
+    display: inline-flex;
+    margin: 8px 0;
+    margin-right: 20px;
+    min-width: 150px;
+    height: 85%;
+    text-align: left;
+    border: 2px solid black;
+    border-radius: 6px;
+    background-color: aliceblue;
+    cursor: pointer;
+}
+.room_area .room>h2 {
+    margin-left: 6px;
+    cursor: move;
+}
+.room_area .room input[type="text"] {
+    border: 0;
+    width: 90px;
+    background-color: #dce3e9;
+}
+.room_area .room .side_area {
+    background-color: aqua;
+}
+.room_area .side {
+    display: inline-block;
+    width: 110px;
+    height: 65px;
+    background-color: #4accff;
+}
+.room_area .side img ,
+.room_area .side .info,
+.room_area .side button {
+    position: absolute;
+}
+.room_area .side button {
+    top: 60px
+}
+.room_area .side .info h4,
+.room_area .side .info input[type="text"],
+.room_area .side .info button {
+    display: inline;
 }
