@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 
+import './Editor.css';
+
 import { createRoomFrame } from '../../../modules/handlePolygon';
 import { GamePnC, Room, Side } from '../../../modules/editor/gamePnC';
 import { loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
@@ -502,6 +504,17 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     // ↓ 원근법 디버깅을 위해 일부 레이어 겹침 -----------------------(section 17)
+    
+    const scrollRef = useRef(null);
+
+    const onWheel = (e) => {
+        e.preventDefault();
+
+        if (scrollRef.current) {
+            scrollRef.current.scrollLeft += e.deltaY * 0.7; // 세로 휠 deltaY를 가로 스크롤로 변환
+        }
+    };
+    
     return (
         <div
             className='Editor_screen'
@@ -581,34 +594,36 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                 └button 방 추가
             */}
             <div className='room_area'>
-                {game.room.map((roomData, roomIndex) => {
-                    return (
-                        <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
-                            <h2>{roomIndex}</h2>
-                            <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='방의 이름'/>
-                                {roomIndex == currentRoom && (
-                                    <div className='side_area'>
-                                        {room.side.map((sideData, sideIndex) => {
-                                            return(
-                                                <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
-                                                    {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
-                                                    <div className="info">
-                                                        <h4>{sideIndex}</h4>
-                                                        <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
+                <div className='room_area_scroll' ref={scrollRef} onWheel={onWheel} >
+                    {game.room.map((roomData, roomIndex) => {
+                        return (
+                            <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
+                                <h3>Stage {roomIndex + 1}</h3>
+                                <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='방의 이름'/>
+                                    {/* {roomIndex == currentRoom && (
+                                        <div className='side_area'>
+                                            {room.side.map((sideData, sideIndex) => {
+                                                return(
+                                                    <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
+                                                        {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
+                                                        <div className="info">
+                                                            <h4>{sideIndex}</h4>
+                                                            <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
+                                                        </div>
+                                                        <button onClick={handleDeleteGameSide}>방향 삭제</button>
                                                     </div>
-                                                    <button onClick={handleDeleteGameSide}>방향 삭제</button>
-                                                </div>
-                                            )
-                                        })}
-                                        <button onClick={handleAddGameSide}>방향 추가</button>
-                                        <button onClick={handleDeleteGameRoom}>방 삭제</button>
-                                    </div>
-                                )}
-                        </div>
-                    )
-                })}
-                <button onClick={handleAddGameRoom}>방 추가</button>
-                <button onClick={() =>console.log('game',game)}>게임</button>
+                                                )
+                                            })}
+                                            <button onClick={handleAddGameSide}>방향 추가</button>
+                                            <button onClick={handleDeleteGameRoom}>방 삭제</button>
+                                        </div>
+                                    )} */}
+                            </div>
+                        )
+                    })}
+                               
+                    <button onClick={handleAddGameRoom}>+</button>
+                </div>
             </div>
         </div>
         
