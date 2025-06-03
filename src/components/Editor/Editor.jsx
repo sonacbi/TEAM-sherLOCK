@@ -42,7 +42,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
 
-    const [selectedSides, setSelectedSides] = useState({});
+    const [selectedSide, setSelectedSide] = useState({ roomIndex: null, sideIndex: null });
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -358,15 +358,22 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     const handleCurrentRoom = (roomIndex) => {
         setCurrentRoom(roomIndex);
+
+        setSelectedSides((prev) => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(key => {
+                if (parseInt(key) !== roomIndex) {
+                    delete updated[key];
+                }
+            });
+            return updated;
+        });
     }
 
-    const handleCurrentSide = (roomIndex) => {
-        setCurrentSide(roomIndex);
+    const handleCurrentSide = (sideIndex) => {
+        setCurrentSide(sideIndex);
 
-        setSelectedSides(prev => ({
-            ...prev,
-            [currentRoom]: roomIndex
-        }));
+        setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
 
     const handleChangeRoomName = (name) => {
@@ -617,11 +624,16 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     {roomIndex == currentRoom && (
                                         <div className='side_area'>
                                             {room.side.map((sideData, sideIndex) => {
+                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+
                                                 return(
-                                                    <div className='side_wrap'>
-                                                        <div className={`side ${selectedSides[currentRoom] === sideIndex ? 'selected' : ''}`} key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
+                                                    <div className={`side_wrap ${isSelected ? 'selected' : ''}`}  key={sideIndex}> 
+                                                        <div className={`side ${isSelected ? 'selected' : ''}`} onClick={() => handleCurrentSide(sideIndex)}>
                                                             {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
-                                                            <button onClick={handleDeleteGameSide}>-</button>
+                                                            <button onClick={(e) => {
+                                                                e.stopPropagation();  // 클릭 이벤트 전파 막기
+                                                                handleDeleteGameSide();
+                                                            }}>-</button>
                                                         </div>
 
                                                         <div className="info">
