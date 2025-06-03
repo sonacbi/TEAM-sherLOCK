@@ -42,6 +42,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
 
+    const [selectedSides, setSelectedSides] = useState({});
+
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
     if (!hoveredWall) return;
@@ -360,6 +362,11 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     const handleCurrentSide = (roomIndex) => {
         setCurrentSide(roomIndex);
+
+        setSelectedSides(prev => ({
+            ...prev,
+            [currentRoom]: roomIndex
+        }));
     }
 
     const handleChangeRoomName = (name) => {
@@ -507,7 +514,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     
     const scrollRef = useRef(null);
 
-    const onWheel = (e) => {
+    const onWheel = (e) => {1
         e.preventDefault();
 
         if (scrollRef.current) {
@@ -598,26 +605,33 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                     {game.room.map((roomData, roomIndex) => {
                         return (
                             <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
-                                <h3>Stage {roomIndex + 1}</h3>
-                                <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='방의 이름'/>
-                                    {/* {roomIndex == currentRoom && (
-                                        <div className='side_area'>
-                                            {room.side.map((sideData, sideIndex) => {
-                                                return(
-                                                    <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
-                                                        {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
-                                                        <div className="info">
-                                                            <h4>{sideIndex}</h4>
-                                                            <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
-                                                        </div>
-                                                        <button onClick={handleDeleteGameSide}>방향 삭제</button>
+                                <div className='stage_wrap'>
+                                    <div className='stageIndex_delete'>
+                                        <h3>Stage {roomIndex + 1}</h3>
+                                        <button onClick={handleDeleteGameRoom}>X</button>
+                                    </div>
+                                    <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='이름'/>
+                                </div>
+
+                                {roomIndex == currentRoom && (
+                                    <div className='side_area'>
+                                        {room.side.map((sideData, sideIndex) => {
+                                            return(
+                                                <div className='side_wrap'>
+                                                    <div className={`side ${selectedSides[currentRoom] === sideIndex ? 'selected' : ''}`} key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
+                                                        {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
+                                                        <button onClick={handleDeleteGameSide}>-</button>
                                                     </div>
-                                                )
-                                            })}
-                                            <button onClick={handleAddGameSide}>방향 추가</button>
-                                            <button onClick={handleDeleteGameRoom}>방 삭제</button>
-                                        </div>
-                                    )} */}
+
+                                                    <div className="info">
+                                                        <h4>{sideIndex + 1}</h4>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                        <button onClick={handleAddGameSide}>+</button>
+                                    </div>
+                                )}
                             </div>
                         )
                     })}

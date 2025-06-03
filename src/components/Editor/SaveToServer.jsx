@@ -84,9 +84,9 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
     
     return(
         <div className='save_submit'>
-            {/* <p className='save_canvas_button' onClick={saveCanvasToSide}>
+            <p className='save_canvas_button' onClick={saveCanvasToSide}>
                 캔버스 저장
-            </p> */}
+            </p>
             <p className='save_button' title='저장하기' onClick={saveFilesToLocal}>
                 <img id='save_icon' src={save_icon} alt='save_icon' />
             </p>
