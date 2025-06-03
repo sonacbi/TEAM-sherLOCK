@@ -601,42 +601,44 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                 └button 방 추가
             */}
             <div className='room_area'>
-                <div className='room_area_scroll' ref={scrollRef} onWheel={onWheel} >
-                    {game.room.map((roomData, roomIndex) => {
-                        return (
-                            <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
-                                <div className='stage_wrap'>
-                                    <div className='stageIndex_delete'>
-                                        <h3>Stage {roomIndex + 1}</h3>
-                                        <button onClick={handleDeleteGameRoom}>X</button>
+                <div className='room_window' ref={scrollRef} onWheel={onWheel}>
+                    <div className='room_area_scroll'>
+                        {game.room.map((roomData, roomIndex) => {
+                            return (
+                                <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
+                                    <div className='stage_wrap'>
+                                        <div className='stageIndex_delete'>
+                                            <h3>Stage {roomIndex + 1}</h3>
+                                            <button onClick={handleDeleteGameRoom}>X</button>
+                                        </div>
+                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='이름'/>
                                     </div>
-                                    <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='이름'/>
+
+                                    {roomIndex == currentRoom && (
+                                        <div className='side_area'>
+                                            {room.side.map((sideData, sideIndex) => {
+                                                return(
+                                                    <div className='side_wrap'>
+                                                        <div className={`side ${selectedSides[currentRoom] === sideIndex ? 'selected' : ''}`} key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
+                                                            {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
+                                                            <button onClick={handleDeleteGameSide}>-</button>
+                                                        </div>
+
+                                                        <div className="info">
+                                                            <h4>{sideIndex + 1}</h4>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                            <button onClick={handleAddGameSide}>+</button>
+                                        </div>
+                                    )}
                                 </div>
-
-                                {roomIndex == currentRoom && (
-                                    <div className='side_area'>
-                                        {room.side.map((sideData, sideIndex) => {
-                                            return(
-                                                <div className='side_wrap'>
-                                                    <div className={`side ${selectedSides[currentRoom] === sideIndex ? 'selected' : ''}`} key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
-                                                        {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
-                                                        <button onClick={handleDeleteGameSide}>-</button>
-                                                    </div>
-
-                                                    <div className="info">
-                                                        <h4>{sideIndex + 1}</h4>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })}
-                                        <button onClick={handleAddGameSide}>+</button>
-                                    </div>
-                                )}
-                            </div>
-                        )
-                    })}
-                               
-                    <button onClick={handleAddGameRoom}>+</button>
+                            )
+                        })}
+                                
+                        <button onClick={handleAddGameRoom}>+</button>
+                    </div>
                 </div>
             </div>
         </div>

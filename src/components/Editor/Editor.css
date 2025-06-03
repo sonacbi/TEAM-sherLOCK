@@ -4,32 +4,45 @@
     padding-bottom: 4px;
 }
 
-.room_area_scroll {
-    display: flex;
-    padding: 5px 10px;
-    gap: 20px;
+.room_window{
+    /* 부모가 스크롤 컨테이너 역할을 하도록 */
     overflow-x: auto;
     overflow-y: hidden;
-    height: 100%;
+
+    /* 너비와 높이 명확히 지정 */
     width: 100%;
 }
 
-.room_area_scroll::-webkit-scrollbar {
+.room_window::-webkit-scrollbar {
     height: 6px;
 }
 
-.room_area_scroll::-webkit-scrollbar-track {
+.room_window::-webkit-scrollbar-track {
     margin: 10px;
 }
 
-.room_area_scroll::-webkit-scrollbar-thumb {
+.room_window::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
 }
 
-.room_area_scroll::-webkit-scrollbar-thumb:hover {
+.room_window::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 10px;
+}
+
+.room_area_scroll {
+    display: flex;
+    padding: 5px 10px;
+    gap: 20px;
+    /* 자식 요소들이 제 영역 확보 */
+    flex-wrap: nowrap; /* 한 줄로 유지 */
+
+    /* 부모가 스크롤 처리하므로 overflow는 제거 */
+    overflow: visible;
+
+    height: 100%;
+    width: max-content; /* 자식 요소만큼 너비 늘리기 */
 }
 
 .room_area .room {
