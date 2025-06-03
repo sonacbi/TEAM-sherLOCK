@@ -31,13 +31,14 @@ function RoomInfo() {
   const [modalMessage, setModalMessage] = useState(''); // 압축 안내 메시지
   const [modalFadeOut, setModalFadeOut] = useState(false); // 자동 모달 페이드아웃 효과
 
-
   // 소개글
   const [ inputScript, setInputScript ] = useState('');
   const [ scriptMessage, setScriptMessage ] = useState('');
+  const maxScriptByte = 1000;
 
   // 난이도
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+  const [ difficultyMessage, setDifficultyMessage ] = useState('');
   
   // 예상소요시간
   const [playtimeHour, setPlaytimeHour] = useState('');
@@ -45,6 +46,7 @@ function RoomInfo() {
   const [playtimeMessage, setPlaytimeMessage] = useState('');
   
   const [selectedTheme, setSelectedTheme] = useState(null);
+  const [ themeMessage, setThemeMessage ] = useState('');
 
   const [userToken, setUserToken] = useState(null); // 사용자 토큰 상태
 
@@ -62,7 +64,18 @@ function RoomInfo() {
     crime: '범죄',
   };
 
-  const [selectedVisibility, setSelectedVisibility] = React.useState(''); // 기본값은 공개로 설정
+  const [selectedVisibility, setSelectedVisibility] = React.useState(''); // 기본값은 빈값으로 설정
+  const [ visibilityMessage, setVisibilityMessage ] = useState('');
+
+  // 유효성 검사 통과 못하면 이쪽으로 시선 집중(포커스)
+  const titleRef = useRef(null);
+  const thumbnailInputRef = useRef(null);
+  const scriptionRef = useRef(null);
+  const hourRef = useRef(null);
+  const minRef = useRef(null);
+  const difficultyRef = useRef(null);
+  const themeRef = useRef(null);
+  const visibilityRef = useRef(null);
 
   // 컴포넌트가 마운트될 때 localStorage에서 토큰 읽고 디코딩
   useEffect(() => {
@@ -219,9 +232,8 @@ function RoomInfo() {
       setTimeout(() => setThumbnailMessage(''), 500);
     }, 3000);
   };
-
-
-  const validateScription = (text) => {
+  
+  const validateScription = (text, maxBytes = 1000) => {
     // 1. HTML 태그 제거 검사
     const tagPattern = /<\/?[^>]+>/gi;
     if (tagPattern.test(text)) {
@@ -235,14 +247,18 @@ function RoomInfo() {
     }
 
     // 3. 빈 문자열 검사
-    if (text.trim() === '') { return '소개글을 입력해주세요.'; }
+    if (text.trim() === '') {
+      return '소개글을 입력해주세요.';
+    }
 
-    // 4. 길이 제한 (예: 1000자 이내)
-    if (text.length > 1000) { return '1000자 이내로 입력해주세요.'; }
+    // 4. 길이 제한 (바이트 기준)
+    if (getByteLength(text) > maxBytes) {
+      return `${maxBytes}byte 이내로 입력해주세요.`;
+    }
 
     return ''; // 유효할 경우 에러 없음
   };
-
+  
   const validatePlaytime = (h, m) => {
     // 빈 문자열이면 0으로 처리
     const hour = h === '' ? 0 : parseInt(h, 10);
@@ -271,35 +287,68 @@ function RoomInfo() {
     return '';
   };
 
-    const handleDifficultyClick = (level) => {
+  const handleDifficultyClick = (level) => {
     setSelectedDifficulty(level);
+    setDifficultyMessage(''); // 선택하면 메시지 지우기
   };
 
   const handleThemeClick = (theme) => {
     setSelectedTheme(theme);
+    setThemeMessage(''); // 선택하면 메시지 지우기
   };
 
-const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault(); // 이거 없으면 자동 리로드됨
+
     // 제목 검사
     if (!title || getByteLength(title) === 0) {
-      alert('제목을 입력해주세요.');
+      setTitleMessage('제목을 입력해주세요.');
+      titleRef.current?.focus(); // 제목 입력란으로 포커스 이동
       return;
     }
     if (getByteLength(title) > maxBytes) {
-      alert(`제목은 최대 ${maxBytes}바이트까지 가능합니다.`);
+      setTitleMessage(`${maxBytes}byte를 넘길 수 없습니다.`);
+      titleRef.current?.focus(); // 제목 입력란으로 포커스 이동
       return;
     }
 
     // 썸네일 검사
     if (!thumbnail) {
-      alert('썸네일 이미지를 업로드해주세요.');
+      setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
+      setModalFadeOut(false);
+
+      // 바로 포커스 후 클릭을 약간 딜레이 줘서 실행
+      const input = thumbnailInputRef.current;
+      console.log("input", input);
+      if (input) {
+        input.focus();    
+      }
+      setTimeout(() => {
+        setModalFadeOut(true);
+        setTimeout(() => setThumbnailMessage(''), 500);
+      }, 3000);
+
       return;
     }
 
     // 소개글 검사
-    const introMsg = validateScription(inputScript);
-    if (introMsg) {
-      alert(introMsg);
+    const ScriptMsg = validateScription(inputScript.trim());
+    if (ScriptMsg) {
+      setScriptMessage(ScriptMsg); // 메시지 표시
+      scriptionRef.current?.focus(); // 소개글 입력란 포커스
+      return;
+    }
+
+    // 난이도 검사
+    if (![1, 2, 3, 4, 5].includes(selectedDifficulty)) {
+      if (selectedDifficulty === null) {
+        setDifficultyMessage("난이도를 선택해주세요.");
+        visibilityRef.current?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      } else {
+        setDifficultyMessage(''); // 통과되면 메시지 제거
+      }
+      difficultyRef.current?.focus(); // 난이도 선택 영역으로 포커스
       return;
     }
 
@@ -307,32 +356,37 @@ const handleSubmit = () => {
     const timeMsg = validatePlaytime(playtimeHour, playtimeMin);
     if (timeMsg) {
       alert(timeMsg);
-      return;
-    }
 
-    // 난이도 검사
-    if (![1, 2, 3, 4, 5].includes(selectedDifficulty)) {
-      alert('난이도를 선택해주세요.');
+      if (playtimeHour === '' || parseInt(playtimeHour) < 0 || parseInt(playtimeHour) > 3) {
+        hourRef.current?.focus();
+      } else {
+        minRef.current?.focus();
+      }
       return;
     }
 
     // 테마 검사
     if (!['horror', 'adventure', 'crime'].includes(selectedTheme)) {
-      alert('테마를 선택해주세요.');
+      setThemeMessage('테마를 선택해주세요.'); // 메시지 상태 업데이트
+      themeRef.current?.focus();
       return;
+    } else {
+      setThemeMessage(''); // 통과 시 메시지 초기화
     }
 
     // 공개 여부 검사
     if (!['public', 'limited', 'private'].includes(selectedVisibility)) {
-      alert('공개여부를 선택해주세요.');
+      setVisibilityMessage('공개여부를 선택해주세요.');
+      visibilityRef.current?.focus();
       return;
+    }else {
+      setVisibilityMessage(''); // 통과 시 메시지 초기화
     }
 
     // 여기서 실제 저장 API 호출 등 수행 (백엔드 업무)
     alert('저장 완료!');
+    /* 저장데이터를 정련할 일련의 코드 만들어주시면 될 것 같아요.*/
   };
-
-
 
   return (
     <div className='RoomInfo_wrap'>
@@ -342,7 +396,7 @@ const handleSubmit = () => {
             <p>제목</p>
             <span>{titleMessage}</span>
           </div>
-          <input type='text' placeholder='제목을 입력하세요.' value={title} onChange={handleTitle} onBlur={handleTitleBlur}></input>
+          <input type='text' ref={titleRef} placeholder='제목을 입력하세요.' value={title} onChange={handleTitle} onBlur={handleTitleBlur}></input>
         </div>
 
         <div className='Room_thumbnail'>
@@ -392,35 +446,56 @@ const handleSubmit = () => {
               onChange={handleImageUpload}
             />
 
-            <button onClick={() => document.getElementById('thumbnailInput').click()}>사진첨부</button>
+            <button onClick={() => document.getElementById('thumbnailInput').click()} ref={thumbnailInputRef}>사진첨부</button>
           </div>
         </div>
 
         <div className='Room_introduction'>
           <div className='introduction_precautions'>
             <p>소개글</p>
-            <span>{scriptMessage || ''}</span>
+            <span>
+              {scriptMessage ? scriptMessage : `현재 ${byteLength} / ${maxScriptByte} bytes 사용 중`}
+            </span>
           </div>
-          <textarea placeholder='내용을 입력하세요.'
+          <textarea
+            placeholder='내용을 입력하세요.'
             value={inputScript}
+            ref={scriptionRef}
             onChange={(e) => {
-            const value = e.target.value;
-            setInputScript(value);
-            setScriptMessage(validateScription(value)); // 실시간 검사
-            }} onBlur={() => {
-              if (!validateScription(inputScript)) { // 에러가 없으면 안내 문구 표시를 위해 빈 문자열로 초기화
-                setScriptMessage(''); }
-            }}>
-          </textarea>
+              let value = e.target.value;
+              let encoded = new TextEncoder().encode(value);
+              let bytes = encoded.length;
+
+              // 바이트 제한 초과 시 자르기
+              while (bytes > maxScriptByte) {
+                encoded = encoded.slice(0, -1);
+                value = new TextDecoder().decode(encoded);
+                bytes = encoded.length;
+              }
+
+              setInputScript(value);
+              setByteLength(bytes);
+              setScriptMessage(validateScription(value));
+            }}
+            onBlur={() => {
+              if (!validateScription(inputScript)) {
+                setScriptMessage('');
+              }
+            }}
+          />
         </div>
 
         <div className='Room_difficulty'>
           <div className='Room_difficulty_select'>
             <p>난이도</p>
-            <span>선택: {selectedDifficulty ? difficultyText[selectedDifficulty] : '??'}</span>
+            <span>
+              {difficultyMessage
+              ? difficultyMessage
+              : `선택: ${selectedDifficulty ? difficultyText[selectedDifficulty] : '??'}`}
+            </span>
           </div>
 
-          <div className='difficulty_wrap'>
+          <div className='difficulty_wrap' ref={difficultyRef}>
             {[1, 2, 3, 4, 5].map((level) => {
               const className = `difficulty_${['one', 'two', 'three', 'four', 'five'][level - 1]} ${
                 selectedDifficulty === level ? 'selected' : ''
@@ -448,6 +523,7 @@ const handleSubmit = () => {
               type='text'
               placeholder='?'
               value={playtimeHour}
+              ref={hourRef}
               onChange={(e) => {
                 const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
                 setPlaytimeHour(onlyNumbers === '' ? '' : Number(onlyNumbers));
@@ -464,6 +540,7 @@ const handleSubmit = () => {
                 type='text'
                 placeholder='??'
                 value={playtimeMin}
+                ref={minRef}
                 onChange={(e) => {
                   const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
                   setPlaytimeMin(onlyNumbers === '' ? '' : Number(onlyNumbers));
@@ -483,10 +560,14 @@ const handleSubmit = () => {
         <div className='Room_theme'>
           <div className='Room_theme_select'>
             <p>테마</p>
-            <span>선택: {selectedTheme ? themeTextMap[selectedTheme] : '??'}</span>
+            <span>
+              {themeMessage
+              ? themeMessage
+              : `선택: ${selectedTheme ? themeTextMap[selectedTheme] : '??'}`}
+            </span>
           </div>
 
-          <div className='Room_theme_wrap'>
+          <div className='Room_theme_wrap'  ref={themeRef}>
             <div
               className={`theme_horror ${selectedTheme === 'horror' ? 'selected' : ''}`}
               onClick={() => handleThemeClick('horror')}
@@ -510,10 +591,10 @@ const handleSubmit = () => {
           </div>
         </div>
 
-        <div className='Room_visibility'>
+        <div className='Room_visibility' ref={visibilityRef}>
           <div className='visibility_precautions'>
             <p>공개여부</p>
-            <span></span>
+            <span>{visibilityMessage}</span>
           </div>
 
           <div className='visibility_wrap'>
@@ -524,7 +605,7 @@ const handleSubmit = () => {
               
               <input type='radio' name='visibility' value='public'
               checked={selectedVisibility === 'public'} 
-              onChange={(e) => setSelectedVisibility(e.target.value)} ></input>
+              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
               <p>공개</p>
             </div>
 
@@ -535,7 +616,7 @@ const handleSubmit = () => {
 
               <input type='radio' name='visibility' value='limited'
               checked={selectedVisibility === 'limited'} 
-              onChange={(e) => setSelectedVisibility(e.target.value)} ></input>
+              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
               <p>일부공개</p>
             </div>
 
@@ -546,7 +627,7 @@ const handleSubmit = () => {
 
               <input type='radio' name='visibility' value='private'
               checked={selectedVisibility === 'private'} 
-              onChange={(e) => setSelectedVisibility(e.target.value)} ></input>
+              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
               <p>비공개</p>
             </div>
           </div>

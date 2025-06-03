@@ -101,6 +101,16 @@
     outline: 2px solid rgb(160, 160, 160);
 }
 
+#thumbnailInput { /* display : none 에서 투명도 0으로 수정함*/
+    opacity: 0.01;
+    position: absolute;
+    z-index: 0;
+    width: 10px;
+height: 10px;
+
+    top: 0;
+}
+
 .Room_thumbnail_img_button {
     display: flex;
     flex-direction: column;
