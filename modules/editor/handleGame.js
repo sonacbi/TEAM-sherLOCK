@@ -55,9 +55,7 @@ const handleSide = (canvas, setSide) => {
 const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame) => {
     canvas.clear();
     if (side.frame) {
-        new Promise((resolve, reject) => {
-            resolve(side);
-        })
+        Promise.resolve(side)
         .then(data => {
             roomController.left = data.frame.x;
             roomController.top = data.frame.y;
@@ -71,7 +69,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
             setAngle(data.frame.angle);
             setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom]);
         })
-        .finally(addFrame());
+        .finally(addFrame);
     }
     side.fabric.forEach((fabricData, fabricIndex) => {
         const opt = fabricData.option;

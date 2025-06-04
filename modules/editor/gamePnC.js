@@ -23,7 +23,7 @@ class Room extends ClassVersion {
 }
 // 방의 방향 | 면
 class Side extends ClassVersion {
-    constructor({ name = '', description = '', frame = null, fabric = [new Fabric({})], }) {
+    constructor({ name = '', description = '', frame = null, fabric = [], }) {
         super();
         this.name = name;
         this.description = description;

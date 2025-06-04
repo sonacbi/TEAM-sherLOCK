@@ -3,7 +3,7 @@ import * as fabric from 'fabric';
 
 import { createRoomFrame } from '../../../modules/handlePolygon';
 import { GamePnC, Room, Side } from '../../../modules/editor/gamePnC';
-import { loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
+import { handleSide, loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
@@ -14,8 +14,6 @@ import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, room, setRoom, side, setSide, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
-    // const canvasRef = useRef(null);
-    // const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
@@ -188,10 +186,28 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             canvas.renderAll();
         });
 
+        saveCanvasToSide();
         setIsReady(true);
         return () => canvas.dispose();
     }, []);
     //                           -------------------------------------(section 5) 
+    // 캔버스 내 객체가 생성/변경/삭제되면 저장-----------------------(section) (노은성)
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        canvas.on('object:added', saveCanvasToSide);
+        canvas.on('object:modified', saveCanvasToSide);
+        canvas.on('object:removed', saveCanvasToSide);
+
+        // cleanup
+        return () => {
+            canvas.off('object:added', saveCanvasToSide);
+            canvas.off('object:modified', saveCanvasToSide);
+            canvas.off('object:removed', saveCanvasToSide);
+        };
+    }, [canvasInstance.current, currentRoom, currentSide]);
+    // ---------------------------------------------------------------(section)
     // 랜더링 준비되면 추가버튼 활성화 -------------------------------(section 6) 
     useEffect(() => {
         if (isReady) addTextBox();
@@ -308,7 +324,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setGame(prev => (new GamePnC({
             ...prev, room: [...prev.room, new Room({})]
         })));
-        setSideImgSrcs(prev => [...prev, ['']])
+        setSideImgSrcs(prev => [...prev, ['']]);
     }
 
     const handleAddGameSide = () => {
@@ -356,8 +372,11 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setCurrentRoom(roomIndex);
     }
 
-    const handleCurrentSide = (roomIndex) => {
+    const handleCurrentSide = (roomIndex, cb) => {
         setCurrentSide(roomIndex);
+        setTimeout(() => {
+            cb?.();
+        }, 100)
     }
 
     const handleChangeRoomName = (name) => {
@@ -374,6 +393,27 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             newData.room[currentRoom].side[currentSide].name = name;
             return new GamePnC(newData);
         })
+    }
+
+    const saveCanvasToSide = () => {
+        setTimeout(() => {
+            const updatedFabric = handleSide(canvasInstance.current, setSide);
+            setRoom(prev => {
+                const newData = new Room({
+                    ...prev
+                })
+                newData.side[currentSide].fabric = updatedFabric;
+                return newData;
+            })
+            setSideImgSrcs(prev => {
+                const newData = [ ...prev ];
+                newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
+                    format: 'jpeg',
+                    quality: 0.1,
+                });
+                return newData;
+            });
+        }, 100)
     }
 
     useEffect(()=>console.log('sideImgSrcs',sideImgSrcs), [sideImgSrcs])
@@ -590,8 +630,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     <div className='side_area'>
                                         {room.side.map((sideData, sideIndex) => {
                                             return(
-                                                <div className='side' key={sideIndex} onClick={() => handleCurrentSide(sideIndex)}>
-                                                    {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
+                                                <div className='side' key={sideIndex} onClick={() => {
+                                                    handleCurrentSide(sideIndex, () => {
+                                                        loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+                                                    });
+                                                }}>
+                                                    {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65}/>}
                                                     <div className="info">
                                                         <h4>{sideIndex}</h4>
                                                         <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
