@@ -35,9 +35,10 @@ function RoomInfo() {
   const [ inputScript, setInputScript ] = useState('');
   const [ scriptMessage, setScriptMessage ] = useState('');
   const maxScriptByte = 1000;
+  const [ scriptByteLength, setScriptByteLength ] = useState(0);
 
   // 난이도
-  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+  const [selectedDifficulty, setSelectedDifficulty ] = useState(null);
   const [ difficultyMessage, setDifficultyMessage ] = useState('');
   
   // 예상소요시간
@@ -332,7 +333,7 @@ function RoomInfo() {
     }
 
     // 소개글 검사
-    const ScriptMsg = validateScription(inputScript.trim());
+    const ScriptMsg = validateScription(inputScript);
     if (ScriptMsg) {
       setScriptMessage(ScriptMsg); // 메시지 표시
       scriptionRef.current?.focus(); // 소개글 입력란 포커스
@@ -355,7 +356,7 @@ function RoomInfo() {
     // 예상 소요 시간 검사
     const timeMsg = validatePlaytime(playtimeHour, playtimeMin);
     if (timeMsg) {
-      alert(timeMsg);
+      setPlaytimeMessage(timeMsg);
 
       if (playtimeHour === '' || parseInt(playtimeHour) < 0 || parseInt(playtimeHour) > 3) {
         hourRef.current?.focus();
@@ -454,7 +455,7 @@ function RoomInfo() {
           <div className='introduction_precautions'>
             <p>소개글</p>
             <span>
-              {scriptMessage ? scriptMessage : `현재 ${byteLength} / ${maxScriptByte} bytes 사용 중`}
+              {scriptMessage ? scriptMessage : `현재 ${scriptByteLength} / ${maxScriptByte} bytes 사용 중`}
             </span>
           </div>
           <textarea
@@ -474,7 +475,7 @@ function RoomInfo() {
               }
 
               setInputScript(value);
-              setByteLength(bytes);
+              setScriptByteLength(bytes);
               setScriptMessage(validateScription(value));
             }}
             onBlur={() => {
@@ -544,7 +545,6 @@ function RoomInfo() {
                 onChange={(e) => {
                   const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
                   setPlaytimeMin(onlyNumbers === '' ? '' : Number(onlyNumbers));
-                  // 여기 두 번째 인자를 playtimeMin -> onlyNumbers로 변경!
                   const msg = validatePlaytime(playtimeHour, onlyNumbers === '' ? '' : Number(onlyNumbers));
                   setPlaytimeMessage(msg);
                 }}
