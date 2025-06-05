@@ -106,10 +106,16 @@
     position: absolute;
     z-index: 0;
     width: 10px;
-height: 10px;
-
+    height: 10px;
     top: 0;
 }
+
+.thumbnail_button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; /* 완전히 클릭 방지 */
+}
+
 
 .Room_thumbnail_img_button {
     display: flex;

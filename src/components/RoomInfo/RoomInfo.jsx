@@ -19,7 +19,7 @@ function RoomInfo() {
   const maxBytes = 100;
   const [title, setTitle] = useState('');
   const [byteLength, setByteLength] = useState(0);
-  const [titleMessage, setTitleMessage] = useState(`현재 0 / ${maxBytes} bytes 사용 중`);
+  const [titleMessage, setTitleMessage] = useState(`0 / ${maxBytes} bytes 사용 중`);
 
   // 썸네일
   const [thumbnail, setThumbnail] = useState(null);
@@ -153,10 +153,24 @@ function RoomInfo() {
     const ScriptMsg = validateScription(scriptValue);
     setInputScript(scriptValue); // 확실히 값처리
 
+    if (scriptValue.trim() === '') {
+      setScriptMessage('소개글을 입력해주세요.');
+      if (document.activeElement !== scriptionRef.current) {
+        scriptionRef.current?.focus();
+        // 커서를 끝으로 이동
+        const length = scriptionRef.current?.value.length || 0;
+        scriptionRef.current?.setSelectionRange(length, length);
+      }
+      return;
+    }
+
     if (ScriptMsg) {
       setScriptMessage(ScriptMsg);
-      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
-      if (document.activeElement !== scriptionRef.current) { setTimeout(() => { scriptionRef.current?.focus(); }, 0); }
+      if (document.activeElement !== scriptionRef.current) {
+        scriptionRef.current?.focus();
+        const length = scriptionRef.current?.value.length || 0;
+        scriptionRef.current?.setSelectionRange(length, length);
+      }
       return;
     }
 
@@ -267,7 +281,8 @@ function RoomInfo() {
               onChange={handleImageUpload}
             />
 
-            <button onClick={() => document.getElementById('thumbnailInput').click()} ref={thumbnailInputRef}>사진첨부</button>
+            <button onClick={() => { if (!showModal) { document.getElementById('thumbnailInput').click(); }}}
+            ref={thumbnailInputRef} className={`thumbnail_button ${showModal ? 'disabled' : ''}`} >사진첨부</button>
           </div>
         </div>
 
@@ -275,7 +290,7 @@ function RoomInfo() {
           <div className='introduction_precautions'>
             <p>소개글</p>
             <span>
-              {scriptMessage ? scriptMessage : `현재 ${scriptByteLength} / ${maxScriptByte} bytes 사용 중`}
+              {scriptMessage ? scriptMessage : `${scriptByteLength} / ${maxScriptByte} bytes 사용 중`}
             </span>
           </div>
           <textarea
