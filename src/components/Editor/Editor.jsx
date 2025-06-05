@@ -41,6 +41,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
 
+    const [selectedSide, setSelectedSide] = useState({ roomIndex: null, sideIndex: null });
+
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
     if (!hoveredWall) return;
@@ -333,20 +335,39 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     }
 
     const handleDeleteGameRoom = (roomSide) => {
-        if (game.room.length <= 1) return; // 최소 1개는 유지
+        if (game.room.length <= 1) return;
+
         setGame(prev => {
             const newRooms = [...prev.room];
-            newRooms.splice(roomSide, 1); // 현재 방 삭제
+            newRooms.splice(roomSide, 1);
             return new GamePnC({ ...prev, room: newRooms });
         });
+
         setSideImgSrcs(prev => {
             const newImgs = [...prev];
             newImgs.splice(roomSide, 1);
             return newImgs;
         });
-        // 인덱스 조정
-        setCurrentRoom(prev => Math.max(0, prev - 1));
-    }
+
+        // 선택된 room이 삭제된 경우 → 초기화
+        // 선택된 room이 뒤에 있던 경우 → index 하나 앞으로
+        setSelectedSide(prev => {
+            if (prev.roomIndex === roomSide) {
+                return { roomIndex: -1, sideIndex: -1 };
+            } else if (prev.roomIndex > roomSide) {
+                return { ...prev, roomIndex: prev.roomIndex - 1 };
+            } else {
+                return prev;
+            }
+        });
+
+        // currentRoom 인덱스 보정
+        setCurrentRoom(prev => {
+            if (prev === roomSide) return Math.max(0, prev - 1);
+            else if (prev > roomSide) return prev - 1;
+            else return prev;
+        });
+    };
 
     const handleDeleteGameSide = () => {
         if (room.side.length <= 1) return;
@@ -386,6 +407,16 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     const handleCurrentRoom = (roomIndex) => {
         setCurrentRoom(roomIndex);
+
+        // setSelectedSides((prev) => {
+        //     const updated = { ...prev };
+        //     Object.keys(updated).forEach(key => {
+        //         if (parseInt(key) !== roomIndex) {
+        //             delete updated[key];
+        //         }
+        //     });
+        //     return updated;
+        // });
     }
 
     const handleCurrentSide = (sideIndex, sideData) => {
@@ -393,6 +424,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setTimeout(() => {
             loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
         }, 100)
+        setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
 
     const handleChangeRoomName = (roomIndex, name) => {
@@ -681,7 +713,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     {roomIndex == currentRoom && (
                                         <div className='side_area'>
                                             {room.side.map((sideData, sideIndex) => {
-                                                const isSelected = currentRoom === roomIndex && currentSide === sideIndex;
+                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
 
                                                 return(
                                                     <div className={`side_wrap ${isSelected ? 'selected' : ''}`}  key={sideIndex}> 
