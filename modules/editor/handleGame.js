@@ -52,7 +52,7 @@ const handleSide = (canvas, setSide) => {
     return updatedFabric;
 };
 
-const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame) => {
+const loadCanvas = (canvas, imgs, side, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState) => {
     canvas.clear();
     if (side.frame) {
         Promise.resolve(side)
@@ -69,7 +69,6 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
             setAngle(data.frame.angle);
             setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom]);
         })
-        .finally(addFrame);
     }
     side.fabric.forEach((fabricData, fabricIndex) => {
         const opt = fabricData.option;
@@ -238,7 +237,7 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
     canvas.renderAll();
 }
 
-const loadGame = async (game, imgs, canvas, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame) => {
+const loadGame = async (game, imgs, canvas, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState) => {
     // game.room.forEach((roomData, roomIndex) => {
     //     setCurrentRoom(roomIndex);
     //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
@@ -264,7 +263,7 @@ const loadGame = async (game, imgs, canvas, saveCanvasToSide, setCurrentRoom, se
         console.log('results',results)
         results.side.map((sideData, sideIndex) => {
             setCurrentSide(sideIndex);
-            loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+            loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
         });
     })
     .then(saveCanvasToSide)

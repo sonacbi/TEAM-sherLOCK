@@ -36,19 +36,13 @@ class Room extends ClassVersion {
 
 // 방의 방향 | 면
 class Side extends ClassVersion {
-    name: string;
-    description: string;
     frame: Frame;
     fabric: Fabric[];
     constructor({
-        name = '',
-        description = '',
         frame = null,
         fabric = [],
     }) {
         super();
-        this.name = name;
-        this.description = description;
         this.frame = frame;
         this.fabric = fabric.map(data => new Fabric(data));
     }
