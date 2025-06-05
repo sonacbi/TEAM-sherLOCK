@@ -337,16 +337,16 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         }));
     }
 
-    const handleDeleteGameRoom = () => {
+    const handleDeleteGameRoom = (roomSide) => {
         if (game.room.length <= 1) return; // 최소 1개는 유지
         setGame(prev => {
             const newRooms = [...prev.room];
-            newRooms.splice(currentRoom, 1); // 현재 방 삭제
+            newRooms.splice(roomSide, 1); // 현재 방 삭제
             return new GamePnC({ ...prev, room: newRooms });
         });
         setSideImgSrcs(prev => {
             const newImgs = [...prev];
-            newImgs.splice(currentRoom, 1);
+            newImgs.splice(roomSide, 1);
             return newImgs;
         });
         // 인덱스 조정
@@ -354,23 +354,40 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     }
 
     const handleDeleteGameSide = () => {
-        if (room.side.length <= 1) return; // 최소 1개는 유지
+        if (room.side.length <= 1) return;
+
+        const deletedIndex = currentSide;
+        const newLength = room.side.length - 1;
+
+        // 삭제 후 선택할 인덱스 계산
+        const newSideIndex = deletedIndex >= newLength ? newLength - 1 : deletedIndex;
+
         setRoom(prev => {
             const newSides = [...prev.side];
-            newSides.splice(currentSide, 1); // 현재 면 삭제
+            newSides.splice(deletedIndex, 1);
             return { ...prev, side: newSides };
         });
+
         setSideImgSrcs(prev => {
             const newImgs = [...prev];
             if (!newImgs[currentRoom]) return prev;
             const updatedSides = [...newImgs[currentRoom]];
-            updatedSides.splice(currentSide, 1);
+            updatedSides.splice(deletedIndex, 1);
             newImgs[currentRoom] = updatedSides;
             return newImgs;
         });
-        // 인덱스 조정
-        setCurrentSide(prev => Math.max(0, prev - 1));
-    }
+
+        setSelectedSide(prev => {
+            if (prev.roomIndex !== currentRoom) return prev;
+
+            if (prev.sideIndex === deletedIndex) {
+                return { roomIndex: currentRoom, sideIndex: newSideIndex };
+            }
+            return prev;
+        });
+
+        setCurrentSide(newSideIndex);
+    };
 
     const handleCurrentRoom = (roomIndex) => {
         setCurrentRoom(roomIndex);
@@ -670,7 +687,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     <div className='stage_wrap'>
                                         <div className='stageIndex_delete'>
                                             <h3>Stage {roomIndex + 1}</h3>
-                                            <button onClick={handleDeleteGameRoom}>X</button>
+                                            <button onClick={() => handleDeleteGameRoom(roomIndex)}>X</button>
                                         </div>
                                         <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} placeholder='이름'/>
                                     </div>
