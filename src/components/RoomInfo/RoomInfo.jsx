@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { jwtDecode } from 'jwt-decode'; // 유저 정보 디코딩
 
 import './RoomInfo.css';
-import { jwtDecode } from 'jwt-decode'; // 유저 정보 디코딩
+import { useTitleByteHandler, useThumbnailUpload, getByteLength, validateScription, validatePlaytime } from './RoomInfo_validate';
 
 import Room_thumbnail_basic_img from '../../assets/images/RoomInfo/Room_thumbnail_basic_img.png';
 import Room_theme_horror_img from '../../assets/images/MainPage_img/horror_icon.png'
@@ -15,21 +16,18 @@ import creator_profile from '../../assets/images/Profile/ex_user_profile.png';
 
 function RoomInfo() {
   // 타이틀
+  const maxBytes = 100;
   const [title, setTitle] = useState('');
   const [byteLength, setByteLength] = useState(0);
-  const maxBytes = 100;
   const [titleMessage, setTitleMessage] = useState(`현재 0 / ${maxBytes} bytes 사용 중`);
 
   // 썸네일
-  const [thumbnail, setThumbnail] = useState(null); // 최종 썸네일 이미지
-  const [thumbnailMessage, setThumbnailMessage] = useState(''); // 메시지 출력 (자동 모달용)
-  const [showConfirmButtons, setShowConfirmButtons] = useState(false); // 압축 수락/거절 버튼
-
-  const compressedDataUrlRef = useRef(null); // 압축된 이미지 임시 저장
-
-  const [showModal, setShowModal] = useState(false); // 압축 안내 모달 표시 여부
-  const [modalMessage, setModalMessage] = useState(''); // 압축 안내 메시지
-  const [modalFadeOut, setModalFadeOut] = useState(false); // 자동 모달 페이드아웃 효과
+  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailMessage, setThumbnailMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [showConfirmButtons, setShowConfirmButtons] = useState(false);
+  const [modalFadeOut, setModalFadeOut] = useState(true);
+  const [modalMessage, setModalMessage] = useState('');
 
   // 소개글
   const [ inputScript, setInputScript ] = useState('');
@@ -98,196 +96,16 @@ function RoomInfo() {
   }, []);
 
   // 제목 영역의 글자수(바이트로 체크)
-  const getByteLength = (str) => { return new TextEncoder().encode(str).length; }
-
-  const handleTitle = (e) => {
-    let value = e.target.value;
-
-    const trimmed = value.trim(); // 앞뒤 공백 제거
-
-    // 실시간 바이트 계산
-    let encoded = new TextEncoder().encode(value);
-    let bytes = getByteLength(value);
-
-    // 공백만 입력하거나 아무 글자도 없을 때
-    if (trimmed.length === 0) {
-      setTitle(''); // 상태 초기화
-      setByteLength(bytes);
-      setTitleMessage(`현재 ${bytes} / ${maxBytes} bytes 사용 중`);
-      return;
-    }
-
-    if (bytes <= maxBytes) {
-        setTitle(value);
-        setByteLength(bytes);
-        setTitleMessage(`현재 ${bytes} / ${maxBytes} bytes 사용 중`);
-      } else {
-        // 100바이트 초과한 만큼 잘라냄
-        while (bytes > maxBytes) {
-          encoded = encoded.slice(0, -1); // 마지막 바이트 제거
-          value = new TextDecoder().decode(encoded); // 다시 문자열로 변환
-          bytes = getByteLength(value);
-        }
-        setTitle(value);
-        setByteLength(bytes);
-        setTitleMessage('100byte를 넘길 수 없습니다.');
-      }
-    };
-
-  // 포커스 아웃 시 메시지 복구
-  const handleTitleBlur = () => {
-    setTitleMessage(`현재 ${byteLength} / ${maxBytes} bytes 사용 중`);
-  };
+  const {
+    handleTitle,
+    handleTitleBlur,
+  } = useTitleByteHandler(100, title, setTitle, byteLength, setByteLength, titleMessage, setTitleMessage );
 
   // 썸네일 유효성 검사
-  const handleAcceptCompression = () => {
-    setThumbnail(compressedDataUrlRef.current);
-    setThumbnailMessage('');
-    setShowConfirmButtons(false);
-    setShowModal(false);
-  };
-
-  const handleRejectCompression = () => {
-    setThumbnailMessage('이미지 업로드가 취소되었습니다.');
-    setShowConfirmButtons(false);
-    setThumbnail(null);
-    setModalFadeOut(false);
-    setShowModal(false);
-
-    setTimeout(() => {
-      setModalFadeOut(true);
-      setTimeout(() => setThumbnailMessage(''), 500);
-    }, 3000);
-  };
-
-  const handleImageUpload = (e) => {
-    const fileInput = e.target;
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    setShowConfirmButtons(false);
-
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    const maxSize = 360 * 1024; // 360KB
-    const minWidth = 380;
-    const minHeight = 480;
-
-    // 1. 형식 검사
-    if (!allowedTypes.includes(file.type)) {
-      showAutoModal('JPEG, JPG, PNG 형식의 파일만 업로드할 수 있습니다.');
-      fileInput.value = ''; // 파일 리셋
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const img = new Image();
-      img.onload = function () {
-        // 2. 해상도 검사
-        if (img.width < minWidth || img.height < minHeight) {
-          showAutoModal(`업로드한 이미지 ${img.width}x${img.height}px<br />(최소 ${minWidth}x${minHeight}px 이상 업로드 요망)`);
-          fileInput.value = '';
-          return;
-        }
-
-        // 3. 용량 검사
-        if (file.size > maxSize) {
-          // 압축
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-
-          let quality = 0.6;
-          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-
-          while (compressedDataUrl.length > maxSize * 1.37 && quality > 0.2) {
-            quality -= 0.1;
-            compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          }
-
-          compressedDataUrlRef.current = compressedDataUrl;
-          setModalMessage('이미지 용량이 360KB를 초과합니다. 용량을 자동으로 압축해서 업로드하시겠습니까?');
-          setShowConfirmButtons(true);
-          setShowModal(true);
-        } else {
-          // 문제 없을 때 바로 업로드
-          const imageUrl = URL.createObjectURL(file);
-          setThumbnail(imageUrl);
-          fileInput.value = ''; // 파일 리셋
-        }
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const showAutoModal = (message) => {
-    setThumbnailMessage(message);
-    setShowConfirmButtons(false);
-    setModalFadeOut(false);
-
-    setTimeout(() => {
-      setModalFadeOut(true);
-      setTimeout(() => setThumbnailMessage(''), 500);
-    }, 3000);
-  };
+  const { handleImageUpload, handleAcceptCompression, handleRejectCompression,
+  } = useThumbnailUpload(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage);
   
-  const validateScription = (text, maxBytes = 1000) => {
-    // 1. HTML 태그 제거 검사
-    const tagPattern = /<\/?[^>]+>/gi;
-    if (tagPattern.test(text)) {
-      return 'HTML태그는 사용할 수 없습니다.';
-    }
-
-    // 2. 특수 코드 (예: &lt;, &gt;, &nbsp;) 검사
-    const entityPattern = /&[a-z]+;/gi;
-    if (entityPattern.test(text)) {
-      return '특수 문자는 입력할 수 없습니다.';
-    }
-
-    // 3. 빈 문자열 검사
-    if (text.trim() === '') {
-      return '소개글을 입력해주세요.';
-    }
-
-    // 4. 길이 제한 (바이트 기준)
-    if (getByteLength(text) > maxBytes) {
-      return `${maxBytes}byte 이내로 입력해주세요.`;
-    }
-
-    return ''; // 유효할 경우 에러 없음
-  };
   
-  const validatePlaytime = (h, m) => {
-    // 빈 문자열이면 0으로 처리
-    const hour = h === '' ? 0 : parseInt(h, 10);
-    const min = m === '' ? 0 : parseInt(m, 10);
-
-    if (isNaN(hour) || isNaN(min)) {
-      return '시간에 숫자만 입력해주세요.';
-    }
-
-    if (hour < 0 || hour > 3) {
-      return '시간(h)은 0~3 사이의 숫자여야 합니다.';
-    }
-
-    if (min < 0 || min >= 60) {
-      return '분(m)은 0~59 사이로 입력해주세요.';
-    }
-
-    const totalMinutes = hour * 60 + min;
-    if (totalMinutes > 180) {
-      return '총 플레이타임은 3시간(180분)을 넘길 수 없습니다.';
-    }
-
-    if(hour === 0 && min === 0) {
-      return '시간에 0만 입력할 수 없습니다.'
-    }
-    return '';
-  };
-
   const handleDifficultyClick = (level) => {
     setSelectedDifficulty(level);
     setDifficultyMessage(''); // 선택하면 메시지 지우기
@@ -300,7 +118,7 @@ function RoomInfo() {
 
   const handleSubmit = (e) => {
     e.preventDefault(); // 이거 없으면 자동 리로드됨
-
+    
     // 제목 검사
     if (!title || getByteLength(title) === 0) {
       setTitleMessage('제목을 입력해주세요.');
@@ -315,25 +133,24 @@ function RoomInfo() {
 
     // 썸네일 검사
     if (!thumbnail) {
+      console.log("코드 체크");
       setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
       setModalFadeOut(false);
 
       // 바로 포커스 후 클릭을 약간 딜레이 줘서 실행
       const input = thumbnailInputRef.current;
-      console.log("input", input);
-      if (input) {
-        input.focus();    
-      }
-      setTimeout(() => {
-        setModalFadeOut(true);
-        setTimeout(() => setThumbnailMessage(''), 500);
-      }, 3000);
+      if (input) { input.focus(); }
+      setTimeout(() => { setModalFadeOut(true); setTimeout(() => setThumbnailMessage(''), 500);
+      }, 4000);
 
       return;
     }
 
-    // 소개글 검사
-    const ScriptMsg = validateScription(inputScript);
+        // 소개글 검사
+    const scriptValue = scriptionRef.current?.value || ''; // 직접 가져오기
+    const ScriptMsg = validateScription(scriptValue);
+    setInputScript(scriptionRef.current?.value); // 확실히 값처리
+
     if (ScriptMsg) {
       setScriptMessage(ScriptMsg); // 메시지 표시
       scriptionRef.current?.focus(); // 소개글 입력란 포커스
