@@ -372,25 +372,25 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setCurrentRoom(roomIndex);
     }
 
-    const handleCurrentSide = (roomIndex, cb) => {
-        setCurrentSide(roomIndex);
+    const handleCurrentSide = (sideIndex, cb) => {
+        setCurrentSide(sideIndex);
         setTimeout(() => {
             cb?.();
         }, 100)
     }
 
-    const handleChangeRoomName = (name) => {
+    const handleChangeRoomName = (roomIndex, name) => {
         setGame(prev => {
             const newData = { ...prev };
-            newData.room[currentRoom].name = name;
+            newData.room[roomIndex].name = name;
             return new GamePnC(newData);
         })
     }
 
-    const handleChangeSideName = (name) => {
+    const handleChangeSideName = (roomIndex, sideIndex, name) => {
         setGame(prev => {
             const newData = { ...prev };
-            newData.room[currentRoom].side[currentSide].name = name;
+            newData.room[roomIndex].side[sideIndex].name = name;
             return new GamePnC(newData);
         })
     }
@@ -399,9 +399,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setTimeout(() => {
             const updatedFabric = handleSide(canvasInstance.current, setSide);
             setRoom(prev => {
-                const newData = new Room({
-                    ...prev
-                })
+                const newData = new Room({ ...prev })
                 newData.side[currentSide].fabric = updatedFabric;
                 return newData;
             })
@@ -441,15 +439,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     useEffect(() => {
         if (isReadyToLoad && game) {
-            loadGame(game, imgs, canvasInstance.current, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+            loadGame(game, imgs, canvasInstance.current, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
             setIsReadyToLoad(false);
         }
     }, [isReadyToLoad, game]);
-
     useEffect(() => {
         if (isReady && gameZip) {
             loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);
-            (false);
         }
     }, [gameZip]);
     // ☑️ 오타있음 --------------------------------------------------(section 10)
@@ -625,7 +621,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                     return (
                         <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
                             <h2>{roomIndex}</h2>
-                            <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='방의 이름'/>
+                            <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} placeholder='방의 이름'/>
                                 {roomIndex == currentRoom && (
                                     <div className='side_area'>
                                         {room.side.map((sideData, sideIndex) => {
@@ -638,7 +634,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                                     {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={110} height={65}/>}
                                                     <div className="info">
                                                         <h4>{sideIndex}</h4>
-                                                        <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(e.target.value)} placeholder='방향의 이름'/>
+                                                        <input type="text" value={sideData?.name || ''} onChange={(e) => handleChangeSideName(roomIndex, sideIndex, e.target.value)} placeholder='방향의 이름'/>
                                                     </div>
                                                     <button onClick={handleDeleteGameSide}>방향 삭제</button>
                                                 </div>

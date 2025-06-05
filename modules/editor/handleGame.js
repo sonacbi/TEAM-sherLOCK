@@ -238,14 +238,40 @@ const loadCanvas = (canvas, side, controlStyle, roomController, setPosition, set
     canvas.renderAll();
 }
 
-const loadGame = (game, imgs, canvas, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame) => {
-    console.log('loadGame - game', game)
-    game.room.forEach((roomData, roomIndex) => {
-        roomData.side.forEach((sideData, sideIndex) => {
-            loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+const loadGame = async (game, imgs, canvas, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame) => {
+    // game.room.forEach((roomData, roomIndex) => {
+    //     setCurrentRoom(roomIndex);
+    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
+    //     roomData.side.forEach((sideData, sideIndex) => {
+    //         setCurrentSide(sideIndex);
+    //         loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+    //         saveCanvasToSide();
+    //     })
+    // })
+    // setCurrentRoom(0);
+    // setCurrentSide(0);
+
+    const promises = game.room.map((roomData, roomIndex) => {
+        return new Promise(resolve => {
+            setCurrentRoom(roomIndex);
+            roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
+            resolve(roomData);
         })
+    });
+
+    Promise.all(promises)
+    .then(results => {
+        console.log('results',results)
+        results.side.map((sideData, sideIndex) => {
+            setCurrentSide(sideIndex);
+            loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+        });
     })
-    console.log('loadGame - canvas', canvas);
+    .then(saveCanvasToSide)
+    .finally(()=> {
+        setCurrentRoom(0);
+        setCurrentSide(0);
+    })
 }
 
 const loadGameZip = async (file, setGame, setImgs, setIsReadyToLoad) => {
