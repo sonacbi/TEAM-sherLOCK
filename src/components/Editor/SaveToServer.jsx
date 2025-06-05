@@ -1,33 +1,10 @@
 import JSZip from "jszip";
 import { nanoid } from "nanoid";
 import { GameInfo } from "../../../modules/game-modules";
-import { Room } from "../../../modules/editor/gamePnC";
-import { handleSide } from "../../../modules/editor/handleGame";
 
 import save_icon from '../../assets/images/EditorPage_img/save_icon.png';
 
 export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs, canvases}) {
-    function saveCanvasToSide() {
-        const {canvasRef, canvasInstance, setRoom, currentRoom, setSide, currentSide, setSideImgSrcs} = canvases;
-        const updatedFabric = handleSide(canvasInstance.current, setSide);
-        setRoom(prev => {
-            const newData = new Room({
-                ...prev
-            })
-            newData.side[currentSide].fabric = updatedFabric;
-            return newData;
-        })
-        setSideImgSrcs(prev => {
-            const newData = [ ...prev ];
-            newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
-                format: 'jpeg',
-                quality: 0.1,
-            });
-            console.log('newData',newData)
-            return newData;
-        })
-    }
-
     function saveFilesToLocal() {
         const zip = new JSZip();
         // ZIP에 파일 추가
@@ -84,9 +61,6 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
     
     return(
         <div className='save_submit'>
-            <p className='save_canvas_button' onClick={saveCanvasToSide}>
-                캔버스 저장
-            </p>
             <p className='save_button' title='저장하기' onClick={saveFilesToLocal}>
                 <img id='save_icon' src={save_icon} alt='save_icon' />
             </p>

@@ -44,7 +44,7 @@ class Side extends ClassVersion {
         name = '',
         description = '',
         frame = null,
-        fabric = [new Fabric({})],
+        fabric = [],
     }) {
         super();
         this.name = name;

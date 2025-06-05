@@ -5,7 +5,7 @@ import './Editor.css';
 
 import { createRoomFrame } from '../../../modules/handlePolygon';
 import { GamePnC, Room, Side } from '../../../modules/editor/gamePnC';
-import { loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
+import { handleSide, loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
@@ -16,8 +16,6 @@ import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, room, setRoom, side, setSide, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
-    // const canvasRef = useRef(null);
-    // const canvasInstance = useRef(null);
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
@@ -192,10 +190,28 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             canvas.renderAll();
         });
 
+        saveCanvasToSide();
         setIsReady(true);
         return () => canvas.dispose();
     }, []);
     //                           -------------------------------------(section 5) 
+    // 캔버스 내 객체가 생성/변경/삭제되면 저장-----------------------(section) (노은성)
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        canvas.on('object:added', saveCanvasToSide);
+        canvas.on('object:modified', saveCanvasToSide);
+        canvas.on('object:removed', saveCanvasToSide);
+
+        // cleanup
+        return () => {
+            canvas.off('object:added', saveCanvasToSide);
+            canvas.off('object:modified', saveCanvasToSide);
+            canvas.off('object:removed', saveCanvasToSide);
+        };
+    }, [canvasInstance.current, currentRoom, currentSide]);
+    // ---------------------------------------------------------------(section)
     // 랜더링 준비되면 추가버튼 활성화 -------------------------------(section 6) 
     useEffect(() => {
         if (isReady) addTextBox();
@@ -312,7 +328,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setGame(prev => (new GamePnC({
             ...prev, room: [...prev.room, new Room({})]
         })));
-        setSideImgSrcs(prev => [...prev, ['']])
+        setSideImgSrcs(prev => [...prev, ['']]);
     }
 
     const handleAddGameSide = () => {
@@ -370,26 +386,51 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         });
     }
 
+    // const handleCurrentSide = (sideIndex, cb) => {
+    //     setCurrentSide(sideIndex);
+    //     setTimeout(() => {
+    //         cb?.();
+    //     }, 100)
+    // }
     const handleCurrentSide = (sideIndex) => {
         setCurrentSide(sideIndex);
 
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
 
-    const handleChangeRoomName = (name) => {
+    const handleChangeRoomName = (roomIndex, name) => {
         setGame(prev => {
             const newData = { ...prev };
-            newData.room[currentRoom].name = name;
+            newData.room[roomIndex].name = name;
             return new GamePnC(newData);
         })
     }
 
-    const handleChangeSideName = (name) => {
+    const handleChangeSideName = (roomIndex, sideIndex, name) => {
         setGame(prev => {
             const newData = { ...prev };
-            newData.room[currentRoom].side[currentSide].name = name;
+            newData.room[roomIndex].side[sideIndex].name = name;
             return new GamePnC(newData);
         })
+    }
+
+    const saveCanvasToSide = () => {
+        setTimeout(() => {
+            const updatedFabric = handleSide(canvasInstance.current, setSide);
+            setRoom(prev => {
+                const newData = new Room({ ...prev })
+                newData.side[currentSide].fabric = updatedFabric;
+                return newData;
+            })
+            setSideImgSrcs(prev => {
+                const newData = [ ...prev ];
+                newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
+                    format: 'jpeg',
+                    quality: 0.1,
+                });
+                return newData;
+            });
+        }, 100)
     }
 
     useEffect(()=>console.log('sideImgSrcs',sideImgSrcs), [sideImgSrcs])
@@ -417,15 +458,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     useEffect(() => {
         if (isReadyToLoad && game) {
-            loadGame(game, imgs, canvasInstance.current, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+            loadGame(game, imgs, canvasInstance.current, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
             setIsReadyToLoad(false);
         }
     }, [isReadyToLoad, game]);
-
     useEffect(() => {
         if (isReady && gameZip) {
             loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);
-            (false);
         }
     }, [gameZip]);
     // ☑️ 오타있음 --------------------------------------------------(section 10)
@@ -626,13 +665,14 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                     <div className='room_area_scroll'>
                         {game.room.map((roomData, roomIndex) => {
                             return (
+
                                 <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
                                     <div className='stage_wrap'>
                                         <div className='stageIndex_delete'>
                                             <h3>Stage {roomIndex + 1}</h3>
                                             <button onClick={handleDeleteGameRoom}>X</button>
                                         </div>
-                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(e.target.value)} placeholder='이름'/>
+                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} placeholder='이름'/>
                                     </div>
 
                                     {roomIndex == currentRoom && (
