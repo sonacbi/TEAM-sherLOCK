@@ -336,22 +336,22 @@ function RoomInfo() {
           <p>예상소요시간</p>
 
           <div className='playtime_wrap'>
-          <div className='hour_wrap'>
-            <input
-              type='text'
-              placeholder='?'
-              value={playtimeHour}
-              ref={hourRef}
-              onChange={(e) => {
-                const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
-                setPlaytimeHour(onlyNumbers === '' ? '' : Number(onlyNumbers));
-                const msg = validatePlaytime(onlyNumbers === '' ? '' : Number(onlyNumbers), playtimeMin);
-                setPlaytimeMessage(msg);
-              }}
+            <div className='hour_wrap'>
+              <input
+                type='text'
+                placeholder='?'
+                value={playtimeHour}
+                ref={hourRef}
+                onChange={(e) => {
+                  const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
+                  setPlaytimeHour(onlyNumbers === '' ? '' : Number(onlyNumbers));
+                  const msg = validatePlaytime(onlyNumbers === '' ? '' : Number(onlyNumbers), playtimeMin);
+                  setPlaytimeMessage(msg);
+                }}
 
-            />
-            <p>h</p>
-          </div>
+              />
+              <p>h</p>
+            </div>
 
             <div className='min_wrap'>
               <input
@@ -369,7 +369,17 @@ function RoomInfo() {
               <p>m</p>
             </div>
           </div>
-          <span className={playtimeMessage.includes('시간') ? 'tooltip tooltip-h' : playtimeMessage.includes('분') ? 'tooltip tooltip-m' : ''}>
+
+          <span
+            className={`tooltip ${
+              playtimeMessage.includes('시간')
+                ? 'tooltip-h'
+                : playtimeMessage.includes('분')
+                ? 'tooltip-m'
+                : ''
+            }`}
+            style={{ visibility: playtimeMessage ? 'visible' : 'hidden' }}
+          >
             {playtimeMessage || ''}
           </span>
         </div>

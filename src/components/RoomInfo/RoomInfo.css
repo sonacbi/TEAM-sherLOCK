@@ -30,7 +30,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 50px;
     overflow-y: auto; 
     overflow-x: hidden;
     padding-right: 30px;
@@ -139,7 +139,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.8); /* 옅은 노란색 */
+    background-color: rgba(0, 0, 0, 0.8);
     color: white;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -283,35 +283,36 @@
 
 .Room_playtime > .tooltip {
     position: absolute;
-    bottom: 100%; /* 위로 뜨게 */
-    width: 90%;
+    top: 150%; /* 위로 뜨게 */
+    width: 80%;
     left: 0;
-    transform: translate(-0% ,-8px);
-    background-color: rgba(255, 255, 204, 0.95); /* 옅은 노란색 */
-    color: #333;
+    transform: translate(20px, -8px);
+    background-color: rgba(0, 0, 0, 0.8); /* 옅은 노란색 */
+    color: white;
     padding: 6px 10px;
     border-radius: 6px;
     font-size: 0.8rem;
     white-space: pre-line;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     z-index: 10;
+    text-align: center;
 }
 
 .Room_playtime > .tooltip::after {
     content: '';
     position: absolute;
-    top: 100%;
+    bottom: 95%;
     border-width: 6px;
     border-style: solid;
-    border-color: rgba(255, 255, 204, 0.95) transparent transparent transparent;
+    border-color: rgba(0, 0, 0, 0.3) transparent transparent transparent;
 }
 
 .tooltip-h::after {
-  left: 160px;
+  left: 140px;
 }
 
 .tooltip-m::after {
-  left: 230px;
+  left: 210px;
 }
 
 .playtime_wrap, .playtime_wrap > div {
