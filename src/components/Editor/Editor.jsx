@@ -448,15 +448,29 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                 imgElement.src = e.target.result;
 
                 imgElement.onload = () => {
+                    const MAX_WIDTH = 800;  // 최대 너비
+                    const MAX_HEIGHT = 600; // 최대 높이
                     // const warpedCanvas = warpImageToTrapezoid(imgElement, 40);
+
+                    let { width, height } = imgElement;
+
+                    // 이미지가 최대 크기보다 크면 비율에 맞게 축소
+                    if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+                        const widthRatio = MAX_WIDTH / width;
+                        const heightRatio = MAX_HEIGHT / height;
+                        const ratio = Math.min(widthRatio, heightRatio);
+
+                        width = width * ratio;
+                        height = height * ratio;
+                    }
 
                     // const fabricImage = new fabric.Image(warpedCanvas, {
                     const fabricImage = new fabric.Image(imgElement, {
                         ...controlStyle,
                         left: 150,
                         top: 150,
-                        scaleX: 0.4,
-                        scaleY: 0.4,
+                        scaleX: width / imgElement.width,
+                        scaleY: height / imgElement.height,
                         name: addImageFile.name,
                         imageUrl: e.target.result // 배경 랜더링용
                     });
