@@ -117,111 +117,130 @@ function RoomInfo() {
     setThemeMessage(''); // 선택하면 메시지 지우기
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); // 이거 없으면 자동 리로드됨
-    
-    // 제목 검사
-    if (!title || getByteLength(title) === 0) {
-      setTitleMessage('제목을 입력해주세요.');
-      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
-      if (document.activeElement !== titleRef.current) { setTimeout(() => { titleRef.current?.focus(); }, 0); }
-      return;
-    }
-    if (getByteLength(title) > maxBytes) {
-      setTitleMessage(`${maxBytes}byte를 넘길 수 없습니다.`);
-      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
-      if (document.activeElement !== titleRef.current) { setTimeout(() => { titleRef.current?.focus(); }, 0); }
-      return;
-    }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
-    // 썸네일 검사
-    if (!thumbnail) {
-      console.log("코드 체크");
-      setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
-      setModalFadeOut(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
-      if (document.activeElement !== thumbnailInputRef.current) { setTimeout(() => { thumbnailInputRef.current?.focus(); }, 0); }
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-      setTimeout(() => { setModalFadeOut(true); setTimeout(() => setThumbnailMessage(''), 500);
-      }, 4000);
-
-      return;
-    }
-
-    // 소개글 검사
-    const scriptValue = scriptionRef.current?.value || ''; // 직접 가져오기
-    const ScriptMsg = validateScription(scriptValue);
-    setInputScript(scriptValue); // 확실히 값처리
-
-    if (scriptValue.trim() === '') {
-      setScriptMessage('소개글을 입력해주세요.');
-      if (document.activeElement !== scriptionRef.current) {
-        scriptionRef.current?.focus();
-        // 커서를 끝으로 이동
-        const length = scriptionRef.current?.value.length || 0;
-        scriptionRef.current?.setSelectionRange(length, length);
+    try {
+      // 제목 검사
+      if (!title || getByteLength(title) === 0) {
+        setTitleMessage('제목을 입력해주세요.');
+        titleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setIsSubmitting(false);
+        return;
       }
-      return;
-    }
-
-    if (ScriptMsg) {
-      setScriptMessage(ScriptMsg);
-      if (document.activeElement !== scriptionRef.current) {
-        scriptionRef.current?.focus();
-        const length = scriptionRef.current?.value.length || 0;
-        scriptionRef.current?.setSelectionRange(length, length);
+      if (getByteLength(title) > maxBytes) {
+        setTitleMessage(`${maxBytes}byte를 넘길 수 없습니다.`);
+        titleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setIsSubmitting(false);
+        return;
       }
-      return;
-    }
 
-    // 난이도 검사
-    if (![1, 2, 3, 4, 5].includes(selectedDifficulty)) {
-      if (selectedDifficulty === null) {
-        setDifficultyMessage("난이도를 선택해주세요.");
-        visibilityRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // 썸네일 검사
+      if (!thumbnail) {
+        setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
+        setModalFadeOut(false);
+        thumbnailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        await wait(4000);
+        setModalFadeOut(true);
+        await wait(500);
+        setThumbnailMessage('');
+        
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 소개글 검사
+      const scriptValue = scriptionRef.current?.value || '';
+      const ScriptMsg = await validateScription(scriptValue);
+      setInputScript(scriptValue);
+
+      if (scriptValue.trim() === '') {
+        setScriptMessage('소개글을 입력해주세요.');
+        scriptionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setIsSubmitting(false);
+        return;
+      }
+      if (ScriptMsg) {
+        setScriptMessage(ScriptMsg);
+        scriptionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 난이도 검사
+      if (![1, 2, 3, 4, 5].includes(selectedDifficulty)) {
+        if (selectedDifficulty === null) {
+          setDifficultyMessage("난이도를 선택해주세요.");
+          visibilityRef.current?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          setDifficultyMessage('');
+          difficultyRef.current?.focus();
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 예상 소요 시간 검사
+      const timeMsg = await validatePlaytime(playtimeHour, playtimeMin);
+      if (timeMsg) {
+        setPlaytimeMessage(timeMsg);
+        if (playtimeHour === '' || parseInt(playtimeHour) < 0 || parseInt(playtimeHour) > 3) {
+          hourRef.current?.focus();
+        } else {
+          minRef.current?.focus();
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 테마 검사
+      if (!['horror', 'adventure', 'crime'].includes(selectedTheme)) {
+        setThemeMessage('테마를 선택해주세요.');
+        themeRef.current?.focus();
+        setIsSubmitting(false);
         return;
       } else {
-        setDifficultyMessage(''); // 통과되면 메시지 제거
+        setThemeMessage('');
       }
-      difficultyRef.current?.focus(); // 난이도 선택 영역으로 포커스
-      return;
-    }
 
-    // 예상 소요 시간 검사
-    const timeMsg = validatePlaytime(playtimeHour, playtimeMin);
-    if (timeMsg) {
-      setPlaytimeMessage(timeMsg);
-
-      if (playtimeHour === '' || parseInt(playtimeHour) < 0 || parseInt(playtimeHour) > 3) {
-        hourRef.current?.focus();
+      // 공개 여부 검사
+      if (!['public', 'limited', 'private'].includes(selectedVisibility)) {
+        setVisibilityMessage('공개여부를 선택해주세요.');
+        visibilityRef.current?.focus();
+        setIsSubmitting(false);
+        return;
       } else {
-        minRef.current?.focus();
+        setVisibilityMessage('');
       }
-      return;
-    }
 
-    // 테마 검사
-    if (!['horror', 'adventure', 'crime'].includes(selectedTheme)) {
-      setThemeMessage('테마를 선택해주세요.'); // 메시지 상태 업데이트
-      themeRef.current?.focus();
-      return;
-    } else {
-      setThemeMessage(''); // 통과 시 메시지 초기화
-    }
+      // *** 실제 저장 API 호출 (백엔드 코드 넣어주세요)-----------------------------------//
+      await fakeApiCallToSave({
+        title,
+        thumbnail,
+        script: scriptValue,
+        difficulty: selectedDifficulty,
+        playtimeHour,
+        playtimeMin,
+        theme: selectedTheme,
+        visibility: selectedVisibility,
+      });
 
-    // 공개 여부 검사
-    if (!['public', 'limited', 'private'].includes(selectedVisibility)) {
-      setVisibilityMessage('공개여부를 선택해주세요.');
-      visibilityRef.current?.focus();
-      return;
-    }else {
-      setVisibilityMessage(''); // 통과 시 메시지 초기화
-    }
+      alert('저장 완료!');
 
-    // 여기서 실제 저장 API 호출 등 수행 (백엔드 업무)
-    alert('저장 완료!');
-    /* 저장데이터를 정련할 일련의 코드 만들어주시면 될 것 같아요.*/
+      // *** 실제 저장 API 호출 (백엔드 코드 넣어주세요)-----------------------------------//
+    } catch (error) {
+      console.error(error);
+      alert('저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
