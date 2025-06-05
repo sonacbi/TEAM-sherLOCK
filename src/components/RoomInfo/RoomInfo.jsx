@@ -122,12 +122,14 @@ function RoomInfo() {
     // 제목 검사
     if (!title || getByteLength(title) === 0) {
       setTitleMessage('제목을 입력해주세요.');
-      titleRef.current?.focus(); // 제목 입력란으로 포커스 이동
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== titleRef.current) { setTimeout(() => { titleRef.current?.focus(); }, 0); }
       return;
     }
     if (getByteLength(title) > maxBytes) {
       setTitleMessage(`${maxBytes}byte를 넘길 수 없습니다.`);
-      titleRef.current?.focus(); // 제목 입력란으로 포커스 이동
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== titleRef.current) { setTimeout(() => { titleRef.current?.focus(); }, 0); }
       return;
     }
 
@@ -137,9 +139,9 @@ function RoomInfo() {
       setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
       setModalFadeOut(false);
 
-      // 바로 포커스 후 클릭을 약간 딜레이 줘서 실행
-      const input = thumbnailInputRef.current;
-      if (input) { input.focus(); }
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== thumbnailInputRef.current) { setTimeout(() => { thumbnailInputRef.current?.focus(); }, 0); }
+
       setTimeout(() => { setModalFadeOut(true); setTimeout(() => setThumbnailMessage(''), 500);
       }, 4000);
 
@@ -149,11 +151,12 @@ function RoomInfo() {
     // 소개글 검사
     const scriptValue = scriptionRef.current?.value || ''; // 직접 가져오기
     const ScriptMsg = validateScription(scriptValue);
-    setInputScript(scriptionRef.current?.value); // 확실히 값처리
+    setInputScript(scriptValue); // 확실히 값처리
 
     if (ScriptMsg) {
-      setScriptMessage(ScriptMsg); // 메시지 표시
-      scriptionRef.current?.focus(); // 소개글 입력란 포커스
+      setScriptMessage(ScriptMsg);
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== scriptionRef.current) { setTimeout(() => { scriptionRef.current?.focus(); }, 0); }
       return;
     }
 
