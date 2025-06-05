@@ -101,6 +101,16 @@
     outline: 2px solid rgb(160, 160, 160);
 }
 
+#thumbnailInput { /* display : none 에서 투명도 0으로 수정함*/
+    opacity: 0.01;
+    position: absolute;
+    z-index: 0;
+    width: 10px;
+height: 10px;
+
+    top: 0;
+}
+
 .Room_thumbnail_img_button {
     display: flex;
     flex-direction: column;
@@ -115,6 +125,45 @@
     position: relative;
     border-radius: 10px;
 }
+
+/* (추가) ------------------- */
+/* 압축 수락/거부 모달 */
+
+.Room_thumbnail_img_wrap .modal_overlay, .Room_thumbnail_img_wrap .auto_modal{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 204, 0.95); /* 옅은 노란색 */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    width : 80%;
+    height : 35%;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.Room_thumbnail_img_wrap  .modal_box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Room_thumbnail_img_wrap  .modal_overlay {
+    z-index: 10;
+}
+/* 자동 메시지 모달 */
+.Room_thumbnail_img_wrap  .auto_modal {
+    z-index: 9;
+    transition: opacity 0.5s;
+}
+
+.auto_modal.fade-out { opacity: 0; }
+/* (추가) ------------------- */
 
 .Room_thumbnail_basic_wrap {
     display: flex;
@@ -132,6 +181,8 @@
 .Room_thumbnail_img_wrap.has-thumbnail {
     border: 2px solid white;
 }
+
+
 
 #Room_thumbnail_basic_img {
     width: 100px;
@@ -204,7 +255,40 @@
 
 .Room_playtime {
     flex-direction: row !important;
+    position : relative;
 }
+
+.Room_playtime > .tooltip {
+    position: absolute;
+    bottom: 100%; /* 위로 뜨게 */
+    width: 90%;
+    left: 0;
+    transform: translate(-0% ,-8px);
+    background-color: rgba(255, 255, 204, 0.95); /* 옅은 노란색 */
+    color: #333;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: pre-line;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.Room_playtime > .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(255, 255, 204, 0.95) transparent transparent transparent;
+}
+.tooltip-h::after {
+  left: 160px;
+}
+.tooltip-m::after {
+  left: 230px;
+}
+
 
 .playtime_wrap, .playtime_wrap > div {
     display: flex;
