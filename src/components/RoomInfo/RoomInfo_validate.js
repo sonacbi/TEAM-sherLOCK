@@ -16,7 +16,7 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
     setTitle('');
     setByteLength(bytes);
     if (!isErrorMessage) {  // 에러 메시지가 없을 때만 바이트 메시지 업데이트
-      setTitleMessage(`현재 ${bytes} / ${maxBytes} bytes 사용 중`);
+      setTitleMessage(`${bytes} / ${maxBytes} bytes 사용 중`);
     }
     return;
   }
@@ -25,7 +25,7 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
     setTitle(value);
     setByteLength(bytes);
     if (!isErrorMessage) {
-      setTitleMessage(`현재 ${bytes} / ${maxBytes} bytes 사용 중`);
+      setTitleMessage(`${bytes} / ${maxBytes} bytes 사용 중`);
     }
   } else {
     while (bytes > maxBytes) {
@@ -41,7 +41,7 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
 
 
   const handleTitleBlur = () => {
-    setTitleMessage(`현재 ${byteLength} / ${maxBytes} bytes 사용 중`);
+    setTitleMessage(`${byteLength} / ${maxBytes} bytes 사용 중`);
   };
 
   return {
@@ -54,7 +54,7 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
 };
 
 export const useThumbnailUpload =
-(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage) => {
+(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef) => {
 
   const compressedDataUrlRef = useRef(null);
 
@@ -138,17 +138,23 @@ export const useThumbnailUpload =
   };
 
   const showAutoModal = (message) => {
+    // 기존 타이머 제거
+    if (modalTimeoutRef.current) {
+      clearTimeout(modalTimeoutRef.current);
+    }
+
     setThumbnailMessage(message);
     setShowConfirmButtons(false);
     setModalFadeOut(false);
 
-    setTimeout(() => {
+    modalTimeoutRef.current = setTimeout(() => {
       setModalFadeOut(true);
-      setTimeout(() => setThumbnailMessage(''), 500);
-    }, 3000);
-  };
+      modalTimeoutRef.current = setTimeout(() => {
+        setThumbnailMessage('');
+      }, 500);
 
-  
+    }, 6000);
+  };
 
   return {
     thumbnail,
@@ -176,10 +182,6 @@ export const validateScription = (text, maxBytes = 1000) => {
   const entityPattern = /&[a-z]+;/gi;
   if (entityPattern.test(text)) {
     return '특수 문자는 입력할 수 없습니다.';
-  }
-
-  if (text.trim() === '') {
-    return '소개글을 입력해주세요.';
   }
 
   if (getByteLength(text) > maxBytes) {

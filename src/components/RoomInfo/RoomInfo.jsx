@@ -19,7 +19,7 @@ function RoomInfo() {
   const maxBytes = 100;
   const [title, setTitle] = useState('');
   const [byteLength, setByteLength] = useState(0);
-  const [titleMessage, setTitleMessage] = useState(`현재 0 / ${maxBytes} bytes 사용 중`);
+  const [titleMessage, setTitleMessage] = useState(`0 / ${maxBytes} bytes 사용 중`);
 
   // 썸네일
   const [thumbnail, setThumbnail] = useState(null);
@@ -28,6 +28,7 @@ function RoomInfo() {
   const [showConfirmButtons, setShowConfirmButtons] = useState(false);
   const [modalFadeOut, setModalFadeOut] = useState(true);
   const [modalMessage, setModalMessage] = useState('');
+  const modalTimeoutRef = useRef(null); 
 
   // 소개글
   const [ inputScript, setInputScript ] = useState('');
@@ -103,7 +104,7 @@ function RoomInfo() {
 
   // 썸네일 유효성 검사
   const { handleImageUpload, handleAcceptCompression, handleRejectCompression,
-  } = useThumbnailUpload(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage);
+  } = useThumbnailUpload(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef);
   
   
   const handleDifficultyClick = (level) => {
@@ -122,12 +123,14 @@ function RoomInfo() {
     // 제목 검사
     if (!title || getByteLength(title) === 0) {
       setTitleMessage('제목을 입력해주세요.');
-      titleRef.current?.focus(); // 제목 입력란으로 포커스 이동
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== titleRef.current) { setTimeout(() => { titleRef.current?.focus(); }, 0); }
       return;
     }
     if (getByteLength(title) > maxBytes) {
       setTitleMessage(`${maxBytes}byte를 넘길 수 없습니다.`);
-      titleRef.current?.focus(); // 제목 입력란으로 포커스 이동
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== titleRef.current) { setTimeout(() => { titleRef.current?.focus(); }, 0); }
       return;
     }
 
@@ -137,9 +140,9 @@ function RoomInfo() {
       setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
       setModalFadeOut(false);
 
-      // 바로 포커스 후 클릭을 약간 딜레이 줘서 실행
-      const input = thumbnailInputRef.current;
-      if (input) { input.focus(); }
+      // 상태 반영 후 포커스 주기, 이미 포커스가 가있다면 생략
+      if (document.activeElement !== thumbnailInputRef.current) { setTimeout(() => { thumbnailInputRef.current?.focus(); }, 0); }
+
       setTimeout(() => { setModalFadeOut(true); setTimeout(() => setThumbnailMessage(''), 500);
       }, 4000);
 
@@ -149,11 +152,26 @@ function RoomInfo() {
     // 소개글 검사
     const scriptValue = scriptionRef.current?.value || ''; // 직접 가져오기
     const ScriptMsg = validateScription(scriptValue);
-    setInputScript(scriptionRef.current?.value); // 확실히 값처리
+    setInputScript(scriptValue); // 확실히 값처리
+
+    if (scriptValue.trim() === '') {
+      setScriptMessage('소개글을 입력해주세요.');
+      if (document.activeElement !== scriptionRef.current) {
+        scriptionRef.current?.focus();
+        // 커서를 끝으로 이동
+        const length = scriptionRef.current?.value.length || 0;
+        scriptionRef.current?.setSelectionRange(length, length);
+      }
+      return;
+    }
 
     if (ScriptMsg) {
-      setScriptMessage(ScriptMsg); // 메시지 표시
-      scriptionRef.current?.focus(); // 소개글 입력란 포커스
+      setScriptMessage(ScriptMsg);
+      if (document.activeElement !== scriptionRef.current) {
+        scriptionRef.current?.focus();
+        const length = scriptionRef.current?.value.length || 0;
+        scriptionRef.current?.setSelectionRange(length, length);
+      }
       return;
     }
 
@@ -264,7 +282,8 @@ function RoomInfo() {
               onChange={handleImageUpload}
             />
 
-            <button onClick={() => document.getElementById('thumbnailInput').click()} ref={thumbnailInputRef}>사진첨부</button>
+            <button onClick={() => { if (!showModal) { document.getElementById('thumbnailInput').click(); }}}
+            ref={thumbnailInputRef} className={`thumbnail_button ${showModal ? 'disabled' : ''}`} >사진첨부</button>
           </div>
         </div>
 
