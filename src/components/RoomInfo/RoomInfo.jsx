@@ -220,7 +220,7 @@ function RoomInfo() {
         <div className='Room_thumbnail'>
           <div className='thumbnail_precautions'>
             <p>썸네일</p>
-            <span> </span>
+            <span></span>
           </div>
 
           <div className='Room_thumbnail_img_button'>
@@ -272,7 +272,7 @@ function RoomInfo() {
           <div className='introduction_precautions'>
             <p>소개글</p>
             <span>
-              {scriptMessage ? scriptMessage : `현재 ${scriptByteLength} / ${maxScriptByte} bytes 사용 중`}
+              {scriptMessage ? scriptMessage : `${scriptByteLength} / ${maxScriptByte} bytes 사용 중`}
             </span>
           </div>
           <textarea

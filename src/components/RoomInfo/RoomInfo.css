@@ -82,6 +82,12 @@
     border-radius: 10px;
 }
 
+.title_precautions > span,
+.introduction_precautions > span,
+.visibility_precautions > span {
+    color: rgb(163, 163, 163);
+}
+
 .Room_title > input,
 .Room_introduction > textarea {
     width: 284px;
@@ -106,8 +112,7 @@
     position: absolute;
     z-index: 0;
     width: 10px;
-height: 10px;
-
+    height: 10px;
     top: 0;
 }
 
@@ -134,23 +139,42 @@ height: 10px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 204, 0.95); /* 옅은 노란색 */
-    border: 1px solid #ccc;
+    background-color: rgba(0, 0, 0, 0.8); /* 옅은 노란색 */
+    color: white;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    width : 80%;
-    height : 35%;
+    width : 85%;
+    height : 40%;
     font-size: 0.9rem;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    padding: 5px;
+    text-align: center;
 }
 
 .Room_thumbnail_img_wrap  .modal_box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.Room_thumbnail_img_wrap .modal_box > .modal_buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.modal_buttons button {
+    border: 0;
+    padding: 3px 10px;
+    border-radius: 10px;
+}
+
+.modal_buttons button:nth-child(2) {
+    background-color: grey;
+    color: white;
 }
 
 .Room_thumbnail_img_wrap  .modal_overlay {
@@ -182,8 +206,6 @@ height: 10px;
     border: 2px solid white;
 }
 
-
-
 #Room_thumbnail_basic_img {
     width: 100px;
 }
@@ -203,7 +225,8 @@ height: 10px;
 }
 
 .Room_thumbnail_img_button > button:hover,
-.Room_save_button > button:hover {
+.Room_save_button > button:hover,
+.modal_buttons button:hover {
     opacity: 0.7;
 }
 
@@ -282,13 +305,14 @@ height: 10px;
     border-style: solid;
     border-color: rgba(255, 255, 204, 0.95) transparent transparent transparent;
 }
+
 .tooltip-h::after {
   left: 160px;
 }
+
 .tooltip-m::after {
   left: 230px;
 }
-
 
 .playtime_wrap, .playtime_wrap > div {
     display: flex;
