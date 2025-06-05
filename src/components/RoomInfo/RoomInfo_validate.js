@@ -54,7 +54,7 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
 };
 
 export const useThumbnailUpload =
-(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage) => {
+(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef) => {
 
   const compressedDataUrlRef = useRef(null);
 
@@ -138,17 +138,23 @@ export const useThumbnailUpload =
   };
 
   const showAutoModal = (message) => {
+    // 기존 타이머 제거
+    if (modalTimeoutRef.current) {
+      clearTimeout(modalTimeoutRef.current);
+    }
+
     setThumbnailMessage(message);
     setShowConfirmButtons(false);
     setModalFadeOut(false);
 
-    setTimeout(() => {
+    modalTimeoutRef.current = setTimeout(() => {
       setModalFadeOut(true);
-      setTimeout(() => setThumbnailMessage(''), 500);
-    }, 3000);
-  };
+      modalTimeoutRef.current = setTimeout(() => {
+        setThumbnailMessage('');
+      }, 500);
 
-  
+    }, 6000);
+  };
 
   return {
     thumbnail,

@@ -28,6 +28,7 @@ function RoomInfo() {
   const [showConfirmButtons, setShowConfirmButtons] = useState(false);
   const [modalFadeOut, setModalFadeOut] = useState(true);
   const [modalMessage, setModalMessage] = useState('');
+  const modalTimeoutRef = useRef(null); 
 
   // 소개글
   const [ inputScript, setInputScript ] = useState('');
@@ -103,7 +104,7 @@ function RoomInfo() {
 
   // 썸네일 유효성 검사
   const { handleImageUpload, handleAcceptCompression, handleRejectCompression,
-  } = useThumbnailUpload(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage);
+  } = useThumbnailUpload(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef);
   
   
   const handleDifficultyClick = (level) => {
