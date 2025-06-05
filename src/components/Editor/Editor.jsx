@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
+import debounce from 'lodash/debounce';
 
 import './Editor.css';
 
@@ -39,8 +40,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
-
-    const [selectedSide, setSelectedSide] = useState({ roomIndex: null, sideIndex: null });
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -200,15 +199,11 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
-        canvas.on('object:added', saveCanvasToSide);
-        canvas.on('object:modified', saveCanvasToSide);
-        canvas.on('object:removed', saveCanvasToSide);
+        canvas.on('before:render', debouncedSave);
 
-        // cleanup
         return () => {
-            canvas.off('object:added', saveCanvasToSide);
-            canvas.off('object:modified', saveCanvasToSide);
-            canvas.off('object:removed', saveCanvasToSide);
+            canvas.off('before:render', debouncedSave);
+            debouncedSave.cancel();
         };
     }, [canvasInstance.current, currentRoom, currentSide]);
     // ---------------------------------------------------------------(section)
@@ -374,28 +369,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     const handleCurrentRoom = (roomIndex) => {
         setCurrentRoom(roomIndex);
-
-        setSelectedSides((prev) => {
-            const updated = { ...prev };
-            Object.keys(updated).forEach(key => {
-                if (parseInt(key) !== roomIndex) {
-                    delete updated[key];
-                }
-            });
-            return updated;
-        });
     }
 
-    // const handleCurrentSide = (sideIndex, cb) => {
-    //     setCurrentSide(sideIndex);
-    //     setTimeout(() => {
-    //         cb?.();
-    //     }, 100)
-    // }
-    const handleCurrentSide = (sideIndex) => {
+    const handleCurrentSide = (sideIndex, sideData) => {
         setCurrentSide(sideIndex);
-
-        setSelectedSide({ roomIndex: currentRoom, sideIndex });
+        setTimeout(() => {
+            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
+        }, 100)
     }
 
     const handleChangeRoomName = (roomIndex, name) => {
@@ -406,34 +386,41 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         })
     }
 
-    const handleChangeSideName = (roomIndex, sideIndex, name) => {
-        setGame(prev => {
-            const newData = { ...prev };
-            newData.room[roomIndex].side[sideIndex].name = name;
-            return new GamePnC(newData);
-        })
-    }
-
-    const saveCanvasToSide = () => {
-        setTimeout(() => {
-            const updatedFabric = handleSide(canvasInstance.current, setSide);
-            setRoom(prev => {
-                const newData = new Room({ ...prev })
-                newData.side[currentSide].fabric = updatedFabric;
-                return newData;
-            })
-            setSideImgSrcs(prev => {
-                const newData = [ ...prev ];
-                newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
-                    format: 'jpeg',
-                    quality: 0.1,
-                });
-                return newData;
+    const saveCanvasToSide = useCallback(() => {
+        const updatedFabric = handleSide(canvasInstance.current, setSide);
+        setRoom(prev => {
+            const newData = new Room({ ...prev })
+            newData.side[currentSide].fabric = updatedFabric;
+            // if(canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
+            //     newData.side[currentSide].frame = {
+            //         x: position[0],
+            //         y: position[1],
+            //         width: size[0],
+            //         height: size[1],
+            //         angle,
+            //         top: edgeFrameState[0],
+            //         left: edgeFrameState[1],
+            //         right: edgeFrameState[2],
+            //         bottom: edgeFrameState[3],
+            //     };
+            // }
+            return newData;
+        });
+        setSideImgSrcs(prev => {
+            const newData = [ ...prev ];
+            newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
+                format: 'jpeg',
+                quality: 0.1,
             });
-        }, 100)
-    }
+            return newData;
+        });
+    }, [canvasInstance, canvasRef, currentSide, currentRoom, setRoom, setSideImgSrcs]);
 
-    useEffect(()=>console.log('sideImgSrcs',sideImgSrcs), [sideImgSrcs])
+    const debouncedSave = debounce(() => {
+        setTimeout(() => {
+            saveCanvasToSide();
+        }, 100);
+    }, 300);
 
     useEffect(() => {
         const canvas = canvasInstance.current;
@@ -467,7 +454,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);
         }
     }, [gameZip]);
-    // ☑️ 오타있음 --------------------------------------------------(section 10)
     // 이미지 추가 ---------------------------------------------------(section 11)
     useEffect(() => {
         if (isReady && addImageFile) {
@@ -678,12 +664,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     {roomIndex == currentRoom && (
                                         <div className='side_area'>
                                             {room.side.map((sideData, sideIndex) => {
-                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+                                                const isSelected = currentRoom === roomIndex && currentSide === sideIndex;
 
                                                 return(
                                                     <div className={`side_wrap ${isSelected ? 'selected' : ''}`}  key={sideIndex}> 
-                                                        <div className={`side ${isSelected ? 'selected' : ''}`} onClick={() => handleCurrentSide(sideIndex)}>
-                                                            {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} onClick={() => loadCanvas(canvasInstance.current, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame)}/>}
+                                                        <div className={`side ${isSelected ? 'selected' : ''}`} onClick={() => handleCurrentSide(sideIndex, sideData)}>
+                                                            {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55}/>}
                                                             <button onClick={(e) => {
                                                                 e.stopPropagation();  // 클릭 이벤트 전파 막기
                                                                 handleDeleteGameSide();
