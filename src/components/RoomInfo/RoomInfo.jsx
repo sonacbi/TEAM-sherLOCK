@@ -146,7 +146,7 @@ function RoomInfo() {
       return;
     }
 
-        // 소개글 검사
+    // 소개글 검사
     const scriptValue = scriptionRef.current?.value || ''; // 직접 가져오기
     const ScriptMsg = validateScription(scriptValue);
     setInputScript(scriptionRef.current?.value); // 확실히 값처리
