@@ -40,7 +40,6 @@ function EditorPage() {
     const canvasInstance = useRef(null);
     const [game, setGame] = useState(new GamePnC({}));
     const [room, setRoom] = useState(new Room({}));
-    const [side, setSide] = useState(new Side({})); // 임시(나중에 방의 방향을 생성할 때 만들어지게 할 것임)
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const [sideImgSrcs, setSideImgSrcs] = useState([['']]);
@@ -225,7 +224,7 @@ function EditorPage() {
                         <label>제목: ???</label>
                     </div>
 
-                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs} canvases={{canvasRef, canvasInstance, setRoom, currentRoom, setSide, currentSide, setSideImgSrcs}}/>
+                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs}/>
                 </header>
 
                 <div className='Editor_content'>
@@ -375,7 +374,7 @@ function EditorPage() {
                         edgeFrameState={edgeFrameState}
                         editorOffset={editorOffset}
                         setEdgeFrameState={setEdgeFrameState}
-                        saveTool={{game, setGame, room, setRoom, side, setSide, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs}}
+                        saveTool={{game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs}}
                         gameZip={gameZip} setGameZip={setGameZip}
                         selectedTool={selectedTool}
                         canvases={{canvasRef, canvasInstance}}

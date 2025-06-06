@@ -1,8 +1,8 @@
 import * as fabric from 'fabric';
 import JSZip from 'jszip';
-import { GamePnC, Room, Side, Fabric } from "./gamePnC";
+import { GamePnC, Room, Fabric } from "./gamePnC";
 
-const handleSide = (canvas, setSide) => {
+const handleSide = (canvas) => {
     const updatedFabric = [];
 
     canvas._objects.forEach((data) => {
@@ -44,31 +44,22 @@ const handleSide = (canvas, setSide) => {
         );
     });
 
-    setSide(prev => (new Side({
-        ...prev,
-        fabric: [...updatedFabric]
-    })));
-
     return updatedFabric;
 };
 
 const loadCanvas = (canvas, imgs, side, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState) => {
     canvas.clear();
     if (side.frame) {
-        Promise.resolve(side)
-        .then(data => {
-            roomController.left = data.frame.x;
-            roomController.top = data.frame.y;
-            roomController.width = data.frame.width;
-            roomController.height = data.frame.height;
-            return data;
-        })
-        .then(data => {
-            setPosition([data.frame.x, data.frame.y]);
-            setSize([data.frame.width, data.frame.height]);
-            setAngle(data.frame.angle);
-            setEdgeFrameState([data.frame.top, data.frame.left, data.frame.right, data.frame.bottom]);
-        })
+        const { x, y, width, height, angle, top, left, right, bottom } = side.frame;
+        roomController.set({
+            left: x,
+            top: y,
+            width,
+            height,
+            angle
+        });
+        roomController.setCoords();
+        setEdgeFrameState([top, left, right, bottom]);
     }
     side.fabric.forEach((fabricData, fabricIndex) => {
         const opt = fabricData.option;

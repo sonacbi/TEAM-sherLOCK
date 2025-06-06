@@ -15,12 +15,12 @@ import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspect
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 
 function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
-    const {game, setGame, room, setRoom, side, setSide, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
+    const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
     const [position, setPosition] = useState([220, 120]);
-    const [size, setSize] = useState([position[0] + 440, position[1] + 300]);
+    const [size, setSize] = useState([220 + 440, 120 + 300]);
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
 
@@ -111,18 +111,18 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // ---------------------------------------------------------------(section 2) ?
 
     // 프레임 설정 기본값 세팅 ---------------------------------------(section 3) (노은성)
-    const [roomController, setRoomController] = useState(new fabric.Rect({
+    const roomController = useRef(new fabric.Rect({
         ...controlStyle,
         left: 220,
         top: 120,
+        width: 220 + 440,
+        height: 120 + 300,
         fill: 'rgba(255, 0, 0, 0.2)',
         strokeWidth: 2,
         stroke: 'red',
         name: "SherLockRoomController",
-    }));
-    useEffect(()=> {
-        roomController.width = roomController.left + 440;
-        roomController.height = roomController.top + 300;
+    })).current;
+    useEffect(() => {
         roomController.on('rotating', () => {
             setAngle(roomController.angle);
             setPosition([roomController.left, roomController.top]);
@@ -191,12 +191,15 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             canvas.renderAll();
         });
 
-        saveCanvasToSide();
         setIsReady(true);
         return () => canvas.dispose();
     }, []);
-    //                           -------------------------------------(section 5) 
-    // 캔버스 내 객체가 생성/변경/삭제되면 저장-----------------------(section) (노은성)
+    //                           -------------------------------------(section 5)
+    // 처음 텍스트도 저장되게
+    useEffect(()=>{
+        if (isReady) saveCanvasToSide();
+    }, [isReady])
+    // 캔버스가 렌더되면 저장 ----------------------------------------(section) (노은성)
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -369,10 +372,10 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         });
     };
 
-    const handleDeleteGameSide = () => {
+    const handleDeleteGameSide = (sideIndex) => {
         if (room.side.length <= 1) return;
 
-        const deletedIndex = currentSide;
+        const deletedIndex = sideIndex;
         const newLength = room.side.length - 1;
 
         // 삭제 후 선택할 인덱스 계산
@@ -407,16 +410,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     const handleCurrentRoom = (roomIndex) => {
         setCurrentRoom(roomIndex);
-
-        // setSelectedSides((prev) => {
-        //     const updated = { ...prev };
-        //     Object.keys(updated).forEach(key => {
-        //         if (parseInt(key) !== roomIndex) {
-        //             delete updated[key];
-        //         }
-        //     });
-        //     return updated;
-        // });
     }
 
     const handleCurrentSide = (sideIndex, sideData) => {
@@ -436,23 +429,21 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     }
 
     const saveCanvasToSide = useCallback(() => {
-        const updatedFabric = handleSide(canvasInstance.current, setSide);
+        const updatedFabric = handleSide(canvasInstance.current);
         setRoom(prev => {
             const newData = new Room({ ...prev })
             newData.side[currentSide].fabric = updatedFabric;
-            // if(canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
-            //     newData.side[currentSide].frame = {
-            //         x: position[0],
-            //         y: position[1],
-            //         width: size[0],
-            //         height: size[1],
-            //         angle,
-            //         top: edgeFrameState[0],
-            //         left: edgeFrameState[1],
-            //         right: edgeFrameState[2],
-            //         bottom: edgeFrameState[3],
-            //     };
-            // }
+            if (canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomFrame')) newData.side[currentSide].frame = {
+                x: roomController.left,
+                y: roomController.top,
+                width: roomController.width,
+                height: roomController.height,
+                angle: roomController.angle,
+                top: edgeFrameState[0],
+                left: edgeFrameState[1],
+                right: edgeFrameState[2],
+                bottom: edgeFrameState[3],
+            }
             return newData;
         });
         setSideImgSrcs(prev => {
@@ -494,7 +485,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     useEffect(() => {
         if (isReadyToLoad && game) {
-            loadGame(game, imgs, canvasInstance.current, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
+            loadGame(game, imgs, canvasInstance.current, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
             setIsReadyToLoad(false);
         }
     }, [isReadyToLoad, game]);
@@ -721,7 +712,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                                             {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55}/>}
                                                             <button onClick={(e) => {
                                                                 e.stopPropagation();  // 클릭 이벤트 전파 막기
-                                                                handleDeleteGameSide();
+                                                                handleDeleteGameSide(sideIndex);
                                                             }}>-</button>
                                                         </div>
 

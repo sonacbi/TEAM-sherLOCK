@@ -4,7 +4,7 @@ import { GameInfo } from "../../../modules/game-modules";
 
 import save_icon from '../../assets/images/EditorPage_img/save_icon.png';
 
-export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs, canvases}) {
+export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs}) {
     function saveFilesToLocal() {
         const zip = new JSZip();
         // ZIP에 파일 추가
