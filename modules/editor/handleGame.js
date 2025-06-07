@@ -47,8 +47,8 @@ const handleSide = (canvas) => {
     return updatedFabric;
 };
 
-const loadCanvas = (canvas, imgs, side, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState) => {
-    canvas.clear();
+const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, setEdgeFrameState) => {
+    await canvas.clear();
     if (side.frame) {
         const { x, y, width, height, angle, top, left, right, bottom } = side.frame;
         roomController.set({
@@ -225,43 +225,31 @@ const loadCanvas = (canvas, imgs, side, controlStyle, roomController, setPositio
             canvas.setActiveObject(shape);
         } else console.warn('!!! shape가 이상함', shape)
     })
-    canvas.renderAll();
+    await canvas.renderAll();
 }
 
-const loadGame = async (game, imgs, canvas, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState) => {
+const loadGame = async (game, setCurrentRoom, handleCurrentSide, setSideImgSrcs) => {
     // game.room.forEach((roomData, roomIndex) => {
     //     setCurrentRoom(roomIndex);
     //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
     //     roomData.side.forEach((sideData, sideIndex) => {
-    //         setCurrentSide(sideIndex);
-    //         loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState, addFrame);
-    //         saveCanvasToSide();
+    //         handleCurrentSide(sideIndex, sideData)
     //     })
     // })
     // setCurrentRoom(0);
-    // setCurrentSide(0);
+    // handleCurrentSide(0, game.room[0].side[0]);
 
-    const promises = game.room.map((roomData, roomIndex) => {
-        return new Promise(resolve => {
-            setCurrentRoom(roomIndex);
-            roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
-            resolve(roomData);
-        })
-    });
-
-    Promise.all(promises)
-    .then(results => {
-        console.log('results',results)
-        results.side.map((sideData, sideIndex) => {
-            setCurrentSide(sideIndex);
-            loadCanvas(canvas, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
-        });
-    })
-    .then(saveCanvasToSide)
-    .finally(()=> {
-        setCurrentRoom(0);
-        setCurrentSide(0);
-    })
+    // let roomIndex = 0;
+    // setInterval(() => {
+    //     setCurrentRoom(roomIndex);
+    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
+    //     game.room[roomIndex].side.forEach((sideData, sideIndex) => {
+    //         handleCurrentSide(sideIndex, sideData);
+    //     })
+    //     if (roomIndex < game.room.length) roomIndex++;
+    //     else return;
+    // }, 1000)
+    console.log('loadGame 공사 중...🛠️')
 }
 
 const loadGameZip = async (file, setGame, setImgs, setIsReadyToLoad) => {

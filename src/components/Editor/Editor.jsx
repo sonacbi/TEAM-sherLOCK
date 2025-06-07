@@ -485,7 +485,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     useEffect(() => {
         if (isReadyToLoad && game) {
-            loadGame(game, imgs, canvasInstance.current, saveCanvasToSide, setCurrentRoom, setCurrentSide, setSideImgSrcs, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
+            loadGame(game, setCurrentRoom, handleCurrentSide, setSideImgSrcs);
             setIsReadyToLoad(false);
         }
     }, [isReadyToLoad, game]);

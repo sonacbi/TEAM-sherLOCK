@@ -46,10 +46,9 @@ class Frame extends ClassVersion {
 }
 // 도형
 class Fabric extends ClassVersion {
-    constructor({ option = {}, event = [], }) {
+    constructor({ option = {}, }) {
         super();
         this.option = option;
-        this.event = event;
     }
 }
 // 이벤트

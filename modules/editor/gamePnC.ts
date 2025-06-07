@@ -86,14 +86,11 @@ class Frame extends ClassVersion {
 // 도형
 class Fabric extends ClassVersion {
     option: Object;
-    event: Object[];
     constructor({
         option = {},
-        event = [],
     }) {
         super();
         this.option = option;
-        this.event = event;
     }
 }
 
