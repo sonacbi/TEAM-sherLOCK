@@ -41,7 +41,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
 
-    const [selectedSide, setSelectedSide] = useState({ roomIndex: null, sideIndex: null });
+    const [selectedSide, setSelectedSide] = useState({ roomIndex: 0, sideIndex: 0 });
 
     // 1. hoveredWallVertices가 바뀔 때 perspective 상태도 업데이트하는 효과 추가
     useEffect(() => {
@@ -375,14 +375,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         });
     };
 
-    const handleDeleteGameSide = (sideIndex) => {
+    const handleDeleteGameSide = (deletedIndex) => {
         if (room.side.length <= 1) return;
 
-        const deletedIndex = sideIndex;
-        const newLength = room.side.length - 1;
-
         // 삭제 후 선택할 인덱스 계산
-        const newSideIndex = deletedIndex >= newLength ? newLength - 1 : deletedIndex;
+        const newLength = room.side.length - 1;
+        const newSideIndex = deletedIndex == newLength ? newLength - 1 : deletedIndex;
 
         setRoom(prev => {
             const newSides = [...prev.side];
@@ -399,16 +397,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             return newImgs;
         });
 
-        setSelectedSide(prev => {
-            if (prev.roomIndex !== currentRoom) return prev;
-
-            if (prev.sideIndex === deletedIndex) {
-                return { roomIndex: currentRoom, sideIndex: newSideIndex };
-            }
-            return prev;
-        });
-
-        setCurrentSide(newSideIndex);
+        handleCurrentSide(newSideIndex, game.room[currentRoom].side[newSideIndex+1])
     };
 
     const handleCurrentRoom = (roomIndex) => {
