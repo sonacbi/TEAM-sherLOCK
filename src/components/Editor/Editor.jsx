@@ -364,6 +364,26 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             else if (prev > roomSide) return prev - 1;
             else return prev;
         });
+
+        // 해당 room 인덱스와 일치하는 원근법 배경 객체 초기화
+        setPerspective(prev => {
+            const newPerspective = { ...prev };
+            // 삭제할 room 인덱스(roomSide)
+            const roomToDelete = roomSide;
+
+            // 해당 room 삭제
+            delete newPerspective[roomToDelete];
+
+            // 남은 room 키들을 숫자 순으로 정렬하고, 삭제된 방 뒤 인덱스들은 -1씩 당겨야 함
+            const adjustedPerspective = {};
+            Object.entries(newPerspective).forEach(([key, value]) => {
+                const numKey = Number(key);
+                adjustedPerspective[numKey > roomToDelete ? numKey - 1 : numKey] = value;
+            });
+
+            return adjustedPerspective;
+        });
+
     };
 
     const handleDeleteGameSide = (deletedIndex) => {
@@ -390,6 +410,34 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         });
 
         handleCurrentSide(newSideIndex1, game.room[currentRoom].side[newSideIndex2+1])
+
+        // 해당 side 인덱스와 일치하는 원근법 배경 객체 초기화
+        setPerspective(prev => {
+            const newPerspective = { ...prev };
+            const roomIdx = currentRoom;  // 현재 방 번호
+            const sideToDelete = deletedIndex;  // 삭제할 side 인덱스
+
+            if (!newPerspective[roomIdx]) return prev;
+
+            // 해당 room의 sides 객체를 복사
+            const roomSides = { ...newPerspective[roomIdx] };
+
+            // 삭제할 side 삭제
+            delete roomSides[sideToDelete];
+
+            // 남은 side 키들 재정렬 (숫자 순, 삭제된 뒤쪽 인덱스는 -1)
+            const adjustedSides = {};
+            Object.entries(roomSides).forEach(([key, value]) => {
+                const numKey = Number(key);
+                adjustedSides[numKey > sideToDelete ? numKey - 1 : numKey] = value;
+            });
+
+            // 변경된 side들을 다시 room에 세팅
+            newPerspective[roomIdx] = adjustedSides;
+
+            return newPerspective;
+        });
+
     };
 
     const handleCurrentRoom = (roomIndex) => {
