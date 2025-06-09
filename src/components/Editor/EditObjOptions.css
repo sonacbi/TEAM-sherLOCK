@@ -88,10 +88,6 @@
 .object_edit .add_event:hover {
     background-color: rgba(255, 255, 255, 0.11);
 }
-.object_edit .add_event.not {
-    margin-top: 5px;
-    padding: 9px 15px;
-}
 
 .object_edit .event-item {
     margin-bottom: 15px;
