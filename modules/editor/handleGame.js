@@ -93,7 +93,6 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, setE
                             strokeWidth: opt.strokeWidth,
                             stroke: opt.stroke,
                             strokeUniform: opt.strokeUniform,
-                            editable: opt.editable,
                             name: opt.name,
                             shapeType: opt.shapeType,
                             gameEvent: opt.gameEvent,

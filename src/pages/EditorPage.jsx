@@ -121,7 +121,15 @@ function EditorPage() {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setImgs(prev => [...prev, file]);
+            setImgs(prev => {
+                const isDuplicate = prev.some(f => 
+                    f.name === file.name &&
+                    f.size === file.size &&
+                    f.type === file.type
+                );
+                if (isDuplicate) return prev;
+                return [...prev, file];
+            });
             setAddImageFile(file);
 
             // ✅ 핵심: input value를 수동으로 비워서 같은 파일도 연속 선택 가능하게 함

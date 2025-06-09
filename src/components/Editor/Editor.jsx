@@ -9,7 +9,7 @@ import { GamePnC, Room, Side } from '../../../modules/editor/gamePnC';
 import { handleSide, loadCanvas, loadGame, loadGameZip } from '../../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveComponent';
 import { getShapeByType } from './getShapeByType';
-import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect } from './useCanvasHandlers';
+import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect, useCopyNPaste } from './useCanvasHandlers';
 import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
@@ -380,7 +380,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
         // 삭제 후 선택할 인덱스 계산
         const newLength = room.side.length - 1;
-        const newSideIndex = deletedIndex == newLength ? newLength - 1 : deletedIndex;
+        const newSideIndex1 = deletedIndex >= newLength ? newLength - 1 : deletedIndex;
+        const newSideIndex2 = deletedIndex == newLength ? newLength - 1 : deletedIndex;
 
         setRoom(prev => {
             const newSides = [...prev.side];
@@ -397,7 +398,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             return newImgs;
         });
 
-        handleCurrentSide(newSideIndex, game.room[currentRoom].side[newSideIndex+1])
+        handleCurrentSide(newSideIndex1, game.room[currentRoom].side[newSideIndex2+1])
     };
 
     const handleCurrentRoom = (roomIndex) => {
@@ -408,7 +409,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setCurrentSide(sideIndex);
         setTimeout(() => {
             loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, setEdgeFrameState);
-        }, 100)
+        }, 50)
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
 
@@ -567,7 +568,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     }, [currentRoom, game]);
     // ---------------------------------------------------------------(section)
     // delete --------------------------------------------------------(section 12)
-    useDeleteKeyHandler(canvasInstance, isReady);
+    useDeleteKeyHandler(canvasInstance, isReady, setImgs);
     // ---------------------------------------------------------------(section 12)
     // zoom in zoom out ----------------------------------------------(section 13)
     useCanvasZoom(canvasInstance, isReady);
@@ -575,6 +576,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 클릭 이벤트----- ----------------------------------------------(section 14)
     useCanvasClickDeselect(canvasInstance, onObjectSelect);
     // ---------------------------------------------------------------(section 14)
+    useCopyNPaste(canvasInstance);
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     const { previewPerspective } = useWallHoverHandler({
