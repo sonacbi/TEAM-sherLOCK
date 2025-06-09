@@ -1,32 +1,44 @@
 import { useEffect } from 'react';
 
-const useSyncPerspective = (canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective) => {
+const useSyncPerspective = (
+  canvasInstance,
+  getWallsFromCanvas,
+  getWallVertices,
+  setPerspective,
+  currentRoom,
+  currentSide
+) => {
   useEffect(() => {
     const canvas = canvasInstance.current;
     if (!canvas) return;
 
     const updatePerspectiveVertices = () => {
       const walls = getWallsFromCanvas(canvas);
-      const rects = canvas.getObjects().filter(obj => obj.type === 'rect');
-
-      if (!walls.length && !rects.length) return;
+      if (!walls.length) return;
 
       setPerspective(prev => {
-        const updatedPerspective = { ...prev };
+        const updated = { ...prev };
+
+        if (!updated[currentRoom]) {
+          updated[currentRoom] = {};
+        }
+        if (!updated[currentRoom][currentSide]) {
+          updated[currentRoom][currentSide] = {};
+        }
 
         walls.forEach(wall => {
           const wallType = wall.get('wallType');
           const vertices = getWallVertices(wall);
 
           if (vertices.length) {
-            updatedPerspective[wallType] = {
-              ...(prev[wallType] || {}),
+            updated[currentRoom][currentSide][wallType] = {
+              ...(updated[currentRoom][currentSide][wallType] || {}),
               vertices: [...vertices],
             };
           }
         });
 
-        return updatedPerspective;
+        return updated;
       });
     };
 
@@ -41,7 +53,7 @@ const useSyncPerspective = (canvasInstance, getWallsFromCanvas, getWallVertices,
       canvas.off('object:modified', updatePerspectiveVertices);
       canvas.off('object:removed', updatePerspectiveVertices);
     };
-  }, []);
+  }, [currentRoom, currentSide]);
 };
 
 export default useSyncPerspective;
