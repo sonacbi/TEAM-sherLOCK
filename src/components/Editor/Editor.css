@@ -164,7 +164,7 @@
 }
 
 .side.selected {
-    outline: 2px solid green;
+    outline: 3px solid green;
 }
 
 .side.selected + .info h4 {

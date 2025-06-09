@@ -9,6 +9,7 @@ import "./EditObjOptions.css"
 export default function EditObjOptions({canvasInstance, selectedObject, selectedTool}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
     const [optionStyle, setOptionStyle] = useState(foundFabric);
+    const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
 
     const editOption = (event, option) => {
         const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
@@ -128,104 +129,133 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
     return(
         <div className='object_edit'>
-            {!(selectedTool === 'event') ?
-            (<>
-            {selectedObject.type !== "image" && (
+            <div className="object_select_wrap">
+                <div className="object_select">
+                    <p>선택된 객체 :</p>
+                    <p>{selectedObject.type === "textbox"
+                        ? "텍스트"
+                        : selectedObject.type === "image"
+                        ? "사진"
+                        : "도형"}</p>
+                </div>
+
+                <div className="attribute_event_menu">
+                    <div
+                        className={`attribute_menu ${activeTab === "attribute" ? "selected" : ""}`}
+                        onClick={() => setActiveTab("attribute")}
+                    >
+                        <p>속성</p>
+                    </div>
+
+                    <div
+                        className={`event_menu ${activeTab === "event" ? "selected" : ""}`}
+                        onClick={() => setActiveTab("event")}
+                    >
+                        <p>이벤트</p>
+                    </div>
+                </div>
+            </div>
+
+            {activeTab === "attribute" && (
                 <>
-                <h4>이름</h4>
-                └<input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
-                <br/><br/>
-                <h4>색</h4>
-                └<input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
-                <h4>윤곽선 색</h4>
-                └<input type="color" value={optionStyle.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/>
-                <h4>윤곽선 두께</h4>
-                └<input type="number" value={Number(optionStyle.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/>
-                <br/><br/>
+                    {selectedObject.type !== "image" && (
+                        <>
+                        <h4>이름</h4>
+                        └<input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
+                        <br/><br/>
+                        <h4>색</h4>
+                        └<input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
+                        <h4>윤곽선 색</h4>
+                        └<input type="color" value={optionStyle.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/>
+                        <h4>윤곽선 두께</h4>
+                        └<input type="number" value={Number(optionStyle.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/>
+                        <br/><br/>
+                        </>
+                    )}
+                    {selectedObject.type == "textbox" && (
+                        <>
+                        <h4>정렬</h4>
+                        └<label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>left<input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/></label>
+                        <label className={`editOpt_textAlign ${optionStyle.textAlign == "center" ? "selected" : ""}`}>center<input type="radio" name="textAlign" value="center" checked={selectedObject.textAlign == "center"} onChange={e => editOption(e, "textAlign")}/></label>
+                        <label className={`editOpt_textAlign ${optionStyle.textAlign == "right" ? "selected" : ""}`}>right<input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/></label>
+                        <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>justify<input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/></label>
+                        <h4>글 배경</h4>
+                        └<input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
+                        <h4>글꼴</h4>
+                        └<select style={{fontFamily: `${optionStyle.fontFamily}`}} value={optionStyle.fontFamily} onChange={e => editOption(e, "fontFamily")}>
+                            <option style={{fontFamily: "맑은 고딕"}} value="맑은 고딕">맑은 고딕</option>
+                            <option style={{fontFamily: "굴림"}} value="굴림">굴림</option>
+                            <option style={{fontFamily: "바탕"}} value="바탕">바탕</option>
+                            <option style={{fontFamily: "궁서"}} value="궁서">궁서</option>
+                            <option style={{fontFamily: "Arial"}} value="Arial">Arial</option>
+                            <option style={{fontFamily: "Arial Black"}} value="Arial Black">Airal Black</option>
+                            <option style={{fontFamily: "Comic Sans MS"}} value="Comic Sans MS">Comic Sans MS</option>
+                            <option style={{fontFamily: "Courier New"}} value="Courier New">Courier New</option>
+                            <option style={{fontFamily: "Impact"}} value="Impact">Impact</option>
+                            <option style={{fontFamily: "Tahoma"}} value="Tahoma">Tahoma</option>
+                            <option style={{fontFamily: "Times New Roman"}} value="Times New Roman">Times New Roman</option>
+                        </select>
+                        <h4>글꼴 크기</h4>
+                        └<input type="number" value={Number(optionStyle.fontSize)} onChange={e => editOption(e, "fontSize")}/>
+                        <h4>글꼴 유형</h4>
+                        └<label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
+                        <h4>글꼴 굵기</h4>
+                        └<select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
+                            <option value="normal">normal</option>
+                            <option value="bold">bold</option>
+                            <option value="lighter">lighter</option>
+                        </select><br/><br/>
+                        </>
+                    )}
+
+                    <button onClick={handleUp}>앞으로 가져오기</button>
+                    <button onClick={handleDown}>뒤로 보내기</button>
                 </>
             )}
-            {selectedObject.type == "textbox" && (
-                <>
-                <h4>정렬</h4>
-                └<label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>left<input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/></label>
-                <label className={`editOpt_textAlign ${optionStyle.textAlign == "center" ? "selected" : ""}`}>center<input type="radio" name="textAlign" value="center" checked={selectedObject.textAlign == "center"} onChange={e => editOption(e, "textAlign")}/></label>
-                <label className={`editOpt_textAlign ${optionStyle.textAlign == "right" ? "selected" : ""}`}>right<input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/></label>
-                <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>justify<input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/></label>
-                <h4>글 배경</h4>
-                └<input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
-                <h4>글꼴</h4>
-                └<select style={{fontFamily: `${optionStyle.fontFamily}`}} value={optionStyle.fontFamily} onChange={e => editOption(e, "fontFamily")}>
-                    <option style={{fontFamily: "맑은 고딕"}} value="맑은 고딕">맑은 고딕</option>
-                    <option style={{fontFamily: "굴림"}} value="굴림">굴림</option>
-                    <option style={{fontFamily: "바탕"}} value="바탕">바탕</option>
-                    <option style={{fontFamily: "궁서"}} value="궁서">궁서</option>
-                    <option style={{fontFamily: "Arial"}} value="Arial">Arial</option>
-                    <option style={{fontFamily: "Arial Black"}} value="Arial Black">Airal Black</option>
-                    <option style={{fontFamily: "Comic Sans MS"}} value="Comic Sans MS">Comic Sans MS</option>
-                    <option style={{fontFamily: "Courier New"}} value="Courier New">Courier New</option>
-                    <option style={{fontFamily: "Impact"}} value="Impact">Impact</option>
-                    <option style={{fontFamily: "Tahoma"}} value="Tahoma">Tahoma</option>
-                    <option style={{fontFamily: "Times New Roman"}} value="Times New Roman">Times New Roman</option>
-                </select>
-                <h4>글꼴 크기</h4>
-                └<input type="number" value={Number(optionStyle.fontSize)} onChange={e => editOption(e, "fontSize")}/>
-                <h4>글꼴 유형</h4>
-                └<label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
-                <h4>글꼴 굵기</h4>
-                └<select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
-                    <option value="normal">normal</option>
-                    <option value="bold">bold</option>
-                    <option value="lighter">lighter</option>
-                </select><br/><br/>
-                </>
+
+            {activeTab === "event" && (
+                <div className="event_wrap">
+                    {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 && (
+                        <>
+                            {optionStyle.gameEvent.map((data, index) => {
+                                const obj = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
+                                return (
+                                    <div key={`event-${index}`}>
+                                        <EditEventItem
+                                            event={data}
+                                            index={index}
+                                            onChange={(updatedEvent) => {
+                                                const newGameEvents = [...optionStyle.gameEvent];
+                                                newGameEvents[index] = updatedEvent;
+                                                if (obj) {
+                                                    obj.gameEvent = newGameEvents;
+                                                    setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                                    canvasInstance.current.requestRenderAll();
+                                                }
+                                            }}
+                                            onRemove={() => {
+                                                const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
+                                                if (obj) {
+                                                    obj.gameEvent = newGameEvents;
+                                                    setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                                    canvasInstance.current.requestRenderAll();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </>
+                    )}
+                    
+
+
+                    {/* 이벤트 추가 버튼: 항상 표시 */}
+                    <button className='add_event' onClick={addEvent}>
+                        이벤트 추가하기
+                    </button>
+                </div>
             )}
-            <button onClick={handleUp}>앞으로 가져오기</button>
-            <button onClick={handleDown}>뒤로 보내기</button>
-            </>)
-            :
-            (<>
-            {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 ? (
-                <>
-                {optionStyle.gameEvent?.map((data, index) => {
-                    const obj = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
-                    return (
-                        <div key={`event-${index}`}>
-                            <EditEventItem
-                                event={data}
-                                index={index}
-                                onChange={(updatedEvent) => {
-                                    const newGameEvents = [...optionStyle.gameEvent];
-                                    newGameEvents[index] = updatedEvent;
-                                    if (obj) {
-                                        obj.gameEvent = newGameEvents;
-                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
-                                        canvasInstance.current.requestRenderAll();
-                                    }
-                                }}
-                                onRemove = {() => {
-                                    const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
-                                    if (obj) {
-                                        obj.gameEvent = newGameEvents;
-                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
-                                        canvasInstance.current.requestRenderAll();
-                                    }
-                                }}
-                            />
-                        </div>
-                    );
-                })}
-                <button className="add_event not" onClick={addEvent}>
-                    이벤트 추가하기
-                </button>
-                </>
-            )
-            :
-            (
-                <button className="add_event" onClick={addEvent}>
-                    이벤트 추가하기
-                </button>
-            )}
-            </>)}
         </div>
     )
 }

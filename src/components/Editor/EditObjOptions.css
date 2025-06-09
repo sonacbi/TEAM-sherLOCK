@@ -1,3 +1,57 @@
+.object_select_wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.object_select {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    /* border: 1px dashed white; */
+    display: flex;
+    padding: 10px;
+    align-items: center;
+    gap: 10px;
+}
+
+.object_select > p:nth-child(2) {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 2px 10px;
+    border-radius: 5px;
+    color: rgb(192, 192, 192);
+}
+
+.attribute_event_menu {
+    color: rgb(192, 192, 192);
+    display: flex;
+}
+
+.attribute_menu, .event_menu {
+    flex: 1;
+    border-bottom: 2px solid rgb(192, 192, 192);
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.attribute_menu > p,
+.event_menu > p {
+    padding: 3px 10px;
+    border-radius: 5px;
+    text-align: center;
+    margin: 0 5px;
+}
+
+.attribute_menu.selected,
+.event_menu.selected {
+    border-bottom: 2px solid black;
+}
+
+.attribute_menu.selected > p,
+.event_menu.selected > p {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
 .object_edit .fontFamily.selected,
 .editOpt_textAlign.selected {
     background-color: rgba(255, 255, 255, 0.2);
@@ -25,7 +79,7 @@
     margin-top: 10px;
     padding: 20px 15px;
     text-align: center;
-    border: 2px dashed #ddd;
+    border: 1px dashed #ddd;
     border-radius: 13px;
     background-color: rgba(255, 255, 255, 0.16);
     color: white;
