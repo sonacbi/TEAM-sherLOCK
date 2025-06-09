@@ -14,7 +14,7 @@ export function useWallHoverHandler({
     selectedTool,
     perspective, perspectiveRef,
     setPerspective,
-  
+    currentRoom, currentSide, // 이미지를 삽입한 방과 사이드 정보를 받아오기
 }) {
 
   const [previewPerspective, setPreviewPerspective] = useState({}); // 임시 미리보기용
@@ -81,7 +81,9 @@ export function useWallHoverHandler({
           [wall.wallType]: {
             ...prev[wall.wallType],
             vertices: vertices,
-            imageUrl: latestImageUrl.current || prev[wall.wallType]?.imageUrl || ''
+            imageUrl: latestImageUrl.current || prev[wall.wallType]?.imageUrl || '',
+            currentRoom: currentRoom,
+            currentSide: currentSide,
           }
         }));
 
