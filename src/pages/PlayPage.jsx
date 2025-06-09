@@ -10,8 +10,6 @@ function PlayPage() {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [game, setGame] = useState(new GamePnC({}));
-    const [currentRoom, setCurrentRoom] = useState(0);
-    const [currentSide, setCurrentSide] = useState(0);
     const [imgs, setImgs] = useState([]);
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
     const [gameZip, setGameZip] = useState(null);
@@ -20,7 +18,6 @@ function PlayPage() {
         const canvas = new fabric.Canvas(canvasRef.current, {
             width: 1100,
             height: 650,
-            backgroundColor: 'white',
             selection: false,
             hoverCursor: null,
         })
@@ -29,11 +26,42 @@ function PlayPage() {
         return () => canvas.dispose();
     }, [])
 
-    const loadGamePlay = () => {
+    const executeGameEvent = (event) => {
+        const [eventType] = Object.keys(event);
+        switch (eventType) {
+            case "move":
+                loadGamePlay(event.move.room, event.move.side)
+                break;
+            case "getObj":
+                break;
+            case "setObj":
+                break;
+            case "dropObj":
+                break;
+            case "getItem":
+                break;
+            case "dropItem":
+                break;
+            case "startTime":
+                break;
+            case "endTime":
+                break;
+            case "startSound":
+                break;
+            case "endSound":
+                break;
+            case "save":
+                break;
+            default:
+                console.warn('잘못된 이벤트입니다', event);
+                break;
+        }
+    }
+
+    const loadGamePlay = (roomIndex, sideIndex) => {
         const canvas = canvasInstance.current;
-        console.clear();
-        // canvas.clear();
-        game.room[currentRoom].side[currentSide].fabric.forEach((shape, index) => {
+        canvas.clear();
+        game.room[roomIndex].side[sideIndex].fabric.forEach((shape, index) => {
             const opt = shape.option;
             let fabricObj;
             switch (opt.type) {
@@ -65,13 +93,13 @@ function PlayPage() {
                     });
                     break;
                 case "line":
-                    fabricObj = new fabric.Line({...opt, left: opt.x, top: opt.y});
+                    fabricObj = new fabric.Line({...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                     break;
                 case "rect":
-                    fabricObj = new fabric.Rect({...opt, left: opt.x, top: opt.y});
+                    fabricObj = new fabric.Rect({...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                     break;
                 case "triangle":
-                    fabricObj = new fabric.Triangle({...opt, left: opt.x, top: opt.y});
+                    fabricObj = new fabric.Triangle({...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                     break;
                 case "circle":
                     fabricObj = new fabric.Circle({...opt, left: opt.x, top: opt.y});
@@ -85,7 +113,7 @@ function PlayPage() {
                             const imgElement = new Image();
                             imgElement.src = e.target.result;
                             imgElement.onload = () => {
-                                fabricObj = new fabric.Image(imgElement, {...opt, left: opt.x, top: opt.y});
+                                fabricObj = new fabric.Image(imgElement, {...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                                 fabricObj.selectable = false;
                                 canvas.add(fabricObj);
                             };
@@ -109,7 +137,7 @@ function PlayPage() {
                                 { x: 100, y: 50 },
                                 { x: 50, y: 100 },
                                 { x: 0, y: 50 }
-                            ], {...opt, left: opt.x, top: opt.y})
+                            ], {...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,})
                             break;
                         case "star":
                             const centerX = 50;
@@ -125,7 +153,7 @@ function PlayPage() {
                                     y: centerY + radius * Math.sin(angle - Math.PI / 2),
                                 });
                             }
-                            fabricObj = new fabric.Polygon(points, {...opt, left: opt.x, top: opt.y});
+                            fabricObj = new fabric.Polygon(points, {...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                             break;
                         case "pentagon":
                             const pentagonSize = 60;
@@ -140,7 +168,7 @@ function PlayPage() {
                                     y: pentagonCenterY + pentagonSize * Math.sin(angle),
                                 });
                             }
-                            fabricObj = new fabric.Polygon(pentagonPoints, {...opt, left: opt.x, top: opt.y});
+                            fabricObj = new fabric.Polygon(pentagonPoints, {...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                             break;
                         case "trapezoid":
                             const topLeftX = 70;
@@ -157,7 +185,7 @@ function PlayPage() {
                                 { x: topRightX, y: topY },
                                 { x: bottomRightX, y: bottomY },
                                 { x: bottomLeftX, y: bottomY },
-                            ], {...opt, left: opt.x, top: opt.y});
+                            ], {...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,});
                             break;
                         default:
                             console.warn(`${opt.shapeType} 잘못된 도형입니다`);
@@ -173,7 +201,7 @@ function PlayPage() {
                                     Q 90,60 50,90
                                     Q 10,60 10,30
                                     Z
-                                `, {...opt, left: opt.x, top: opt.y}
+                                `, {...opt, left: opt.x, top: opt.y, perPixelTargetFind: true,}
                             )
                             break;
                         default:
@@ -185,9 +213,15 @@ function PlayPage() {
                     console.warn(`${opt.type} 잘못된 도형입니다`);
                     break;
             }
-            console.log('fabricObj',fabricObj)
             if (fabricObj) {
                 fabricObj.selectable = false;
+                if (fabricObj.gameEvent) {
+                    fabricObj.on('mouseup', () => {
+                        fabricObj.gameEvent.forEach((eventData, eventIndex) => {
+                            executeGameEvent(eventData);
+                        })
+                    })
+                }
                 canvas.add(fabricObj);
             } else console.warn('!!! fabricObj가 이상함', fabricObj)
         });
@@ -199,7 +233,7 @@ function PlayPage() {
     }, [gameZip])
 
     useEffect(() => {
-        if(isReadyToLoad) loadGamePlay();
+        if(isReadyToLoad) loadGamePlay(0,0);
     }, [isReadyToLoad]);
 
     return (

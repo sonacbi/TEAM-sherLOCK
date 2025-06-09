@@ -322,9 +322,9 @@ function EditorPage() {
                                     )}
 
                                     {selectedTool === 'picture' && (
-                                        <div className='picture_fine_tuning' onClick={handleAddImageFile}>
+                                        <div className='picture_fine_tuning'>
                                             <h2>사진 세부조정</h2>
-                                            <div style={{backgroundColor: "green"}}>
+                                            <div style={{backgroundColor: "green"}} onClick={handleAddImageFile}>
                                                 <p>
                                                     나는 사진 추가하는 버튼이야
                                                 </p>

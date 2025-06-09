@@ -92,6 +92,7 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, setE
                     name: opt.name,
                     shapeType: opt.shapeType,
                     gameEvent: opt.gameEvent,
+                    perPixelTargetFind: false,
                 });
                 break;
             case "line":

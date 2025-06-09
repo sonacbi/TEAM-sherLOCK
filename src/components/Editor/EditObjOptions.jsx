@@ -86,25 +86,13 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
     const handleUp = () => {
         const canvas = canvasInstance.current;
-        const obj = canvas.getActiveObject();
-
-        if (canvas && obj) {
-            canvas.bringForward(obj);
-            canvas.requestRenderAll();
-        } else {
-            console.warn("선택된 객체가 없거나 canvas가 초기화되지 않았습니다.");
-        }
+        canvas.bringObjectForward(selectedObject);
+        canvas.requestRenderAll();
     }
     const handleDown = () => {
         const canvas = canvasInstance.current;
-        const obj = canvas.getActiveObject();
-
-        if (canvas && obj) {
-            canvas.sendBackwards(obj);
-            canvas.requestRenderAll();
-        } else {
-            console.warn("선택된 객체가 없거나 canvas가 초기화되지 않았습니다.");
-        }
+        canvas.sendObjectBackwards(selectedObject);
+        canvas.requestRenderAll();
     }
 
     const addEvent = () => {
@@ -191,8 +179,8 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 </select><br/><br/>
                 </>
             )}
-            {/* <button onClick={handleUp}>위로(미구현)</button>
-            <button onClick={handleDown}>아래로(미구현)</button> */}
+            <button onClick={handleUp}>앞으로 가져오기</button>
+            <button onClick={handleDown}>뒤로 보내기</button>
             </>)
             :
             (<>

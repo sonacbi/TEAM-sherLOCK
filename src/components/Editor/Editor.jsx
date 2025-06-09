@@ -106,6 +106,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         cornerColor: 'white',
         cornerStyle: 'circle',
         borderScaleFactor: 2,
+        perPixelTargetFind: true,
         gameEvent: [],
     };
     // ---------------------------------------------------------------(section 2) ?
@@ -156,6 +157,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             fill: '#333333',
             width: 450,
             editable: true,
+            perPixelTargetFind: false,
         });
 
         textbox.setControlsVisibility({ mt: false, mb: false });
@@ -241,6 +243,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             fill: '#333333',
             width: 160,
             editable: true,
+            perPixelTargetFind: false,
         });
 
         textbox.setControlsVisibility({ mt: false, mb: false });
@@ -415,7 +418,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const handleCurrentSide = (sideIndex, sideData) => {
         setCurrentSide(sideIndex);
         setTimeout(() => {
-            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, setPosition, setSize, setAngle, setEdgeFrameState);
+            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, setEdgeFrameState);
         }, 100)
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
