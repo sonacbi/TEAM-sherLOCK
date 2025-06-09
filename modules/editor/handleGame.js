@@ -49,185 +49,204 @@ const handleSide = (canvas) => {
 
 const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, setEdgeFrameState) => {
     await canvas.clear();
+
     if (side.frame) {
         const { x, y, width, height, angle, top, left, right, bottom } = side.frame;
-        roomController.set({
-            left: x,
-            top: y,
-            width,
-            height,
-            angle
-        });
+        roomController.set({ left: x, top: y, width, height, angle });
         roomController.setCoords();
         setEdgeFrameState([top, left, right, bottom]);
     }
-    side.fabric.forEach((fabricData, fabricIndex) => {
-        const opt = fabricData.option;
-        let shape;
-        switch (opt.type) {
-            case "textbox":
-                shape = new fabric.Textbox(opt.text, {
-                    ...controlStyle,
-                    left: opt.x,
-                    top: opt.y,
-                    width: opt.width,
-                    height: opt.height,
-                    angle: opt.angle,
-                    scaleX: opt.scaleX,
-                    scaleY: opt.scaleY,
-                    fill: opt.fill,
-                    fillRule: opt.fillRule,
-                    text: opt.text,
-                    textAlign: opt.textAlign,
-                    textBackgroundColor: opt.textBackgroundColor,
-                    textLines: opt.textLines,
-                    fontFamily: opt.fontFamily,
-                    fontSize: opt.fontSize,
-                    fontStyle: opt.fontStyle,
-                    fontWeight: opt.fontWeight,
-                    strokeWidth: opt.strokeWidth,
-                    stroke: opt.stroke,
-                    strokeUniform: opt.strokeUniform,
-                    editable: opt.editable,
-                    name: opt.name,
-                    shapeType: opt.shapeType,
-                    gameEvent: opt.gameEvent,
-                    perPixelTargetFind: false,
-                });
-                break;
-            case "line":
-                shape = new fabric.Line({...controlStyle, ...opt, left: opt.x, top: opt.y});
-                break;
-            case "rect":
-                shape = new fabric.Rect({...controlStyle, ...opt, left: opt.x, top: opt.y});
-                break;
-            case "triangle":
-                shape = new fabric.Triangle({...controlStyle, ...opt, left: opt.x, top: opt.y});
-                break;
-            case "circle":
-                shape = new fabric.Circle({...controlStyle, ...opt, left: opt.x, top: opt.y});
-                break;
-            case "image":
-                const foundImg = imgs.find(img => img.name === opt.name);
-                console.log('foundImg',foundImg)
-                if (foundImg) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        if (!canvas) return;
-                        const imgElement = new Image();
-                        imgElement.src = e.target.result;
-                        imgElement.onload = () => {
-                            // const warpedCanvas = warpImageToTrapezoid(imgElement, 40);
-                            // const fabricImage = new fabric.Image(warpedCanvas, {
-                            shape = new fabric.Image(imgElement, {
-                                ...controlStyle, ...opt, left: opt.x, top: opt.y
-                            });
-                            shape.selectable = false;
-                            canvas.add(shape);
-                        };
-                        imgElement.onerror = () => {
-                            console.error('이미지 로드 실패');
-                        };
-                    };
-                    reader.onerror = function () {
-                        console.error('파일 읽기 실패');
-                    };
-                    reader.readAsDataURL(foundImg);
-                } else {
-                    console.warn('이미지 소스를 찾을 수 없습니다.', opt.name);
-                }
-                return;
-            case "polygon":
-                switch (opt.shapeType) {
-                    case "rhombus":
-                        shape = new fabric.Polygon([
-                            { x: 50, y: 0 },
-                            { x: 100, y: 50 },
-                            { x: 50, y: 100 },
-                            { x: 0, y: 50 }
-                        ], {...controlStyle, ...opt, left: opt.x, top: opt.y})
-                        break;
-                    case "star":
-                        const centerX = 50;
-                        const centerY = 50;
-                        const outerRadius = 50;
-                        const innerRadius = 25;
-                        const points = [];
-                        for (let i = 0; i < 10; i++) {
-                            const angle = (Math.PI / 5) * i;
-                            const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                            points.push({
-                                x: centerX + radius * Math.cos(angle - Math.PI / 2),
-                                y: centerY + radius * Math.sin(angle - Math.PI / 2),
-                            });
-                        }
-                        shape = new fabric.Polygon(points, {...controlStyle, ...opt, left: opt.x, top: opt.y});
-                        break;
-                    case "pentagon":
-                        const pentagonSize = 60;
-                        const pentagonCenterX = 150;
-                        const pentagonCenterY = 150;
-                        const pentagonPoints = [];
 
-                        for (let i = 0; i < 5; i++) {
-                            const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
-                            pentagonPoints.push({
-                                x: pentagonCenterX + pentagonSize * Math.cos(angle),
-                                y: pentagonCenterY + pentagonSize * Math.sin(angle),
-                            });
-                        }
-                        shape = new fabric.Polygon(pentagonPoints, {...controlStyle, ...opt, left: opt.x, top: opt.y});
-                        break;
-                    case "trapezoid":
-                        const topLeftX = 70;
-                        const topRightX = 130;
-                        const topY = 20;
-                        const bottomY = 120;
-                        const bottomWidth = 100;
-                        const centerXPos = (topLeftX + topRightX) / 2;
-                        const bottomLeftX = centerXPos - bottomWidth / 2;
-                        const bottomRightX = centerXPos + bottomWidth / 2;
+    const promises = side.fabric.map((fabricData) => {
+        return new Promise((resolve) => {
+            const opt = fabricData.option;
+            let shape;
+            const baseProps = {
+                ...controlStyle,
+                ...opt,
+                left: opt.x,
+                top: opt.y,
+            };
 
-                        shape = new fabric.Polygon([
-                            { x: topLeftX, y: topY },
-                            { x: topRightX, y: topY },
-                            { x: bottomRightX, y: bottomY },
-                            { x: bottomLeftX, y: bottomY },
-                        ], {...controlStyle, ...opt, left: opt.x, top: opt.y});
+            try {
+                switch (opt.type) {
+                    case "textbox":
+                        shape = new fabric.Textbox(opt.text, {
+                            ...controlStyle,
+                            left: opt.x,
+                            top: opt.y,
+                            width: opt.width,
+                            height: opt.height,
+                            angle: opt.angle,
+                            scaleX: opt.scaleX,
+                            scaleY: opt.scaleY,
+                            fill: opt.fill,
+                            fillRule: opt.fillRule,
+                            text: opt.text,
+                            textAlign: opt.textAlign,
+                            textBackgroundColor: opt.textBackgroundColor,
+                            textLines: opt.textLines,
+                            fontFamily: opt.fontFamily,
+                            fontSize: opt.fontSize,
+                            fontStyle: opt.fontStyle,
+                            fontWeight: opt.fontWeight,
+                            strokeWidth: opt.strokeWidth,
+                            stroke: opt.stroke,
+                            strokeUniform: opt.strokeUniform,
+                            editable: opt.editable,
+                            name: opt.name,
+                            shapeType: opt.shapeType,
+                            gameEvent: opt.gameEvent,
+                            perPixelTargetFind: false,
+                        });
                         break;
-                    default:
-                        console.warn(`${opt.shapeType} 잘못된 도형입니다`);
-                }
-                break;
-            case "path":
-                switch (opt.shapeType) {
-                    case "heart":
-                        shape = new fabric.Path(`
+
+                    case "line":
+                        shape = new fabric.Line(baseProps);
+                        break;
+
+                    case "rect":
+                        shape = new fabric.Rect(baseProps);
+                        break;
+
+                    case "triangle":
+                        shape = new fabric.Triangle(baseProps);
+                        break;
+
+                    case "circle":
+                        shape = new fabric.Circle(baseProps);
+                        break;
+
+                    case "image": {
+                        const foundImg = imgs.find((img) => img.name === opt.name);
+                        if (!foundImg) {
+                            console.warn('이미지 소스를 찾을 수 없습니다.', opt.name);
+                            return resolve(); // 계속 진행
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const imgElement = new Image();
+                            imgElement.src = e.target.result;
+                            imgElement.onload = () => {
+                                shape = new fabric.Image(imgElement, baseProps);
+                                resolve(shape);
+                            };
+                            imgElement.onerror = () => {
+                                console.error('이미지 로드 실패');
+                                resolve();
+                            };
+                        };
+                        reader.onerror = () => {
+                            console.error('파일 읽기 실패');
+                            resolve();
+                        };
+                        reader.readAsDataURL(foundImg);
+                        return; // 조기 리턴 (reader.onload 기다림)
+                    }
+
+                    case "polygon": {
+                        const { shapeType } = opt;
+                        switch (shapeType) {
+                            case "rhombus":
+                                shape = new fabric.Polygon([
+                                    { x: 50, y: 0 },
+                                    { x: 100, y: 50 },
+                                    { x: 50, y: 100 },
+                                    { x: 0, y: 50 }
+                                ], baseProps);
+                                break;
+                            case "star": {
+                                const points = [];
+                                const centerX = 50;
+                                const centerY = 50;
+                                const outerRadius = 50;
+                                const innerRadius = 25;
+                                for (let i = 0; i < 10; i++) {
+                                    const angle = (Math.PI / 5) * i;
+                                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                                    points.push({
+                                        x: centerX + radius * Math.cos(angle - Math.PI / 2),
+                                        y: centerY + radius * Math.sin(angle - Math.PI / 2),
+                                    });
+                                }
+                                shape = new fabric.Polygon(points, baseProps);
+                                break;
+                            }
+                            case "pentagon": {
+                                const size = 60;
+                                const cx = 150;
+                                const cy = 150;
+                                const points = [];
+                                for (let i = 0; i < 5; i++) {
+                                    const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                                    points.push({
+                                        x: cx + size * Math.cos(angle),
+                                        y: cy + size * Math.sin(angle),
+                                    });
+                                }
+                                shape = new fabric.Polygon(points, baseProps);
+                                break;
+                            }
+                            case "trapezoid": {
+                                const topLeftX = 70;
+                                const topRightX = 130;
+                                const topY = 20;
+                                const bottomY = 120;
+                                const bottomWidth = 100;
+                                const centerXPos = (topLeftX + topRightX) / 2;
+                                const bottomLeftX = centerXPos - bottomWidth / 2;
+                                const bottomRightX = centerXPos + bottomWidth / 2;
+
+                                shape = new fabric.Polygon([
+                                    { x: topLeftX, y: topY },
+                                    { x: topRightX, y: topY },
+                                    { x: bottomRightX, y: bottomY },
+                                    { x: bottomLeftX, y: bottomY },
+                                ], baseProps);
+                                break;
+                            }
+                            default:
+                                console.warn(`${shapeType} 잘못된 도형입니다`);
+                        }
+                        break;
+                    }
+
+                    case "path":
+                        if (opt.shapeType === "heart") {
+                            shape = new fabric.Path(`
                                 M 10,30
                                 A 20,20 0 0,1 50,30
                                 A 20,20 0 0,1 90,30
                                 Q 90,60 50,90
                                 Q 10,60 10,30
                                 Z
-                            `,{...controlStyle, ...opt, left: opt.x, top: opt.y}
-                        )
+                            `, baseProps);
+                        } else {
+                            console.warn(`${opt.shapeType} 잘못된 도형입니다`);
+                        }
                         break;
+
                     default:
-                        console.warn(`${opt.shapeType} 잘못된 도형입니다`);
+                        console.error(`${opt.type} 잘못된 도형입니다`);
                         break;
                 }
-                break;
-            default:
-                console.error(`${opt.type} 잘못된 도형입니다`)
-                break;
-        }
-        if (shape) {
-            canvas.add(shape);
-            canvas.setActiveObject(shape);
-        } else console.warn('!!! shape가 이상함', shape)
-    })
-    await canvas.renderAll();
-}
+
+                if (shape) resolve(shape);
+            } catch (err) {
+                console.error('도형 처리 중 오류:', err);
+                resolve(); // 오류 발생해도 resolve는 호출
+            }
+        });
+    });
+
+    await Promise.all(promises).then(fabrics => {
+        fabrics.forEach(data => {
+            canvas.add(data)
+        })
+    });
+    canvas.renderAll();
+};
 
 const loadGame = async (game, setCurrentRoom, handleCurrentSide, setSideImgSrcs) => {
     // game.room.forEach((roomData, roomIndex) => {
