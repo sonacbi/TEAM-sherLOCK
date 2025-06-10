@@ -13,6 +13,7 @@ import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect, useCopyNPas
 import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
+import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
 
 function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
@@ -604,21 +605,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         }
     }, [addImageFile]);
 
-    useEffect(() => {
-        const canvas = canvasInstance.current;
-        if (!canvas || selectedTool !== 'frame') return;
-
-        const onObjectMoving = (e) => {
-            const movingObj = e.target;
-            console.log('[object:moving] type:', movingObj?.type, movingObj); // 🔍 타입 확인
-        };
-
-        canvas.on('object:moving', onObjectMoving);
-        return () => {
-            canvas.off('object:moving', onObjectMoving);
-        };
-    }, [selectedTool]);
-
     // 이미지 추가 ---------------------------------------------------(section 11)
     // ---------------------------------------------------------------(section)
     useEffect(() => {
@@ -759,7 +745,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                     <div className='room_area_scroll'>
                         {game.room.map((roomData, roomIndex) => {
                             return (
-
                                 <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
                                     <div className='stage_wrap'>
                                         <div className='stageIndex_delete'>
@@ -772,35 +757,59 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                     {roomIndex == currentRoom && (
                                         <div className='side_area'>
                                             {room.side.map((sideData, sideIndex) => {
-                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+                                            const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
 
-                                                return(
-                                                    <div className={`side_wrap ${isSelected ? 'selected' : ''}`}  key={sideIndex}> 
-                                                        <div className={`side ${isSelected ? 'selected' : ''}`} onClick={() => handleCurrentSide(sideIndex, sideData)}>
-                                                            {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55}/>}
-                                                            <button onClick={(e) => {
-                                                                e.stopPropagation();  // 클릭 이벤트 전파 막기
-                                                                handleDeleteGameSide(sideIndex);
-                                                            }}>-</button>
-                                                        </div>
+                                            return (
+                                                <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
+                                                <div
+                                                    className={`side ${isSelected ? 'selected' : ''}`}
+                                                    onClick={() => handleCurrentSide(sideIndex, sideData)}
+                                                    style={{ position: 'relative', zIndex: 2 }}
+                                                >
+                                                    {sideImgSrcs[currentRoom][sideIndex] && (
+                                                    <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} />
+                                                    )}
+                                                    <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteGameSide(sideIndex);
+                                                    }}
+                                                    >
+                                                    -
+                                                    </button>
+                                                </div>
 
-                                                        <div className="info">
-                                                            <h4>{sideIndex + 1}</h4>
-                                                        </div>
+                                                <div className="info" style={{ position: 'relative', zIndex: 1 }}>
+                                                    <h4>{sideIndex + 1}</h4>
+                                                </div>
+
+                                                {/* 모든 side마다 PerspectiveSVG 렌더링 */}
+                                                    <div
+                                                        style={{ position: 'absolute',
+                                                        top: '5px', left: 0,
+                                                        margin: 'auto',
+                                                        width: '90px', height: '55px',
+                                                        pointerEvents: 'none',
+                                                        zIndex: 1,
+                                                        background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
+                                                        }}
+                                                    >
+                                                        <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex} />
                                                     </div>
-                                                )
+                                                </div>
+                                            );
                                             })}
                                             <button onClick={handleAddGameSide}>+</button>
                                         </div>
                                     )}
-                                </div>
+                                </div>    
                             )
                         })}
-                                
                         <button onClick={handleAddGameRoom}>+</button>
                     </div>
                 </div>
             </div>
+            
         </div>
         
     );
