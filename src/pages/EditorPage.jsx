@@ -144,7 +144,15 @@ function EditorPage() {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (file.type.startsWith('image/')) {
-            setImgs(prev => [...prev, file]);
+            setImgs(prev => {
+                const isDuplicate = prev.some(f => 
+                    f.name === file.name &&
+                    f.size === file.size &&
+                    f.type === file.type
+                );
+                if (isDuplicate) return prev;
+                return [...prev, file];
+            });
             setAddImageFile(file);
             setTimeout(() => setAddImageFile(null), 0);
             }
@@ -276,7 +284,7 @@ function EditorPage() {
 
                         <div className='tool_fine_tuning'>
                             {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
-                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool}/>
+                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool} setImgs={setImgs}/>
                             ) : (
                                 <>
                                     {selectedTool === 'frame' && (

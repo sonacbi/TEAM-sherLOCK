@@ -21,6 +21,16 @@
     color: rgb(192, 192, 192);
 }
 
+#trash {
+    width: 30px;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+#trash:hover {
+    opacity: 0.5;
+}
+
 .attribute_event_menu {
     color: rgb(192, 192, 192);
     display: flex;

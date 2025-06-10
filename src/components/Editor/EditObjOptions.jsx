@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
 import EditEventItem from "./EditEventItem";
-
 import { GameEventType } from "../../../modules/editor/gamePnC";
-
 import "./EditObjOptions.css"
 
-export default function EditObjOptions({canvasInstance, selectedObject, selectedTool}) {
+import trash from '../../assets/images/EditorPage_img/trash.png';
+
+export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
     const [optionStyle, setOptionStyle] = useState(foundFabric);
     const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
@@ -127,16 +127,43 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
         }
     }, [selectedObject])
 
+    const handleDelete = () => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        const activeObjects = canvas.getActiveObjects(); // 항상 배열로 처리
+
+        if (!activeObjects || activeObjects.length === 0) return;
+
+        activeObjects.forEach(obj => {
+            if (obj.type === 'image' && obj.name && setImgs) {
+                const allObjects = canvas.getObjects();
+                const sameNameImages = allObjects.filter(o => o.type === 'image' && o.name === obj.name);
+                if (sameNameImages.length === 1) {
+                    setImgs(prev => prev.filter(img => img.name !== obj.name));
+                }
+            }
+            canvas.remove(obj);
+        });
+
+        canvas.discardActiveObject();
+        canvas.requestRenderAll();
+    };
+
     return(
         <div className='object_edit'>
             <div className="object_select_wrap">
                 <div className="object_select">
                     <p>선택된 객체 :</p>
-                    <p>{selectedObject.type === "textbox"
+                    <p>
+                        {selectedObject.type === "textbox"
                         ? "텍스트"
                         : selectedObject.type === "image"
                         ? "사진"
-                        : "도형"}</p>
+                        : "도형"
+                    }</p>
+
+                    <img id="trash" src={trash} alt="trash" onClick={handleDelete}/>
                 </div>
 
                 <div className="attribute_event_menu">

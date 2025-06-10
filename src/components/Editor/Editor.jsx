@@ -89,7 +89,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         cornerColor: 'white',
         cornerStyle: 'circle',
         borderScaleFactor: 2,
-        perPixelTargetFind: true,
         gameEvent: [],
     };
     // ---------------------------------------------------------------(section 2) ?
