@@ -150,7 +150,23 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         // ---------------------------------------------------------------(section 4) 
         //                           -------------------------------------(section 5) 
         canvas.on('selection:created', (e) => {
-           onObjectSelect(e.selected[0]); // 선택된 객체 전달
+            onObjectSelect(e.selected[0]);
+
+            const activeObject = canvas.getActiveObject();
+
+            if (activeObject && activeObject.type.toLowerCase() === 'activeselection') {
+                activeObject.set({
+                    transparentCorners: false,
+                    cornerStrokeColor: '#A9DB78',
+                    cornerColor: 'white',
+                    cornerStyle: 'circle',
+                    borderScaleFactor: 2,
+                    borderColor: '#A9DB78',
+                    editingBorderColor: '#A9DB78',
+                });
+                activeObject.setControlsVisibility({ mt: false, mb: false, ml: false, mr: false });
+                canvas.requestRenderAll();
+            }
         });
 
         canvas.on('selection:updated', (e) => {

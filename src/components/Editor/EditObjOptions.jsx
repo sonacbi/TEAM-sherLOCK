@@ -10,6 +10,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
     const [optionStyle, setOptionStyle] = useState(foundFabric);
     const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
+    const activeObject = canvasInstance.current?.getActiveObject();
 
     const editOption = (event, option) => {
         const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
@@ -156,12 +157,14 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 <div className="object_select">
                     <p>선택된 객체 :</p>
                     <p>
-                        {selectedObject.type === "textbox"
+                        {activeObject?.type === "activeselection"
+                        ? "그룹"
+                        : activeObject?.type === "textbox"
                         ? "텍스트"
-                        : selectedObject.type === "image"
+                        : activeObject?.type === "image"
                         ? "사진"
-                        : "도형"
-                    }</p>
+                        : "도형"}
+                    </p>
 
                     <img id="trash" src={trash} alt="trash" onClick={handleDelete}/>
                 </div>
@@ -175,8 +178,12 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                     </div>
 
                     <div
-                        className={`event_menu ${activeTab === "event" ? "selected" : ""}`}
-                        onClick={() => setActiveTab("event")}
+                        className={`event_menu ${activeTab === "event" ? "selected" : ""} ${activeObject?.type === "activeselection" ? "disabled" : ""}`}
+                        onClick={() => {
+                            if (activeObject?.type !== "activeSelection") {
+                            setActiveTab("event");
+                            }
+                        }}
                     >
                         <p>이벤트</p>
                     </div>
@@ -185,7 +192,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
             {activeTab === "attribute" && (
                 <>
-                    {selectedObject.type !== "image" && (
+                    {activeObject?.type !== "image" && activeObject?.type !== "activeselection" && (
                         <>
                         <h4>이름</h4>
                         └<input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
@@ -199,7 +206,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                         <br/><br/>
                         </>
                     )}
-                    {selectedObject.type == "textbox" && (
+                    {activeObject?.type === "textbox" && (
                         <>
                         <h4>정렬</h4>
                         └<label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>left<input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/></label>
