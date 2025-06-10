@@ -34,7 +34,6 @@ const handleSide = (canvas) => {
                     strokeWidth: data?.strokeWidth,
                     stroke: data?.stroke,
                     strokeUniform: data?.strokeUniform,
-                    editable: data?.editable,
                     name: data?.name,
                     type: data?.type,
                     shapeType: data?.shapeType,
@@ -47,14 +46,14 @@ const handleSide = (canvas) => {
     return updatedFabric;
 };
 
-const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, setEdgeFrameState) => {
+const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, addFrame) => {
     await canvas.clear();
 
     if (side.frame) {
         const { x, y, width, height, angle, top, left, right, bottom } = side.frame;
         roomController.set({ left: x, top: y, width, height, angle });
         roomController.setCoords();
-        setEdgeFrameState([top, left, right, bottom]);
+        addFrame(angle, [roomController.left, roomController.top], [roomController.getScaledWidth(), roomController.getScaledHeight()], [top, left, right, bottom]);
     }
 
     const promises = side.fabric.map((fabricData) => {

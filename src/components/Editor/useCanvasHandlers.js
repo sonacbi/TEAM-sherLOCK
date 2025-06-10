@@ -115,7 +115,7 @@ export const useCanvasClickDeselect = (canvasInstance, onObjectSelect) => {
 /**
  * 객체 복사 및 붙여놓기
  */
-export const useCopyNPaste = (canvasInstance) => {
+export const useCopyNPaste = (canvasInstance, controlStyle) => {
     const clipboardRef = useRef(null);
 
     useEffect(() => {
@@ -132,9 +132,7 @@ export const useCopyNPaste = (canvasInstance) => {
             if (e.key === 'c' || e.key === 'C') {
                 const activeObject = canvas.getActiveObject();
                 if (activeObject) {
-                    activeObject.clone((cloned) => {
-                        clipboardRef.current = cloned;
-                    }, ['name', 'shapeType', 'gameEvent', 'perPixelTargetFind']);
+                    activeObject.clone(['name', 'gameEvent', 'shapeType', 'perPixelTargetFind']).then(clonedObj => clipboardRef.current = clonedObj);
                     e.preventDefault();
                 }
             }
@@ -144,18 +142,23 @@ export const useCopyNPaste = (canvasInstance) => {
                 const clipboard = clipboardRef.current;
                 if (!clipboard) return;
 
-                clipboard.clone(async (clonedObj) => {
+                clipboard.clone(['name', 'gameEvent', 'shapeType', 'perPixelTargetFind']).then(async (clonedObj) => {
                     canvas.discardActiveObject();
 
                     clonedObj.set({
-                        left: clonedObj.left + 10,
-                        top: clonedObj.top + 10,
-                        evented: true,
+                        ...controlStyle,
+                        left: clonedObj.left + 15,
+                        top: clonedObj.top + 15,
+                        name: clipboard.name,
+                        gameEvent: clipboard.gameEvent,
+                        perPixelTargetFind: clipboard.perPixelTargetFind,
                     });
 
                     if (clonedObj instanceof fabric.ActiveSelection) {
                         clonedObj.canvas = canvas;
-                        clonedObj.forEachObject((obj) => {
+                        clonedObj.forEachObject(obj => {
+                            obj.set(controlStyle);
+                            if (obj.type == 'textbox') obj.set({perPixelTargetFind: false});
                             canvas.add(obj);
                         });
                         clonedObj.setCoords();
@@ -163,8 +166,8 @@ export const useCopyNPaste = (canvasInstance) => {
                         canvas.add(clonedObj);
                     }
 
-                    clipboardRef.current.left += 10;
-                    clipboardRef.current.top += 10;
+                    clipboardRef.current.left += 15;
+                    clipboardRef.current.top += 15;
 
                     canvas.setActiveObject(clonedObj);
                     canvas.requestRenderAll();

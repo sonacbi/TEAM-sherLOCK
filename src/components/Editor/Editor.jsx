@@ -90,6 +90,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         cornerStyle: 'circle',
         borderScaleFactor: 2,
         gameEvent: [],
+        perPixelTargetFind: true,
     };
     // ---------------------------------------------------------------(section 2) ?
 
@@ -104,6 +105,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         strokeWidth: 2,
         stroke: 'red',
         name: "SherLockRoomController",
+        perPixelTargetFind: false,
     })).current;
     useEffect(() => {
         roomController.on('rotating', () => {
@@ -225,7 +227,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     useEffect(() => {
         if (isReady) {
-            addFrame();
+            addFrame(angle, position, size, edgeFrameState);
         }
     }, [addFrameTrigger, angle, position, size, edgeFrameState]);
     //                           -------------------------------------(section 6)
@@ -279,7 +281,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    const addFrame = () => {
+    const addFrame = (angle, position, size, edgeFrameState) => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
         
@@ -424,7 +426,33 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             return newImgs;
         });
 
-        handleCurrentSide(newSideIndex1, game.room[currentRoom].side[newSideIndex2+1])
+        /**
+        a| 길이<=1 : return;
+        a| 현재<삭제 : return;
+        b| 삭제,현재==0 : (현재, 현재+1)
+        c| 삭제>현재 : (현재-1, 현재?)
+        d| 삭제==현재 : (현재-1, 현재-1)
+         */
+
+        if (currentSide < deletedIndex) {
+            console.log('a');
+            return;
+        }
+        if (deletedIndex == 0 && currentSide == 0) {
+            handleCurrentSide(currentSide, game.room[currentRoom].side[currentSide+1]);
+            console.log('b');
+            return;
+        }
+        if (deletedIndex < currentSide) {
+            handleCurrentSide(currentSide-1, game.room[currentRoom].side[currentSide]);
+            console.log('c');
+            return;
+        }
+        if (deletedIndex == currentSide) {
+            handleCurrentSide(currentSide-1, game.room[currentRoom].side[currentSide-1]);
+            console.log('d');
+            return;
+        }
 
         // 해당 side 인덱스와 일치하는 원근법 배경 객체 초기화
         setPerspective(prev => {
@@ -462,7 +490,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const handleCurrentSide = (sideIndex, sideData) => {
         setCurrentSide(sideIndex);
         setTimeout(() => {
-            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, setEdgeFrameState);
+            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, addFrame);
         }, 50)
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
@@ -630,7 +658,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     // 클릭 이벤트----- ----------------------------------------------(section 14)
     useCanvasClickDeselect(canvasInstance, onObjectSelect);
     // ---------------------------------------------------------------(section 14)
-    useCopyNPaste(canvasInstance);
+    useCopyNPaste(canvasInstance, controlStyle);
     // 원근법 기반 프레임 왜곡 배경 ----------------------------------(section 16)
 
     const { previewPerspective } = useWallHoverHandler({
