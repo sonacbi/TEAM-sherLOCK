@@ -24,6 +24,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
 
+    const currentRoomRef = useRef(currentRoom);
+    const currentSideRef = useRef(currentSide);
+
+    // currentRoom, currentSide가 바뀔 때마다 ref도 업데이트
+    useEffect(() => { currentRoomRef.current = currentRoom; }, [currentRoom]);
+    useEffect(() => { currentSideRef.current = currentSide; }, [currentSide]);
+
     // 프레임 원근법 배경 왜곡 디버깅 코드 + 상태 관리 코드 ------------ (section 1) (정다정)
     //디버깅용
     const containerRef = useRef(null);
@@ -42,9 +49,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
 
     const [selectedSide, setSelectedSide] = useState({ roomIndex: 0, sideIndex: 0 });
-
-    useEffect(() => {console.log("[select current_room] room side", currentRoom, currentSide)}, [currentRoom])
-    useEffect(() => {console.log("[select current_side] room side", currentRoom, currentSide)}, [currentSide])
 
     // perspectiveWalls를 벽 객체 배열로 관리
     const perspectiveWalls = React.useMemo(() => {
@@ -74,9 +78,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             };
         });
 
-        // if (process.env.NODE_ENV === 'development' && hoveredWall) {
+        if (process.env.NODE_ENV === 'development' && hoveredWall) {
             console.log('[useMemo] items:', result);
-        // }
+        }
         return result;
     }, [perspective]); // perspective가 바뀔 때만 다시 계산됨
 
@@ -649,6 +653,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         position, size, edgeFrameState, angle,
         setHoveredWallVertices, selectedTool, perspective, perspectiveRef, setPerspective,
         currentRoom, currentSide, // 📝 현재 방과 사이드를 벽 정보에 추가함
+        currentSideRef, currentRoomRef, // 📝 현재 방과 사이드를 벽 정보에 추가함 (최신값 강제반영)
     });
 
         // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산

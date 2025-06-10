@@ -15,6 +15,7 @@ export function useWallHoverHandler({
     perspective, perspectiveRef,
     setPerspective,
     currentRoom, currentSide, // 이미지를 삽입한 방과 사이드 정보를 받아오기
+    currentSideRef, currentRoomRef // 최신값 반영
 }) {
 
   const [previewPerspective, setPreviewPerspective] = useState({}); // 임시 미리보기용
@@ -75,24 +76,29 @@ export function useWallHoverHandler({
           return;
         }
 
+        // prev가 최신 상태
+
         // ✅ 여기서 드래그한 벽과 이미지 URL을 perspective에 저장
         setPerspective(prev => {
         const newPerspective = { ...prev };
 
-        // 중첩 구조가 없다면 초기화
-        if (!newPerspective[currentRoom]) newPerspective[currentRoom] = {};
-        if (!newPerspective[currentRoom][currentSide]) newPerspective[currentRoom][currentSide] = {};
+        // currentRoom, currentSide 대신 ref를 써서 최신값 보장
+        const room = currentRoomRef.current;
+        const side = currentSideRef.current;
 
-        newPerspective[currentRoom][currentSide][wall.wallType] = {
+        // 중첩 구조가 없다면 초기화
+        if (!newPerspective[room]) newPerspective[room] = {};
+        if (!newPerspective[room][side]) newPerspective[room][side] = {};
+
+        newPerspective[room][side][wall.wallType] = {
           vertices: vertices,
           imageUrl: latestImageUrl.current || '',
-          currentRoom: currentRoom,
-          currentSide: currentSide,
+          currentRoom: room,
+          currentSide: side,
         };
 
         return newPerspective;
       });
-
 
         // 이미지 확정 처리: 이미지 위치 고정, 선택 불가, 이벤트 비활성, 투명화, 선택박스 비가시화
         if (draggingImage.current) {
