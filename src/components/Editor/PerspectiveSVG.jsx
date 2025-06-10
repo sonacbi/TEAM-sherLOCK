@@ -4,31 +4,32 @@ import React from 'react';
 
 const vanishingPoint = { x: 0, y: 0 };
 const focalLength = 112;
-const scale = 0.000000074;
-const offsetX = -46;
+const scale = 0.083; // 기존보다 크게 설정하여 변환 효과 강조
+
+const offsetX = -46.0;
 const offsetY = -27.5;
 
 export function perspectiveProjection(vertex) {
-    const z = vertex.z || 0.0001;
-    const x = vanishingPoint.x + ((vertex.x - vanishingPoint.x) * focalLength) / z;
-    const y = vanishingPoint.y + ((vertex.y - vanishingPoint.y) * focalLength) / z;
+    const z = Math.max(vertex.z || 0.1, 0.1); // 최소값 설정
+    
+    const projectedX = (vertex.x * focalLength) / (z + focalLength);
+    const projectedY = (vertex.y * focalLength) / (z + focalLength);
+
+    const centerAdjustmentX = (projectedX - vanishingPoint.x) * scale + offsetX;
+    const centerAdjustmentY = (projectedY - vanishingPoint.y) * scale + offsetY;
+
     return {
-        x: x * scale + offsetX,
-        y: y * scale + offsetY,
+        x: centerAdjustmentX,
+        y: centerAdjustmentY,
     };
 }
 
 export function sortVerticesClockwise(vertices) {
-    const center = vertices.reduce(
-        (acc, v) => ({ x: acc.x + v.x / vertices.length, y: acc.y + v.y / vertices.length }),
-        { x: 0, y: 0 }
-    );
-    return [...vertices].sort((a, b) => {
-        const angleA = Math.atan2(a.y - center.y, a.x - center.x);
-        const angleB = Math.atan2(b.y - center.y, b.x - center.x);
-        return angleA - angleB;
+    return vertices.sort((a, b) => {
+        return Math.atan2(a.y - b.y, a.x - b.x);
     });
 }
+
 
 export default function PerspectiveSVG({ perspectiveWalls, roomData, roomIndex, sideIndex }) {
     if (!roomData || !perspectiveWalls || !perspectiveWalls[roomIndex]) return null;
