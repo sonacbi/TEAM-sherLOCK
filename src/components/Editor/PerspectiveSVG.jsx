@@ -25,11 +25,9 @@ export function perspectiveProjection(vertex) {
 }
 
 export function sortVerticesClockwise(vertices) {
-    return vertices.sort((a, b) => {
-        return Math.atan2(a.y - b.y, a.x - b.x);
-    });
+    // 투영된 좌표들을 기반으로 원래의 입력 순서를 유지한 채 정렬
+    return vertices.sort((a, b) => a.originalIndex - b.originalIndex);
 }
-
 
 export default function PerspectiveSVG({ perspectiveWalls, roomData, roomIndex, sideIndex }) {
     if (!roomData || !perspectiveWalls || !perspectiveWalls[roomIndex]) return null;
