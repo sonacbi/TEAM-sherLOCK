@@ -14,7 +14,7 @@ import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 
-function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
+function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
@@ -42,6 +42,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
 
     const [selectedSide, setSelectedSide] = useState({ roomIndex: 0, sideIndex: 0 });
+
+    useEffect(() => {console.log("[select current_room] room side", currentRoom, currentSide)}, [currentRoom])
+    useEffect(() => {console.log("[select current_side] room side", currentRoom, currentSide)}, [currentSide])
 
     // perspectiveWalls를 벽 객체 배열로 관리
     const perspectiveWalls = React.useMemo(() => {
@@ -71,9 +74,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             };
         });
 
-        if (process.env.NODE_ENV === 'development' && hoveredWall) {
+        // if (process.env.NODE_ENV === 'development' && hoveredWall) {
             console.log('[useMemo] items:', result);
-        }
+        // }
         return result;
     }, [perspective]); // perspective가 바뀔 때만 다시 계산됨
 
@@ -366,19 +369,22 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
         // 해당 room 인덱스와 일치하는 원근법 배경 객체 초기화
         setPerspective(prev => {
-            const newPerspective = { ...prev };
             // 삭제할 room 인덱스(roomSide)
             const roomToDelete = roomSide;
+            const newPerspective = { ...prev };
 
             // 해당 room 삭제
             delete newPerspective[roomToDelete];
 
             // 남은 room 키들을 숫자 순으로 정렬하고, 삭제된 방 뒤 인덱스들은 -1씩 당겨야 함
             const adjustedPerspective = {};
-            Object.entries(newPerspective).forEach(([key, value]) => {
-                const numKey = Number(key);
-                adjustedPerspective[numKey > roomToDelete ? numKey - 1 : numKey] = value;
-            });
+            Object.keys(newPerspective)
+                .map(k => Number(k))
+                .sort((a, b) => a - b)
+                .forEach(oldKey => {
+                    const newKey = oldKey > roomToDelete ? oldKey - 1 : oldKey;
+                    adjustedPerspective[newKey] = newPerspective[oldKey];
+                });
 
             return adjustedPerspective;
         });
@@ -412,29 +418,31 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
         // 해당 side 인덱스와 일치하는 원근법 배경 객체 초기화
         setPerspective(prev => {
-            const newPerspective = { ...prev };
             const roomIdx = currentRoom;  // 현재 방 번호
             const sideToDelete = deletedIndex;  // 삭제할 side 인덱스
 
-            if (!newPerspective[roomIdx]) return prev;
+            if (!prev[roomIdx]) return prev;
 
             // 해당 room의 sides 객체를 복사
-            const roomSides = { ...newPerspective[roomIdx] };
+            const roomSides = { ...prev[roomIdx] };
 
             // 삭제할 side 삭제
             delete roomSides[sideToDelete];
 
             // 남은 side 키들 재정렬 (숫자 순, 삭제된 뒤쪽 인덱스는 -1)
             const adjustedSides = {};
-            Object.entries(roomSides).forEach(([key, value]) => {
-                const numKey = Number(key);
-                adjustedSides[numKey > sideToDelete ? numKey - 1 : numKey] = value;
-            });
+            Object.keys(roomSides)
+                .map(k => Number(k))
+                .sort((a, b) => a - b)
+                .forEach(oldKey => {
+                    const newKey = oldKey > sideToDelete ? oldKey - 1 : oldKey;
+                    adjustedSides[newKey] = roomSides[oldKey];
+                });
 
-            // 변경된 side들을 다시 room에 세팅
-            newPerspective[roomIdx] = adjustedSides;
-
-            return newPerspective;
+            return {
+                ...prev,
+                [roomIdx]: adjustedSides
+            };
         });
 
     };
@@ -574,6 +582,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
                     canvasInstance.current.renderAll();
+
+                    // ✅ 여기서 비워주기
+                    setAddImageFile(null);
                 };
 
                 imgElement.onerror = () => {
@@ -588,6 +599,22 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             reader.readAsDataURL(addImageFile);
         }
     }, [addImageFile]);
+
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas || selectedTool !== 'frame') return;
+
+        const onObjectMoving = (e) => {
+            const movingObj = e.target;
+            console.log('[object:moving] type:', movingObj?.type, movingObj); // 🔍 타입 확인
+        };
+
+        canvas.on('object:moving', onObjectMoving);
+        return () => {
+            canvas.off('object:moving', onObjectMoving);
+        };
+    }, [selectedTool]);
+
     // 이미지 추가 ---------------------------------------------------(section 11)
     // ---------------------------------------------------------------(section)
     useEffect(() => {

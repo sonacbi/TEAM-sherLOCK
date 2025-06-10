@@ -113,50 +113,52 @@ function EditorPage() {
     const handleAddImage = () => {
         setSelectedTool('picture');
     };
+
+    // 공통 처리 함수
+    const processImageFile = (file) => {
+        if (!file || !file.type.startsWith('image/')) return;
+
+        setImgs(prev => {
+            const isDuplicate = prev.some(f => 
+                f.name === file.name &&
+                f.size === file.size &&
+                f.type === file.type
+            );
+            if (isDuplicate) return prev;
+            return [...prev, file];
+        });
+        // ⚠️ 여기서 바로 비우면 안 됨
+        setAddImageFile(file);
+
+        // 같은 파일 다시 선택 가능하게 하기 → 자식 컴퍼넌트로 이동
+        // setTimeout(() => setAddImageFile(null), 0);
+    };
     
+    // 버튼 클릭 -> input 열기
     const handleAddImageFile = () => {
         fileInputRef.current.click();
-    }
+    };
 
+    // input에서 파일 선택
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setImgs(prev => {
-                const isDuplicate = prev.some(f => 
-                    f.name === file.name &&
-                    f.size === file.size &&
-                    f.type === file.type
-                );
-                if (isDuplicate) return prev;
-                return [...prev, file];
-            });
-            setAddImageFile(file);
-
-            // ✅ 핵심: input value를 수동으로 비워서 같은 파일도 연속 선택 가능하게 함
-            e.target.value = ''; 
+            processImageFile(file);
         }
+
+        // ✅ 핵심: input value를 수동으로 비워서 같은 파일도 연속 선택 가능하게 함
+        e.target.value = '';
     };
 
+    // 드래그 앤 드롭 : ✅ 버튼과 완전히 동일하게 1개씩 처리
     const handleDrop = (e) => {
         e.preventDefault();
         const files = e.dataTransfer.files;
         if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.type.startsWith('image/')) {
-            setImgs(prev => {
-                const isDuplicate = prev.some(f => 
-                    f.name === file.name &&
-                    f.size === file.size &&
-                    f.type === file.type
-                );
-                if (isDuplicate) return prev;
-                return [...prev, file];
-            });
-            setAddImageFile(file);
-            setTimeout(() => setAddImageFile(null), 0);
+            const imageFile = Array.from(files).find(file => file.type.startsWith('image/'));
+            if (imageFile) {
+                processImageFile(imageFile);
             }
-        }
         }
     };
 
@@ -384,6 +386,7 @@ function EditorPage() {
                         handleDrop={handleDrop}
                         addTextTrigger={addTextTrigger}
                         addShapeTrigger={addShapeTrigger}
+                        setAddImageFile={setAddImageFile}
                         addImageFile={addImageFile}
                         addFrameTrigger={addFrameTrigger} 
                         onObjectSelect={setSelectedObject}
