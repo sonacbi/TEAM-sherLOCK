@@ -55,6 +55,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const perspectiveWalls = React.useMemo(() => {
         if (!perspective) return []; // perspective가 존재하지 않으면 빈 배열 반환
 
+        const currentRoom = currentRoomRef.current;
+        const currentSide = currentSideRef.current;
+        
         // perspective 구조:
         // {
         //   [roomId]: {
@@ -64,17 +67,23 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         //   }
         // }
 
-        // room 단위로 map 순회
-        const result = Object.entries(perspective).map(([currentRoom, sides]) => { // 각 side (예: 0, 1)에 대해 wall 정보를 복사
-            const sideObjects = Object.entries(sides).reduce((acc, [currentSide, walls]) => { 
-                acc[currentSide] = { ...walls };
-                return acc; // acc는 side ID별로 해당 wall 객체들을 담는 객체
+        const result = Object.entries(perspective).map(([roomId, sides]) => {
+            // 각 room에 대해 side를 필터링하거나 전체 유지
+            const sideObjects = Object.entries(sides).reduce((acc, [sideId, walls]) => {
+                // currentRoom인 경우에만 currentSide만 포함
+                if (roomId === currentRoom) {
+                    if (sideId === currentSide) {
+                        acc[sideId] = { ...walls };
+                    }
+                } else {
+                    acc[sideId] = { ...walls }; // 다른 room이면 모든 side 포함
+                }
+                return acc;
             }, {});
-
             // 각 room 객체는 currentRoom을 포함하고
             // side 0, side 1 정보를 키로 갖는 구조로 리턴됨
             return {
-                currentRoom,
+                currentRoom: roomId,
                 ...sideObjects,
             };
         });
@@ -83,7 +92,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             console.log('[useMemo] items:', result);
         }
         return result;
-    }, [perspective]); // perspective가 바뀔 때만 다시 계산됨
+    }, [perspective, currentRoomRef.current, currentSideRef.current]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
 

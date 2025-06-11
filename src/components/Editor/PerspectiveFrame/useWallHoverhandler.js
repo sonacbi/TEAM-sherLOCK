@@ -59,6 +59,10 @@ export function useWallHoverHandler({
       isDragging.current = false;
       // console.log('[mouse:up] 드래그 종료');
       restoreWallStyle(hoveredWallLocal, originalStyles, canvasInstance);
+      
+      // currentRoom, currentSide 대신 ref를 써서 최신값 보장
+      const room = currentRoomRef.current;
+      const side = currentSideRef.current;
 
       if (hoveredWallLocal.current) {
         const wall = hoveredWallLocal.current;
@@ -66,7 +70,7 @@ export function useWallHoverHandler({
 
         // 확정된 이미지가 있으면 변경 안 함
         if (
-          perspectiveRef.current?.[currentRoom]?.[currentSide]?.[wall.wallType]?.imageUrl
+          perspectiveRef.current?.[room]?.[side]?.[wall.wallType]?.imageUrl
         ) {
           console.log(`[mouse:up] 이미지가 이미 확정되어 변경하지 않음: ${wall.wallType}`);
           setPreviewPerspective({});
@@ -81,10 +85,6 @@ export function useWallHoverHandler({
         // ✅ 여기서 드래그한 벽과 이미지 URL을 perspective에 저장
         setPerspective(prev => {
         const newPerspective = { ...prev };
-
-        // currentRoom, currentSide 대신 ref를 써서 최신값 보장
-        const room = currentRoomRef.current;
-        const side = currentSideRef.current;
 
         // 중첩 구조가 없다면 초기화
         if (!newPerspective[room]) newPerspective[room] = {};
