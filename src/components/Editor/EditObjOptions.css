@@ -68,20 +68,243 @@
     cursor: not-allowed;
 }
 
-.object_edit .fontFamily.selected,
-.editOpt_textAlign.selected {
-    background-color: rgba(255, 255, 255, 0.2);
+.default_attribute {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.object_edit .fontFamily,
-.editOpt_textAlign {
-    border-radius: 6px;
-    padding: 0 5px;
-    margin: 0 1px;
+.object_name {
+    display: flex;
+    gap: 10px;
+    padding: 10px 10px;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: #C0C0C0;
 }
+
+.object_name > input {
+    border: 0;
+    font-size: 15px;
+    flex: 1;
+    background-color: transparent;
+    color: #C0C0C0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.object_name > input:hover {
+    border-bottom: 1px dashed #C0C0C0;
+}
+
+.object_name > input:focus {
+    outline: 0;
+    border-bottom: 1px dashed #C0C0C0;
+}
+
+.object_color_line {
+    display: flex;
+    justify-content: center;
+    color: #C0C0C0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.color, .line_color, .line_width {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    gap: 10px;
+}
+
+.color {
+    padding-left: 0;
+}
+
+.line_width {
+    padding-right: 0;
+    border: 0;
+}
+
+.default_attribute input[type="color"] {
+    cursor: pointer;
+}
+
+.color > input, .line_color > input, .line_width > input {
+    background-color: transparent;
+    border: 0;
+    width: 50px;
+}
+
+.line_width > input {
+    background-color: white;
+    width: 35px;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 5px;
+}
+
+.line_width > input:focus {
+    outline: 0;
+}
+
+.line_width > input::-webkit-inner-spin-button,
+.line_width > input::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+.object_sort {
+    padding: 15px 0;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    margin: 10px 0;
+    border-radius: 10px;
+}
+
+.object_sort img {
+    width: 30px;
+}
+
+.object_sort > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+.object_sort > div:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.object_sort > div > button {
+    background-color: transparent;
+    border: 0;
+    color: #C0C0C0;
+}
+
+.object_textbox_attribute {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 10px 0;
+}
+
+.object_textbox_attribute h4 {
+    color: #C0C0C0;
+}
+
+.textbox_sort {
+    display: flex;
+    padding: 0 10px;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.textbox_sort_type {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+}
+
+.textbox_sort_type img {
+    width: 30px;
+}
+
+.editOpt_textAlign {
+    padding: 3px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.textbox_fontstyle {
+    padding: 20px 0;
+    display: flex;
+}
+
+.textbox_fontstyle > select {
+    flex: 1;
+    height: 45px;
+    border: 0;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #C0C0C0;
+}
+
+.textbox_fontstyle > select:focus {
+    outline: none;
+}
+
+.textbox_fontstyle > select > option {
+    background-color: rgb(90, 90, 90);
+}
+
+.background_size_wrap {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.textbox_background, .textbox_size {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 15px;
+    gap: 10px;
+}
+
+.textbox_background {
+    padding-right: 60px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.textbox_size {
+    padding-left: 60px;
+}
+
+.textbox_background > input, .textbox_size > input {
+    background-color: transparent;
+    border: 0;
+    width: 50px;
+}
+
+.textbox_size > input {
+    background-color: white;
+    width: 50px;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 5px;
+}
+
+.textbox_size > input:focus {
+    outline: 0;
+}
+
+.textbox_size > input::-webkit-inner-spin-button,
+.textbox_size > input::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+.object_edit .fontFamily.selected,
+.editOpt_textAlign.selected {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
 .object_edit .fontFamily i {
     font-family: 'Times New Roman', Times, serif;
 }
+
 .object_edit .fontFamily input {
     display: none;
 }
@@ -92,7 +315,6 @@
 
 .object_edit .add_event {
     width: 100%;
-    margin-top: 10px;
     padding: 20px 15px;
     text-align: center;
     border: 1px dashed #ddd;

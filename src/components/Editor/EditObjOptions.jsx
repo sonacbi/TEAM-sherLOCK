@@ -5,6 +5,13 @@ import { GameEventType } from "../../../modules/editor/gamePnC";
 import "./EditObjOptions.css"
 
 import trash from '../../assets/images/EditorPage_img/trash.png';
+import frontEnd from '../../assets/images/EditorPage_img/frontEnd.png';
+import backEnd from '../../assets/images/EditorPage_img/backEnd.png';
+import back from '../../assets/images/EditorPage_img/back.png';
+import front from '../../assets/images/EditorPage_img/front.png';
+import leftsort from '../../assets/images/EditorPage_img/leftsort.png';
+import centersort from '../../assets/images/EditorPage_img/centersort.png';
+import rightsort from '../../assets/images/EditorPage_img/rightsort.png';
 
 export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
@@ -94,6 +101,20 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
     const handleDown = () => {
         const canvas = canvasInstance.current;
         canvas.sendObjectBackwards(selectedObject);
+        canvas.requestRenderAll();
+    }
+    const handleUpEnd = () => {
+        const canvas = canvasInstance.current;
+        canvas.bringObjectToFront(selectedObject);
+        canvas.requestRenderAll();
+    }
+    const handleDownEnd = () => {
+        const canvas = canvasInstance.current;
+        if(canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
+            canvas.sendObjectToBack(selectedObject);
+            canvas.bringObjectForward(selectedObject);
+            canvas.bringObjectForward(selectedObject);
+        } else canvas.sendObjectToBack(selectedObject);
         canvas.requestRenderAll();
     }
 
@@ -194,56 +215,125 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 <>
                     {activeObject?.type !== "image" && activeObject?.type !== "activeselection" && (
                         <>
-                        <h4>이름</h4>
-                        └<input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
-                        <br/><br/>
-                        <h4>색</h4>
-                        └<input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
-                        <h4>윤곽선 색</h4>
-                        └<input type="color" value={optionStyle.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/>
-                        <h4>윤곽선 두께</h4>
-                        └<input type="number" value={Number(optionStyle.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/>
-                        <br/><br/>
+                        <div className="default_attribute">
+                            <div className="object_name">
+                                <h4>이름 : </h4>
+                                <input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
+                            </div>
+
+                            <div className="object_color_line">
+                                <div className="color">
+                                    <h4>색</h4>
+                                    <input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
+                                </div>
+
+                                <div className="line_color">
+                                    <h4>윤곽선</h4>
+                                    <input type="color" value={optionStyle.stroke ?? "#333333"} onChange={e => editOption(e, "stroke")}/>
+                                </div>
+
+                                <div className="line_width">
+                                    <h4>윤곽선 두께</h4>
+                                    <input type="number" min={0} value={Number(optionStyle.strokeWidth)} onChange={e => editOption(e, "strokeWidth")}/>
+                                </div>
+                            </div>
+                        </div>
                         </>
                     )}
+                    
+                    <div className="object_sort" onClick={handleUpEnd}>
+                        <div className="frontEnd_wrap">
+                            <img id="frontEnd" src={frontEnd} alt="frontEnd" />
+                            <button>맨 앞으로</button>
+                        </div>
+
+                        <div className="front_wrap" onClick={handleUp}>
+                            <img id="front" src={front} alt="front" />
+                            <button>앞으로</button>
+                        </div>
+
+                        <div className="backEnd_wrap" onClick={handleDownEnd}>
+                            <img id="backEnd" src={backEnd} alt="backEnd" />
+                            <button>맨 뒤로</button>
+                        </div>
+
+                        <div className="back_wrap" onClick={handleDown}>
+                            <img id="back" src={back} alt="back" />
+                            <button>뒤로</button>
+                        </div>
+                    </div>
+
                     {activeObject?.type === "textbox" && (
                         <>
-                        <h4>정렬</h4>
-                        └<label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>left<input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/></label>
-                        <label className={`editOpt_textAlign ${optionStyle.textAlign == "center" ? "selected" : ""}`}>center<input type="radio" name="textAlign" value="center" checked={selectedObject.textAlign == "center"} onChange={e => editOption(e, "textAlign")}/></label>
-                        <label className={`editOpt_textAlign ${optionStyle.textAlign == "right" ? "selected" : ""}`}>right<input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/></label>
-                        <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>justify<input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/></label>
-                        <h4>글 배경</h4>
-                        └<input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
-                        <h4>글꼴</h4>
-                        └<select style={{fontFamily: `${optionStyle.fontFamily}`}} value={optionStyle.fontFamily} onChange={e => editOption(e, "fontFamily")}>
-                            <option style={{fontFamily: "맑은 고딕"}} value="맑은 고딕">맑은 고딕</option>
-                            <option style={{fontFamily: "굴림"}} value="굴림">굴림</option>
-                            <option style={{fontFamily: "바탕"}} value="바탕">바탕</option>
-                            <option style={{fontFamily: "궁서"}} value="궁서">궁서</option>
-                            <option style={{fontFamily: "Arial"}} value="Arial">Arial</option>
-                            <option style={{fontFamily: "Arial Black"}} value="Arial Black">Airal Black</option>
-                            <option style={{fontFamily: "Comic Sans MS"}} value="Comic Sans MS">Comic Sans MS</option>
-                            <option style={{fontFamily: "Courier New"}} value="Courier New">Courier New</option>
-                            <option style={{fontFamily: "Impact"}} value="Impact">Impact</option>
-                            <option style={{fontFamily: "Tahoma"}} value="Tahoma">Tahoma</option>
-                            <option style={{fontFamily: "Times New Roman"}} value="Times New Roman">Times New Roman</option>
-                        </select>
-                        <h4>글꼴 크기</h4>
-                        └<input type="number" value={Number(optionStyle.fontSize)} onChange={e => editOption(e, "fontSize")}/>
-                        <h4>글꼴 유형</h4>
-                        └<label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
-                        <h4>글꼴 굵기</h4>
-                        └<select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
-                            <option value="normal">normal</option>
-                            <option value="bold">bold</option>
-                            <option value="lighter">lighter</option>
-                        </select><br/><br/>
+                        <div className="object_textbox_attribute">
+                            <div className="textbox_sort">
+                                <h4>글 정렬</h4>
+
+                                <div className="textbox_sort_type">
+                                    <label className={`editOpt_textAlign ${optionStyle.textAlign == "left" ? "selected" : ""}`}>
+                                        <img id="leftsort" src={leftsort} alt="leftsort" />
+                                        <input type="radio" name="textAlign" value="left" checked={selectedObject.textAlign == "left"} onChange={e => editOption(e, "textAlign")}/>
+                                    </label>
+
+                                    <label className={`editOpt_textAlign ${optionStyle.textAlign == "center" ? "selected" : ""}`}>
+                                        <img id="centersort" src={centersort} alt="centersort" />
+                                        <input type="radio" name="textAlign" value="center" checked={selectedObject.textAlign == "center"} onChange={e => editOption(e, "textAlign")}/>
+                                    </label>
+
+                                    <label className={`editOpt_textAlign ${optionStyle.textAlign == "right" ? "selected" : ""}`}>
+                                        <img id="rightsort" src={rightsort} alt="rightsort" />
+                                        <input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/>
+                                    </label>
+
+                                    {/* <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>
+                                        <img id="rightsort" src={rightsort} alt="rightsort" />
+                                        <input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/>
+                                    </label> */}
+                                </div>
+                            </div>
+
+                            <div className="textbox_fontstyle">  
+                                <select style={{fontFamily: `${optionStyle.fontFamily}`}} value={optionStyle.fontFamily} onChange={e => editOption(e, "fontFamily")}>
+                                    <option style={{fontFamily: "맑은 고딕"}} value="맑은 고딕">맑은 고딕</option>
+                                    <option style={{fontFamily: "굴림"}} value="굴림">굴림</option>
+                                    <option style={{fontFamily: "바탕"}} value="바탕">바탕</option>
+                                    <option style={{fontFamily: "궁서"}} value="궁서">궁서</option>
+                                    <option style={{fontFamily: "Arial"}} value="Arial">Arial</option>
+                                    <option style={{fontFamily: "Arial Black"}} value="Arial Black">Airal Black</option>
+                                    <option style={{fontFamily: "Comic Sans MS"}} value="Comic Sans MS">Comic Sans MS</option>
+                                    <option style={{fontFamily: "Courier New"}} value="Courier New">Courier New</option>
+                                    <option style={{fontFamily: "Impact"}} value="Impact">Impact</option>
+                                    <option style={{fontFamily: "Tahoma"}} value="Tahoma">Tahoma</option>
+                                    <option style={{fontFamily: "Times New Roman"}} value="Times New Roman">Times New Roman</option>
+                                </select>
+                            </div>
+
+                            <div className="textbox_category_wrap">
+                                <div className="background_size_wrap">
+                                    <div className="textbox_background">
+                                        <h4>글 배경</h4>
+                                        <input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
+                                    </div>
+
+                                    <div className="textbox_size">
+                                        <h4>글꼴 크기</h4>
+                                        <input type="number" value={Number(optionStyle.fontSize)} onChange={e => editOption(e, "fontSize")}/>
+                                    </div>
+                                </div>
+
+                                <h4>글꼴 유형</h4>
+                                <label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
+
+                                <h4>글꼴 굵기</h4>
+                                <select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
+                                    <option value="normal">normal</option>
+                                    <option value="bold">bold</option>
+                                    <option value="lighter">lighter</option>
+                                </select>
+                            </div>
+                        </div>
                         </>
                     )}
-
-                    <button onClick={handleUp}>앞으로 가져오기</button>
-                    <button onClick={handleDown}>뒤로 보내기</button>
                 </>
             )}
 
