@@ -53,46 +53,61 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     
     // perspectiveWalls를 벽 객체 배열로 관리
     const perspectiveWalls = React.useMemo(() => {
-  if (!perspective) return [];
+    if (!perspective) return [];
 
-  const wall_room = String(currentRoomRef.current);
-  const wall_side = String(currentSideRef.current);
+    const wall_room = String(currentRoomRef.current);
+    const wall_side = String(currentSideRef.current);
 
-  // perspective에 있는 방 개수 혹은 현재 방 번호+1 중 큰 값으로 방 개수 고정
-  const totalRooms = Math.max(Object.keys(perspective).length, Number(wall_room) + 1);
+    // perspective 구조:
+    // {
+    //   [roomId]: {
+    //     [sideId]: {
+    //       [wallType]: { imageUrl, vertices, ... }
+    //     }
+    //   }
+    // }
 
-  const result = [];
+    // perspective에 있는 방 개수 혹은 현재 방 번호+1 중 큰 값으로 방 개수 고정
+    const totalRooms = Math.max(Object.keys(perspective).length, Number(wall_room) + 1);
 
-  for (let i = 0; i < totalRooms; i++) {
-    const roomId = String(i);
-    const sides = perspective[roomId] || {}; // 데이터가 없으면 빈 객체
+    const result = [];
 
-    // 현재 방이라도 모든 side를 포함하도록 수정
-    const filteredSides = {};
+    for (let i = 0; i < totalRooms; i++) {
+        const roomId = String(i);
+        const sides = perspective[roomId] || {}; // 데이터가 없으면 빈 객체
 
-    Object.entries(sides).forEach(([sideId, walls]) => {
-      // 모든 side를 넣음
-      filteredSides[sideId] = { ...walls };
-    });
+        // 현재 방이라도 모든 side를 포함하도록 수정
+        const filteredSides = {};
 
-    // 만약 side가 아예 없으면 기본값(빈 객체) 넣기
-    if (Object.keys(filteredSides).length === 0) {
-      filteredSides['0'] = {};
+        Object.entries(sides).forEach(([sideId, walls]) => {
+        // 모든 side를 넣음
+        filteredSides[sideId] = { ...walls };
+        });
+
+        // side가 아예 없으면 기본값으로 side_0 빈 객체 삽입
+        if (Object.keys(filteredSides).length === 0) {
+        filteredSides['0'] = {};
+        }
+
+        // 각 room 객체는 다음과 같은 형태로 리턴됨:
+        // {
+        //   currentRoom: "0",
+        //   0: { front: {...}, top: {...}, ... },
+        //   1: { ... },
+        //   ...
+        // }
+        result.push({
+        currentRoom: roomId,
+        ...filteredSides,
+        });
     }
 
-    result.push({
-      currentRoom: roomId,
-      ...filteredSides,
-    });
-  }
+    if (process.env.NODE_ENV === 'development' && hoveredWall) {
+        console.log('[useMemo] items:', result);
+    }
 
-  console.log('[useMemo] items:', result);
-
-  return result;
-}, [perspective]);
-
-
-
+    return result;
+    }, [perspective]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
