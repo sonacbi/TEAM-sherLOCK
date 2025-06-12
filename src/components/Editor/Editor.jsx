@@ -93,35 +93,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         perPixelTargetFind: true,
     };
     // ---------------------------------------------------------------(section 2) ?
-
-    // 프레임 설정 기본값 세팅 ---------------------------------------(section 3) (노은성)
-    const roomController = useRef(new fabric.Rect({
-        ...controlStyle,
-        left: 220,
-        top: 120,
-        width: 220 + 440,
-        height: 120 + 300,
-        fill: 'rgba(255, 0, 0, 0.2)',
-        strokeWidth: 2,
-        stroke: 'red',
-        name: "SherLockRoomController",
-        perPixelTargetFind: false,
-    })).current;
-    useEffect(() => {
-        roomController.on('rotating', () => {
-            setAngle(roomController.angle);
-            setPosition([roomController.left, roomController.top]);
-        });
-        roomController.on('moving', () => {
-            setPosition([roomController.left, roomController.top]);
-            setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
-        });
-        roomController.on('scaling', () => {
-            setPosition([roomController.left, roomController.top]);
-            setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
-        });
-    }, [])
-    // ---------------------------------------------------------------(section 3) (노은성)
     // 캔버스 랜더링 기본값 세팅 -------------------------------------(section 4) ?
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
@@ -227,9 +198,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
     useEffect(() => {
         if (isReady) {
-            addFrame(angle, position, size, edgeFrameState);
+            addFrame(220, 120, 220+440, 120+300, edgeFrameState);
         }
-    }, [addFrameTrigger, angle, position, size, edgeFrameState]);
+    }, [addFrameTrigger]);
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -281,7 +252,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    const addFrame = (angle, position, size, edgeFrameState) => {
+    const addFrame = (left, top, width, height, edgeFrameState) => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
         
@@ -289,14 +260,34 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         if (target) canvas.remove(target);
         
         const roomFrame = createRoomFrame(
-            ...position,
-            ...size,
+            left, top, width, height,
             ...edgeFrameState,
-            angle
         );
 
         canvas.add(roomFrame);
         if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
+            const roomController = new fabric.Rect({
+                ...controlStyle,
+                fill: 'rgba(255, 0, 0, 0.2)',
+                strokeWidth: 2,
+                stroke: 'red',
+                name: "SherLockRoomController",
+                perPixelTargetFind: false,
+                left, top, width, height,
+            });
+            roomController.setControlVisible('mtr', false);
+            
+            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState);
+
+            roomController.on('rotating', makeFrame);
+            roomController.on('moving', makeFrame);
+            roomController.on('scaling', makeFrame);
+
+            // return () => {
+            //     roomController.off('rotating', makeFrame);
+            //     roomController.off('moving', makeFrame);
+            //     roomController.off('scaling', makeFrame);
+            // };
             canvas.add(roomController);
             canvas.setActiveObject(roomController);
             canvas.sendObjectToBack(roomController);
@@ -351,6 +342,22 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const handleDeleteGameRoom = (roomSide) => {
         if (game.room.length <= 1) return;
 
+        if (currentRoom < roomSide) {}
+        else if (roomSide == 0 && currentRoom == 0) {
+            handleCurrentSide(0, game.room[currentRoom+1].side[0]);
+            setSelectedSide(prev => ({...prev, roomIndex: currentRoom+1}));
+        }
+        else if (roomSide < currentRoom) {
+            setCurrentRoom(prev => prev-1);
+            handleCurrentSide(0, game.room[currentRoom].side[0]);
+            setSelectedSide(prev => ({...prev, roomIndex: currentRoom-1}));
+        }
+        else if (roomSide == currentRoom) {
+            setCurrentRoom(prev => prev-1);
+            handleCurrentSide(0, game.room[currentRoom-1].side[0]);
+            setSelectedSide(prev => ({...prev, roomIndex: currentRoom-1}));
+        }
+
         setGame(prev => {
             const newRooms = [...prev.room];
             newRooms.splice(roomSide, 1);
@@ -361,25 +368,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             const newImgs = [...prev];
             newImgs.splice(roomSide, 1);
             return newImgs;
-        });
-
-        // 선택된 room이 삭제된 경우 → 초기화
-        // 선택된 room이 뒤에 있던 경우 → index 하나 앞으로
-        setSelectedSide(prev => {
-            if (prev.roomIndex === roomSide) {
-                return { roomIndex: -1, sideIndex: -1 };
-            } else if (prev.roomIndex > roomSide) {
-                return { ...prev, roomIndex: prev.roomIndex - 1 };
-            } else {
-                return prev;
-            }
-        });
-
-        // currentRoom 인덱스 보정
-        setCurrentRoom(prev => {
-            if (prev === roomSide) return Math.max(0, prev - 1);
-            else if (prev > roomSide) return prev - 1;
-            else return prev;
         });
 
         // 해당 room 인덱스와 일치하는 원근법 배경 객체 초기화
@@ -400,7 +388,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
             return adjustedPerspective;
         });
-
     };
 
     const handleDeleteGameSide = (deletedIndex) => {
@@ -408,8 +395,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
         // 삭제 후 선택할 인덱스 계산
         const newLength = room.side.length - 1;
-        const newSideIndex1 = deletedIndex >= newLength ? newLength - 1 : deletedIndex;
-        const newSideIndex2 = deletedIndex == newLength ? newLength - 1 : deletedIndex;
 
         setRoom(prev => {
             const newSides = [...prev.side];
@@ -490,7 +475,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const handleCurrentSide = (sideIndex, sideData) => {
         setCurrentSide(sideIndex);
         setTimeout(() => {
-            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, roomController, addFrame);
+            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, addFrame);
         }, 50)
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
     }
@@ -508,12 +493,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         setRoom(prev => {
             const newData = new Room({ ...prev })
             newData.side[currentSide].fabric = updatedFabric;
-            if (canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomFrame')) newData.side[currentSide].frame = {
-                x: roomController.left,
-                y: roomController.top,
-                width: roomController.width,
-                height: roomController.height,
-                angle: roomController.angle,
+            const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+            if (roomController) newData.side[currentSide].frame = {
+                x: Number(roomController.left.toFixed(2)),
+                y: Number(roomController.top.toFixed(2)),
+                width: Number(roomController.getScaledWidth().toFixed(2)),
+                height: Number(roomController.getScaledHeight().toFixed(2)),
                 top: edgeFrameState[0],
                 left: edgeFrameState[1],
                 right: edgeFrameState[2],
@@ -776,7 +761,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     <div className='stage_wrap'>
                                         <div className='stageIndex_delete'>
                                             <h3>Stage {roomIndex + 1}</h3>
-                                            <button onClick={() => handleDeleteGameRoom(roomIndex)}>X</button>
+                                            <button onClick={(e) => {e.stopPropagation(); handleDeleteGameRoom(roomIndex)}}>X</button>
                                         </div>
                                         <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} placeholder='이름'/>
                                     </div>

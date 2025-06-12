@@ -46,14 +46,12 @@ const handleSide = (canvas) => {
     return updatedFabric;
 };
 
-const loadCanvas = async (canvas, imgs, side, controlStyle, roomController, addFrame) => {
+const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame) => {
     await canvas.clear();
 
     if (side.frame) {
-        const { x, y, width, height, angle, top, left, right, bottom } = side.frame;
-        roomController.set({ left: x, top: y, width, height, angle });
-        roomController.setCoords();
-        addFrame(angle, [roomController.left, roomController.top], [roomController.getScaledWidth(), roomController.getScaledHeight()], [top, left, right, bottom]);
+        const { x, y, width, height, top, left, right, bottom } = side.frame;
+        addFrame(x, y, width, height, [top, left, right, bottom]);
     }
 
     const promises = side.fabric.map((fabricData) => {

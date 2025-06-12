@@ -50,13 +50,12 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
         { x: 220 - frameEdgeWeight.left,        y: 120 + 420 + frameEdgeWeight.bottom }
     ];
 
-    const frontEdge = getRotatedRectangleCorners(
-        Number(fpl.toFixed(2)),
-        Number(fpt.toFixed(2)),
-        Number(fsw.toFixed(2)),
-        Number(fsh.toFixed(2)),
-        Number(angle.toFixed(2))
-    )
+    const frontEdge = [
+        { x: frontPosition.left, y: frontPosition.top },
+        { x: frontPosition.left + frontSize.width, y: frontPosition.top },
+        { x: frontPosition.left + frontSize.width, y: frontPosition.top + frontSize.height },
+        { x: frontPosition.left, y: frontPosition.top + frontSize.height }
+    ];
 
     // 사각형
     // 앞면
@@ -159,50 +158,4 @@ function createRoomFrame( fpl, fpt, fsw, fsh, fewt, fewl, fewr, fewb, angle ) {
     return group;
 }
 
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
-}
-
-function rotatePoint(px, py, cx, cy, angleRad) {
-  const dx = px - cx;
-  const dy = py - cy;
-
-  const qx = Math.cos(angleRad) * dx - Math.sin(angleRad) * dy + cx;
-  const qy = Math.sin(angleRad) * dx + Math.cos(angleRad) * dy + cy;
-
-  return { x: qx, y: qy };
-}
-
-function getRotatedRectangleCorners(x, y, width, height, angleDeg) {
-  const angleRad = toRadians(angleDeg);
-
-  // 중심 좌표
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-
-  // 원래 꼭짓점들
-  const corners = [
-    { x: x, y: y },                     // 좌상단
-    { x: x + width, y: y },             // 우상단
-    { x: x + width, y: y + height },    // 우하단
-    { x: x, y: y + height }             // 좌하단
-  ];
-
-  // 회전된 꼭짓점들
-  return corners.map(pt => rotatePoint(pt.x, pt.y, cx, cy, angleRad));
-}
-
-function getFabricObjectCorners(obj) {
-    const angle = obj.angle || 0;
-    const width = obj.getScaledWidth();
-    const height = obj.getScaledHeight();
-    const center = obj.getCenterPoint(); // fabric.Point
-    console.log(width)
-
-    const x = center.x - width / 2;
-    const y = center.y - height / 2;
-
-    return getRotatedRectangleCorners(x, y, width, height, angle);
-}
-
-export { createRoomFrame, getRotatedRectangleCorners, getFabricObjectCorners }
+export { createRoomFrame }
