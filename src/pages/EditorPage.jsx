@@ -67,7 +67,6 @@ function EditorPage() {
     const roomInfoRef = useRef(null);
 
     const handleAddFrame = () => {
-        setAddFrameTrigger(Date.now());
         setSelectedTool('frame');
     };
 
@@ -289,11 +288,15 @@ function EditorPage() {
                                 <>
                                     {selectedTool === 'frame' && (
                                         <div className='frame_fine_tuning'>
+                                            {canvasInstance.current?.getObjects().find(obj => obj.name === 'SherLockRoomController') ?
+                                                <button onClick={removeFrame}>프레임 삭제</button> :
+                                                <button onClick={() => setAddFrameTrigger(Date.now())}>새 프레임 생성</button>
+                                            }
+                                            <br />
                                             top: <input id="roomFrame0" type="range" min={120} max={800} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
                                             left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
                                             right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
                                             bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
-                                            <button onClick={removeFrame}>프레임 삭제</button>
                                         </div>
                                     )}
 
