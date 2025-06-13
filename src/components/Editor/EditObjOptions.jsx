@@ -71,6 +71,16 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 foundFabric.fontWeight = value;
                 setOptionStyle(prev => ({...prev, fontWeight: value}));
                 break;
+            case 'underline':
+                value = event.target.checked ? true : false;
+                foundFabric.underline = value;
+                setOptionStyle(prev => ({...prev, underline: value}));
+                break;
+            case 'linethrough':
+                value = event.target.checked ? true : false;
+                foundFabric.linethrough = value;
+                setOptionStyle(prev => ({...prev, linethrough: value}));
+                break;
             case 'event':
                 foundFabric.event = value;
                 break;
@@ -325,6 +335,8 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                 <h4>글꼴 유형</h4>
                                 <label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
                                 <label className={`fontFamily ${optionStyle.fontWeight == "bold" && "selected"}`}><b>B</b><input type="checkbox" checked={optionStyle.fontWeight == "bold"} onChange={e => editOption(e, "fontWeight")}/></label>
+                                <label className={`fontFamily ${optionStyle.underline && "selected"}`}>밑줄<input type="checkbox" checked={optionStyle.underline} onChange={e => editOption(e, "underline")}/></label>
+                                <label className={`fontFamily ${optionStyle.linethrough && "selected"}`}>취소선<input type="checkbox" checked={optionStyle.linethrough} onChange={e => editOption(e, "linethrough")}/></label>
                             </div>
                         </div>
                         </>
