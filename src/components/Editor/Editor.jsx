@@ -326,23 +326,36 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         //     }
         //     return wall;
         // });
-        // roomFrame 안에 있는 모든 하위 오브젝트(fabric.js 기준)들을 가져옴 (📝 구조 변경돼서 수정)
-        const frameObjects = roomFrame.getObjects?.() ?? [];
 
         // 현재 방(currentRoom)과 현재 면(currentSide)에 해당하는 벽 정보 집합을 가져옴
         // 구조: perspective = { [room]: { [side]: { wallType: { vertices, imageUrl, ... } } } }
         const currentWalls = perspective[currentRoom]?.[currentSide] ?? {};
-        // 각 벽 오브젝트에 대해 해당 wallType에 imageUrl이 존재하면 fill/stroke를 투명하게 설정
+        // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
+        if (!currentWalls['front']?.imageUrl) {
+            const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
+                if (frontWall) {
+                // roomController도 보이게 설정
+                roomController.set({
+                    fill: 'rgba(255,0,0,0.2)',
+                    stroke: 'red',
+                });
+            }
+        }
+
+        // 프레임 안 오브젝트 스타일 설정
+        const frameObjects = roomFrame.getObjects?.() ?? [];
         frameObjects.forEach(obj => {
             const wallData = currentWalls[obj.wallType];
             if (wallData?.imageUrl) {
                 obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
             }
         });
-        // 만약 정면(front) 벽에 imageUrl이 있으면 roomController도 숨김 처리
+
+        // front 벽에 이미지 있을 경우 컨트롤러 숨김 처리
         if (currentWalls['front']?.imageUrl) {
             roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
         }
+
         // roomFrame을 캔버스 맨 뒤로 보내고 전체 다시 렌더링
         canvas.sendObjectToBack(roomFrame);
         

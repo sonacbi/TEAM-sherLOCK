@@ -125,3 +125,156 @@ export function restoreWallStyle(hoveredWallLocal, originalStyles, canvasInstanc
         canvasInstance.current.renderAll();
     }
 }
+
+
+// 공통 틀 예시 (actionType: 'save' | 'remove')
+export const updatePerspective = (actionType, wall, pointer) => {
+    const wallType = wall.wallType;
+    const room = currentRoomRef.current;
+    const side = currentSideRef.current;
+
+    // 1. perspective 상태 업데이트
+    setPerspective(prev => {
+        const next = { ...prev };
+        next[room] = next[room] || {};
+        next[room][side] = next[room][side] || {};
+
+        if (actionType === 'save') {
+        // 저장: 벽 정점과 이미지 URL 저장
+        next[room][side][wallType] = {
+            vertices: getWallVertices(wall),
+            imageUrl: latestImageUrl.current || '',
+            currentRoom: room,
+            currentSide: side,
+        };
+        } else {
+        // 제거: 정점과 이미지 URL 제거
+        next[room][side][wallType] = {
+            ...next[room][side][wallType],
+            vertices: [],
+            imageUrl: '',
+        };
+        }
+
+        return next;
+    });
+
+    // 2. 이미지 객체 처리
+    const imageObj = canvas.getObjects().find(
+        obj => obj.type === 'image' && obj.inputWall === wallType
+    );
+
+    if (imageObj) {
+        if (actionType === 'save') {
+        // 저장 시: 이미지 비활성화 및 숨김 처리
+        imageObj.set({
+            selectable: false,
+            evented: false,
+            opacity: 0,
+            visible: false,
+            inputWall: wallType,
+        });
+        } else if (pointer) {
+        // 제거 시: 이미지 재배치 및 활성화
+        const scaledWidth = imageObj.width * imageObj.scaleX;
+        const scaledHeight = imageObj.height * imageObj.scaleY;
+
+        imageObj.set({
+            left: pointer.x - scaledWidth / 2,
+            top: pointer.y - scaledHeight / 2,
+            selectable: true,
+            evented: true,
+            opacity: 1,
+            visible: true,
+            inputWall: '',
+        });
+
+        imageObj.setCoords(); // 위치 재계산
+        canvas.setActiveObject(imageObj); // 포커스 설정
+        }
+    }
+
+    // 3. 벽 스타일 설정
+    if (actionType === 'save') {
+        wall.set({
+        fill: 'rgba(0,0,0,0)',
+        stroke: null,
+        selectable: false,
+        evented: false,
+        });
+    } else {
+        const restore = wallStyles[wallType] || {};
+        wall.set({
+        ...restore,
+        selectable: true,
+        evented: true,
+        });
+    }
+
+    // 4. front 벽일 경우 컨트롤러 스타일도 변경
+    if (wallType === 'front') {
+        const controllerObj = canvas.getObjects().find(
+        obj => obj.name === 'SherLockRoomController'
+        );
+
+        if (controllerObj) {
+        controllerObj.set(
+            actionType === 'save'
+            ? { fill: 'rgba(0,0,0,0)', stroke: 'rgba(0,0,0,0)' }
+            : { fill: 'rgba(255,0,0,0.2)', stroke: 'red' }
+        );
+        }
+    }
+
+    // 5. 캔버스 상태 정리
+    canvas.discardActiveObject(); // 선택 해제
+    canvas.renderAll(); // 다시 그리기
+};
+
+
+// 벽 스타일 복원
+export const restoreWallVisualStyle = (wall, wallType, canvas) => {
+    const wallStyles = {
+        top:    { fill: 'rgba(255, 0, 255, 0.2)', stroke: 'purple' },
+        left:   { fill: 'rgba(0, 0, 255, 0.2)', stroke: 'blue' },
+        right:  { fill: 'rgba(0, 255, 0, 0.2)', stroke: 'green' },
+        bottom: { fill: 'rgba(255, 255, 0, 0.2)', stroke: 'orange' },
+        front:  { fill: 'rgba(0, 0, 0, 0)', stroke: undefined },
+    };
+
+    const style = wallStyles[wallType] || {};
+    wall.set({ ...style, selectable: true, evented: true });
+
+    if (wallType === 'front') {
+        const controller = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        if (controller) {
+        controller.set({
+            fill: 'rgba(255, 0, 0, 0.2)',
+            stroke: 'red',
+        });
+        }
+    }
+};
+
+// 이미지 제거 및 복원
+export const restoreImageToPointer = (canvas, pointer, wallType) => {
+    const imageObj = canvas.getObjects().find(obj => obj.type === 'image' && obj.inputWall === wallType);
+    if (!imageObj) return;
+
+    const scaledWidth = imageObj.width * imageObj.scaleX;
+    const scaledHeight = imageObj.height * imageObj.scaleY;
+
+    imageObj.set({
+        left: pointer.x - scaledWidth / 2,
+        top: pointer.y - scaledHeight / 2,
+        selectable: true,
+        evented: true,
+        opacity: 1,
+        visible: true,
+        inputWall: '',
+    });
+
+    imageObj.setCoords();
+    canvas.discardActiveObject();
+    canvas.setActiveObject(imageObj);
+};
