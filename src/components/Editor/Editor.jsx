@@ -233,13 +233,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     useEffect(() => {
         if (isReady) {
-            addFrame(220, 120, 220+440, 120+300, edgeFrameState);
+            addFrame(220, 120, 220+440, 120+300, edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
         }
     }, [addFrameTrigger]);
     useEffect(() => {
         if (isReady) {
             const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState);
+            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
         }
     }, [edgeFrameState])
     //                           -------------------------------------(section 6)
@@ -294,7 +294,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    const addFrame = (left, top, width, height, edgeFrameState) => {
+    const addFrame = (left, top, width, height, edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef) => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
         
@@ -319,11 +319,14 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             });
             roomController.setControlVisible('mtr', false);
             
-            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState);
+            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
 
             roomController.on('rotating', makeFrame);
             roomController.on('moving', makeFrame);
             roomController.on('scaling', makeFrame);
+            // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
+            const handleModified = () => { setIsPerspectiveUpdated(true); };
+            roomController.on('modified', handleModified);
 
             // return () => {
             //     roomController.off('rotating', makeFrame);
@@ -348,7 +351,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
         // 현재 방(currentRoom)과 현재 면(currentSide)에 해당하는 벽 정보 집합을 가져옴
         // 구조: perspective = { [room]: { [side]: { wallType: { vertices, imageUrl, ... } } } }
-        const currentWalls = perspective[currentRoom]?.[currentSide] ?? {};
+        const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
+
         // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
         if (!currentWalls['front']?.imageUrl) {
             const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
@@ -379,7 +383,24 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         canvas.sendObjectToBack(roomFrame);
         
         canvas.renderAll();
+
+        return () => { roomController.off('modified', handleModified); };
     };
+    
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        const handleMouseUp = () => {
+            setIsPerspectiveUpdated(true);
+        };
+
+        canvas.on('mouse:up', handleMouseUp);
+
+        return () => {
+            canvas.off('mouse:up', handleMouseUp);
+        };
+    }, []);
 
     const handleAddGameRoom = () => {
         setGame(prev => (new GamePnC({
