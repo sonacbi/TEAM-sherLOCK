@@ -345,7 +345,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         //     }
         //     return wall;
         // });
-
+        const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
         // 현재 방(currentRoom)과 현재 면(currentSide)에 해당하는 벽 정보 집합을 가져옴
         // 구조: perspective = { [room]: { [side]: { wallType: { vertices, imageUrl, ... } } } }
         const currentWalls = perspective[currentRoom]?.[currentSide] ?? {};
