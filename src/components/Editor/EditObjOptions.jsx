@@ -15,6 +15,7 @@ import rightsort from '../../assets/images/EditorPage_img/rightsort.png';
 import underline from '../../assets/images/EditorPage_img/underline.png';
 import strikethrough from '../../assets/images/EditorPage_img/strikethrough.png';
 import italic from '../../assets/images/EditorPage_img/italic.png';
+import bold from '../../assets/images/EditorPage_img/bold.png';
 
 
 export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs}) {
@@ -341,7 +342,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                         </label>
 
                                         <label className={`fontFamily ${optionStyle.fontWeight == "bold" && "selected"}`}>
-                                            <b>B</b>
+                                            <img id="bold" src={bold} alt="bold" />
                                             <input type="checkbox" checked={optionStyle.fontWeight == "bold"} onChange={e => editOption(e, "fontWeight")}/>
                                         </label>
 

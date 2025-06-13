@@ -869,6 +869,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                                         pointerEvents: 'none',
                                                         zIndex: 1,
                                                         background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
+                                                        borderRadius: '5px'
                                                         }}
                                                     >
                                                         <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex}
