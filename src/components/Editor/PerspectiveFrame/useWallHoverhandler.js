@@ -16,7 +16,8 @@ export function useWallHoverHandler({
     perspective, perspectiveRef,
     setPerspective,
     currentRoom, currentSide, // 이미지를 삽입한 방과 사이드 정보를 받아오기
-    currentSideRef, currentRoomRef // 최신값 반영
+    currentSideRef, currentRoomRef, // 최신값 반영
+    setIsPerspectiveUpdated // 캡쳐 이벤트
 }) {
 
   const [previewPerspective, setPreviewPerspective] = useState({}); // 임시 미리보기용
@@ -128,6 +129,8 @@ export function useWallHoverHandler({
 
         canvas.discardActiveObject(); // 확실하게 이미지 선택박스 비가시화
         canvas.renderAll();
+        // 이미지 추가 후
+        setIsPerspectiveUpdated(true);
 
         // console.log(`[mouse:up] ${wall.wallType} 벽을 이미지 확정으로 투명하게 설정`);
       }
@@ -269,6 +272,9 @@ export function useWallHoverHandler({
     restoreWallVisualStyle(wall, wallType, canvas);
 
     canvas.renderAll();
+
+    // 이미지 삭제 후
+    setIsPerspectiveUpdated(true);
     
   };
 

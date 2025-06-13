@@ -48,6 +48,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
+    // 미리보기 캡쳐
+    const [isPerspectiveUpdated, setIsPerspectiveUpdated] = useState(false);
 
     const [selectedSide, setSelectedSide] = useState({ roomIndex: 0, sideIndex: 0 });
     
@@ -150,7 +152,30 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             setPosition([roomController.left, roomController.top]);
             setSize([roomController.getScaledWidth(), roomController.getScaledHeight()]);
         });
+
+        // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
+        const handleModified = () => { setIsPerspectiveUpdated(true); };
+        roomController.on('modified', handleModified);
+        return () => { roomController.off('modified', handleModified); };
+        
     }, [])
+
+
+    useEffect(() => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+
+        const handleMouseUp = () => {
+            setIsPerspectiveUpdated(true);
+            console.log('인식체크'); // 조작 끝났을 때 한 번만 뜸
+        };
+
+        canvas.on('mouse:up', handleMouseUp);
+
+        return () => {
+            canvas.off('mouse:up', handleMouseUp);
+        };
+    }, []);
     // ---------------------------------------------------------------(section 3) (노은성)
     // 캔버스 랜더링 기본값 세팅 -------------------------------------(section 4) ?
     useEffect(() => {
@@ -677,6 +702,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         setHoveredWallVertices, selectedTool, perspective, perspectiveRef, setPerspective,
         currentRoom, currentSide, // 📝 현재 방과 사이드를 벽 정보에 추가함
         currentSideRef, currentRoomRef, // 📝 현재 방과 사이드를 벽 정보에 추가함 (최신값 강제반영)
+        setIsPerspectiveUpdated, // 캡쳐 이벤트
     });
 
         // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
@@ -831,7 +857,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                                         background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
                                                         }}
                                                     >
-                                                        <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex} />
+                                                        <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex}
+                                                        isPerspectiveUpdated={isPerspectiveUpdated} setIsPerspectiveUpdated={setIsPerspectiveUpdated} />
                                                     </div>
                                                 </div>
                                             );

@@ -1,6 +1,6 @@
 // PerspectiveSVG.jsx
 
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 const vanishingPoint = { x: 0, y: 0 };
 const focalLength = 112;
@@ -29,11 +29,45 @@ export function sortVerticesClockwise(vertices) {
     return vertices.sort((a, b) => a.originalIndex - b.originalIndex);
 }
 
-export default function PerspectiveSVG({ perspectiveWalls, roomData, roomIndex, sideIndex }) {
+export default function PerspectiveSVG({ perspectiveWalls, roomData, roomIndex, sideIndex, isPerspectiveUpdated, setIsPerspectiveUpdated }) {
+
+    const svgRef = useRef(null);
+    const [imgDataUrl, setImgDataUrl] = useState(null);
+    
+    // 벽 추가/삭제 끝났을 때 캡처
+    useEffect(() => {
+    if (!isPerspectiveUpdated) return;
+
+    const rafId = requestAnimationFrame(() => {
+        const svgElement = svgRef.current;
+        if (svgElement) {
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svgElement);
+        const encodedData = `data:image/svg+xml;base64,${btoa(svgString)}`;
+        setImgDataUrl(encodedData);
+        console.log("캡쳐 인식");
+        } else {
+        console.warn("SVG 요소가 존재하지 않음");
+        setImgDataUrl(null);
+        }
+        setIsPerspectiveUpdated(false);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+    }, [isPerspectiveUpdated]);
+
+
+
+
+
     if (!roomData || !perspectiveWalls || !perspectiveWalls[roomIndex]) return null;
 
     const side = perspectiveWalls[roomIndex][sideIndex];
     if (!side) return null;
+
+    if (imgDataUrl) {
+        return <img src={imgDataUrl} alt="Perspective Preview" style={{ width: 90, height: 55 }} />;
+    }
 
     const allProjectedPoints = [];
 
@@ -92,6 +126,7 @@ export default function PerspectiveSVG({ perspectiveWalls, roomData, roomIndex, 
 
     return (
         <svg
+            ref={svgRef}
             width={svgWidth}
             height={svgHeight}
             viewBox={`${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`}
