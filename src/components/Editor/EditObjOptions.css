@@ -336,6 +336,33 @@
     display: none;
 }
 
+.event_wrap {
+    height: 680px;
+}
+
+.event_list {
+    overflow-y: auto;
+    max-height: 614px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.event_list::-webkit-scrollbar {
+    width: 8px;
+    margin-right: 10px;
+}
+
+.event_list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.event_list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
 .object_edit .add_event {
     width: 100%;
     padding: 20px 15px;
@@ -348,10 +375,6 @@
 }
 .object_edit .add_event:hover {
     background-color: rgba(255, 255, 255, 0.11);
-}
-
-.object_edit .event-item {
-    margin-bottom: 15px;
 }
 .object_edit .event-item input[type="number"] {
     width: 55px;

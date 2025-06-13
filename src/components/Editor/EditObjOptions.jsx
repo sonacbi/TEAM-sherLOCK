@@ -257,8 +257,8 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                         </>
                     )}
                     
-                    <div className="object_sort" onClick={handleUpEnd}>
-                        <div className="frontEnd_wrap">
+                    <div className="object_sort">
+                        <div className="frontEnd_wrap" onClick={handleUpEnd}>
                             <img id="frontEnd" src={frontEnd} alt="frontEnd" />
                             <button>맨 앞으로</button>
                         </div>
@@ -366,38 +366,40 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
             {activeTab === "event" && (
                 <div className="event_wrap">
-                    {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 && (
-                        <>
-                            {optionStyle.gameEvent.map((data, index) => {
-                                const obj = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
-                                return (
-                                    <div key={`event-${index}`}>
-                                        <EditEventItem
-                                            event={data}
-                                            index={index}
-                                            onChange={(updatedEvent) => {
-                                                const newGameEvents = [...optionStyle.gameEvent];
-                                                newGameEvents[index] = updatedEvent;
-                                                if (obj) {
-                                                    obj.gameEvent = newGameEvents;
-                                                    setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
-                                                    canvasInstance.current.requestRenderAll();
-                                                }
-                                            }}
-                                            onRemove={() => {
-                                                const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
-                                                if (obj) {
-                                                    obj.gameEvent = newGameEvents;
-                                                    setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
-                                                    canvasInstance.current.requestRenderAll();
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </>
-                    )}
+                    <div className="event_list" style={{marginBottom: optionStyle.gameEvent.length > 0 ? "10px" : "0px"}}>
+                        {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 && (
+                            <>
+                                {optionStyle.gameEvent.map((data, index) => {
+                                    const obj = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
+                                    return (
+                                        <div key={`event-${index}`}>
+                                            <EditEventItem
+                                                event={data}
+                                                index={index}
+                                                onChange={(updatedEvent) => {
+                                                    const newGameEvents = [...optionStyle.gameEvent];
+                                                    newGameEvents[index] = updatedEvent;
+                                                    if (obj) {
+                                                        obj.gameEvent = newGameEvents;
+                                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                                        canvasInstance.current.requestRenderAll();
+                                                    }
+                                                }}
+                                                onRemove={() => {
+                                                    const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
+                                                    if (obj) {
+                                                        obj.gameEvent = newGameEvents;
+                                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                                        canvasInstance.current.requestRenderAll();
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </>
+                        )}
+                    </div>
                     
 
 
