@@ -112,6 +112,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             fill: '#333333',
             width: 450,
             editable: true,
+            strokeWidth: 0,
             perPixelTargetFind: false,
         });
 
@@ -201,6 +202,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             addFrame(220, 120, 220+440, 120+300, edgeFrameState);
         }
     }, [addFrameTrigger]);
+    useEffect(() => {
+        if (isReady) {
+            const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState);
+        }
+    }, [edgeFrameState])
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -214,6 +221,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             fill: '#333333',
             width: 160,
             editable: true,
+            strokeWidth: 0,
             perPixelTargetFind: false,
         });
 

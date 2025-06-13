@@ -62,11 +62,12 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 setOptionStyle(prev => ({...prev, fontSize: value}));
                 break;
             case 'fontStyle':
-                value = event.target.checked ? "italic" : "normal"
+                value = event.target.checked ? "italic" : "normal";
                 foundFabric.fontStyle = value;
                 setOptionStyle(prev => ({...prev, fontStyle: value}));
                 break;
             case 'fontWeight':
+                value = event.target.checked ? "bold" : "normal";
                 foundFabric.fontWeight = value;
                 setOptionStyle(prev => ({...prev, fontWeight: value}));
                 break;
@@ -323,13 +324,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
                                 <h4>글꼴 유형</h4>
                                 <label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
-
-                                <h4>글꼴 굵기</h4>
-                                <select value={optionStyle.fontWeight} onChange={e => editOption(e, "fontWeight")}>
-                                    <option value="normal">normal</option>
-                                    <option value="bold">bold</option>
-                                    <option value="lighter">lighter</option>
-                                </select>
+                                <label className={`fontFamily ${optionStyle.fontWeight == "bold" && "selected"}`}><b>B</b><input type="checkbox" checked={optionStyle.fontWeight == "bold"} onChange={e => editOption(e, "fontWeight")}/></label>
                             </div>
                         </div>
                         </>
