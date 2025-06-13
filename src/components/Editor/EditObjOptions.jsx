@@ -12,6 +12,10 @@ import front from '../../assets/images/EditorPage_img/front.png';
 import leftsort from '../../assets/images/EditorPage_img/leftsort.png';
 import centersort from '../../assets/images/EditorPage_img/centersort.png';
 import rightsort from '../../assets/images/EditorPage_img/rightsort.png';
+import underline from '../../assets/images/EditorPage_img/underline.png';
+import strikethrough from '../../assets/images/EditorPage_img/strikethrough.png';
+import italic from '../../assets/images/EditorPage_img/italic.png';
+
 
 export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
@@ -295,11 +299,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                         <img id="rightsort" src={rightsort} alt="rightsort" />
                                         <input type="radio" name="textAlign" value="right" checked={selectedObject.textAlign == "right"} onChange={e => editOption(e, "textAlign")}/>
                                     </label>
-
-                                    {/* <label className={`editOpt_textAlign ${optionStyle.textAlign == "justify" ? "selected" : ""}`}>
-                                        <img id="rightsort" src={rightsort} alt="rightsort" />
-                                        <input type="radio" name="textAlign" value="justify" checked={selectedObject.textAlign == "justify"} onChange={e => editOption(e, "textAlign")}/>
-                                    </label> */}
                                 </div>
                             </div>
 
@@ -332,11 +331,31 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                     </div>
                                 </div>
 
-                                <h4>글꼴 유형</h4>
-                                <label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}><i>I</i><input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/></label>
-                                <label className={`fontFamily ${optionStyle.fontWeight == "bold" && "selected"}`}><b>B</b><input type="checkbox" checked={optionStyle.fontWeight == "bold"} onChange={e => editOption(e, "fontWeight")}/></label>
-                                <label className={`fontFamily ${optionStyle.underline && "selected"}`}>밑줄<input type="checkbox" checked={optionStyle.underline} onChange={e => editOption(e, "underline")}/></label>
-                                <label className={`fontFamily ${optionStyle.linethrough && "selected"}`}>취소선<input type="checkbox" checked={optionStyle.linethrough} onChange={e => editOption(e, "linethrough")}/></label>
+                                <div className="textbox_fontType">
+                                    <h4>글꼴 유형</h4>
+
+                                    <div className="fontType_wrap">
+                                        <label className={`fontFamily ${optionStyle.fontStyle == "italic" && "selected"}`}>
+                                            <img id="italic" src={italic} alt="italic" />
+                                            <input type="checkbox" checked={optionStyle.fontStyle == "italic"} onChange={e => editOption(e, "fontStyle")}/>
+                                        </label>
+
+                                        <label className={`fontFamily ${optionStyle.fontWeight == "bold" && "selected"}`}>
+                                            <b>B</b>
+                                            <input type="checkbox" checked={optionStyle.fontWeight == "bold"} onChange={e => editOption(e, "fontWeight")}/>
+                                        </label>
+
+                                        <label className={`fontFamily ${optionStyle.underline && "selected"}`}>
+                                            <img id="underline" src={underline} alt="underline" />
+                                            <input type="checkbox" checked={optionStyle.underline} onChange={e => editOption(e, "underline")}/>
+                                        </label>
+
+                                        <label className={`fontFamily ${optionStyle.linethrough && "selected"}`}>
+                                            <img id="strikethrough" src={strikethrough} alt="strikethrough" />
+                                            <input type="checkbox" checked={optionStyle.linethrough} onChange={e => editOption(e, "linethrough")}/>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         </>

@@ -296,6 +296,24 @@
     opacity: 1;
 }
 
+.textbox_fontType {
+    display: flex;
+    padding: 10px;
+    align-items: center;
+}
+
+.fontType_wrap {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    font-size: 30px;
+    align-items: center;
+}
+
+.fontType_wrap img {
+    width: 35px;
+}
+
 .object_edit .fontFamily.selected,
 .editOpt_textAlign.selected {
     background-color: rgba(255, 255, 255, 0.15);
