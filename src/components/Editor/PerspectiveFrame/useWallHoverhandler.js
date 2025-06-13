@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import * as fabric from 'fabric';
-import { getWallsFromCanvas, getWallVertices, restoreWallStyle, getRectVertices } from './perspectiveBackground';
+import {  getWallsFromCanvas, getWallVertices, restoreWallStyle, getRectVertices,
+          updatePerspective, restoreWallVisualStyle, restoreImageToPointer } from './perspectiveBackground';
 import { createRoomFrame } from '../../../../modules/handlePolygon';
 
 export function useWallHoverHandler({
@@ -15,6 +16,8 @@ export function useWallHoverHandler({
     perspective, perspectiveRef,
     setPerspective,
     currentRoom, currentSide, // 이미지를 삽입한 방과 사이드 정보를 받아오기
+    currentSideRef, currentRoomRef, // 최신값 반영
+    setIsPerspectiveUpdated // 캡쳐 이벤트
 }) {
 
   const [previewPerspective, setPreviewPerspective] = useState({}); // 임시 미리보기용
@@ -58,6 +61,10 @@ export function useWallHoverHandler({
       isDragging.current = false;
       // console.log('[mouse:up] 드래그 종료');
       restoreWallStyle(hoveredWallLocal, originalStyles, canvasInstance);
+      
+      // currentRoom, currentSide 대신 ref를 써서 최신값 보장
+      const room = currentRoomRef.current;
+      const side = currentSideRef.current;
 
       if (hoveredWallLocal.current) {
         const wall = hoveredWallLocal.current;
@@ -65,7 +72,7 @@ export function useWallHoverHandler({
 
         // 확정된 이미지가 있으면 변경 안 함
         if (
-          perspectiveRef.current?.[currentRoom]?.[currentSide]?.[wall.wallType]?.imageUrl
+          perspectiveRef.current?.[room]?.[side]?.[wall.wallType]?.imageUrl
         ) {
           console.log(`[mouse:up] 이미지가 이미 확정되어 변경하지 않음: ${wall.wallType}`);
           setPreviewPerspective({});
@@ -75,24 +82,25 @@ export function useWallHoverHandler({
           return;
         }
 
+        // prev가 최신 상태
+
         // ✅ 여기서 드래그한 벽과 이미지 URL을 perspective에 저장
         setPerspective(prev => {
         const newPerspective = { ...prev };
 
         // 중첩 구조가 없다면 초기화
-        if (!newPerspective[currentRoom]) newPerspective[currentRoom] = {};
-        if (!newPerspective[currentRoom][currentSide]) newPerspective[currentRoom][currentSide] = {};
+        if (!newPerspective[room]) newPerspective[room] = {};
+        if (!newPerspective[room][side]) newPerspective[room][side] = {};
 
-        newPerspective[currentRoom][currentSide][wall.wallType] = {
+        newPerspective[room][side][wall.wallType] = {
           vertices: vertices,
           imageUrl: latestImageUrl.current || '',
-          currentRoom: currentRoom,
-          currentSide: currentSide,
+          currentRoom: room,
+          currentSide: side,
         };
 
         return newPerspective;
       });
-
 
         // 이미지 확정 처리: 이미지 위치 고정, 선택 불가, 이벤트 비활성, 투명화, 선택박스 비가시화
         if (draggingImage.current) {
@@ -121,6 +129,8 @@ export function useWallHoverHandler({
 
         canvas.discardActiveObject(); // 확실하게 이미지 선택박스 비가시화
         canvas.renderAll();
+        // 이미지 추가 후
+        setIsPerspectiveUpdated(true);
 
         // console.log(`[mouse:up] ${wall.wallType} 벽을 이미지 확정으로 투명하게 설정`);
       }
@@ -226,90 +236,46 @@ export function useWallHoverHandler({
       }
   };
 
+  
   const onMouseDblClick = (opt) => {
-    const canvas = canvasInstance.current;
+    const canvas = canvasInstance.current; 
     const pointer = opt.absolutePointer || canvas.getPointer(opt.e);
-    const currentWalls = getWallsFromCanvas(canvas);
-    const wallUnderPointer = currentWalls.find(wall => wall.containsPoint(pointer));
+    const wall = getWallsFromCanvas(canvas).find(w => w.containsPoint(pointer)); 
+    if (!wall) return;
 
-    if (!wallUnderPointer) return;
+    // currentRoom, currentSide 대신 ref를 써서 최신값 보장
+    const room = currentRoomRef.current;
+    const side = currentSideRef.current;
 
-    const wallType = wallUnderPointer.wallType;
-    const currentData = perspectiveRef.current?.[currentRoom]?.[currentSide]?.[wallType];
-    if (!currentData || !currentData.imageUrl) return;
+    const wallType = wall.wallType;
+    const currentData = perspectiveRef.current?.[room]?.[side]?.[wallType];
+    if (!currentData?.imageUrl) return;
 
-    const wallStyles = {
-      top:    { fill: 'rgba(255, 0, 255, 0.2)', stroke: 'purple' },
-      left:   { fill: 'rgba(0, 0, 255, 0.2)', stroke: 'blue' },
-      right:  { fill: 'rgba(0, 255, 0, 0.2)', stroke: 'green' },
-      bottom: { fill: 'rgba(255, 255, 0, 0.2)', stroke: 'orange' },
-      front:  { fill: 'rgba(0, 0, 0, 0)', stroke: undefined },
-    };
-
-    // console.log(`[dblclick] ${wallType} 벽에서 이미지 제거`);
-
-      // perspective에서 이미지 및 꼭지점 제거
-      setPerspective(prev => {
+    // 이미지 제거
+    setPerspective(prev => {
       const newPerspective = { ...prev };
-      if (newPerspective[currentRoom]?.[currentSide]?.[wallType]) {
-        newPerspective[currentRoom][currentSide][wallType] = {
-          ...newPerspective[currentRoom][currentSide][wallType],
-          imageUrl: '',
-          vertices: [],
-        };
-      }
+      
+      if (!newPerspective[room]) newPerspective[room] = {};
+      if (!newPerspective[room][side]) newPerspective[room][side] = {};
+
+      newPerspective[room][side][wallType] = {
+        vertices: [],
+        imageUrl: '',
+        currentRoom: room,
+        currentSide: side,
+      };
+
       return newPerspective;
     });
 
-      // 캔버스 오브젝트 중에서 해당 이미지 URL 가진 객체 찾기
-      const imageObj = canvas.getObjects().find(obj => obj.type === 'image' && obj.inputWall === wallType);
-      if (imageObj) {
-        const scaledWidth = imageObj.width * imageObj.scaleX;
-        const scaledHeight = imageObj.height * imageObj.scaleY;
+    restoreImageToPointer(canvas, pointer, wallType);
+    restoreWallVisualStyle(wall, wallType, canvas);
 
-        imageObj.set({
-          left: pointer.x - scaledWidth / 2,
-          top: pointer.y - scaledHeight / 2,
-          selectable: true,
-          evented: true,
-          opacity: 1,
-          visible: true,
-          inputWall: '', // 초기화
-        });
+    canvas.renderAll();
 
-        imageObj.setCoords(); // 경계 다시 계산
-        canvas.discardActiveObject();
-        canvas.setActiveObject(imageObj);
-      }
-
-
-      // 벽 스타일 복원
-      const style = wallStyles[wallType] || {};
-      wallUnderPointer.set({
-        ...style,
-        selectable: true,
-        evented: true,
-      });
-
-      // front 벽일 때 컨트롤러도 함께 복원
-      if (wallType === 'front') {
-        const controllerName = 'SherLockRoomController';
-        const controllerStyle = {
-          fill: 'rgba(255, 0, 0, 0.2)',
-          stroke: 'red',
-        };
-
-        const controllerObj = canvas.getObjects().find(obj => obj.name === controllerName);
-        if (controllerObj) {
-          controllerObj.set(controllerStyle);
-        }
-      }
-      imageObj.setCoords(); // 경계 다시 계산
-      
-      canvas.discardActiveObject(); // 튀어나온 이미지 선택 가능하게
-      canvas.setActiveObject(imageObj);        // 이미지 선택 박스 씌우기
-      canvas.renderAll();
-      // console.log(`[dblclick] ${wallType} 벽 이미지 제거 및 스타일 복원 완료`);
+    // 이미지 삭제 후
+    setIsPerspectiveUpdated(true);
+    
   };
 
 

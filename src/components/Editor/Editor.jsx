@@ -13,8 +13,9 @@ import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect, useCopyNPas
 import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
+import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
 
-function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
+function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
@@ -23,6 +24,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const [size, setSize] = useState([220 + 440, 120 + 300]);
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
+
+    const currentRoomRef = useRef(currentRoom);
+    const currentSideRef = useRef(currentSide);
+
+    // currentRoom, currentSide가 바뀔 때마다 ref도 업데이트
+    useEffect(() => { currentRoomRef.current = currentRoom; }, [currentRoom]);
+    useEffect(() => { currentSideRef.current = currentSide; }, [currentSide]);
 
     // 프레임 원근법 배경 왜곡 디버깅 코드 + 상태 관리 코드 ------------ (section 1) (정다정)
     //디버깅용
@@ -40,42 +48,68 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
     const [hoveredWall, setHoveredWall] = useState(null);
     // 현재 호버된 벽의 꼭지점 좌표 (WebGL 컴포넌트 전달용)
     const [hoveredWallVertices, setHoveredWallVertices] = useState([]);
+    // 미리보기 캡쳐
+    const [isPerspectiveUpdated, setIsPerspectiveUpdated] = useState(false);
 
     const [selectedSide, setSelectedSide] = useState({ roomIndex: 0, sideIndex: 0 });
-
+    
     // perspectiveWalls를 벽 객체 배열로 관리
     const perspectiveWalls = React.useMemo(() => {
-        if (!perspective) return []; // perspective가 존재하지 않으면 빈 배열 반환
+    if (!perspective) return [];
 
-        // perspective 구조:
-        // {
-        //   [roomId]: {
-        //     [sideId]: {
-        //       [wallType]: { imageUrl, vertices, ... }
-        //     }
-        //   }
-        // }
+    const wall_room = String(currentRoomRef.current);
+    const wall_side = String(currentSideRef.current);
 
-        // room 단위로 map 순회
-        const result = Object.entries(perspective).map(([currentRoom, sides]) => { // 각 side (예: 0, 1)에 대해 wall 정보를 복사
-            const sideObjects = Object.entries(sides).reduce((acc, [currentSide, walls]) => { 
-                acc[currentSide] = { ...walls };
-                return acc; // acc는 side ID별로 해당 wall 객체들을 담는 객체
-            }, {});
+    // perspective 구조:
+    // {
+    //   [roomId]: {
+    //     [sideId]: {
+    //       [wallType]: { imageUrl, vertices, ... }
+    //     }
+    //   }
+    // }
 
-            // 각 room 객체는 currentRoom을 포함하고
-            // side 0, side 1 정보를 키로 갖는 구조로 리턴됨
-            return {
-                currentRoom,
-                ...sideObjects,
-            };
+    // perspective에 있는 방 개수 혹은 현재 방 번호+1 중 큰 값으로 방 개수 고정
+    const totalRooms = Math.max(Object.keys(perspective).length, Number(wall_room) + 1);
+
+    const result = [];
+
+    for (let i = 0; i < totalRooms; i++) {
+        const roomId = String(i);
+        const sides = perspective[roomId] || {}; // 데이터가 없으면 빈 객체
+
+        // 현재 방이라도 모든 side를 포함하도록 수정
+        const filteredSides = {};
+
+        Object.entries(sides).forEach(([sideId, walls]) => {
+        // 모든 side를 넣음
+        filteredSides[sideId] = { ...walls };
         });
 
-        if (process.env.NODE_ENV === 'development' && hoveredWall) {
-            console.log('[useMemo] items:', result);
+        // side가 아예 없으면 기본값으로 side_0 빈 객체 삽입
+        if (Object.keys(filteredSides).length === 0) {
+        filteredSides['0'] = {};
         }
-        return result;
-    }, [perspective]); // perspective가 바뀔 때만 다시 계산됨
+
+        // 각 room 객체는 다음과 같은 형태로 리턴됨:
+        // {
+        //   currentRoom: "0",
+        //   0: { front: {...}, top: {...}, ... },
+        //   1: { ... },
+        //   ...
+        // }
+        result.push({
+        currentRoom: roomId,
+        ...filteredSides,
+        });
+    }
+
+    if (process.env.NODE_ENV === 'development' && hoveredWall) {
+        console.log('[useMemo] items:', result);
+    }
+
+    return result;
+    }, [perspective]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
@@ -311,23 +345,36 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         //     }
         //     return wall;
         // });
-        // roomFrame 안에 있는 모든 하위 오브젝트(fabric.js 기준)들을 가져옴 (📝 구조 변경돼서 수정)
-        const frameObjects = roomFrame.getObjects?.() ?? [];
 
         // 현재 방(currentRoom)과 현재 면(currentSide)에 해당하는 벽 정보 집합을 가져옴
         // 구조: perspective = { [room]: { [side]: { wallType: { vertices, imageUrl, ... } } } }
         const currentWalls = perspective[currentRoom]?.[currentSide] ?? {};
-        // 각 벽 오브젝트에 대해 해당 wallType에 imageUrl이 존재하면 fill/stroke를 투명하게 설정
+        // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
+        if (!currentWalls['front']?.imageUrl) {
+            const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
+                if (frontWall) {
+                // roomController도 보이게 설정
+                roomController.set({
+                    fill: 'rgba(255,0,0,0.2)',
+                    stroke: 'red',
+                });
+            }
+        }
+
+        // 프레임 안 오브젝트 스타일 설정
+        const frameObjects = roomFrame.getObjects?.() ?? [];
         frameObjects.forEach(obj => {
             const wallData = currentWalls[obj.wallType];
             if (wallData?.imageUrl) {
                 obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
             }
         });
-        // 만약 정면(front) 벽에 imageUrl이 있으면 roomController도 숨김 처리
+
+        // front 벽에 이미지 있을 경우 컨트롤러 숨김 처리
         if (currentWalls['front']?.imageUrl) {
             roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
         }
+
         // roomFrame을 캔버스 맨 뒤로 보내고 전체 다시 렌더링
         canvas.sendObjectToBack(roomFrame);
         
@@ -380,19 +427,22 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
         // 해당 room 인덱스와 일치하는 원근법 배경 객체 초기화
         setPerspective(prev => {
-            const newPerspective = { ...prev };
             // 삭제할 room 인덱스(roomSide)
             const roomToDelete = roomSide;
+            const newPerspective = { ...prev };
 
             // 해당 room 삭제
             delete newPerspective[roomToDelete];
 
             // 남은 room 키들을 숫자 순으로 정렬하고, 삭제된 방 뒤 인덱스들은 -1씩 당겨야 함
             const adjustedPerspective = {};
-            Object.entries(newPerspective).forEach(([key, value]) => {
-                const numKey = Number(key);
-                adjustedPerspective[numKey > roomToDelete ? numKey - 1 : numKey] = value;
-            });
+            Object.keys(newPerspective)
+                .map(k => Number(k))
+                .sort((a, b) => a - b)
+                .forEach(oldKey => {
+                    const newKey = oldKey > roomToDelete ? oldKey - 1 : oldKey;
+                    adjustedPerspective[newKey] = newPerspective[oldKey];
+                });
 
             return adjustedPerspective;
         });
@@ -449,29 +499,31 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
 
         // 해당 side 인덱스와 일치하는 원근법 배경 객체 초기화
         setPerspective(prev => {
-            const newPerspective = { ...prev };
             const roomIdx = currentRoom;  // 현재 방 번호
             const sideToDelete = deletedIndex;  // 삭제할 side 인덱스
 
-            if (!newPerspective[roomIdx]) return prev;
+            if (!prev[roomIdx]) return prev;
 
             // 해당 room의 sides 객체를 복사
-            const roomSides = { ...newPerspective[roomIdx] };
+            const roomSides = { ...prev[roomIdx] };
 
             // 삭제할 side 삭제
             delete roomSides[sideToDelete];
 
             // 남은 side 키들 재정렬 (숫자 순, 삭제된 뒤쪽 인덱스는 -1)
             const adjustedSides = {};
-            Object.entries(roomSides).forEach(([key, value]) => {
-                const numKey = Number(key);
-                adjustedSides[numKey > sideToDelete ? numKey - 1 : numKey] = value;
-            });
+            Object.keys(roomSides)
+                .map(k => Number(k))
+                .sort((a, b) => a - b)
+                .forEach(oldKey => {
+                    const newKey = oldKey > sideToDelete ? oldKey - 1 : oldKey;
+                    adjustedSides[newKey] = roomSides[oldKey];
+                });
 
-            // 변경된 side들을 다시 room에 세팅
-            newPerspective[roomIdx] = adjustedSides;
-
-            return newPerspective;
+            return {
+                ...prev,
+                [roomIdx]: adjustedSides
+            };
         });
 
     };
@@ -611,6 +663,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
                     canvasInstance.current.renderAll();
+
+                    // ✅ 여기서 비워주기
+                    setAddImageFile(null);
                 };
 
                 imgElement.onerror = () => {
@@ -625,6 +680,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
             reader.readAsDataURL(addImageFile);
         }
     }, [addImageFile]);
+
     // 이미지 추가 ---------------------------------------------------(section 11)
     // ---------------------------------------------------------------(section)
     useEffect(() => {
@@ -659,6 +715,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
         position, size, edgeFrameState, angle,
         setHoveredWallVertices, selectedTool, perspective, perspectiveRef, setPerspective,
         currentRoom, currentSide, // 📝 현재 방과 사이드를 벽 정보에 추가함
+        currentSideRef, currentRoomRef, // 📝 현재 방과 사이드를 벽 정보에 추가함 (최신값 강제반영)
+        setIsPerspectiveUpdated, // 캡쳐 이벤트
     });
 
         // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
@@ -764,7 +822,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                     <div className='room_area_scroll'>
                         {game.room.map((roomData, roomIndex) => {
                             return (
-
                                 <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
                                     <div className='stage_wrap'>
                                         <div className='stageIndex_delete'>
@@ -777,35 +834,60 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, addImageFile, add
                                     {roomIndex == currentRoom && (
                                         <div className='side_area'>
                                             {room.side.map((sideData, sideIndex) => {
-                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+                                            const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
 
-                                                return(
-                                                    <div className={`side_wrap ${isSelected ? 'selected' : ''}`}  key={sideIndex}> 
-                                                        <div className={`side ${isSelected ? 'selected' : ''}`} onClick={() => handleCurrentSide(sideIndex, sideData)}>
-                                                            {sideImgSrcs[currentRoom][sideIndex] && <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55}/>}
-                                                            <button onClick={(e) => {
-                                                                e.stopPropagation();  // 클릭 이벤트 전파 막기
-                                                                handleDeleteGameSide(sideIndex);
-                                                            }}>-</button>
-                                                        </div>
+                                            return (
+                                                <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
+                                                <div
+                                                    className={`side ${isSelected ? 'selected' : ''}`}
+                                                    onClick={() => handleCurrentSide(sideIndex, sideData)}
+                                                    style={{ position: 'relative', zIndex: 2 }}
+                                                >
+                                                    {sideImgSrcs[currentRoom][sideIndex] && (
+                                                    <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} />
+                                                    )}
+                                                    <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteGameSide(sideIndex);
+                                                    }}
+                                                    >
+                                                    -
+                                                    </button>
+                                                </div>
 
-                                                        <div className="info">
-                                                            <h4>{sideIndex + 1}</h4>
-                                                        </div>
+                                                <div className="info" style={{ position: 'relative', zIndex: 1 }}>
+                                                    <h4>{sideIndex + 1}</h4>
+                                                </div>
+
+                                                {/* 모든 side마다 PerspectiveSVG 렌더링 */}
+                                                    <div
+                                                        style={{ position: 'absolute',
+                                                        top: '5px', left: 0,
+                                                        margin: 'auto',
+                                                        width: '90px', height: '55px',
+                                                        pointerEvents: 'none',
+                                                        zIndex: 1,
+                                                        background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
+                                                        }}
+                                                    >
+                                                        <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex}
+                                                        isPerspectiveUpdated={isPerspectiveUpdated} setIsPerspectiveUpdated={setIsPerspectiveUpdated} />
                                                     </div>
-                                                )
+                                                </div>
+                                            );
                                             })}
                                             <button onClick={handleAddGameSide}>+</button>
                                         </div>
                                     )}
-                                </div>
+                                </div>    
                             )
                         })}
-                                
                         <button onClick={handleAddGameRoom}>+</button>
                     </div>
                 </div>
             </div>
+            
         </div>
         
     );
