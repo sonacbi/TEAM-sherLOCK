@@ -233,13 +233,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     useEffect(() => {
         if (isReady) {
-            addFrame(220, 120, 220+440, 120+300, edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
+            addFrame(220, 120, 220+440, 120+300);
         }
     }, [addFrameTrigger]);
     useEffect(() => {
         if (isReady) {
             const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
+            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight());
         }
     }, [edgeFrameState])
     //                           -------------------------------------(section 6)
@@ -294,99 +294,107 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    const addFrame = (left, top, width, height, edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef) => {
-        const canvas = canvasInstance.current;
-        if (!canvas) return;
-        
-        const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
-        if (target) canvas.remove(target);
-        
-        const roomFrame = createRoomFrame(
-            left, top, width, height,
-            ...edgeFrameState,
-        );
+    // 기존 addFrame을 콜백 방식으로 변경 
+    const makeAddFrameCallback = (
+        edgeFrameState,
+        currentRoomRef,
+        currentSideRef,
+        perspectiveRef,
+        setIsPerspectiveUpdated,
+    ) => {
+        return (left, top, width, height) => {
+            const canvas = canvasInstance.current;
+            if (!canvas) return;
 
-        canvas.add(roomFrame);
-        if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
-            const roomController = new fabric.Rect({
-                ...controlStyle,
-                fill: 'rgba(255, 0, 0, 0.2)',
-                strokeWidth: 2,
-                stroke: 'red',
-                name: "SherLockRoomController",
-                perPixelTargetFind: false,
+            const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+            if (target) canvas.remove(target);
+
+            const roomFrame = createRoomFrame(
                 left, top, width, height,
-            });
-            roomController.setControlVisible('mtr', false);
-            
-            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
+                ...edgeFrameState,
+            );
 
-            roomController.on('rotating', makeFrame);
-            roomController.on('moving', makeFrame);
-            roomController.on('scaling', makeFrame);
-            // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
-            const handleModified = () => { setIsPerspectiveUpdated(true); };
-            roomController.on('modified', handleModified);
+            canvas.add(roomFrame);
 
-            // return () => {
-            //     roomController.off('rotating', makeFrame);
-            //     roomController.off('moving', makeFrame);
-            //     roomController.off('scaling', makeFrame);
-            // };
-            canvas.add(roomController);
-            canvas.setActiveObject(roomController);
-            canvas.sendObjectToBack(roomController);
-        }
-
-        // const result = perspectiveWalls.map(wall => {
-        //     if (hoveredWall && hoveredWall.wallType === wall.wallType) {
-        //         return {
-        //         ...wall,
-        //         vertices: hoveredWallVertices.length === 4 ? hoveredWallVertices : wall.vertices,
-        //         imageUrl: perspective[wall.wallType]?.imageUrl ?? '',
-        //         };
-        //     }
-        //     return wall;
-        // });
-        const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-        // 현재 방(currentRoom)과 현재 면(currentSide)에 해당하는 벽 정보 집합을 가져옴
-        // 구조: perspective = { [room]: { [side]: { wallType: { vertices, imageUrl, ... } } } }
-        const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
-
-        // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
-        if (!currentWalls['front']?.imageUrl) {
-            const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
-                if (frontWall) {
-                // roomController도 보이게 설정
-                roomController.set({
-                    fill: 'rgba(255,0,0,0.2)',
+            let roomController = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
+            if (!roomController) {
+                roomController = new fabric.Rect({
+                    ...controlStyle,
+                    fill: 'rgba(255, 0, 0, 0.2)',
+                    strokeWidth: 2,
                     stroke: 'red',
+                    name: "SherLockRoomController",
+                    perPixelTargetFind: false,
+                    left, top, width, height,
                 });
+                roomController.setControlVisible('mtr', false);
+
+                const addFrameCallback = makeAddFrameCallback(
+                    edgeFrameState,
+                    currentRoomRef,
+                    currentSideRef,
+                    perspectiveRef,
+                    setIsPerspectiveUpdated,
+                );
+
+                const onFrameChange = () => {
+                    addFrameCallback(
+                        roomController.left,
+                        roomController.top,
+                        roomController.getScaledWidth(),
+                        roomController.getScaledHeight(),
+                    );
+                };
+
+                roomController.on('rotating', onFrameChange);
+                roomController.on('moving', onFrameChange);
+                roomController.on('scaling', onFrameChange);
+
+                const handleModified = () => {
+                    setIsPerspectiveUpdated(true);
+                };
+                roomController.on('modified', handleModified);
+
+                canvas.add(roomController);
+                canvas.setActiveObject(roomController);
+                canvas.sendObjectToBack(roomController);
             }
-        }
 
-        // 프레임 안 오브젝트 스타일 설정
-        const frameObjects = roomFrame.getObjects?.() ?? [];
-        frameObjects.forEach(obj => {
-            const wallData = currentWalls[obj.wallType];
-            if (wallData?.imageUrl) {
-                obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+            const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
+
+            if (!currentWalls['front']?.imageUrl) {
+                const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
+                if (frontWall) {
+                    roomController.set({
+                        fill: 'rgba(255,0,0,0.2)',
+                        stroke: 'red',
+                    });
+                }
             }
-        });
 
-        // front 벽에 이미지 있을 경우 컨트롤러 숨김 처리
-        if (currentWalls['front']?.imageUrl) {
-            roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
-        }
+            const frameObjects = roomFrame.getObjects?.() ?? [];
+            frameObjects.forEach(obj => {
+                const wallData = currentWalls[obj.wallType];
+                if (wallData?.imageUrl) {
+                    obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+                }
+            });
 
-        // roomFrame을 캔버스 맨 뒤로 보내고 전체 다시 렌더링
-        canvas.sendObjectToBack(roomFrame);
-        
-        canvas.renderAll();
+            if (currentWalls['front']?.imageUrl) {
+                roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+            }
 
-        return () => { roomController.off('modified', handleModified); };
+            canvas.sendObjectToBack(roomFrame);
+            canvas.renderAll();
+
+            return () => {
+                roomController.off('modified', handleModified);
+            };
+        };
     };
-    
+
+    const addFrame = makeAddFrameCallback(edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef, setIsPerspectiveUpdated);
+
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -464,7 +472,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                     const newKey = oldKey > roomToDelete ? oldKey - 1 : oldKey;
                     adjustedPerspective[newKey] = newPerspective[oldKey];
                 });
-
+            
+            setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
             return adjustedPerspective;
         });
     };
@@ -540,7 +549,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                     const newKey = oldKey > sideToDelete ? oldKey - 1 : oldKey;
                     adjustedSides[newKey] = roomSides[oldKey];
                 });
-
+            
+            setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
             return {
                 ...prev,
                 [roomIdx]: adjustedSides
@@ -551,6 +561,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     const handleCurrentRoom = (roomIndex) => {
         setCurrentRoom(roomIndex);
+        setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
     }
 
     const handleCurrentSide = (sideIndex, sideData) => {
@@ -559,6 +570,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, addFrame);
         }, 50)
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
+        setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
     }
 
     const handleChangeRoomName = (roomIndex, name) => {
