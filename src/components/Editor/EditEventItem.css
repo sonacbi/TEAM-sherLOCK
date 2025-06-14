@@ -12,8 +12,28 @@
 .event_header {
     display: flex;
     align-items: center;
+    gap: 20px;
+}
+
+.event_header > p {
+    flex: 1;
+    border-radius: 5px;
+    padding: 3px 10px;
+    border: 2px solid white;
+    text-align: center;
 }
 
 .event_header > button {
     margin-left: auto;
+    border: 0;
+    padding: 3px 5px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.3);
+    opacity: 0.5;
+}
+
+.event_header > button:hover {
+    opacity: 0.8;
 }

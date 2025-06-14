@@ -38,9 +38,9 @@ export default function EditEventItem({ event, index, onChange, onRemove, color 
             <div className="event_header">
                 <h4>Event {index + 1}</h4>
 
-                <p>??</p>
+                <p>이동</p>
 
-                <button onClick={onRemove}>삭제</button>
+                <button onClick={onRemove}>X</button>
             </div>
 
             {/* <select value={type} onChange={handleTypeChange}>
