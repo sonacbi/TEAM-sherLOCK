@@ -1,0 +1,19 @@
+.event-item {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.event_header {
+    display: flex;
+    align-items: center;
+}
+
+.event_header > button {
+    margin-left: auto;
+}

@@ -23,6 +23,21 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
     const [optionStyle, setOptionStyle] = useState(foundFabric);
     const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
     const activeObject = canvasInstance.current?.getActiveObject();
+    const [showOptions, setShowOptions] = useState(false);
+
+    const eventColors = {
+        move: "#89b9e7",
+        appear: "#6ac46a",
+        hide: "#a5a5a5",
+        remove: "#f57070",
+        change: "#c695ff",
+        additem: "#d0bc5a",
+        deleteitem: "#e1bc94",
+        timer_start: "#8db4c1",
+        timer_end: "#6c868f",
+        save: "#71c39a",
+        delay: "#ffba65"
+    };
 
     const editOption = (event, option) => {
         const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
@@ -140,22 +155,45 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
         const foundFabric = canvas.getObjects().find(obj => obj === selectedObject);
         if (!foundFabric) return;
 
-        // 기존 gameEvent가 없으면 초기화
         if (!Array.isArray(foundFabric.gameEvent)) {
             foundFabric.gameEvent = [];
         }
 
-        // 직접 복사본 생성 후 set
         foundFabric.gameEvent = [...foundFabric.gameEvent, event];
 
-        // 상태도 마찬가지로 불변성 유지
         setOptionStyle(prev => ({
             ...prev,
             gameEvent: [...(prev.gameEvent || []), event]
         }));
 
         canvas.requestRenderAll();
-    }
+    };
+
+    const handleAddEvent = (eventType) => {
+        const canvas = canvasInstance.current;
+        const foundFabric = canvas.getObjects().find(obj => obj === selectedObject);
+        if (!foundFabric) return;
+
+        if (!Array.isArray(foundFabric.gameEvent)) {
+            foundFabric.gameEvent = [];
+        }
+
+        const newEvent = {
+            type: eventType,
+            color: eventColors[eventType] || "#000000" // 기본색
+        };
+
+        foundFabric.gameEvent = [...foundFabric.gameEvent, newEvent];
+
+        setOptionStyle(prev => ({
+            ...prev,
+            gameEvent: [...(prev.gameEvent || []), newEvent]
+        }));
+
+        canvas.requestRenderAll();
+
+        setShowOptions(false);
+    };
 
     useEffect(() => {
         const found = canvasInstance.current?.getObjects().find(obj => obj === selectedObject);
@@ -186,6 +224,10 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
         canvas.discardActiveObject();
         canvas.requestRenderAll();
+    };
+
+    const toggleEventOption = () => {
+        setShowOptions(prev => !prev); // 단순히 보이기만 토글
     };
 
     return(
@@ -366,7 +408,38 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
             {activeTab === "event" && (
                 <div className="event_wrap">
-                    <div className="event_list" style={{marginBottom: optionStyle.gameEvent.length > 0 ? "10px" : "0px"}}>
+                    {/* 이벤트 추가 버튼: 항상 표시 */}
+                    <button className='add_event' onClick={toggleEventOption}>
+                        이벤트 추가하기
+                    </button>
+
+                    {showOptions && (
+                        <div className="event_option">
+                            {Object.keys(eventColors).map(key => (
+                                <p
+                                    key={key}
+                                    className={key}
+                                    onClick={() => handleAddEvent(key)}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    {/* 예를 들어 "move" => "이동 - 방, 컷 이동 이벤트" 등 텍스트 직접 작성 필요 */}
+                                    {key === "move" && "이동 - 방, 컷 이동 이벤트"}
+                                    {key === "appear" && "객체 출현 - 숨김 → 출현 이벤트"}
+                                    {key === "hide" && "객체 숨김 - 출현 → 숨김 이벤트"}
+                                    {key === "remove" && "객체 제거 - 객체 삭제 이벤트"}
+                                    {key === "change" && "객체 변경 - 객체 변경 이벤트"}
+                                    {key === "additem" && "아이템 얻기 - 인벤토리 저장 이벤트"}
+                                    {key === "deleteitem" && "아이템 제거 - 인벤토리 제거 이벤트"}
+                                    {key === "timer_start" && "타이머 시작 - 타이머 시작 이벤트"}
+                                    {key === "timer_end" && "타이머 종료 - 타이머 종료 이벤트"}
+                                    {key === "save" && "저장 - 세이브포인트 이벤트"}
+                                    {key === "delay" && "딜레이 - 딜레이 후 행동 이벤트"}
+                                </p>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="event_list" style={{marginTop: optionStyle.gameEvent.length > 0 ? "15px" : "0px"}}>
                         {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 && (
                             <>
                                 {optionStyle.gameEvent.map((data, index) => {
@@ -376,6 +449,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                             <EditEventItem
                                                 event={data}
                                                 index={index}
+                                                color={data.color}
                                                 onChange={(updatedEvent) => {
                                                     const newGameEvents = [...optionStyle.gameEvent];
                                                     newGameEvents[index] = updatedEvent;
@@ -400,13 +474,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                             </>
                         )}
                     </div>
-                    
-
-
-                    {/* 이벤트 추가 버튼: 항상 표시 */}
-                    <button className='add_event' onClick={addEvent}>
-                        이벤트 추가하기
-                    </button>
                 </div>
             )}
         </div>

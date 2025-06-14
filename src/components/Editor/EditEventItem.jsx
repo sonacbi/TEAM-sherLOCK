@@ -1,8 +1,9 @@
 import { useState } from "react";
 
 import { GameEventType } from "../../../modules/editor/gamePnC";
+import './EditEventItem.css';
 
-export default function EditEventItem({ event, index, onChange, onRemove }) {
+export default function EditEventItem({ event, index, onChange, onRemove, color }) {
     const [type, setType] = useState(getEventType(event));
 
     function getEventType(eventObj) {
@@ -33,23 +34,29 @@ export default function EditEventItem({ event, index, onChange, onRemove }) {
     }
 
     return (
-        <div className="event-item">
-            <h4>이벤트 {index + 1}</h4>
-            <select value={type} onChange={handleTypeChange}>
-                {/* <option value="">선택</option> */}
-                <option value="move">이동</option>
-                <option value="getObj">객체 얻기</option>
-                <option value="setObj">객체 변경</option>
-                <option value="dropObj">객체 제거</option>
-                <option value="getItem">아이템 얻기</option>
-                <option value="dropItem">아이템 제거</option>
-                <option value="startTime">타이머 시작</option>
-                <option value="endTime">타이머 종료</option>
-                <option value="startSound">소리 재생</option>
-                <option value="endSound">소리 정지</option>
-                <option value="save">저장</option>
-            </select>
-            <button onClick={onRemove}>삭제</button>
+        <div className="event-item" style={{ backgroundColor: color || "transparent" }}>
+            <div className="event_header">
+                <h4>Event {index + 1}</h4>
+
+                <p>??</p>
+
+                <button onClick={onRemove}>삭제</button>
+            </div>
+
+            {/* <select value={type} onChange={handleTypeChange}>
+                    <option value="">선택</option>
+                    <option value="move">이동</option>
+                    <option value="getObj">객체 얻기</option>
+                    <option value="setObj">객체 변경</option>
+                    <option value="dropObj">객체 제거</option>
+                    <option value="getItem">아이템 얻기</option>
+                    <option value="dropItem">아이템 제거</option>
+                    <option value="startTime">타이머 시작</option>
+                    <option value="endTime">타이머 종료</option>
+                    <option value="startSound">소리 재생</option>
+                    <option value="endSound">소리 정지</option>
+                    <option value="save">저장</option>
+            </select> */}
 
             <div className="event-fields">
                 {type === "move" && (
