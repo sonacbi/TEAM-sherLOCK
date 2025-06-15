@@ -25,18 +25,51 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
     const activeObject = canvasInstance.current?.getActiveObject();
     const [showOptions, setShowOptions] = useState(false);
 
-    const eventColors = {
-        move: "#89b9e7",
-        appear: "#6ac46a",
-        hide: "#a5a5a5",
-        remove: "#f57070",
-        change: "#c695ff",
-        additem: "#d0bc5a",
-        deleteitem: "#e1bc94",
-        timer_start: "#8db4c1",
-        timer_end: "#6c868f",
-        save: "#71c39a",
-        delay: "#ffba65"
+    const eventValues = {
+        move: {
+            name: "이동", color: "#89b9e7",
+            explain: "방, 스테이지 이동 이벤트"
+        },
+        appearObj: {
+            name: "객체 출현", color: "#6ac46a",
+            explain: "숨김 → 출현 이벤트"
+        },
+        hideObj: {
+            name: "객체 숨김", color: "#a5a5a5",
+            explain: "출현 → 숨김 이벤트"
+        },
+        removeObj: {
+            name: "객체 제거", color: "#f57070",
+            explain: "객체 삭제 이벤트"
+        },
+        changeObj: {
+            name: "객체 변경", color: "#c695ff",
+            explain: "객체 변경 이벤트"
+        },
+        getItem: {
+            name: "아이템 얻기", color: "#d0bc5a",
+            explain: "인벤토리 저장 이벤트"
+        },
+        dropItem: {
+            name: "아이템 제거", color: "#e1bc94",
+            explain: "인벤토리 제거 이벤트"
+        },
+        startTime: {
+            name: "타이머 시작", color: "#8db4c1",
+            explain: "타이머 시작 이벤트"
+        },
+        endTime: {
+            name: "타이머 종료", color: "#6c868f",
+            explain: "타이머 종료 이벤트"
+        },
+        save: {
+            name: "저장", color: "#71c39a",
+            explain: "세이브포인트 이벤트"
+        },
+        delay: {
+            name: "딜레이", color: "#ffba65",
+            explain: "딜레이 후 행동 이벤트"
+        },
     };
 
     const editOption = (event, option) => {
@@ -110,7 +143,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
         }
         try {
             foundFabric.set(option, value);
-            foundFabric.dirty = true;
+            foundFabric.dirty = true; // 랜더링용
             canvasInstance.current.requestRenderAll();
         } catch (error) {
             console.error(`속성 '${option}' 설정 중 오류:`, error);
@@ -149,49 +182,22 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
         canvas.requestRenderAll();
     }
 
-    const addEvent = () => {
-        const event = { move: GameEventType["move"] };
-        const canvas = canvasInstance.current;
-        const foundFabric = canvas.getObjects().find(obj => obj === selectedObject);
-        if (!foundFabric) return;
+    const addEvent = (eventType) => {
+        const event = { [eventType]: GameEventType[eventType] };
+        if (!selectedObject) return;
 
-        if (!Array.isArray(foundFabric.gameEvent)) {
-            foundFabric.gameEvent = [];
+        if (!Array.isArray(selectedObject.gameEvent)) {
+            selectedObject.gameEvent = [];
         }
 
-        foundFabric.gameEvent = [...foundFabric.gameEvent, event];
+        selectedObject.gameEvent = [...selectedObject.gameEvent, event];
 
         setOptionStyle(prev => ({
             ...prev,
             gameEvent: [...(prev.gameEvent || []), event]
         }));
 
-        canvas.requestRenderAll();
-    };
-
-    const handleAddEvent = (eventType) => {
-        const canvas = canvasInstance.current;
-        const foundFabric = canvas.getObjects().find(obj => obj === selectedObject);
-        if (!foundFabric) return;
-
-        if (!Array.isArray(foundFabric.gameEvent)) {
-            foundFabric.gameEvent = [];
-        }
-
-        const newEvent = {
-            type: eventType,
-            color: eventColors[eventType] || "#000000" // 기본색
-        };
-
-        foundFabric.gameEvent = [...foundFabric.gameEvent, newEvent];
-
-        setOptionStyle(prev => ({
-            ...prev,
-            gameEvent: [...(prev.gameEvent || []), newEvent]
-        }));
-
-        canvas.requestRenderAll();
-
+        canvasInstance.current.requestRenderAll();
         setShowOptions(false);
     };
 
@@ -272,7 +278,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             {activeTab === "attribute" && (
                 <>
                     {activeObject?.type !== "image" && activeObject?.type !== "activeselection" && (
-                        <>
                         <div className="default_attribute">
                             <div className="object_name">
                                 <h4>이름 : </h4>
@@ -296,7 +301,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                 </div>
                             </div>
                         </div>
-                        </>
                     )}
                     
                     <div className="object_sort">
@@ -365,7 +369,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                 <div className="background_size_wrap">
                                     <div className="textbox_background">
                                         <h4>글 배경</h4>
-                                        <input type="color" value={optionStyle.textBackgroundColor ? optionStyle.textBackgroundColor : "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
+                                        <input type="color" value={optionStyle.textBackgroundColor ?? "#000000"} onChange={e => editOption(e, "textBackgroundColor")}/>
                                     </div>
 
                                     <div className="textbox_size">
@@ -415,25 +419,14 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
                     {showOptions && (
                         <div className="event_option">
-                            {Object.keys(eventColors).map(key => (
+                            {Object.keys(GameEventType).map(key => (
                                 <p
                                     key={key}
-                                    className={key}
-                                    onClick={() => handleAddEvent(key)}
-                                    style={{ cursor: "pointer" }}
+                                    onClick={() => addEvent(key)}
+                                    style={{ cursor: "pointer", '--hover-event': eventValues[key].color }}
                                 >
                                     {/* 예를 들어 "move" => "이동 - 방, 컷 이동 이벤트" 등 텍스트 직접 작성 필요 */}
-                                    {key === "move" && "이동 - 방, 컷 이동 이벤트"}
-                                    {key === "appear" && "객체 출현 - 숨김 → 출현 이벤트"}
-                                    {key === "hide" && "객체 숨김 - 출현 → 숨김 이벤트"}
-                                    {key === "remove" && "객체 제거 - 객체 삭제 이벤트"}
-                                    {key === "change" && "객체 변경 - 객체 변경 이벤트"}
-                                    {key === "additem" && "아이템 얻기 - 인벤토리 저장 이벤트"}
-                                    {key === "deleteitem" && "아이템 제거 - 인벤토리 제거 이벤트"}
-                                    {key === "timer_start" && "타이머 시작 - 타이머 시작 이벤트"}
-                                    {key === "timer_end" && "타이머 종료 - 타이머 종료 이벤트"}
-                                    {key === "save" && "저장 - 세이브포인트 이벤트"}
-                                    {key === "delay" && "딜레이 - 딜레이 후 행동 이벤트"}
+                                    {`${eventValues[key].name} - ${eventValues[key].explain}`}
                                 </p>
                             ))}
                         </div>
@@ -443,26 +436,26 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                         {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 && (
                             <>
                                 {optionStyle.gameEvent.map((data, index) => {
-                                    const obj = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
                                     return (
                                         <div key={`event-${index}`}>
                                             <EditEventItem
                                                 event={data}
                                                 index={index}
-                                                color={data.color}
+                                                eventValues={eventValues}
                                                 onChange={(updatedEvent) => {
                                                     const newGameEvents = [...optionStyle.gameEvent];
                                                     newGameEvents[index] = updatedEvent;
-                                                    if (obj) {
-                                                        obj.gameEvent = newGameEvents;
+                                                    if (selectedObject) {
+                                                        selectedObject.gameEvent = newGameEvents;
                                                         setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
+                                                        foundFabric.dirty = true; // 랜더링용
                                                         canvasInstance.current.requestRenderAll();
                                                     }
                                                 }}
                                                 onRemove={() => {
                                                     const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
-                                                    if (obj) {
-                                                        obj.gameEvent = newGameEvents;
+                                                    if (selectedObject) {
+                                                        selectedObject.gameEvent = newGameEvents;
                                                         setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
                                                         canvasInstance.current.requestRenderAll();
                                                     }

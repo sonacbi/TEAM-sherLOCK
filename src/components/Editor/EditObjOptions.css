@@ -400,17 +400,9 @@
     cursor: pointer;
 }
 
-.move:hover         { background-color: #89b9e7; }
-.appear:hover       { background-color: #6ac46a; }
-.hide:hover         { background-color: #a5a5a5; }
-.remove:hover       { background-color: #f57070; }
-.change:hover       { background-color: #c695ff; }
-.additem:hover      { background-color: #d0bc5a; }
-.deleteitem:hover   { background-color: #e1bc94; }
-.timer_start:hover  { background-color: #8db4c1; }
-.timer_end:hover    { background-color: #6c868f; }
-.save:hover         { background-color: #71c39a; }
-.delay:hover        { background-color: #ffba65; }
+.event_option > p:hover {
+    background-color: var(--hover-event);
+}
 
 .object_edit .event-item input[type="number"] {
     width: 55px;

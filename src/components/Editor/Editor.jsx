@@ -233,15 +233,15 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     useEffect(() => {
         if (isReady) {
-            addFrame(220, 120, 220+440, 120+300, edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
+            addFrame(220, 120, 220+440, 120+300, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
         }
     }, [addFrameTrigger]);
     useEffect(() => {
         if (isReady) {
-            const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
+            const frame = room.side[currentSide].frame;
+            frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
         }
-    }, [edgeFrameState])
+    }, [room.side[currentSide].frame])
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -294,7 +294,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    const addFrame = (left, top, width, height, edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef) => {
+    const addFrame = (left, top, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef) => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
         
@@ -302,8 +302,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         if (target) canvas.remove(target);
         
         const roomFrame = createRoomFrame(
-            left, top, width, height,
-            ...edgeFrameState,
+            left, top, width, height, ...edge
         );
 
         canvas.add(roomFrame);
@@ -313,15 +312,15 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 fill: 'rgba(255, 0, 0, 0.2)',
                 strokeWidth: 2,
                 stroke: 'red',
+                edge: [170, 240, 240, 150],
                 name: "SherLockRoomController",
                 perPixelTargetFind: false,
                 left, top, width, height,
             });
             roomController.setControlVisible('mtr', false);
-            
-            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef);
 
-            roomController.on('rotating', makeFrame);
+            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), room.side[currentSide]?.frame?.edge ?? roomController.edge, currentRoomRef, currentSideRef, perspectiveRef);
+
             roomController.on('moving', makeFrame);
             roomController.on('scaling', makeFrame);
             // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
@@ -329,7 +328,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             roomController.on('modified', handleModified);
 
             // return () => {
-            //     roomController.off('rotating', makeFrame);
             //     roomController.off('moving', makeFrame);
             //     roomController.off('scaling', makeFrame);
             // };
@@ -580,10 +578,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 y: Number(roomController.top.toFixed(2)),
                 width: Number(roomController.getScaledWidth().toFixed(2)),
                 height: Number(roomController.getScaledHeight().toFixed(2)),
-                top: edgeFrameState[0],
-                left: edgeFrameState[1],
-                right: edgeFrameState[2],
-                bottom: edgeFrameState[3],
+                edge: room.side[currentSide]?.frame?.edge ?? roomController.edge,
             }
             return newData;
         });

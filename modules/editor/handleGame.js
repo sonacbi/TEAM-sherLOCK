@@ -31,6 +31,8 @@ const handleSide = (canvas) => {
                     fontSize: data?.fontSize,
                     fontStyle: data?.fontStyle,
                     fontWeight: data?.fontWeight,
+                    underline: data?.underline,
+                    linethrough: data?.linethrough,
                     strokeWidth: data?.strokeWidth,
                     stroke: data?.stroke,
                     strokeUniform: data?.strokeUniform,
@@ -50,8 +52,8 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame) => {
     await canvas.clear();
 
     if (side.frame) {
-        const { x, y, width, height, top, left, right, bottom } = side.frame;
-        addFrame(x, y, width, height, [top, left, right, bottom]);
+        const { x, y, width, height, edge } = side.frame;
+        addFrame(x, y, width, height, edge);
     }
 
     const promises = side.fabric.map((fabricData) => {
@@ -87,6 +89,8 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame) => {
                             fontSize: opt.fontSize,
                             fontStyle: opt.fontStyle,
                             fontWeight: opt.fontWeight,
+                            underline: opt.underline,
+                            linethrough: opt.linethrough,
                             strokeWidth: opt.strokeWidth,
                             stroke: opt.stroke,
                             strokeUniform: opt.strokeUniform,
