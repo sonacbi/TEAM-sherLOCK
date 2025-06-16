@@ -241,7 +241,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             const frame = room.side[currentSide].frame;
             frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
         }
-    }, [room.side[currentSide].frame?.side])
+    }, [room.side[currentSide].frame])
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -306,7 +306,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         );
 
         canvas.add(roomFrame);
-
         if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
             const roomController = new fabric.Rect({
                 ...controlStyle,
@@ -328,41 +327,47 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             const handleModified = () => { setIsPerspectiveUpdated(true); };
             roomController.on('modified', handleModified);
 
-            const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
-
-            if (!currentWalls['front']?.imageUrl) {
-                const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
-                if (frontWall) {
-                    roomController.set({
-                        fill: 'rgba(255,0,0,0.2)',
-                        stroke: 'red',
-                    });
-                }
-            }
-
-            const frameObjects = roomFrame.getObjects?.() ?? [];
-            frameObjects.forEach(obj => {
-                const wallData = currentWalls[obj.wallType];
-                if (wallData?.imageUrl) {
-                    obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
-                }
-            });
-
-            if (currentWalls['front']?.imageUrl) {
-                roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
-            }
-
             canvas.add(roomController);
             canvas.setActiveObject(roomController);
             canvas.sendObjectToBack(roomController);
-            canvas.sendObjectToBack(roomFrame);
-            canvas.renderAll();
+        }
 
-            return () => {
-                roomController.off('modified', handleModified);
-            };
-        };
-    }
+        const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
+
+        // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
+        if (!currentWalls['front']?.imageUrl) {
+            const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
+                if (frontWall) {
+                // roomController도 보이게 설정
+                roomController.set({
+                    fill: 'rgba(255,0,0,0.2)',
+                    stroke: 'red',
+                });
+            }
+        }
+
+        // 프레임 안 오브젝트 스타일 설정
+        const frameObjects = roomFrame.getObjects?.() ?? [];
+        frameObjects.forEach(obj => {
+            const wallData = currentWalls[obj.wallType];
+            if (wallData?.imageUrl) {
+                obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+            }
+        });
+
+        // front 벽에 이미지 있을 경우 컨트롤러 숨김 처리
+        if (currentWalls['front']?.imageUrl) {
+            roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
+        }
+
+        // roomFrame을 캔버스 맨 뒤로 보내고 전체 다시 렌더링
+        canvas.sendObjectToBack(roomFrame);
+        
+        canvas.renderAll();
+
+        return () => { roomController.off('modified', handleModified); };
+    };
     
     useEffect(() => {
         const canvas = canvasInstance.current;
