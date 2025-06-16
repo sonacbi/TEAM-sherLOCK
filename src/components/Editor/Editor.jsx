@@ -242,12 +242,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             addFrame(220, 120, 220+440, 120+300, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
         }
     }, [addFrameTrigger]);
-    useEffect(() => {
-        if (isReady) {
-            const frame = room.side[currentSide].frame;
-            frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
-        }
-    }, [room.side[currentSide].frame])
+    // useEffect(() => {
+    //     if (isReady) {
+    //         const frame = room.side[currentSide].frame;
+    //         frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
+    //     }
+    // }, [room.side[currentSide].frame])
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
