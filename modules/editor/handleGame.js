@@ -48,12 +48,12 @@ const handleSide = (canvas) => {
     return updatedFabric;
 };
 
-const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame) => {
+const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoomRef, currentSideRef, perspectiveRef) => {
     await canvas.clear();
 
     if (side.frame) {
         const { x, y, width, height, edge } = side.frame;
-        addFrame(x, y, width, height, edge);
+        addFrame(x, y, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef);
     }
 
     const promises = side.fabric.map((fabricData) => {

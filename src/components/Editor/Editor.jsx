@@ -241,7 +241,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             const frame = room.side[currentSide].frame;
             frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
         }
-    }, [room.side[currentSide].frame])
+    }, [room.side[currentSide].frame?.side])
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -327,9 +327,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
             const handleModified = () => { setIsPerspectiveUpdated(true); };
             roomController.on('modified', handleModified);
-            canvas.add(roomController);
-            canvas.setActiveObject(roomController);
-            canvas.sendObjectToBack(roomController);
 
             const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
 
@@ -355,6 +352,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 roomController.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
             }
 
+            canvas.add(roomController);
+            canvas.setActiveObject(roomController);
+            canvas.sendObjectToBack(roomController);
             canvas.sendObjectToBack(roomFrame);
             canvas.renderAll();
 
@@ -536,7 +536,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const handleCurrentSide = (sideIndex, sideData) => {
         setCurrentSide(sideIndex);
         setTimeout(() => {
-            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, addFrame);
+            loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, addFrame, currentRoomRef, currentSideRef, perspectiveRef);
         }, 50)
         setSelectedSide({ roomIndex: currentRoom, sideIndex });
         setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
