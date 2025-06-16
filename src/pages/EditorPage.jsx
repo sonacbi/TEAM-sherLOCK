@@ -186,6 +186,7 @@ function EditorPage() {
         const target2 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController')
         if (target1) canvasInstance.current.remove(target1);
         if (target2) canvasInstance.current.remove(target2);
+        room.side[currentSide].frame = null;
     }
 
     useEffect(()=>console.log('imgs',imgs), [imgs])
@@ -208,6 +209,36 @@ function EditorPage() {
     const toggleRoomInfo = () => {
         setShowRoomInfo(prev => !prev);
     };
+
+    const EdgeFramePage = () => {
+        const roomController = canvasInstance.current?.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        const handleEdge = (event, index) => {
+            const value = Number(event.target.value);
+            roomController.edge[index] = value;
+            setRoom(prev => {
+                const newData = new Room(prev);
+                newData.side[currentSide].frame.edge[index] = value;
+                return newData;
+            });
+        }
+
+        return(
+            <div className='frame_fine_tuning'>
+                {roomController && room.side[currentSide]?.frame?.edge ?
+                    (<>
+                    <button onClick={removeFrame}>프레임 삭제</button>
+                    <br />
+                    top: <input id="roomFrame0" type="range" min={120} max={800} value={room.side[currentSide].frame.edge[0]} step={1} onChange={event => handleEdge(event, 0)}/> {room.side[currentSide].frame.edge[0]} <br />
+                    left: <input id="roomFrame0" type="range" min={220} max={800} value={room.side[currentSide].frame.edge[1]} step={1} onChange={event => handleEdge(event, 1)}/> {room.side[currentSide].frame.edge[1]} <br />
+                    right: <input id="roomFrame0" type="range" min={220} max={800} value={room.side[currentSide].frame.edge[2]} step={1} onChange={event => handleEdge(event, 2)}/> {room.side[currentSide].frame.edge[2]} <br />
+                    bottom: <input id="roomFrame0" type="range" min={110} max={800} value={room.side[currentSide].frame.edge[3]} step={1} onChange={event => handleEdge(event, 3)}/> {room.side[currentSide].frame.edge[3]} <br />
+                    </>)
+                    :
+                    <button onClick={() => setAddFrameTrigger(Date.now())}>새 프레임 생성</button>
+                }
+            </div>
+        )
+    }
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -289,17 +320,7 @@ function EditorPage() {
                             ) : (
                                 <>
                                     {selectedTool === 'frame' && (
-                                        <div className='frame_fine_tuning'>
-                                            {canvasInstance.current?.getObjects().find(obj => obj.name === 'SherLockRoomController') ?
-                                                <button onClick={removeFrame}>프레임 삭제</button> :
-                                                <button onClick={() => setAddFrameTrigger(Date.now())}>새 프레임 생성</button>
-                                            }
-                                            <br />
-                                            top: <input id="roomFrame0" type="range" min={120} max={800} value={edgeFrameState[0]} step={1} onChange={event => handleEdgeFrameState(event, 0)}/> {edgeFrameState[0]} <br />
-                                            left: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[1]} step={1} onChange={event => handleEdgeFrameState(event, 1)}/> {edgeFrameState[1]} <br />
-                                            right: <input id="roomFrame0" type="range" min={220} max={800} value={edgeFrameState[2]} step={1} onChange={event => handleEdgeFrameState(event, 2)}/> {edgeFrameState[2]} <br />
-                                            bottom: <input id="roomFrame0" type="range" min={110} max={800} value={edgeFrameState[3]} step={1} onChange={event => handleEdgeFrameState(event, 3)}/> {edgeFrameState[3]} <br />
-                                        </div>
+                                        <EdgeFramePage/>
                                     )}
 
                                     {selectedTool === 'text' && (

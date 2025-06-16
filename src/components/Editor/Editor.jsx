@@ -233,15 +233,15 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     useEffect(() => {
         if (isReady) {
-            addFrame(220, 120, 220+440, 120+300);
+            addFrame(220, 120, 220+440, 120+300, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
         }
     }, [addFrameTrigger]);
     useEffect(() => {
         if (isReady) {
-            const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight());
+            const frame = room.side[currentSide].frame;
+            frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
         }
-    }, [edgeFrameState])
+    }, [room.side[currentSide].frame])
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -294,66 +294,38 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    // 기존 addFrame을 콜백 방식으로 변경 
-    const makeAddFrameCallback = (
-        edgeFrameState,
-        currentRoomRef,
-        currentSideRef,
-        perspectiveRef,
-        setIsPerspectiveUpdated,
-    ) => {
-        return (left, top, width, height) => {
-            const canvas = canvasInstance.current;
-            if (!canvas) return;
+    const addFrame = (left, top, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef) => {
+        const canvas = canvasInstance.current;
+        if (!canvas) return;
+        
+        const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+        if (target) canvas.remove(target);
+        
+        const roomFrame = createRoomFrame(
+            left, top, width, height, ...edge
+        );
 
-            const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
-            if (target) canvas.remove(target);
-
-            const roomFrame = createRoomFrame(
+        canvas.add(roomFrame);
+        if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
+            const roomController = new fabric.Rect({
+                ...controlStyle,
+                fill: 'rgba(255, 0, 0, 0.2)',
+                strokeWidth: 2,
+                stroke: 'red',
+                edge: [170, 240, 240, 150],
+                name: "SherLockRoomController",
+                perPixelTargetFind: false,
                 left, top, width, height,
-                ...edgeFrameState,
-            );
+            });
+            roomController.setControlVisible('mtr', false);
 
-            canvas.add(roomFrame);
+            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), room.side[currentSide]?.frame?.edge ?? roomController.edge, currentRoomRef, currentSideRef, perspectiveRef);
 
-            let roomController = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            if (!roomController) {
-                roomController = new fabric.Rect({
-                    ...controlStyle,
-                    fill: 'rgba(255, 0, 0, 0.2)',
-                    strokeWidth: 2,
-                    stroke: 'red',
-                    name: "SherLockRoomController",
-                    perPixelTargetFind: false,
-                    left, top, width, height,
-                });
-                roomController.setControlVisible('mtr', false);
-
-                const addFrameCallback = makeAddFrameCallback(
-                    edgeFrameState,
-                    currentRoomRef,
-                    currentSideRef,
-                    perspectiveRef,
-                    setIsPerspectiveUpdated,
-                );
-
-                const onFrameChange = () => {
-                    addFrameCallback(
-                        roomController.left,
-                        roomController.top,
-                        roomController.getScaledWidth(),
-                        roomController.getScaledHeight(),
-                    );
-                };
-
-                roomController.on('rotating', onFrameChange);
-                roomController.on('moving', onFrameChange);
-                roomController.on('scaling', onFrameChange);
-
-                const handleModified = () => {
-                    setIsPerspectiveUpdated(true);
-                };
-                roomController.on('modified', handleModified);
+            roomController.on('moving', makeFrame);
+            roomController.on('scaling', makeFrame);
+            // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
+            const handleModified = () => { setIsPerspectiveUpdated(true); };
+            roomController.on('modified', handleModified);
 
                 canvas.add(roomController);
                 canvas.setActiveObject(roomController);
@@ -592,10 +564,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 y: Number(roomController.top.toFixed(2)),
                 width: Number(roomController.getScaledWidth().toFixed(2)),
                 height: Number(roomController.getScaledHeight().toFixed(2)),
-                top: edgeFrameState[0],
-                left: edgeFrameState[1],
-                right: edgeFrameState[2],
-                bottom: edgeFrameState[3],
+                edge: room.side[currentSide]?.frame?.edge ?? roomController.edge,
             }
             return newData;
         });

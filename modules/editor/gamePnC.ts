@@ -54,32 +54,20 @@ class Frame extends ClassVersion {
     y: number;
     width: number;
     height: number;
-    angle: number;
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
+    edge: number[];
     constructor({
         x = 220,
         y = 120,
         width = 220 + 440,
         height = 120 + 330,
-        angle = 0,
-        top = 170,
-        left = 240,
-        right = 240,
-        bottom = 150,
+        edge = [170, 240, 240, 150],
     }) {
         super();
-        this.x = Math.round(x);
-        this.y = Math.round(y);
-        this.width = Math.round(width);
-        this.height = Math.round(height);
-        this.angle = Number(angle.toFixed(1));
-        this.top = top;
-        this.left = left;
-        this.right = right;
-        this.bottom = bottom;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.edge = edge;
     }
 }
 
@@ -97,16 +85,18 @@ class Fabric extends ClassVersion {
 // 이벤트
 const GameEventType = {
     move: { room: 0, side: 0 },
-    getObj: { name: "", x: 0, y: 0, scaleX: 1, scaleY: 1 },
-    setObj: { from: "", to: { name: "", scaleX: 1, scaleY: 1 } },
-    dropObj: "",
-    getItem: "",
-    dropItem: "",
+    appearObj: { name: "" },
+    hideObj: { name: "" },
+    removeObj: { name: "" },
+    changeObj: { from: "", to: "" },
+    getItem: { name: "" },
+    dropItem: { name: "" },
     startTime: { name: "", limit: 0 },
-    endTime: "",
-    startSound: { name: "", volume: 1 },
-    endSound: "",
-    save: {}
+    endTime: { name: "" },
+    // startSound: { name: "", volume: 1 },
+    // endSound: { name:"" },
+    save: {},
+    delay: { time: 0 },
 };
 
 // 아이템
