@@ -9,7 +9,7 @@ export default function EditEventItem({ event, index, eventValues, onChange, onR
             <div className="event_header">
                 <h4>Event {index + 1}</h4>
                 <p>{eventName}</p>
-                <button onClick={onRemove}>삭제</button>
+                <button onClick={onRemove}>X</button>
             </div>
 
             <div className="event-fields">

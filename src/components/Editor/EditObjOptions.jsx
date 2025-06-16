@@ -31,11 +31,11 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             explain: "방, 스테이지 이동 이벤트"
         },
         appearObj: {
-            name: "객체 출현", color: "#6ac46a",
+            name: "객체 출현", color: "#c695ff",
             explain: "숨김 → 출현 이벤트"
         },
         hideObj: {
-            name: "객체 숨김", color: "#a5a5a5",
+            name: "객체 숨김", color: "#c695ff",
             explain: "출현 → 숨김 이벤트"
         },
         removeObj: {
@@ -43,7 +43,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             explain: "객체 삭제 이벤트"
         },
         changeObj: {
-            name: "객체 변경", color: "#c695ff",
+            name: "객체 변경", color: "#f57070",
             explain: "객체 변경 이벤트"
         },
         getItem: {
@@ -51,7 +51,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             explain: "인벤토리 저장 이벤트"
         },
         dropItem: {
-            name: "아이템 제거", color: "#e1bc94",
+            name: "아이템 제거", color: "#d0bc5a",
             explain: "인벤토리 제거 이벤트"
         },
         startTime: {
@@ -59,7 +59,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             explain: "타이머 시작 이벤트"
         },
         endTime: {
-            name: "타이머 종료", color: "#6c868f",
+            name: "타이머 종료", color: "#8db4c1",
             explain: "타이머 종료 이벤트"
         },
         save: {
