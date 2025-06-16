@@ -37,3 +37,92 @@
 .event_header > button:hover {
     opacity: 0.8;
 }
+
+.event-fields > div {
+    display: flex;
+    border-radius: 5px;
+    padding: 15px;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.event-fields input {
+    border: 0;
+    border-radius: 5px;
+}
+
+.event-fields input:focus {
+    outline: none;
+}
+
+.object_move {
+    gap: 10px;
+}
+
+.stage_move, .cut_move {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stage_move > input, .cut_move > input {
+    background-color: white;
+    width: 35px;
+    text-align: center;
+    padding: 5px 0;
+}
+
+.stage_move > input::-webkit-inner-spin-button,
+.stage_move > input::-webkit-outer-spin-button,
+.cut_move > input::-webkit-inner-spin-button,
+.cut_move > input::-webkit-outer-spin-button,
+.object_delay > input::-webkit-inner-spin-button,
+.object_delay > input::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+.object_appear, .object_hide, .object_remove, .object_getItem, .object_dropItem, .object_startTime, .object_endTime {
+    align-items: center;
+}
+
+.object_appear > input, .object_hide > input, .object_remove > input, .object_getItem > input, .object_dropItem > input {
+    height: 25px;
+    width: 160px;
+    padding: 5px;
+    margin-left: auto;
+}
+
+.object_change {
+    flex-direction: column;
+    gap: 20px;
+}
+
+.before_name, .after_name {
+    display: flex;
+    align-items: center;
+}
+
+.before_name > input, .after_name > input {
+    width: 130px;
+    height: 25px;
+    margin-left: auto;
+    padding: 5px;
+} 
+
+.object_startTime > input, .object_endTime > input {
+    height: 25px;
+    width: 120px;
+    padding: 5px;
+    margin-left: auto;
+}
+
+.object_delay {
+    gap: 10px;
+}
+
+.object_delay > input {
+    background-color: white;
+    width: 80px;
+    text-align: right;
+    padding: 5px 0;
+}

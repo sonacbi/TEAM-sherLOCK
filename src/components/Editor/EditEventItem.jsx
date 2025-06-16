@@ -15,50 +15,92 @@ export default function EditEventItem({ event, index, eventValues, onChange, onR
             <div className="event-fields">
                 {eventName === eventValues.move.name && (
                     <>
-                        스테이지: <input type="number" min={0} max={99} value={event.move?.room} onChange={e => onChange({ move: { room: Number(e.target.value), side: event.move?.side } })} />
-                        컷: <input type="number" min={0} max={99} value={event.move?.side} onChange={e => onChange({ move: { room: event.move?.room, side: Number(e.target.value) } })} />
+                        <div className='object_move'>
+                            <p>→</p>
+
+                            <div className='stage_move'>
+                                <p>스테이지</p>
+                                <input type="number" min={0} max={99} value={event.move?.room} onChange={e => onChange({ move: { room: Number(e.target.value), side: event.move?.side } })} />
+                            </div>
+
+                            <p>/</p>
+
+                            <div className='cut_move'>
+                                <p>컷</p>
+                                <input type="number" min={0} max={99} value={event.move?.side} onChange={e => onChange({ move: { room: event.move?.room, side: Number(e.target.value) } })} />
+                            </div>
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.appearObj.name && (
                     <>
-                        이름: <input value={event.appearObj?.name} onChange={e => onChange({ appearObj: { name: e.target.value } })} />
+                        <div className='object_appear'>
+                            <p>이름 : </p>
+                            <input value={event.appearObj?.name} onChange={e => onChange({ appearObj: { name: e.target.value } })} />
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.hideObj.name && (
                     <>
-                        이름: <input value={event.hideObj?.name} onChange={e => onChange({ hideObj: { name: e.target.value } })} />
+                        <div className='object_hide'>
+                            <p>이름 : </p>
+                            <input value={event.hideObj?.name} onChange={e => onChange({ hideObj: { name: e.target.value } })} />
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.removeObj.name && (
                     <>
-                        이름: <input value={event.removeObj?.name} onChange={e => onChange({ removeObj: { name: e.target.value } })} />
+                        <div className='object_remove'>
+                            <p>이름 : </p>
+                            <input value={event.removeObj?.name} onChange={e => onChange({ removeObj: { name: e.target.value } })} />
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.changeObj.name && (
-                    <>
-                        기존 이름: <input value={event.changeObj?.from} onChange={e => onChange({ changeObj: { from: e.target.value, to: event.changeObj?.to } })} />
-                        바꿀 이름: <input value={event.changeObj?.to} onChange={e => onChange({ changeObj: { from: event.changeObj?.from, to: e.target.value } })} />
+                    <>  
+                        <div className='object_change'>
+                            <div className='before_name'>
+                                <p>기존 이름 : </p>
+                                <input value={event.changeObj?.from} onChange={e => onChange({ changeObj: { from: e.target.value, to: event.changeObj?.to } })} />
+                            </div>
+
+                            <div className='after_name'>
+                                <p>바꿀 이름 : </p>
+                                <input value={event.changeObj?.to} onChange={e => onChange({ changeObj: { from: event.changeObj?.from, to: e.target.value } })} />
+                            </div>
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.getItem.name && (
                     <>
-                        아이템 이름: <input value={event.getItem?.name} onChange={e => onChange({ getItem: { name: e.target.value } })} />
+                        <div className='object_getItem'>
+                            <p>이름: </p>
+                            <input value={event.getItem?.name} onChange={e => onChange({ getItem: { name: e.target.value } })} />
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.dropItem.name && (
                     <>
-                        아이템 이름: <input value={event.dropItem?.name} onChange={e => onChange({ dropItem: { name: e.target.value } })} />
+                        <div className='object_dropItem'>
+                            <p>이름: </p>
+                            <input value={event.dropItem?.name} onChange={e => onChange({ dropItem: { name: e.target.value } })} />
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.startTime.name && (
                     <>
-                        타이머 이름: <input value={event.startTime?.name} onChange={e => onChange({ startTime: { name: e.target.value, limit: event.startTime?.limit } })} />
-                        제한 시간: <input type="number" min={0} max={1000*60} value={event.startTime?.limit} onChange={e => onChange({ startTime: { name: event.startTime?.name, limit: Number(e.target.value) } })} /> 밀리초
+                        <div className='object_startTime'>
+                            <p>타이머 이름 : </p>
+                            <input value={event.startTime?.name} onChange={e => onChange({ startTime: { name: e.target.value, limit: event.startTime?.limit } })} />
+                        </div>
                     </>
                 )}
                 {eventName === eventValues.endTime.name && (
                     <>
-                        멈출 타이머 이름: <input value={event.endTime?.name} onChange={e => onChange({ endTime: { name: e.target.value } })} />
+                        <div className='object_endTime'>
+                            <p>타이머 이름 : </p>
+                            <input value={event.endTime?.name} onChange={e => onChange({ endTime: { name: e.target.value } })} />
+                        </div>
                     </>
                 )}
                 {/* {eventName === eventValues.endTime.name && (
@@ -72,10 +114,14 @@ export default function EditEventItem({ event, index, eventValues, onChange, onR
                         정지할 소리 이름: <input value={event.endSound} onChange={e => onChange({ endSound: e.target.value })} />
                     </>
                 )} */}
-                {eventName === eventValues.save.name && <p>저장은 별도 설정 없음</p>}
+                {eventName === eventValues.save.name && <div><p>세이브포인트</p></div>}
+
                 {eventName === eventValues.delay.name && (
                     <>
-                        시간: <input type="number" value={event.delay?.time} onChange={e => onChange({ delay: { time: Number(e.target.value) } })} /> 밀리초
+                        <div className='object_delay'>
+                            <input type="number" value={event.delay?.time} onChange={e => onChange({ delay: { time: Number(e.target.value) } })} /> 
+                            <p>ms (밀리초)</p>
+                        </div>
                     </>
                 )}
             </div>

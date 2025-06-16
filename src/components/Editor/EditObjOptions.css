@@ -405,7 +405,3 @@
 .event_option > p:hover {
     background-color: var(--hover-event);
 }
-
-.object_edit .event-item input[type="number"] {
-    width: 55px;
-}
