@@ -306,6 +306,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         );
 
         canvas.add(roomFrame);
+
         if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
             const roomController = new fabric.Rect({
                 ...controlStyle,
@@ -326,11 +327,9 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             // ✅ 조작 끝난 후 한 번만 호출 (추가 캡처)
             const handleModified = () => { setIsPerspectiveUpdated(true); };
             roomController.on('modified', handleModified);
-
-                canvas.add(roomController);
-                canvas.setActiveObject(roomController);
-                canvas.sendObjectToBack(roomController);
-            }
+            canvas.add(roomController);
+            canvas.setActiveObject(roomController);
+            canvas.sendObjectToBack(roomController);
 
             const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
 
@@ -363,10 +362,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 roomController.off('modified', handleModified);
             };
         };
-    };
-
-    const addFrame = makeAddFrameCallback(edgeFrameState, currentRoomRef, currentSideRef, perspectiveRef, setIsPerspectiveUpdated);
-
+    }
+    
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -780,7 +777,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                         width={1100} height={650}
                                     />
                                 </div>
-                            ))}
+                            ))
+                        }   
 
                         {/* 미리보기용 perspective 렌더링 추가 */}
                         {previewItems.map(({ wallType, vertices, imageUrl }) => (
@@ -836,49 +834,49 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                     {roomIndex == currentRoom && (
                                         <div className='side_area'>
                                             {room.side.map((sideData, sideIndex) => {
-                                            const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
 
-                                            return (
-                                                <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
-                                                <div
-                                                    className={`side ${isSelected ? 'selected' : ''}`}
-                                                    onClick={() => handleCurrentSide(sideIndex, sideData)}
-                                                    style={{ position: 'relative', zIndex: 2 }}
-                                                >
-                                                    {sideImgSrcs[currentRoom][sideIndex] && (
-                                                    <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} />
-                                                    )}
-                                                    <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteGameSide(sideIndex);
-                                                    }}
-                                                    >
-                                                    -
-                                                    </button>
-                                                </div>
-
-                                                <div className="info" style={{ position: 'relative', zIndex: 1 }}>
-                                                    <h4>{sideIndex + 1}</h4>
-                                                </div>
-
-                                                {/* 모든 side마다 PerspectiveSVG 렌더링 */}
+                                                return (
+                                                    <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
                                                     <div
-                                                        style={{ position: 'absolute',
-                                                        top: '5px', left: 0,
-                                                        margin: 'auto',
-                                                        width: '90px', height: '55px',
-                                                        pointerEvents: 'none',
-                                                        zIndex: 1,
-                                                        background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
-                                                        borderRadius: '5px'
-                                                        }}
+                                                        className={`side ${isSelected ? 'selected' : ''}`}
+                                                        onClick={() => handleCurrentSide(sideIndex, sideData)}
+                                                        style={{ position: 'relative', zIndex: 2 }}
                                                     >
-                                                        <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex}
-                                                        isPerspectiveUpdated={isPerspectiveUpdated} setIsPerspectiveUpdated={setIsPerspectiveUpdated} />
+                                                        {sideImgSrcs[currentRoom][sideIndex] && (
+                                                        <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} />
+                                                        )}
+                                                        <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteGameSide(sideIndex);
+                                                        }}
+                                                        >
+                                                        -
+                                                        </button>
                                                     </div>
-                                                </div>
-                                            );
+
+                                                    <div className="info" style={{ position: 'relative', zIndex: 1 }}>
+                                                        <h4>{sideIndex + 1}</h4>
+                                                    </div>
+
+                                                    {/* 모든 side마다 PerspectiveSVG 렌더링 */}
+                                                        <div
+                                                            style={{ position: 'absolute',
+                                                            top: '5px', left: 0,
+                                                            margin: 'auto',
+                                                            width: '90px', height: '55px',
+                                                            pointerEvents: 'none',
+                                                            zIndex: 1,
+                                                            background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
+                                                            borderRadius: '5px'
+                                                            }}
+                                                        >
+                                                            <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex}
+                                                            isPerspectiveUpdated={isPerspectiveUpdated} setIsPerspectiveUpdated={setIsPerspectiveUpdated} />
+                                                        </div>
+                                                    </div>
+                                                );
                                             })}
                                             <button onClick={handleAddGameSide}>+</button>
                                         </div>
@@ -890,12 +888,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                     </div>
                 </div>
             </div>
-            
         </div>
-        
     );
-
-
 }
 
 export default Editor;
