@@ -154,6 +154,35 @@
     cursor: pointer;
 }
 
+.picture_fine_tuning {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+}
+
+.img_list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 10px;
+}
+
+.img_box {
+    background-color: black;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.img_box img {
+    max-width: 100%;
+    height: auto;
+    width: auto;
+    display: block;
+}
+
 .Editor_screen {
     width: 80%;
     background-color: #2d2d2d;

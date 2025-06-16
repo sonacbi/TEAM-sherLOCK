@@ -365,7 +365,16 @@ function EditorPage() {
 
                                     {selectedTool === 'picture' && (
                                         <div className='picture_fine_tuning'>
-                                            <h2>사진 세부조정</h2>
+                                            <label>사진 목록</label>
+
+                                            <div className='img_list'>
+                                                {imageSrcs.map((src, idx) => (
+                                                    <div className='img_box'>
+                                                        <img key={idx} src={src} alt={`img-${idx}`} />
+                                                    </div>
+                                                ))}
+                                            </div>
+
                                             <div style={{backgroundColor: "green"}} onClick={handleAddImageFile}>
                                                 <p>
                                                     나는 사진 추가하는 버튼이야
@@ -378,9 +387,6 @@ function EditorPage() {
                                                     style={{ display: 'none' }}
                                                 />
                                             </div>
-                                            {imageSrcs.map((src, idx) => (
-                                                <img key={idx} src={src} alt={`img-${idx}`} />
-                                            ))}
                                         </div>
                                     )}
 
