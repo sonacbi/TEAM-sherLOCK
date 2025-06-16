@@ -52,7 +52,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const [isPerspectiveUpdated, setIsPerspectiveUpdated] = useState(false);
 
     const [selectedSide, setSelectedSide] = useState({ roomIndex: 0, sideIndex: 0 });
-    
+
+    const [isPerspectiveRender, setIsPerspectiveRender] = useState(true);
+    useEffect(() => { // selectedSide가 null이 아니고, currentRoom과 매칭되면만 렌더링 ON
+        if (selectedSide && selectedSide.roomIndex === currentRoom) { setIsPerspectiveRender(true);
+        } else { setIsPerspectiveRender(false); } }, [selectedSide, currentRoom]
+    );
+
     // perspectiveWalls를 벽 객체 배열로 관리
     const perspectiveWalls = React.useMemo(() => {
     if (!perspective) return [];
@@ -777,10 +783,10 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                         zIndex: 1,
                                     }}
                                 >
-                                    <WebGLPerspectiveComponent
+                                    {isPerspectiveRender && (<WebGLPerspectiveComponent
                                         items={[{ imageUrl: wall.imageUrl, vertices: wall.vertices, wallType, }]}
                                         width={1100} height={650}
-                                    />
+                                    />)}
                                 </div>
                             ))
                         }   
@@ -827,7 +833,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                     <div className='room_area_scroll'>
                         {game.room.map((roomData, roomIndex) => {
                             return (
-                                <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
+                                <div className='room' key={roomIndex} onClick={() => {handleCurrentRoom(roomIndex);}}>
                                     <div className='stage_wrap'>
                                         <div className='stageIndex_delete'>
                                             <h3>Stage {roomIndex + 1}</h3>
