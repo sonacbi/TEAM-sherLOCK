@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import * as fabric from 'fabric';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { v4 as uuidv4 } from 'uuid';
 import debounce from 'lodash/debounce';
 
 import './Editor.css';
@@ -112,49 +110,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     return result;
     }, [perspective]);
-
-    const handleDragEnd = (result) => {
-        console.log('handleDragEnd:', result);
-
-        if (!result.destination) {
-            console.log('no destination, drop cancelled');
-            return;
-        }
-
-        const { source, destination, type } = result;
-        console.log(`type: ${type}, source:`, source, ', destination:', destination);
-
-        if (!destination) return;
-
-        if (type === 'room') {
-            const updatedRooms = [...game.room];
-            const [movedRoom] = updatedRooms.splice(source.index, 1);
-            updatedRooms.splice(destination.index, 0, movedRoom);
-            setGame({ ...game, room: updatedRooms });
-            const updatedImgs = [...sideImgSrcs];
-            const [movedImgs] = updatedImgs.splice(source.index, 1);
-            updatedImgs.splice(destination.index, 0, movedImgs);
-            setSideImgSrcs(updatedImgs);
-        }
-
-
-        if (type === 'side') {
-            const roomIndex = parseInt(source.droppableId.split('-')[1]);
-            const updatedRooms = [...game.room];
-            const sides = [...updatedRooms[roomIndex].side];
-            const [movedSide] = sides.splice(source.index, 1);
-            sides.splice(destination.index, 0, movedSide);
-            updatedRooms[roomIndex].side = sides;
-            setGame(new GamePnC({ ...game, room: updatedRooms }));
-
-            const updatedImgs = [...sideImgSrcs];
-            const sideImgs = [...updatedImgs[roomIndex]];
-            const [movedImg] = sideImgs.splice(source.index, 1);
-            sideImgs.splice(destination.index, 0, movedImg);
-            updatedImgs[roomIndex] = sideImgs;
-            setSideImgSrcs(updatedImgs);
-        }
-    };
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
@@ -430,17 +385,15 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     }, []);
 
     const handleAddGameRoom = () => {
-        setGame(prev => new GamePnC({
-            ...prev,
-            room: [...prev.room, new Room({ id: uuidv4() })]
-        }));
+        setGame(prev => (new GamePnC({
+            ...prev, room: [...prev.room, new Room({})]
+        })));
         setSideImgSrcs(prev => [...prev, ['']]);
     }
 
     const handleAddGameSide = () => {
         setRoom(prev => ({
-            ...prev,
-            side: [...prev.side, new Side({ id: uuidv4() })]
+            ...prev, side: [...prev.side, new Side({})]
         }));
     }
 
@@ -871,141 +824,73 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             */}
             <div className='room_area'>
                 <div className='room_window' ref={scrollRef} onWheel={onWheel}>
-                    <DragDropContext onDragEnd={handleDragEnd}>
-                        <Droppable droppableId="room" type="room">
-                            {(provided) => (
-                            <div className='room_area_scroll' {...provided.droppableProps} ref={provided.innerRef}>
-                                {game.room.map((roomData, roomIndex) => (
-                                    <Draggable
-                                        key={roomData.id}
-                                        draggableId={roomData.id ? String(roomData.id) : `room-${roomIndex}`}
-                                        index={roomIndex}
-                                    >
-                                        {(provided) => (
-                                        <div
-                                            className="room"
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            onClick={() => handleCurrentRoom(roomIndex)}
-                                        >
-                                            <div className="stage_wrap">
-                                            <div className="stageIndex_delete">
-                                                <h3>Stage {roomIndex + 1}</h3>
-                                                <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteGameRoom(roomIndex);
-                                                }}
-                                                >
-                                                X
-                                                </button>
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={roomData.name || ''}
-                                                onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)}
-                                                placeholder="이름"
-                                            />
-                                            </div>
-
-                                            {roomIndex === currentRoom && (
-                                            <Droppable droppableId={`side-${roomIndex}`} type="side">
-                                                {(provided) => (
-                                                <div
-                                                    className="side_area"
-                                                    ref={provided.innerRef}
-                                                    {...provided.droppableProps}
-                                                >
-                                                    {roomData.side.map((sideData, sideIndex) => {
-                                                    const isSelected =
-                                                        selectedSide.roomIndex === roomIndex &&
-                                                        selectedSide.sideIndex === sideIndex;
-                                                    console.log("🔎 sideData:", sideData);
-                                                    return (
-                                                        <Draggable
-                                                        key={`draggable-side-${roomIndex}-${sideIndex}-${sideData.id}`} // ✅ 위치 포함해서 리렌더 유도
-                                                        draggableId={`draggable-side-${roomIndex}-${sideIndex}`} // <- 확인 필요
-                                                        index={sideIndex}
-                                                        >
-
-                                                        {(provided) => (
-                                                            <div
-                                                            className={`side_wrap ${isSelected ? 'selected' : ''}`}
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                            style={{ position: 'relative', ...provided.draggableProps.style }}
-                                                            >
-                                                            <div
-                                                                className={`side ${isSelected ? 'selected' : ''}`}
-                                                                style={{ position: 'relative', zIndex: 2 }}
-                                                                onClick={() => handleCurrentSide(sideIndex, sideData)}
-                                                            >
-                                                                {sideImgSrcs[roomIndex][sideIndex] && (
-                                                                <img
-                                                                    src={sideImgSrcs[roomIndex][sideIndex]}
-                                                                    width={90}
-                                                                    height={55}
-                                                                />
-                                                                )}
-                                                                <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleDeleteGameSide(roomIndex, sideIndex);
-                                                                }}
-                                                                >
-                                                                -
-                                                                </button>
-                                                            </div>
-                                                            <div className="info">
-                                                                <h4>{sideIndex + 1}</h4>
-                                                            </div>
-                                                            <div
-                                                                style={{
-                                                                position: 'absolute',
-                                                                top: '5px',
-                                                                left: 0,
-                                                                margin: 'auto',
-                                                                width: '90px',
-                                                                height: '55px',
-                                                                pointerEvents: 'none',
-                                                                zIndex: 1,
-                                                                background: 'white',
-                                                                borderRadius: '5px',
-                                                                }}
-                                                            >
-                                                                <PerspectiveSVG
-                                                                perspectiveWalls={perspectiveWalls}
-                                                                roomData={roomData}
-                                                                roomIndex={roomIndex}
-                                                                sideIndex={sideIndex}
-                                                                isPerspectiveUpdated={isPerspectiveUpdated}
-                                                                setIsPerspectiveUpdated={setIsPerspectiveUpdated}
-                                                                />
-                                                            </div>
-                                                            </div>
-                                                        )}
-                                                        </Draggable>
-                                                    );
-                                                    })}
-                                                    {provided.placeholder}
-                                                    <button onClick={handleAddGameSide}>+</button>
-                                                </div>
-                                                )}
-                                            </Droppable>
-                                            )}
+                    <div className='room_area_scroll'>
+                        {game.room.map((roomData, roomIndex) => {
+                            return (
+                                <div className='room' key={roomIndex} onClick={() => handleCurrentRoom(roomIndex)}>
+                                    <div className='stage_wrap'>
+                                        <div className='stageIndex_delete'>
+                                            <h3>Stage {roomIndex + 1}</h3>
+                                            <button onClick={(e) => {e.stopPropagation(); handleDeleteGameRoom(roomIndex)}}>X</button>
                                         </div>
-                                        )}
-                                    </Draggable>
-                                    ))}
+                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} placeholder='이름'/>
+                                    </div>
 
-                                {provided.placeholder}
-                                <button onClick={handleAddGameRoom}>+</button>
-                            </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
+                                    {roomIndex == currentRoom && (
+                                        <div className='side_area'>
+                                            {room.side.map((sideData, sideIndex) => {
+                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+
+                                                return (
+                                                    <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
+                                                    <div
+                                                        className={`side ${isSelected ? 'selected' : ''}`}
+                                                        onClick={() => handleCurrentSide(sideIndex, sideData)}
+                                                        style={{ position: 'relative', zIndex: 2 }}
+                                                    >
+                                                        {sideImgSrcs[currentRoom][sideIndex] && (
+                                                        <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} />
+                                                        )}
+                                                        <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteGameSide(sideIndex);
+                                                        }}
+                                                        >
+                                                        -
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="info" style={{ position: 'relative', zIndex: 1 }}>
+                                                        <h4>{sideIndex + 1}</h4>
+                                                    </div>
+
+                                                    {/* 모든 side마다 PerspectiveSVG 렌더링 */}
+                                                        <div
+                                                            style={{ position: 'absolute',
+                                                            top: '5px', left: 0,
+                                                            margin: 'auto',
+                                                            width: '90px', height: '55px',
+                                                            pointerEvents: 'none',
+                                                            zIndex: 1,
+                                                            background : 'white', // ✏️ 해당 사이드의 배경을 여기서 설정해주세요.
+                                                            borderRadius: '5px'
+                                                            }}
+                                                        >
+                                                            <PerspectiveSVG perspectiveWalls={perspectiveWalls} roomData={roomData} roomIndex={roomIndex} sideIndex={sideIndex}
+                                                            isPerspectiveUpdated={isPerspectiveUpdated} setIsPerspectiveUpdated={setIsPerspectiveUpdated} />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                            <button onClick={handleAddGameSide}>+</button>
+                                        </div>
+                                    )}
+                                </div>    
+                            )
+                        })}
+                        <button onClick={handleAddGameRoom}>+</button>
+                    </div>
                 </div>
             </div>
         </div>
