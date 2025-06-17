@@ -24,6 +24,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     const [size, setSize] = useState([220 + 440, 120 + 300]);
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
+    const [openedRooms, setOpenedRooms] = useState([0]);
 
     const currentRoomRef = useRef(currentRoom);
     const currentSideRef = useRef(currentSide);
@@ -242,12 +243,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             addFrame(220, 120, 220+440, 120+300, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
         }
     }, [addFrameTrigger]);
-    // useEffect(() => {
-    //     if (isReady) {
-    //         const frame = room.side[currentSide].frame;
-    //         frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
-    //     }
-    // }, [room.side[currentSide].frame])
+    useEffect(() => {
+        if (isReady) {
+            // 거의 초마다 실행되는 문제 있음
+            const frame = game.room[currentRoom].side[currentSide].frame;
+            frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
+        }
+    }, [game.room[currentRoom].side[currentSide]?.frame]);
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
@@ -325,7 +327,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             });
             roomController.setControlVisible('mtr', false);
 
-            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), room.side[currentSide]?.frame?.edge ?? roomController.edge, currentRoomRef, currentSideRef, perspectiveRef);
+            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), game.room[currentRoom].side[currentSide]?.frame?.edge ?? roomController.edge, currentRoomRef, currentSideRef, perspectiveRef);
 
             roomController.on('moving', makeFrame);
             roomController.on('scaling', makeFrame);
@@ -398,9 +400,16 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     }
 
     const handleAddGameSide = () => {
-        setRoom(prev => ({
-            ...prev, side: [...prev.side, new Side({})]
-        }));
+        setGame(prev => {
+            const newData = new GamePnC(prev);
+            newData.room[currentRoom].side.push(new Side({}));
+            return newData;
+        });
+        setSideImgSrcs(prev => {
+            const newData = prev;
+            newData[currentRoom].push('');
+            return newData;
+        })
     }
 
     const handleDeleteGameRoom = (roomSide) => {
@@ -408,17 +417,17 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
         if (currentRoom < roomSide) {}
         else if (roomSide == 0 && currentRoom == 0) {
-            handleCurrentSide(0, game.room[currentRoom+1].side[0]);
-            setSelectedSide(prev => ({...prev, roomIndex: currentRoom+1}));
+            handleCurrentSide(0, 0, game.room[currentRoom+1].side[0]);
+            setSelectedSide(prev => ({...prev, roomIndex: currentRoom}));
         }
         else if (roomSide < currentRoom) {
             setCurrentRoom(prev => prev-1);
-            handleCurrentSide(0, game.room[currentRoom].side[0]);
+            handleCurrentSide(currentRoom-1, 0, game.room[currentRoom].side[0]);
             setSelectedSide(prev => ({...prev, roomIndex: currentRoom-1}));
         }
         else if (roomSide == currentRoom) {
             setCurrentRoom(prev => prev-1);
-            handleCurrentSide(0, game.room[currentRoom-1].side[0]);
+            handleCurrentSide(currentRoom-1, 0, game.room[currentRoom-1].side[0]);
             setSelectedSide(prev => ({...prev, roomIndex: currentRoom-1}));
         }
 
@@ -459,15 +468,12 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     };
 
     const handleDeleteGameSide = (deletedIndex) => {
-        if (room.side.length <= 1) return;
+        if (game.room[currentRoom].side.length <= 1) return;
 
-        // 삭제 후 선택할 인덱스 계산
-        const newLength = room.side.length - 1;
-
-        setRoom(prev => {
-            const newSides = [...prev.side];
-            newSides.splice(deletedIndex, 1);
-            return { ...prev, side: newSides };
+        setGame(prev => {
+            const newData = new GamePnC(prev);
+            newData.room[currentRoom].side.splice(deletedIndex, 1);
+            return newData;
         });
 
         setSideImgSrcs(prev => {
@@ -487,25 +493,10 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         d| 삭제==현재 : (현재-1, 현재-1)
          */
 
-        if (currentSide < deletedIndex) {
-            console.log('a');
-            return;
-        }
-        if (deletedIndex == 0 && currentSide == 0) {
-            handleCurrentSide(currentSide, game.room[currentRoom].side[currentSide+1]);
-            console.log('b');
-            return;
-        }
-        if (deletedIndex < currentSide) {
-            handleCurrentSide(currentSide-1, game.room[currentRoom].side[currentSide]);
-            console.log('c');
-            return;
-        }
-        if (deletedIndex == currentSide) {
-            handleCurrentSide(currentSide-1, game.room[currentRoom].side[currentSide-1]);
-            console.log('d');
-            return;
-        }
+        if (currentSide < deletedIndex) {}
+        else if (deletedIndex == 0 && currentSide == 0) handleCurrentSide(currentRoom, currentSide, game.room[currentRoom].side[currentSide+1]);
+        else if (deletedIndex < currentSide) handleCurrentSide(currentRoom, currentSide-1, game.room[currentRoom].side[currentSide]);
+        else if (deletedIndex == currentSide) handleCurrentSide(currentRoom, currentSide-1, game.room[currentRoom].side[currentSide-1]);
 
         // 해당 side 인덱스와 일치하는 원근법 배경 객체 초기화
         setPerspective(prev => {
@@ -539,17 +530,18 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     };
 
-    const handleCurrentRoom = (roomIndex) => {
-        setCurrentRoom(roomIndex);
-        setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
+    const handleShowRoom = (roomIndex) => {
+        openedRooms.includes(roomIndex) ? setOpenedRooms(prev => prev.filter(num => num !== roomIndex)) : setOpenedRooms(prev => [...prev, roomIndex]);
+        // setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
     }
 
-    const handleCurrentSide = (sideIndex, sideData) => {
+    const handleCurrentSide = (roomIndex, sideIndex, sideData) => {
+        setCurrentRoom(roomIndex);
         setCurrentSide(sideIndex);
         setTimeout(() => {
             loadCanvas(canvasInstance.current, imgs, sideData, controlStyle, addFrame, currentRoomRef, currentSideRef, perspectiveRef);
         }, 50)
-        setSelectedSide({ roomIndex: currentRoom, sideIndex });
+        setSelectedSide({ roomIndex, sideIndex });
         setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
     }
 
@@ -563,16 +555,16 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     const saveCanvasToSide = useCallback(() => {
         const updatedFabric = handleSide(canvasInstance.current);
-        setRoom(prev => {
-            const newData = new Room({ ...prev })
-            newData.side[currentSide].fabric = updatedFabric;
+        setGame(prev => {
+            const newData = new GamePnC(prev);
+            newData.room[currentRoom].side[currentSide].fabric = updatedFabric;
             const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            if (roomController) newData.side[currentSide].frame = {
+            if (roomController) newData.room[currentRoom].side[currentSide].frame = {
                 x: Number(roomController.left.toFixed(2)),
                 y: Number(roomController.top.toFixed(2)),
                 width: Number(roomController.getScaledWidth().toFixed(2)),
                 height: Number(roomController.getScaledHeight().toFixed(2)),
-                edge: room.side[currentSide]?.frame?.edge ?? roomController.edge,
+                edge: game.room[currentRoom].side[currentSide]?.frame?.edge ?? roomController.edge,
             }
             return newData;
         });
@@ -584,7 +576,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             });
             return newData;
         });
-    }, [canvasInstance, canvasRef, currentSide, currentRoom, setRoom, setSideImgSrcs]);
+    }, [canvasInstance, canvasRef, currentSide, currentRoom, game, setGame, setSideImgSrcs]);
 
     const debouncedSave = debounce(() => {
         setTimeout(() => {
@@ -692,22 +684,6 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     }, [addImageFile]);
 
     // 이미지 추가 ---------------------------------------------------(section 11)
-    // ---------------------------------------------------------------(section)
-    useEffect(() => {
-        setGame(prev => {
-            if (prev.room[currentRoom] === room) return prev; // 변화 없으면 그대로 반환
-            const newGameData = { ...prev };
-            newGameData.room[currentRoom] = room;
-            return new GamePnC(newGameData);
-        });
-    }, [room]);
-    
-    useEffect(() => {
-        if (game.room[currentRoom] && game.room[currentRoom] !== room) {
-            setRoom(game.room[currentRoom]);
-        }
-    }, [currentRoom, game]);
-    // ---------------------------------------------------------------(section)
     // delete --------------------------------------------------------(section 12)
     useDeleteKeyHandler(canvasInstance, isReady, setImgs);
     // ---------------------------------------------------------------(section 12)
@@ -833,29 +809,29 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                     <div className='room_area_scroll'>
                         {game.room.map((roomData, roomIndex) => {
                             return (
-                                <div className='room' key={roomIndex} onClick={() => {handleCurrentRoom(roomIndex);}}>
-                                    <div className='stage_wrap'>
+                                <div className='room' key={roomIndex}>
+                                    <div className='stage_wrap' onClick={() => handleShowRoom(roomIndex)}>
                                         <div className='stageIndex_delete'>
                                             <h3>Stage {roomIndex + 1}</h3>
                                             <button onClick={(e) => {e.stopPropagation(); handleDeleteGameRoom(roomIndex)}}>X</button>
                                         </div>
-                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} placeholder='이름'/>
+                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} onClick={e => e.stopPropagation()} placeholder='이름'/>
                                     </div>
 
-                                    {roomIndex == currentRoom && (
+                                    {openedRooms.includes(roomIndex) && (
                                         <div className='side_area'>
-                                            {room.side.map((sideData, sideIndex) => {
+                                            {roomData.side.map((sideData, sideIndex) => {
                                                 const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
 
                                                 return (
                                                     <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
                                                     <div
                                                         className={`side ${isSelected ? 'selected' : ''}`}
-                                                        onClick={() => handleCurrentSide(sideIndex, sideData)}
+                                                        onClick={() => handleCurrentSide(roomIndex, sideIndex, sideData)}
                                                         style={{ position: 'relative', zIndex: 2 }}
                                                     >
-                                                        {sideImgSrcs[currentRoom][sideIndex] && (
-                                                        <img src={sideImgSrcs[currentRoom][sideIndex]} width={90} height={55} />
+                                                        {sideImgSrcs[roomIndex][sideIndex] && (
+                                                        <img src={sideImgSrcs[roomIndex][sideIndex]} width={90} height={55} />
                                                         )}
                                                         <button
                                                         onClick={(e) => {
