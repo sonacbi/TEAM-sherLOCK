@@ -164,11 +164,11 @@
 }
 
 .side.selected {
-    outline: 3px solid green;
+    outline: 3px solid rgb(93, 180, 93);
 }
 
 .side.selected + .info h4 {
-    color: green;
+    color: rgb(93, 180, 93);
 }
 
 .side > button {

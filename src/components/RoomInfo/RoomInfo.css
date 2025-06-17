@@ -224,7 +224,7 @@
 }
 
 .Room_thumbnail_img_button > button {
-    background-color: green;
+    background-color: rgb(93, 180, 93);
     border: 0;
     color: white;
     padding: 5px 10px;
@@ -274,7 +274,7 @@
 
 .difficulty_wrap > div.selected,
 .Room_theme_wrap > div.selected {
-    border: 2px solid green;
+    border: 2px solid rgb(93, 180, 93);
 }
 
 .difficulty_one {background-color: rgb(80, 80, 80);}
@@ -449,6 +449,6 @@
     border-radius: 5px;
     border: 0;
     color: white;
-    background-color: green;
+    background-color: rgb(93, 180, 93);
     margin-left: auto;
 }
