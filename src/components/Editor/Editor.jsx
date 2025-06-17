@@ -233,7 +233,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     useEffect(() => {
         if (!isReady) return;
-        switch (addFrameTrigger) {
+        switch (addFrameTrigger.type) {
             case 'basic':
                 addFrame(220, 120, 220+440, 120+300, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
                 break;
@@ -241,7 +241,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 addFrame(530, -10, 640, 120+300, [170, 225, 240, 120], currentRoomRef, currentSideRef, perspectiveRef);
                 break;
             case 'corridor':
-                addFrame(480, 250, 80, 120, [330, 225, 225, 780], currentRoomRef, currentSideRef, perspectiveRef);                
+                addFrame(450, 50, 130, 180, [330, 225, 225, 780], currentRoomRef, currentSideRef, perspectiveRef);                
                 break;
             default:
                 console.warn('존재하지 않는 형식입니다');

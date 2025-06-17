@@ -235,9 +235,9 @@ function EditorPage() {
                     </>)
                     :
                     (<>
-                    <button onClick={() => setAddFrameTrigger('basic')}>기본 프레임 생성</button>
-                    <button onClick={() => setAddFrameTrigger('edge')}>모서리 프레임 생성</button>
-                    <button onClick={() => setAddFrameTrigger('corridor')}>복도 프레임 생성</button>
+                    <button onClick={() => setAddFrameTrigger({ modified: Date.now(), type: 'basic'})}>기본 프레임 생성</button>
+                    <button onClick={() => setAddFrameTrigger({ modified: Date.now(), type: 'edge'})}>모서리 프레임 생성</button>
+                    <button onClick={() => setAddFrameTrigger({ modified: Date.now(), type: 'corridor'})}>복도 프레임 생성</button>
                     </>)
                 }
             </div>
