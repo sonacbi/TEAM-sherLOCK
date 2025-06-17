@@ -234,7 +234,11 @@ function EditorPage() {
                     bottom: <input id="roomFrame0" type="range" min={110} max={800} value={room.side[currentSide].frame.edge[3]} step={1} onChange={event => handleEdge(event, 3)}/> {room.side[currentSide].frame.edge[3]} <br />
                     </>)
                     :
-                    <button onClick={() => setAddFrameTrigger(Date.now())}>새 프레임 생성</button>
+                    (<>
+                    <button onClick={() => setAddFrameTrigger('basic')}>기본 프레임 생성</button>
+                    <button onClick={() => setAddFrameTrigger('edge')}>모서리 프레임 생성</button>
+                    <button onClick={() => setAddFrameTrigger('corridor')}>복도 프레임 생성</button>
+                    </>)
                 }
             </div>
         )
