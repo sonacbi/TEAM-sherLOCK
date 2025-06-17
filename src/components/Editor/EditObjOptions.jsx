@@ -463,9 +463,9 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                     <div className="event_list" style={{ marginTop: eventList.length > 0 ? "15px" : "0px" }}>
                         {eventList.length > 0 && (
                             <DragDropContext onDragEnd={onDragEnd}>
-                                <Droppable droppableId="droppable-event-list">
+                                <Droppable droppableId="droppable-event-list" style={{  }}>
                                     {(provided) => (
-                                    <div {...provided.droppableProps} ref={provided.innerRef} style={{ listStyle: "none", padding: 0 }}>
+                                    <div {...provided.droppableProps} ref={provided.innerRef} style={{ listStyle: "none", padding: 0, display : 'flex', flexDirection : 'column' }}>
                                         {eventList.map((event, index) => {
                                         const uniqueId = String(event._uuid);
                                         const eventKey = Object.keys(event).find(k => k !== "_uuid");
@@ -478,10 +478,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                                             {...provided.dragHandleProps}       
                                                             style={{
                                                                 ...provided.draggableProps.style,
-                                                                padding: "8px",
-                                                                marginBottom: "6px",
-                                                                backgroundColor: eventValues[eventKey]?.color || "#eee",
-                                                                borderRadius: "4px",
+                                                                marginBottom: "15px",
                                                                 cursor: snapshot.isDragging ? "grabbing" : "grab",
                                                             }}
                                                         >

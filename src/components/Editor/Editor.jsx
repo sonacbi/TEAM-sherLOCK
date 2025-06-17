@@ -910,7 +910,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                             </div>
 
                                             {roomIndex === currentRoom && (
-                                            <Droppable droppableId={`side-${roomData.id}`} type="side">
+                                            <Droppable droppableId={`side-${roomIndex}`} type="side">
                                                 {(provided) => (
                                                 <div
                                                     className="side_area"
@@ -921,20 +921,21 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                                     const isSelected =
                                                         selectedSide.roomIndex === roomIndex &&
                                                         selectedSide.sideIndex === sideIndex;
-
+                                                    console.log("🔎 sideData:", sideData);
                                                     return (
                                                         <Draggable
-                                                        key={sideData.id}
-                                                        draggableId={String(sideData.id)}
+                                                        key={`draggable-side-${roomIndex}-${sideIndex}-${sideData.id}`} // ✅ 위치 포함해서 리렌더 유도
+                                                        draggableId={`draggable-side-${roomIndex}-${sideIndex}`} // <- 확인 필요
                                                         index={sideIndex}
                                                         >
+
                                                         {(provided) => (
                                                             <div
                                                             className={`side_wrap ${isSelected ? 'selected' : ''}`}
                                                             ref={provided.innerRef}
                                                             {...provided.draggableProps}
                                                             {...provided.dragHandleProps}
-                                                            style={{ position: 'relative' }}
+                                                            style={{ position: 'relative', ...provided.draggableProps.style }}
                                                             >
                                                             <div
                                                                 className={`side ${isSelected ? 'selected' : ''}`}
