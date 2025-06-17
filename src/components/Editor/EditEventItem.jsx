@@ -1,8 +1,16 @@
 import './EditEventItem.css';
 
 export default function EditEventItem({ event, index, eventValues, onChange, onRemove }) {
-    const eventName = eventValues[Object.keys(event)[0]].name;
-    const eventColor = eventValues[Object.keys(event)[0]].color;
+    const eventKey = Object.keys(event)[0];
+    const eventData = eventValues?.[eventKey]; // Optional chaining
+
+    if (!eventData) {
+        console.warn('Invalid event or eventValues:', event);
+        return null; // 또는 fallback UI
+    }
+
+    const eventName = eventData.name;
+    const eventColor = eventData.color;
 
     return (
         <div className="event-item" style={{ backgroundColor: eventColor || "transparent" }}>

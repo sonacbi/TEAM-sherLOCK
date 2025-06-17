@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { v4 as uuidv4 } from 'uuid';
 
 import EditEventItem from "./EditEventItem";
 import { GameEventType } from "../../../modules/editor/gamePnC";
@@ -24,6 +26,32 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
     const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
     const activeObject = canvasInstance.current?.getActiveObject();
     const [showOptions, setShowOptions] = useState(false);
+
+    const [eventList, setEventList] = React.useState(optionStyle.gameEvent || []);
+
+    React.useEffect(() => {
+        setEventList(optionStyle.gameEvent || []);
+    }, [optionStyle.gameEvent]);
+
+    const onDragEnd = (result) => {
+        console.log("드래그 이벤트 발생");
+        if (!result.destination) return;
+
+        const items = Array.from(eventList);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        setEventList(items);
+        setOptionStyle(prev => ({
+            ...prev,
+            gameEvent: items,
+        }));
+
+        if (selectedObject) {
+            selectedObject.gameEvent = items;
+            canvasInstance.current.requestRenderAll();
+        }
+    };
 
     const eventValues = {
         move: {
@@ -183,7 +211,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
     }
 
     const addEvent = (eventType) => {
-        const event = { [eventType]: GameEventType[eventType] };
+        const event = { [eventType]: GameEventType[eventType], _uuid: uuidv4() };
         if (!selectedObject) return;
 
         if (!Array.isArray(selectedObject.gameEvent)) {
@@ -432,39 +460,68 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                         </div>
                     )}
 
-                    <div className="event_list" style={{marginTop: optionStyle.gameEvent.length > 0 ? "15px" : "0px"}}>
-                        {Array.isArray(optionStyle.gameEvent) && optionStyle.gameEvent.length > 0 && (
-                            <>
-                                {optionStyle.gameEvent.map((data, index) => {
-                                    return (
-                                        <div key={`event-${index}`}>
-                                            <EditEventItem
-                                                event={data}
-                                                index={index}
-                                                eventValues={eventValues}
-                                                onChange={(updatedEvent) => {
-                                                    const newGameEvents = [...optionStyle.gameEvent];
-                                                    newGameEvents[index] = updatedEvent;
-                                                    if (selectedObject) {
-                                                        selectedObject.gameEvent = newGameEvents;
-                                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
-                                                        foundFabric.dirty = true; // 랜더링용
-                                                        canvasInstance.current.requestRenderAll();
-                                                    }
-                                                }}
-                                                onRemove={() => {
-                                                    const newGameEvents = optionStyle.gameEvent.filter((_, i) => i !== index);
-                                                    if (selectedObject) {
-                                                        selectedObject.gameEvent = newGameEvents;
-                                                        setOptionStyle(prev => ({ ...prev, gameEvent: newGameEvents }));
-                                                        canvasInstance.current.requestRenderAll();
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </>
+                    <div className="event_list" style={{ marginTop: eventList.length > 0 ? "15px" : "0px" }}>
+                        {eventList.length > 0 && (
+                            <DragDropContext onDragEnd={onDragEnd}>
+                                <Droppable droppableId="droppable-event-list">
+                                    {(provided) => (
+                                    <div {...provided.droppableProps} ref={provided.innerRef} style={{ listStyle: "none", padding: 0 }}>
+                                        {eventList.map((event, index) => {
+                                        const uniqueId = String(event._uuid);
+                                        const eventKey = Object.keys(event).find(k => k !== "_uuid");
+                                        return (
+                                            <Draggable key={uniqueId} draggableId={`event-${uniqueId}`} index={index}>
+                                                {(provided, snapshot) => (
+                                                        <div
+                                                            ref={provided.innerRef}             
+                                                            {...provided.draggableProps}        
+                                                            {...provided.dragHandleProps}       
+                                                            style={{
+                                                                ...provided.draggableProps.style,
+                                                                padding: "8px",
+                                                                marginBottom: "6px",
+                                                                backgroundColor: eventValues[eventKey]?.color || "#eee",
+                                                                borderRadius: "4px",
+                                                                cursor: snapshot.isDragging ? "grabbing" : "grab",
+                                                            }}
+                                                        >
+                                                    <EditEventItem
+                                                        event={event}
+                                                        index={index}
+                                                        eventValues={eventValues}
+                                                        onChange={(updatedEvent) => {
+                                                        const newEvents = [...eventList];
+                                                        newEvents[index] = {
+                                                            ...updatedEvent,
+                                                            _uuid: newEvents[index]._uuid  // 기존 uuid 유지
+                                                        };
+                                                        setEventList(newEvents);
+                                                        if (selectedObject) {
+                                                            selectedObject.gameEvent = newEvents;
+                                                            setOptionStyle(prev => ({ ...prev, gameEvent: newEvents }));
+                                                            canvasInstance.current.requestRenderAll();
+                                                        }
+                                                        }}
+                                                        onRemove={() => {
+                                                        const newEvents = eventList.filter((_, i) => i !== index);
+                                                        setEventList(newEvents);
+                                                        if (selectedObject) {
+                                                            selectedObject.gameEvent = newEvents;
+                                                            setOptionStyle(prev => ({ ...prev, gameEvent: newEvents }));
+                                                            canvasInstance.current.requestRenderAll();
+                                                        }
+                                                        }}
+                                                    />
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        );
+                                        })}
+                                        {provided.placeholder}
+                                    </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         )}
                     </div>
                 </div>
