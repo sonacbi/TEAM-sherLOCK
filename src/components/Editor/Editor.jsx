@@ -235,13 +235,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         if (!isReady) return;
         switch (addFrameTrigger.type) {
             case 'basic':
-                addFrame(220, 120, 220+440, 120+300, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
+                addFrame(280, 80, 500, 360, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
                 break;
             case 'edge':
                 addFrame(530, -10, 640, 120+300, [170, 225, 240, 120], currentRoomRef, currentSideRef, perspectiveRef);
                 break;
             case 'corridor':
-                addFrame(450, 50, 130, 180, [330, 225, 225, 780], currentRoomRef, currentSideRef, perspectiveRef);                
+                addFrame(450, 50, 130, 180, [330, 225, 225, 110], currentRoomRef, currentSideRef, perspectiveRef);                
                 break;
             default:
                 console.warn('존재하지 않는 형식입니다');
