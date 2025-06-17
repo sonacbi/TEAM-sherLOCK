@@ -34,6 +34,7 @@ import bubble5 from '../assets/images/EditorPage_img/bubble/bubble5.png';
 import bubble6 from '../assets/images/EditorPage_img/bubble/bubble6.png';
 import bubble7 from '../assets/images/EditorPage_img/bubble/bubble7.png';
 import bubble8 from '../assets/images/EditorPage_img/bubble/bubble8.png';
+import img_none_icon from '../assets/images/RoomInfo/Room_thumbnail_basic_img.png';
 
 function EditorPage() {
     const canvasRef = useRef(null);
@@ -367,17 +368,26 @@ function EditorPage() {
                                         <div className='picture_fine_tuning'>
                                             <label>사진 목록</label>
 
-                                            <div className='img_list'>
-                                                {imageSrcs.map((src, idx) => (
-                                                    <div className='img_box'>
-                                                        <img key={idx} src={src} alt={`img-${idx}`} />
-                                                    </div>
-                                                ))}
+                                            <div className='img_list_wrap'>
+                                                <div className={`img_list ${imageSrcs.length === 0 ? 'flex' : 'grid'}`}>
+                                                    {imageSrcs.length === 0 ? (
+                                                        <div className='img_none'>
+                                                            <img id='img_none_icon' src={img_none_icon} alt='img_none_icon' />
+                                                            <p>* 아직 추가된 이미지가 없습니다.</p>
+                                                        </div>
+                                                    ) : (
+                                                        imageSrcs.map((src, idx) => (
+                                                            <div key={idx} className='img_box'>
+                                                                <img src={src} alt={`img-${idx}`} />
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            <div style={{backgroundColor: "green"}} onClick={handleAddImageFile}>
+                                            <div className='picture_addButton' onClick={handleAddImageFile}>
                                                 <p>
-                                                    나는 사진 추가하는 버튼이야
+                                                    사진 추가
                                                 </p>
                                                 <input
                                                     type='file'
