@@ -460,7 +460,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                         </div>
                     )}
 
-                    <div className="event_list" style={{ marginTop: eventList.length > 0 ? "15px" : "0px" }}>
+                    <div className="event_list" style={{ marginTop: eventList.length > 0 ? "10px" : "0px" }}>
                         {eventList.length > 0 && (
                             <DragDropContext onDragEnd={onDragEnd}>
                                 <Droppable droppableId="droppable-event-list" style={{  }}>
@@ -478,7 +478,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                                             {...provided.dragHandleProps}       
                                                             style={{
                                                                 ...provided.draggableProps.style,
-                                                                marginBottom: "15px",
+                                                                marginTop: "15px",
                                                                 cursor: snapshot.isDragging ? "grabbing" : "grab",
                                                             }}
                                                         >

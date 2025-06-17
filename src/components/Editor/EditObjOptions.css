@@ -364,6 +364,10 @@
     border-radius: 10px;
 }
 
+.event_list::-webkit-scrollbar-track {
+    margin-top: 15px;
+}
+
 .object_edit .add_event {
     width: 100%;
     padding: 20px 15px;
