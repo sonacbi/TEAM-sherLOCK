@@ -35,6 +35,16 @@ import bubble6 from '../assets/images/EditorPage_img/bubble/bubble6.png';
 import bubble7 from '../assets/images/EditorPage_img/bubble/bubble7.png';
 import bubble8 from '../assets/images/EditorPage_img/bubble/bubble8.png';
 import img_none_icon from '../assets/images/RoomInfo/Room_thumbnail_basic_img.png';
+import basic_frame_img from '../assets/images/EditorPage_img/basic_frame_img.png';
+import edge_frame_img from '../assets/images/EditorPage_img/edge_frame_img.png';
+import corridor_frame_img from '../assets/images/EditorPage_img/corridor_frame_img.png';
+import wall_left_img from '../assets/images/EditorPage_img/wall_left_img.png';
+import wall_right_img from '../assets/images/EditorPage_img/wall_right_img.png';
+import wall_center_img from '../assets/images/EditorPage_img/wall_center_img.png';
+import wall_bottom_img from '../assets/images/EditorPage_img/wall_bottom_img.png';
+import wall_top_img from '../assets/images/EditorPage_img/wall_top_img.png';
+import frame_trash from '../assets/images/EditorPage_img/trash.png';
+
 
 function EditorPage() {
     const canvasRef = useRef(null);
@@ -66,6 +76,18 @@ function EditorPage() {
 
     const [showRoomInfo, setShowRoomInfo] = useState(true); // 처음에 무조건 보이게
     const roomInfoRef = useRef(null);
+
+    const [selectedFrameType, setSelectedFrameType] = useState(null);
+
+    const handleFrameTypeClick = (type) => {
+        setSelectedFrameType(type);
+        setAddFrameTrigger({ modified: Date.now(), type });
+
+        // 3초 후 선택 해제
+        setTimeout(() => {
+            setSelectedFrameType(null);
+        }, 500);
+    };
 
     const handleAddFrame = () => {
         setSelectedTool('frame');
@@ -227,18 +249,68 @@ function EditorPage() {
             <div className='frame_fine_tuning'>
                 {roomController && room.side[currentSide]?.frame?.edge ?
                     (<>
-                    <button onClick={removeFrame}>프레임 삭제</button>
-                    <br />
-                    top: <input id="roomFrame0" type="range" min={120} max={800} value={room.side[currentSide].frame.edge[0]} step={1} onChange={event => handleEdge(event, 0)}/> {room.side[currentSide].frame.edge[0]} <br />
-                    left: <input id="roomFrame0" type="range" min={220} max={800} value={room.side[currentSide].frame.edge[1]} step={1} onChange={event => handleEdge(event, 1)}/> {room.side[currentSide].frame.edge[1]} <br />
-                    right: <input id="roomFrame0" type="range" min={220} max={800} value={room.side[currentSide].frame.edge[2]} step={1} onChange={event => handleEdge(event, 2)}/> {room.side[currentSide].frame.edge[2]} <br />
-                    bottom: <input id="roomFrame0" type="range" min={110} max={800} value={room.side[currentSide].frame.edge[3]} step={1} onChange={event => handleEdge(event, 3)}/> {room.side[currentSide].frame.edge[3]} <br />
+                        <div className='frame_wall_header'>
+                            <label>프레임 조정</label>
+
+                            <img id='frame_trash' src={frame_trash} alt='frame_trash' onClick={removeFrame} />
+                        </div>
+
+                        <div className='frame_wall_wrap'>
+                            <div className='wall_top'>
+                                <img id='wall_top_img' src={wall_top_img} alt='wall_top_img' />
+                            </div>
+
+                            <div className='wall_left'>
+                                <img id='wall_left_img' src={wall_left_img} alt='wall_left_img' />
+                            </div>
+
+                            <div className='wall_center'>
+                                <img id='wall_center_img' src={wall_center_img} alt='wall_center_img' />
+                            </div>
+
+                            <div className='wall_right'>
+                                <img id='wall_right_img' src={wall_right_img} alt='wall_right_img' />
+                            </div>
+
+                            <div className='wall_bottom'>
+                                <img id='wall_bottom_img' src={wall_bottom_img} alt='wall_bottom_img' />
+                            </div>
+                        </div>
+
+                        top: <input id="roomFrame0" type="range" min={120} max={800} value={room.side[currentSide].frame.edge[0]} step={1} onChange={event => handleEdge(event, 0)}/> {room.side[currentSide].frame.edge[0]} <br />
+                        left: <input id="roomFrame0" type="range" min={220} max={800} value={room.side[currentSide].frame.edge[1]} step={1} onChange={event => handleEdge(event, 1)}/> {room.side[currentSide].frame.edge[1]} <br />
+                        right: <input id="roomFrame0" type="range" min={220} max={800} value={room.side[currentSide].frame.edge[2]} step={1} onChange={event => handleEdge(event, 2)}/> {room.side[currentSide].frame.edge[2]} <br />
+                        bottom: <input id="roomFrame0" type="range" min={110} max={800} value={room.side[currentSide].frame.edge[3]} step={1} onChange={event => handleEdge(event, 3)}/> {room.side[currentSide].frame.edge[3]} <br />
                     </>)
                     :
                     (<>
-                    <button onClick={() => setAddFrameTrigger({ modified: Date.now(), type: 'basic'})}>기본 프레임 생성</button>
-                    <button onClick={() => setAddFrameTrigger({ modified: Date.now(), type: 'edge'})}>모서리 프레임 생성</button>
-                    <button onClick={() => setAddFrameTrigger({ modified: Date.now(), type: 'corridor'})}>복도 프레임 생성</button>
+                        <label>프레임 구조</label>
+
+                        <div className='frame_type_wrap'>
+                            <div className={`basic_frame ${selectedFrameType === 'basic' ? 'selected' : ''}`} onClick={() => handleFrameTypeClick('basic')}>
+                                <img id='basic_frame_img' src={basic_frame_img} alt='basic_frame_img' />
+
+                                <div>
+                                    <p>기본 프레임</p>
+                                </div>
+                            </div>
+
+                            <div className={`edge_frame ${selectedFrameType === 'edge' ? 'selected' : ''}`} onClick={() => handleFrameTypeClick('edge')}>
+                                <img id='edge_frame_img' src={edge_frame_img} alt='edge_frame_img' />
+
+                                <div>
+                                    <p>모서리 프레임</p>
+                                </div>
+                            </div>
+
+                            <div className={`corridor_frame ${selectedFrameType === 'corridor' ? 'selected' : ''}`} onClick={() => handleFrameTypeClick('corridor')}>
+                                <img id='corridor_frame_img' src={corridor_frame_img} alt='corridor_frame_img' />
+
+                                <div>
+                                    <p>복도 프레임</p>
+                                </div>
+                            </div>    
+                        </div>
                     </>)
                 }
             </div>
