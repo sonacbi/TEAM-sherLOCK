@@ -37,8 +37,9 @@ var Visibility;
     Visibility["private"] = "private";
 })(Visibility || (Visibility = {}));
 class GameInfo {
-    constructor({ id = null, title = '', thumbnail = '', theme = Theme.horror, type = GameInfoType.general, visibility = Visibility.public, description = '', difficulty = 1, playTime = 10, isRanking = false, isHiddenStage = false }) {
+    constructor({ id, userId = '', title = '', thumbnail = '', theme = Theme.horror, type = GameInfoType.general, visibility = Visibility.public, description = '', difficulty = 1, playTime = 10, isRanking = false, isHiddenStage = false }) {
         this.id = id;
+        this.userId = userId;
         this.title = title;
         this.thumbnail = thumbnail;
         this.theme = theme;

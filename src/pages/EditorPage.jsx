@@ -54,10 +54,11 @@ function EditorPage() {
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const [sideImgSrcs, setSideImgSrcs] = useState([['']]);
-    const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
-    const [thumbnail, setThumbnail] = useState(new File([], ''));
+    const [gameInfo, setGameInfo] = useState(null);
+    const [thumbnail, setThumbnail] = useState(null);
     const [imgs, setImgs] = useState([]);
     const [imageSrcs, setImageSrcs] = useState([]);
+    const [storedFabric, setStoredFabric] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -372,7 +373,7 @@ function EditorPage() {
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
-                        {showRoomInfo && <RoomInfo />}
+                        {showRoomInfo && <RoomInfo gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} setThumbnail={setThumbnail}/>}
                         <label>제목: ???</label>
                     </div>
 

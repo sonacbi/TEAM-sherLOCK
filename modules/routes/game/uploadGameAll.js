@@ -45,8 +45,7 @@ router.all('/:game_id', upload.single('zipfile'), (req, res, next) => {
 });
 router.post('/:game_id', async (req, res) => {
   const gameId = req.params.game_id;
-  const userId = "admin01"
-  const {title, thumbnail, theme, type, visibility, description, difficulty, playTime, isRanking, isHiddenStage} = JSON.parse(req.body.gameInfo)
+  const {userId, title, thumbnail, theme, type, visibility, description, difficulty, playTime, isRanking, isHiddenStage} = JSON.parse(req.body.gameInfo)
   try {
     await db.query("INSERT INTO game (game_id, user_id, title, thumbnail, theme, type, visibility, description, difficulty, playTime, isLanking, isHiddenStage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
       [gameId, userId, title, thumbnail, theme, type, visibility, description, difficulty, playTime, isRanking, isHiddenStage])

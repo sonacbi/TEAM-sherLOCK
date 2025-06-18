@@ -54,8 +54,9 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
 };
 
 export const useThumbnailUpload =
-(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef) => {
+(setThumbnail, thumbnailSrc, setThumbnailSrc, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef) => {
 
+  const compressedDataRef = useRef(null);
   const compressedDataUrlRef = useRef(null);
 
   const maxSize = 360 * 1024; // 360KB
@@ -63,7 +64,8 @@ export const useThumbnailUpload =
   const minHeight = 480;
 
   const handleAcceptCompression = () => {
-    setThumbnail(compressedDataUrlRef.current);
+    setThumbnail(compressedDataRef.current);
+    setThumbnailSrc(compressedDataUrlRef.current);
     setThumbnailMessage('');
     setShowConfirmButtons(false);
     setShowModal(false);
@@ -73,6 +75,7 @@ export const useThumbnailUpload =
     setThumbnailMessage('이미지 업로드가 취소되었습니다.');
     setShowConfirmButtons(false);
     setThumbnail(null);
+    setThumbnailSrc(null);
     setModalFadeOut(false);
     setShowModal(false);
 
@@ -122,13 +125,29 @@ export const useThumbnailUpload =
             compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
           }
 
+          function dataURLtoBlob(dataurl) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]); // base64 디코딩
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+
+            return new Blob([u8arr], { type: mime });
+          }
+          const blob = dataURLtoBlob(compressedDataUrl);
+          compressedDataRef.current = new File([blob], file.name, { type: blob.type });
           compressedDataUrlRef.current = compressedDataUrl;
           setModalMessage('이미지 용량이 360KB를 초과합니다. 용량을 자동으로 압축해서 업로드하시겠습니까?');
           setShowConfirmButtons(true);
           setShowModal(true);
         } else {
           const imageUrl = URL.createObjectURL(file);
-          setThumbnail(imageUrl);
+          setThumbnail(file);
+          setThumbnailSrc(imageUrl);
           fileInput.value = '';
         }
       };
@@ -157,7 +176,7 @@ export const useThumbnailUpload =
   };
 
   return {
-    thumbnail,
+    thumbnailSrc,
     thumbnailMessage,
     showModal,
     showConfirmButtons,

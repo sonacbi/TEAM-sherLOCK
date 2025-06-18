@@ -21,6 +21,10 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
     };
 
     async function uploadFilesToServer() {
+        if (!gameInfo) {
+            alert("방탈출 정보가 비어 있어 저장이 취소됩니다.")
+            return;
+        }
         const formData = new FormData();
         const zip = new JSZip();
         // zip.file("game.json", JSON.stringify(game), null, 2);

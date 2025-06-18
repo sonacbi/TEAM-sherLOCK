@@ -98,7 +98,7 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
             <div className='thumbnail_basic_info'>
               <div className='thumbnail'>
                 {/* <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' /> */}
-                {gameInfo ? <img id='thumbnail_img' src={`../server/games/${gameInfo.game_id}/${gameInfo.thumbnail}`} alt='thumbnail_img' />
+                {gameInfo ? <img id='thumbnail_img' src={`../server/games/${gameInfo.type == 'PnC' ? 'PnC/' : ''}${gameInfo.game_id}/${gameInfo.thumbnail}`} alt='thumbnail_img' />
                 : <img id='thumbnail_img' src={thumbnail_img} alt='thumbnail_img' />}
               </div>
 
@@ -182,8 +182,8 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
 
               <div className='introduction_gallery'>
                 {activeTab === 'introduction' && (
-                  <div className='introduction'>
-                    <p>
+                  <div className='introduction' style={{whiteSpace: "pre-line"}}>
+                    {/* <p>
                       스토리: “도시는 고요하다. 단 하나, 괴물만이 움직인다.”
                       깨어나 보니 모든 것이 바뀌어 있었다.
                       사라진 사람들, 닫힌 문, 그리고 그 안에서 들리는 무언가의 숨소리…
@@ -196,10 +196,8 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
                       긴장도 하면서, 웃기도 하면서
                       가볍게, 재미있게 즐겨주세요!
                       즐거운 플레이 되시길 바랍니다
-                      </p>
-                      {/* <p>
-                        {gameInfo?.description ?? '설명입니다'}
                       </p> */}
+                      {gameInfo?.description ?? '설명입니다'}
                   </div>
                 )}
 
