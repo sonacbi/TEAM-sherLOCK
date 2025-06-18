@@ -410,15 +410,15 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         setSideImgSrcs(prev => [...prev, ['']]);
     }
 
-    const handleAddGameSide = () => {
+    const handleAddGameSide = (roomIndex) => {
         setGame(prev => {
             const newData = new GamePnC(prev);
-            newData.room[currentRoom].side.push(new Side({}));
+            newData.room[roomIndex].side.push(new Side({}));
             return newData;
         });
         setSideImgSrcs(prev => {
             const newData = prev;
-            newData[currentRoom].push('');
+            newData[roomIndex].push('');
             return newData;
         })
     }
@@ -876,7 +876,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                                     </div>
                                                 );
                                             })}
-                                            <button onClick={handleAddGameSide}>+</button>
+                                            <button onClick={() => handleAddGameSide(roomIndex)}>+</button>
                                         </div>
                                     )}
                                 </div>    

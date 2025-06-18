@@ -56,7 +56,7 @@ const GameEventType = {
     changeObj: { from: "", to: "" },
     getItem: { name: "" },
     dropItem: { name: "" },
-    startTime: { name: "", limit: 0 },
+    startTime: { name: "" },
     endTime: { name: "" },
     // startSound: { name: "", volume: 1 },
     // endSound: { name:"" },
