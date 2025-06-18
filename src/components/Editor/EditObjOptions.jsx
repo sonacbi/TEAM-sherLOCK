@@ -305,7 +305,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
             {activeTab === "attribute" && (
                 <>
-                    {activeObject?.type !== "image" && activeObject?.type !== "activeselection" && (
+                    {activeObject?.type !== "activeselection" && (
                         <div className="default_attribute">
                             <div className="object_name">
                                 <h4>이름 : </h4>
@@ -313,10 +313,12 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                             </div>
 
                             <div className="object_color_line">
+                                {activeObject?.type !== "image" && (
                                 <div className="color">
                                     <h4>색</h4>
                                     <input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
                                 </div>
+                                )}
 
                                 <div className="line_color">
                                     <h4>윤곽선</h4>

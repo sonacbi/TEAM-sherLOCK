@@ -669,7 +669,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                         top: 150,
                         scaleX: width / imgElement.width,
                         scaleY: height / imgElement.height,
-                        name: addImageFile.name,
+                        imgName: addImageFile.name,
                         imageUrl: e.target.result // 배경 랜더링용
                     });
 

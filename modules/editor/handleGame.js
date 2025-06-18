@@ -36,7 +36,9 @@ const handleSide = (canvas) => {
                     strokeWidth: data?.strokeWidth,
                     stroke: data?.stroke,
                     strokeUniform: data?.strokeUniform,
+                    id: data?.id,
                     name: data?.name,
+                    imgName: data?.imgName,
                     type: data?.type,
                     shapeType: data?.shapeType,
                     gameEvent: data?.gameEvent
@@ -94,6 +96,7 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
                             strokeWidth: opt.strokeWidth,
                             stroke: opt.stroke,
                             strokeUniform: opt.strokeUniform,
+                            id: opt.id,
                             name: opt.name,
                             shapeType: opt.shapeType,
                             gameEvent: opt.gameEvent,
@@ -118,9 +121,9 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
                         break;
 
                     case "image": {
-                        const foundImg = imgs.find((img) => img.name === opt.name);
+                        const foundImg = imgs.find((img) => img.name === opt.imgName);
                         if (!foundImg) {
-                            console.warn('이미지 소스를 찾을 수 없습니다.', opt.name);
+                            console.warn('이미지 소스를 찾을 수 없습니다.', opt.imgName);
                             return resolve(); // 계속 진행
                         }
 

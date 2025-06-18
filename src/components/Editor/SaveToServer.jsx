@@ -9,7 +9,7 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
         const zip = new JSZip();
         // ZIP에 파일 추가
         zip.file("game.json", JSON.stringify(game, null, 2));
-        zip.file(thumbnail.name, thumbnail);
+        if (thumbnail) zip.file(thumbnail.name, thumbnail);
         imgs.map(data => {
             zip.file(data.name, data)
         })
