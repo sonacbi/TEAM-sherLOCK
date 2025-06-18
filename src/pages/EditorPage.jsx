@@ -89,6 +89,12 @@ function EditorPage() {
         }, 500);
     };
 
+    const [activeWall, setActiveWall] = useState(null);
+
+    const handleWallClick = (wall) => {
+        setActiveWall(prev => (prev === wall ? null : wall));
+    };
+
     const handleAddFrame = () => {
         setSelectedTool('frame');
     };
@@ -256,24 +262,44 @@ function EditorPage() {
                         </div>
 
                         <div className='frame_wall_wrap'>
-                            <div className='wall_top'>
+                            <div 
+                                className={`wall_top ${activeWall === 'top' ? 'active' : ''}`}
+                                onClick={() => handleWallClick('top')}
+                            >
                                 <img id='wall_top_img' src={wall_top_img} alt='wall_top_img' />
+                                <p>top</p>
                             </div>
 
-                            <div className='wall_left'>
+                            <div 
+                                className={`wall_left ${activeWall === 'left' ? 'active' : ''}`}
+                                onClick={() => handleWallClick('left')}
+                            >
                                 <img id='wall_left_img' src={wall_left_img} alt='wall_left_img' />
+                                <p>left</p>
                             </div>
 
-                            <div className='wall_center'>
+                            <div 
+                                className={`wall_center ${activeWall === 'center' ? 'active' : ''}`}
+                                onClick={() => handleWallClick('center')}
+                            >
                                 <img id='wall_center_img' src={wall_center_img} alt='wall_center_img' />
+                                <p>center</p>
                             </div>
 
-                            <div className='wall_right'>
+                            <div 
+                                className={`wall_right ${activeWall === 'right' ? 'active' : ''}`}
+                                onClick={() => handleWallClick('right')}
+                            >
                                 <img id='wall_right_img' src={wall_right_img} alt='wall_right_img' />
+                                <p>right</p>
                             </div>
 
-                            <div className='wall_bottom'>
+                            <div 
+                                className={`wall_bottom ${activeWall === 'bottom' ? 'active' : ''}`}
+                                onClick={() => handleWallClick('bottom')}
+                            >
                                 <img id='wall_bottom_img' src={wall_bottom_img} alt='wall_bottom_img' />
+                                <p>bottom</p>
                             </div>
                         </div>
 
