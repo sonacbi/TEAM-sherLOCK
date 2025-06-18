@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import * as fabric from 'fabric';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import _ from 'lodash';
 import debounce from 'lodash/debounce';
 
 import './Editor.css';
@@ -120,42 +121,63 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     }, [perspective]);
 
     const handleDragEnd = (result) => {
-    if (!result.destination) return;
+        if (!result.destination) return;
 
-    const { source, destination, type } = result;
+        const { source, destination, type } = result;
 
-    if (type === 'room') {
-        const updatedRooms = [...game.room];
-        const [movedRoom] = updatedRooms.splice(source.index, 1);
-        updatedRooms.splice(destination.index, 0, movedRoom);
-        setGame({ ...game, room: updatedRooms });
+        if (type === 'room') {
+            // lodash cloneDeep으로 깊은 복사
+            const deepCopyRooms = _.cloneDeep(game.room);
 
-        const updatedImgs = [...sideImgSrcs];
-        const [movedImgs] = updatedImgs.splice(source.index, 1);
-        updatedImgs.splice(destination.index, 0, movedImgs);
-        setSideImgSrcs(updatedImgs);
-    }
+            const updatedRooms = [...deepCopyRooms];
+            const [movedRoom] = updatedRooms.splice(source.index, 1);
+            updatedRooms.splice(destination.index, 0, movedRoom);
 
-    if (type === 'side') {
-        const roomIndex = parseInt(source.droppableId.split('-')[1]);
-        const updatedRooms = [...game.room];
-        const sides = [...updatedRooms[roomIndex].side];
-        const [movedSide] = sides.splice(source.index, 1);
-        sides.splice(destination.index, 0, movedSide);
-        updatedRooms[roomIndex].side = sides;
-        setGame({ ...game, room: updatedRooms });
+            setGame(prev => ({
+                ...prev,
+                room: updatedRooms
+            }));
 
-        // 깊은 복사해서 sideImgSrcs를 수정해야 함
-        setSideImgSrcs(prev => {
-            const newImgs = [...prev];
-            const sideImgs = [...newImgs[roomIndex]]; // 기존 배열 복사
-            const [movedImg] = sideImgs.splice(source.index, 1);
-            sideImgs.splice(destination.index, 0, movedImg);
-            newImgs[roomIndex] = sideImgs;  // 새 배열로 교체
-            return newImgs;
-        });
-    }
-};
+            const updatedImgs = [...sideImgSrcs];
+            const [movedImgs] = updatedImgs.splice(source.index, 1);
+            updatedImgs.splice(destination.index, 0, movedImgs);
+            setSideImgSrcs(updatedImgs);
+        }
+
+        if (type === 'side') {
+            const roomIndex = parseInt(source.droppableId.split('-')[1]);
+            console.log('side reorder:', { roomIndex, sourceIndex: source.index, destinationIndex: destination.index });
+
+            const updatedRooms = _.cloneDeep(game.room).map((room, idx) => {
+                if (idx !== roomIndex) return room;
+                const newSides = [...room.side];
+                const [movedSide] = newSides.splice(source.index, 1);
+                newSides.splice(destination.index, 0, movedSide);
+                return {
+                    ...room,
+                    side: newSides,
+                };
+            });
+
+            console.log('updatedRooms:', updatedRooms);
+
+            setGame(prev => ({
+                ...prev,
+                room: updatedRooms
+            }));
+
+            setSideImgSrcs(prev => {
+                const newImgs = [...prev];
+                const sideImgs = [...newImgs[roomIndex]];
+                const [movedImg] = sideImgs.splice(source.index, 1);
+                sideImgs.splice(destination.index, 0, movedImg);
+                newImgs[roomIndex] = sideImgs;
+                return newImgs;
+            });
+        }
+        
+    };
+
 
 
     // -------------------------------------------------------------- (section 1) (정다정)
@@ -899,8 +921,8 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                             const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
                                             return (
                                                 <Draggable
-                                                key={`draggable-side-${roomIndex}-${sideIndex}-${sideData.id ?? sideIndex}`}
-                                                draggableId={`draggable-side-${roomIndex}-${sideIndex}`}
+                                                key={`draggable-side-${roomIndex}-${sideData.id ?? sideIndex}`}
+                                                draggableId={`draggable-side-${roomIndex}-${sideData.id ?? sideIndex}`}
                                                 index={sideIndex}
                                                 >
                                                 {(provided) => (

@@ -7,6 +7,7 @@ import ThemePage from './pages/ThemePage';
 import Workspace from './pages/Workspace';
 import PlayPage from './pages/PlayPage';
 import EditorPage from './pages/EditorPage';
+import SideReorderExample from './components/Editor/Test1'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path='/Theme/workspace' element={<Workspace/>} />
         <Route path='/Theme/Editor' element={<EditorPage/>} />
         <Route path='/Theme/:theme/Play' element={<PlayPage/>} />
+        <Route path='/Test' element={<SideReorderExample/>} />
       </Routes>
     </Router>
   );
