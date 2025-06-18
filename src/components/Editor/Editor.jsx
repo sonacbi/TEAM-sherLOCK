@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import * as fabric from 'fabric';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import debounce from 'lodash/debounce';
 
 import './Editor.css';
@@ -117,6 +118,45 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
 
     return result;
     }, [perspective]);
+
+    const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const { source, destination, type } = result;
+
+    if (type === 'room') {
+        const updatedRooms = [...game.room];
+        const [movedRoom] = updatedRooms.splice(source.index, 1);
+        updatedRooms.splice(destination.index, 0, movedRoom);
+        setGame({ ...game, room: updatedRooms });
+
+        const updatedImgs = [...sideImgSrcs];
+        const [movedImgs] = updatedImgs.splice(source.index, 1);
+        updatedImgs.splice(destination.index, 0, movedImgs);
+        setSideImgSrcs(updatedImgs);
+    }
+
+    if (type === 'side') {
+        const roomIndex = parseInt(source.droppableId.split('-')[1]);
+        const updatedRooms = [...game.room];
+        const sides = [...updatedRooms[roomIndex].side];
+        const [movedSide] = sides.splice(source.index, 1);
+        sides.splice(destination.index, 0, movedSide);
+        updatedRooms[roomIndex].side = sides;
+        setGame({ ...game, room: updatedRooms });
+
+        // 깊은 복사해서 sideImgSrcs를 수정해야 함
+        setSideImgSrcs(prev => {
+            const newImgs = [...prev];
+            const sideImgs = [...newImgs[roomIndex]]; // 기존 배열 복사
+            const [movedImg] = sideImgs.splice(source.index, 1);
+            sideImgs.splice(destination.index, 0, movedImg);
+            newImgs[roomIndex] = sideImgs;  // 새 배열로 교체
+            return newImgs;
+        });
+    }
+};
+
 
     // -------------------------------------------------------------- (section 1) (정다정)
 
@@ -817,25 +857,60 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             */}
             <div className='room_area'>
                 <div className='room_window' ref={scrollRef} onWheel={onWheel}>
-                    <div className='room_area_scroll'>
-                        {game.room.map((roomData, roomIndex) => {
-                            return (
-                                <div className='room' key={roomIndex}>
+                    <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="room" type="room">
+                        {(provided) => (
+                        <div
+                            className='room_area_scroll'
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                        >
+                            {game.room.map((roomData, roomIndex) => (
+                            <Draggable
+                                key={roomData.id ?? `room-${roomIndex}`}
+                                draggableId={roomData.id ? String(roomData.id) : `room-${roomIndex}`}
+                                index={roomIndex}
+                            >
+                                {(provided) => (
+                                <div
+                                    className='room'
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    key={roomIndex}
+                                >
                                     <div className='stage_wrap' onClick={() => handleShowRoom(roomIndex)}>
-                                        <div className='stageIndex_delete'>
-                                            <h3>Stage {roomIndex + 1}</h3>
-                                            <button onClick={(e) => {e.stopPropagation(); handleDeleteGameRoom(roomIndex)}}>X</button>
-                                        </div>
-                                        <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} onClick={e => e.stopPropagation()} placeholder='이름'/>
+                                    <div className='stageIndex_delete'>
+                                        <h3>Stage {roomIndex + 1}</h3>
+                                        <button onClick={(e) => {e.stopPropagation(); handleDeleteGameRoom(roomIndex)}}>X</button>
+                                    </div>
+                                    <input type="text" value={roomData.name || ''} onChange={(e) => handleChangeRoomName(roomIndex, e.target.value)} onClick={(e) => e.stopPropagation()} placeholder='이름'/>
                                     </div>
 
                                     {openedRooms.includes(roomIndex) && (
-                                        <div className='side_area'>
+                                    <Droppable droppableId={`side-${roomIndex}`} type="side">
+                                        {(provided) => (
+                                        <div
+                                            className='side_area'
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                        >
                                             {roomData.side.map((sideData, sideIndex) => {
-                                                const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
-
-                                                return (
-                                                    <div className={`side_wrap ${isSelected ? 'selected' : ''}`} key={sideIndex} style={{ position: 'relative' }}>
+                                            const isSelected = selectedSide.roomIndex === roomIndex && selectedSide.sideIndex === sideIndex;
+                                            return (
+                                                <Draggable
+                                                key={`draggable-side-${roomIndex}-${sideIndex}-${sideData.id ?? sideIndex}`}
+                                                draggableId={`draggable-side-${roomIndex}-${sideIndex}`}
+                                                index={sideIndex}
+                                                >
+                                                {(provided) => (
+                                                    <div
+                                                    className={`side_wrap ${isSelected ? 'selected' : ''}`}
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    style={{ position: 'relative', ...provided.draggableProps.style }}
+                                                    >
                                                     <div
                                                         className={`side ${isSelected ? 'selected' : ''}`}
                                                         onClick={() => handleCurrentSide(roomIndex, sideIndex, sideData)}
@@ -857,7 +932,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                                     <div className="info" style={{ position: 'relative', zIndex: 1 }}>
                                                         <h4>{sideIndex + 1}</h4>
                                                     </div>
-
+                                                    
                                                     {/* 모든 side마다 PerspectiveSVG 렌더링 */}
                                                         <div
                                                             style={{ position: 'absolute',
@@ -874,16 +949,27 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                                             isPerspectiveUpdated={isPerspectiveUpdated} setIsPerspectiveUpdated={setIsPerspectiveUpdated} />
                                                         </div>
                                                     </div>
+                                                )}
+                                                </Draggable>
                                                 );
                                             })}
+                                            {provided.placeholder}
                                             <button onClick={() => handleAddGameSide(roomIndex)}>+</button>
                                         </div>
+                                        )}
+                                    </Droppable>
                                     )}
                                 </div>    
-                            )
-                        })}
-                        <button onClick={handleAddGameRoom}>+</button>
-                    </div>
+                                )}
+                            </Draggable>
+                            ))}
+
+                            {provided.placeholder}
+                            <button onClick={handleAddGameRoom}>+</button>
+                        </div>
+                        )}
+                    </Droppable>
+                    </DragDropContext>
                 </div>
             </div>
         </div>
