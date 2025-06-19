@@ -197,7 +197,7 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
                       가볍게, 재미있게 즐겨주세요!
                       즐거운 플레이 되시길 바랍니다
                       </p> */}
-                      {gameInfo?.description ?? '설명입니다'}
+                      <p>{gameInfo?.description ?? '설명입니다'}</p>
                   </div>
                 )}
 
