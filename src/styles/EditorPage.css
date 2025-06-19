@@ -380,7 +380,7 @@
 .wall_top > p {
     position: absolute;
     top: 0;
-    left: 45%;
+    left: 44%;
     opacity: 0;
     pointer-events: none;
 }
@@ -388,7 +388,7 @@
 .wall_bottom > p {
     position: absolute;
     bottom: 5px;
-    left: 35%;
+    left: 37%;
     opacity: 0;
     pointer-events: none;
 }
@@ -407,6 +407,31 @@
 }
 
 .frame_wall_wrap > div.active > p {
+    opacity: 1;
+}
+
+.wall_fine_tuning > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+ 
+.wall_fine_tuning > div > input[type="number"] {
+    background-color: white;
+    width: 50px;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 5px;
+    border: 0;
+}
+
+.wall_fine_tuning > div > input[type="number"]:focus {
+    outline: 0;
+}
+
+.wall_fine_tuning > div > input[type="number"]::-webkit-inner-spin-button,
+.wall_fine_tuning > div > input[type="number"]::-webkit-outer-spin-button {
     opacity: 1;
 }
 

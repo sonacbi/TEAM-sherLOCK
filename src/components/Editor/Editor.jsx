@@ -255,13 +255,13 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                 break;
         }
     }, [addFrameTrigger]);
-    useEffect(() => {
-        if (isReady) {
-            // 거의 초마다 실행되는 문제 있음
-            const frame = game.room[currentRoom].side[currentSide].frame;
-            frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
-        }
-    }, [game.room[currentRoom].side[currentSide]?.frame]);
+    // useEffect(() => {
+    //     if (isReady) {
+    //         // 거의 초마다 실행되는 문제 있음
+    //         const frame = game.room[currentRoom].side[currentSide].frame;
+    //         frame && addFrame(frame.x, frame.y, frame.width, frame.height, frame.edge, currentRoomRef, currentSideRef, perspectiveRef);
+    //     }
+    // }, [game.room[currentRoom].side[currentSide]?.frame]);
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)

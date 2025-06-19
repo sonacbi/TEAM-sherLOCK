@@ -313,6 +313,7 @@
 .fontType_wrap > label {
     height: 35px;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .fontType_wrap img {

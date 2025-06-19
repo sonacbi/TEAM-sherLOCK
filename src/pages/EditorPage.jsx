@@ -239,9 +239,71 @@ function EditorPage() {
         setShowRoomInfo(prev => !prev);
     };
 
+    const getWallImg = (pos) => {
+        switch (pos) {
+            case 'top': return wall_top_img;
+            case 'left': return wall_left_img;
+            case 'center': return wall_center_img;
+            case 'right': return wall_right_img;
+            case 'bottom': return wall_bottom_img;
+            default: return '';
+        }
+    };
+
     const EdgeFramePage = () => {
         const roomController = canvasInstance.current?.getObjects().find(obj => obj.name === 'SherLockRoomController'); 
         const edge = game.room[currentRoom].side[currentSide]?.frame?.edge;
+        const [tempEdges, setTempEdges] = useState(() => edge ? [...edge] : [120, 220, 220, 110]);
+        const [inputEdges, setInputEdges] = useState(() => edge ? edge.map(v => v.toString()) : ["120", "220", "220", "110"]);
+
+        useEffect(() => {
+            if (!edge) return;
+            setTempEdges([...edge]);
+            setInputEdges(edge.map(v => v.toString()));
+        }, [edge]);
+
+        const handleTempEdgeChange = (value, index) => {
+            const newTempEdges = [...tempEdges];
+            newTempEdges[index] = value;
+            setTempEdges(newTempEdges);
+
+            const newInputEdges = [...inputEdges];
+            newInputEdges[index] = value.toString();
+            setInputEdges(newInputEdges);
+        };
+
+        const handleInputEdgeChange = (value, index) => {
+            const newInputEdges = [...inputEdges];
+            newInputEdges[index] = value;
+            setInputEdges(newInputEdges);
+        };
+
+        const handleInputEdgeBlurOrEnter = (index) => {
+            const num = Number(inputEdges[index]);
+            // 방향별 min/max 설정
+            const minMax = [
+                { min: 120, max: 800 },  // top
+                { min: 220, max: 800 },  // left
+                { min: 220, max: 800 },  // right
+                { min: 110, max: 800 },  // bottom
+            ];
+            if (!isNaN(num) && num >= minMax[index].min && num <= minMax[index].max) {
+                handleEdge(num, index);
+                handleTempEdgeChange(num, index);
+            } else {
+                // 범위 벗어나면 기존값 복구
+                setInputEdges(prev => {
+                const copy = [...prev];
+                copy[index] = edge[index].toString();
+                return copy;
+                });
+                setTempEdges(prev => {
+                const copy = [...prev];
+                copy[index] = edge[index];
+                return copy;
+                });
+            }
+        };
 
         const handleEdge = (value, index) => {
             roomController.edge[index] = value;
@@ -249,8 +311,8 @@ function EditorPage() {
                 const newData = new GamePnC(prev);
                 newData.room[currentRoom].side[currentSide].frame.edge[index] = value;
                 return newData;
-            })
-        }
+            });
+        };
 
         return(
             <div className='frame_fine_tuning'>
@@ -263,51 +325,143 @@ function EditorPage() {
                         </div>
 
                         <div className='frame_wall_wrap'>
-                            <div 
-                                className={`wall_top ${activeWall === 'top' ? 'active' : ''}`}
-                                onClick={() => handleWallClick('top')}
-                            >
-                                <img id='wall_top_img' src={wall_top_img} alt='wall_top_img' />
-                                <p>top</p>
-                            </div>
-
-                            <div 
-                                className={`wall_left ${activeWall === 'left' ? 'active' : ''}`}
-                                onClick={() => handleWallClick('left')}
-                            >
-                                <img id='wall_left_img' src={wall_left_img} alt='wall_left_img' />
-                                <p>left</p>
-                            </div>
-
-                            <div 
-                                className={`wall_center ${activeWall === 'center' ? 'active' : ''}`}
-                                onClick={() => handleWallClick('center')}
-                            >
-                                <img id='wall_center_img' src={wall_center_img} alt='wall_center_img' />
-                                <p>center</p>
-                            </div>
-
-                            <div 
-                                className={`wall_right ${activeWall === 'right' ? 'active' : ''}`}
-                                onClick={() => handleWallClick('right')}
-                            >
-                                <img id='wall_right_img' src={wall_right_img} alt='wall_right_img' />
-                                <p>right</p>
-                            </div>
-
-                            <div 
-                                className={`wall_bottom ${activeWall === 'bottom' ? 'active' : ''}`}
-                                onClick={() => handleWallClick('bottom')}
-                            >
-                                <img id='wall_bottom_img' src={wall_bottom_img} alt='wall_bottom_img' />
-                                <p>bottom</p>
-                            </div>
+                            {['top', 'left', 'center', 'right', 'bottom'].map(pos => (
+                                <div 
+                                    key={pos}
+                                    className={`wall_${pos} ${activeWall === pos ? 'active' : ''}`}
+                                    onClick={() => handleWallClick(pos)}
+                                >
+                                    <img id={`wall_${pos}_img`} src={getWallImg(pos)} alt={`wall_${pos}_img`} />
+                                    <p>{pos}</p>
+                                </div>
+                            ))}
                         </div>
 
-                        top: <input type="range" min={120} max={800} value={edge[0]} step={1} onChange={e => handleEdge(e.target.valueAsNumber, 0)}/> {edge[0]} <br />
-                        left: <input type="range" min={220} max={800} value={edge[1]} step={1} onChange={e => handleEdge(e.target.valueAsNumber, 1)}/> {edge[1]} <br />
-                        right: <input type="range" min={220} max={800} value={edge[2]} step={1} onChange={e => handleEdge(e.target.valueAsNumber, 2)}/> {edge[2]} <br />
-                        bottom: <input type="range" min={110} max={800} value={edge[3]} step={1} onChange={e => handleEdge(e.target.valueAsNumber, 3)}/> {edge[3]} <br />
+                        <div className='wall_fine_tuning'>
+                            {!activeWall && (
+                                <div className='default_description'>
+                                    <p>* 조정할 벽면을 선택하세요.</p>
+                                </div>
+                            )}
+
+                            {activeWall === 'top' && (
+                                <div className='wall_top_ft'>
+                                    <p>top : </p>
+                                    <input
+                                        type="range"
+                                        min={120}
+                                        max={800}
+                                        value={tempEdges[0]}
+                                        step={1}
+                                        onChange={e => handleTempEdgeChange(e.target.valueAsNumber, 0)}
+                                        onMouseUp={() => handleEdge(tempEdges[0], 0)}
+                                    />
+
+                                    <input
+                                        type="number"
+                                        min={120}
+                                        max={800}
+                                        step={1}
+                                        value={inputEdges[0]}
+                                        onChange={e => handleInputEdgeChange(e.target.value, 0)}
+                                        onBlur={() => handleInputEdgeBlurOrEnter(0)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleInputEdgeBlurOrEnter(0);
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {activeWall === 'left' && (
+                                <div className='wall_left_ft'>
+                                    <p>left : </p>
+                                    <input
+                                        type="range"
+                                        min={220}
+                                        max={800}
+                                        value={tempEdges[1]}
+                                        step={1}
+                                        onChange={e => handleTempEdgeChange(e.target.valueAsNumber, 1)}
+                                        onMouseUp={() => handleEdge(tempEdges[1], 1)}
+                                    />
+
+                                    <input
+                                        type="number"
+                                        min={220}
+                                        max={800}
+                                        step={1}
+                                        value={inputEdges[1]}
+                                        onChange={e => handleInputEdgeChange(e.target.value, 1)}
+                                        onBlur={() => handleInputEdgeBlurOrEnter(1)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleInputEdgeBlurOrEnter(1);
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {activeWall === 'center' && (
+                                <div className='wall_center_ft'>
+                                    <p>* 공사중 *</p>
+                                </div>
+                            )}
+
+                            {activeWall === 'right' && (
+                                <div className='wall_right_ft'>
+                                    <p>right : </p>
+                                    <input
+                                        type="range"
+                                        min={220}
+                                        max={800}
+                                        value={tempEdges[2]}
+                                        step={1}
+                                        onChange={e => handleTempEdgeChange(e.target.valueAsNumber, 2)}
+                                        onMouseUp={() => handleEdge(tempEdges[2], 2)}
+                                    />
+
+                                    <input
+                                        type="number"
+                                        min={220}
+                                        max={800}
+                                        step={1}
+                                        value={inputEdges[2]}
+                                        onChange={e => handleInputEdgeChange(e.target.value, 2)}
+                                        onBlur={() => handleInputEdgeBlurOrEnter(2)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleInputEdgeBlurOrEnter(2);
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {activeWall === 'bottom' && (
+                                <div className='wall_bottom_ft'>
+                                    <p>bottom : </p>
+                                    <input
+                                        type="range"
+                                        min={110}
+                                        max={800}
+                                        value={tempEdges[3]}
+                                        step={1}
+                                        onChange={e => handleTempEdgeChange(e.target.valueAsNumber, 3)}
+                                        onMouseUp={() => handleEdge(tempEdges[3], 3)}
+                                    />
+
+                                    <input
+                                        type="number"
+                                        min={110}
+                                        max={800}
+                                        step={1}
+                                        value={inputEdges[3]}
+                                        onChange={e => handleInputEdgeChange(e.target.value, 3)}
+                                        onBlur={() => handleInputEdgeBlurOrEnter(3)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleInputEdgeBlurOrEnter(3);
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </>)
                     :
                     (<>
