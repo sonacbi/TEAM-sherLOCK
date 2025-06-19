@@ -13,25 +13,17 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
     const [display, setDisplay] = useState(eventData.name == eventValues.changeObj.name);
     const [displayFrom, setDisplayFrom] = useState(false);
     const [displayTo, setDisplayTo] = useState(false);
-    const [changeFrom, setChangeFrom] = useState(event?.changeObj?.from);
-    const [changeTo, setChangeTo] = useState(event?.changeObj?.to);
 
     const eventName = eventData.name;
     const eventColor = eventData.color;
 
     const thinkToChange = (eventName, data) => {
-        if (eventName == 'from') {
-            setChangeFrom(data);
-            onChange({ changeObj: { from: data, to: changeFrom }});
-        }
-        else if (eventName == 'to') {
-            setChangeTo(data);
-            onChange({ changeObj: { from: changeTo, to: data }});
-        }
+        if (eventName == 'from') onChange({ changeObj: { from: data, to: event?.changeObj?.to }});
+        else if (eventName == 'to') onChange({ changeObj: { from: event?.changeObj?.from, to: data }});
         else onChange({ [eventName]: data });
     }
 
-    const FoundFabricName = ({fabricName, eventName}) => {
+    const FoundFabricName = ({fabricId, eventName}) => {
         const [keyword, setKeyword] = useState('');
         const filteredFabrics = namedFabrics.filter(fabric =>
             fabric.name.toLowerCase().includes(keyword.toLowerCase())
@@ -46,7 +38,7 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                     {filteredFabrics.length === 0 ? (<div>객체가 없습니다</div>) 
                     :
                     filteredFabrics.map((data, index) => {return(
-                    <li key={index} className={`fabricName-item ${fabricName==data.name && 'selected'}`} onClick={() => thinkToChange(eventName, data)}>
+                    <li key={index} className={`fabricName-item ${fabricId==data.id && 'selected'}`} onClick={() => thinkToChange(eventName, {id: data.id})}>
                         {data.name}
                         <span>#{data.id}</span>
                     </li>
@@ -89,9 +81,9 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                         <div className='object_appear have-fabricName'>
                             <label>
                                 <p>이름 : </p>
-                                <input value={event.appearObj?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                                <input value={namedFabrics.find(item => item.id == event.appearObj?.id)?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
                             </label>
-                            <FoundFabricName fabricName={event.appearObj?.name} eventName='appearObj'/>
+                            <FoundFabricName fabricId={event.appearObj?.id} eventName='appearObj'/>
                         </div>
                     </>
                 )}
@@ -100,9 +92,9 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                         <div className='object_hide have-fabricName'>
                             <label>
                                 <p>이름 : </p>
-                                <input value={event.hideObj?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                                <input value={namedFabrics.find(item => item.id == event.hideObj?.id)?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
                             </label>
-                            <FoundFabricName fabricName={event.hideObj?.name} eventName='hideObj'/>
+                            <FoundFabricName fabricId={event.hideObj?.id} eventName='hideObj'/>
                         </div>
                     </>
                 )}
@@ -111,9 +103,9 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                         <div className='object_remove have-fabricName'>
                             <label>
                                 <p>이름 : </p>
-                                <input value={event.removeObj?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                                <input value={namedFabrics.find(item => item.id == event.removeObj?.id)?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
                             </label>
-                            <FoundFabricName fabricName={event.removeObj?.name} eventName='removeObj'/>
+                            <FoundFabricName fabricId={event.removeObj?.id} eventName='removeObj'/>
                         </div>
                     </>
                 )}
@@ -123,20 +115,20 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                             <div className='before_name have-fabricName'>
                                 <label>
                                     <p>기존 이름 : </p>
-                                    <input value={changeFrom?.name} onClick={()=>setDisplayFrom(prev=>!prev)} readOnly/>
+                                    <input value={namedFabrics.find(item => item.id == event?.changeObj?.from?.id)?.name} onClick={()=>setDisplayFrom(prev=>!prev)} readOnly/>
                                 </label>
-                                <div style={{display: `${displayFrom ? 'none' : ''}`}}>
-                                <FoundFabricName fabricName={changeFrom?.name} eventName='from'/>
+                                <div style={{display: `${displayFrom ? '' : 'none'}`}}>
+                                <FoundFabricName fabricId={event?.changeObj?.from?.id} eventName='from'/>
                                 </div>
                             </div>
 
                             <div className='after_name have-fabricName'>
                                 <label>
                                     <p>바꿀 이름 : </p>
-                                    <input value={changeTo?.name} onClick={()=>setDisplayTo(prev=>!prev)} readOnly/>
+                                    <input value={namedFabrics.find(item => item.id == event?.changeObj?.to?.id)?.name} onClick={()=>setDisplayTo(prev=>!prev)} readOnly/>
                                 </label>
-                                <div style={{display: `${displayTo ? 'none' : ''}`}}>
-                                <FoundFabricName fabricName={changeTo?.name} eventName='to'/>
+                                <div style={{display: `${displayTo ? '' : 'none'}`}}>
+                                <FoundFabricName fabricId={event?.changeObj?.to?.id} eventName='to'/>
                                 </div>
                             </div>
                         </div>
@@ -147,9 +139,9 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                         <div className='object_getItem have-fabricName'>
                             <label>
                                 <p>이름: </p>
-                                <input value={event.getItem?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                                <input value={namedFabrics.find(item => item.id == event.getItem?.id)?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
                             </label>
-                            <FoundFabricName fabricName={event.getItem?.name} eventName='getItem'/>
+                            <FoundFabricName fabricId={event.getItem?.id} eventName='getItem'/>
                         </div>
                     </>
                 )}
