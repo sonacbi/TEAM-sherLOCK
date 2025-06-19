@@ -58,7 +58,7 @@ function EditorPage() {
     const [thumbnail, setThumbnail] = useState(null);
     const [imgs, setImgs] = useState([]);
     const [imageSrcs, setImageSrcs] = useState([]);
-    const [storedFabric, setStoredFabric] = useState([]);
+    const [storedFabrics, setStoredFabrics] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -421,7 +421,7 @@ function EditorPage() {
 
                         <div className='tool_fine_tuning'>
                             {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
-                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool} setImgs={setImgs}/>
+                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool} setImgs={setImgs} storedFabrics={storedFabrics} setStoredFabrics={setStoredFabrics}/>
                             ) : (
                                 <>
                                     {selectedTool === 'frame' && (

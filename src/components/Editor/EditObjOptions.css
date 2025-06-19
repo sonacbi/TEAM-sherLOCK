@@ -74,6 +74,13 @@
     gap: 20px;
 }
 
+.object_id {
+    padding-left: 10px;
+    border-radius: 5px;
+    color: #999999;
+    /* background-color: #333333; */
+}
+
 .object_name {
     display: flex;
     gap: 10px;

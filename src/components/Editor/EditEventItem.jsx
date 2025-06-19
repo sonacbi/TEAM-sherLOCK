@@ -1,6 +1,6 @@
 import './EditEventItem.css';
 
-export default function EditEventItem({ event, index, eventValues, onChange, onRemove }) {
+export default function EditEventItem({ event, index, eventValues, storedFabrics, onChange, onRemove }) {
     const eventKey = Object.keys(event)[0];
     const eventData = eventValues?.[eventKey]; // Optional chaining
 
@@ -11,6 +11,25 @@ export default function EditEventItem({ event, index, eventValues, onChange, onR
 
     const eventName = eventData.name;
     const eventColor = eventData.color;
+
+    const FoundFabricName = ({name}) => {
+        return(
+            <div className='fabricName-box'>
+                <ul className='fabricName-list'>
+                    <li className='fabricName-search'>
+                        <input type="text"/>
+                        <span>🔍</span>
+                    </li>
+                    {storedFabrics.map((data, index) => {return(
+                    <li key={index} className={`fabricName-item ${name==data.name && 'selected'}`} style={{}}>
+                        {data.name}
+                        <span>#{data.id}</span>
+                    </li>
+                    )})}
+                </ul>
+            </div>
+        )
+    }
 
     return (
         <div className="event-item" style={{ backgroundColor: eventColor || "transparent" }}>
@@ -43,8 +62,10 @@ export default function EditEventItem({ event, index, eventValues, onChange, onR
                 {eventName === eventValues.appearObj.name && (
                     <>
                         <div className='object_appear'>
-                            <p>이름 : </p>
-                            <input value={event.appearObj?.name} onChange={e => onChange({ appearObj: { name: e.target.value } })} />
+                            <label>
+                                이름 : <input value={event.appearObj?.name} onChange={e => onChange({ appearObj: { name: e.target.value } })} />
+                            </label>
+                            <FoundFabricName name={event.appearObj?.name}/>
                         </div>
                     </>
                 )}

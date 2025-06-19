@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { v4 as uuidv4 } from 'uuid';
+import { customAlphabet } from "nanoid";
 
 import EditEventItem from "./EditEventItem";
 import { GameEventType } from "../../../modules/editor/gamePnC";
@@ -20,7 +21,7 @@ import italic from '../../assets/images/EditorPage_img/italic.png';
 import bold from '../../assets/images/EditorPage_img/bold.png';
 
 
-export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs}) {
+export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs, storedFabrics, setStoredFabrics}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
     const [optionStyle, setOptionStyle] = useState(foundFabric);
     const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
@@ -111,6 +112,18 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
         switch (option) {
             case 'name':
+                if (!value) {
+                    setOptionStyle(prev => ({...prev, id: undefined}));
+                    foundFabric.id = undefined;
+                }
+                else if (!foundFabric.id) {
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                    const nanoid = customAlphabet(alphabet, 8);
+                    const id = nanoid();
+                    setOptionStyle(prev => ({...prev, id: id}));
+                    foundFabric.id = id;
+                    setStoredFabrics(prev => [...prev, {id, name: value}]);
+                }
                 foundFabric.name = value;
                 setOptionStyle(prev => ({...prev, name: value}));
                 break;
@@ -307,6 +320,9 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 <>
                     {activeObject?.type !== "activeselection" && (
                         <div className="default_attribute">
+                            {optionStyle?.id && (
+                                <p className="object_id">ID - #{optionStyle.id}</p>
+                            )}
                             <div className="object_name">
                                 <h4>이름 : </h4>
                                 <input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
@@ -488,6 +504,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                                         event={event}
                                                         index={index}
                                                         eventValues={eventValues}
+                                                        storedFabrics={storedFabrics}
                                                         onChange={(updatedEvent) => {
                                                         const newEvents = [...eventList];
                                                         newEvents[index] = {
