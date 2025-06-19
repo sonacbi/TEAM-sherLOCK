@@ -6,8 +6,7 @@ import SaveToServer from '../components/Editor/SaveToServer';
 import EditObjOptions from '../components/Editor/EditObjOptions';
 import RoomInfo from '../components/RoomInfo/RoomInfo';
 
-import { GamePnC, Room, Side } from '../../modules/editor/gamePnC';
-import { GameInfo } from '../../modules/game-modules';
+import { GamePnC, Room } from '../../modules/editor/gamePnC';
 import '../styles/EditorPage.css';
 
 import logo from '../assets/images/logo/footer_logo.png'
@@ -58,7 +57,7 @@ function EditorPage() {
     const [thumbnail, setThumbnail] = useState(null);
     const [imgs, setImgs] = useState([]);
     const [imageSrcs, setImageSrcs] = useState([]);
-    const [storedFabrics, setStoredFabrics] = useState([]);
+    const [namedFabrics, setNamedFabrics] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -421,7 +420,11 @@ function EditorPage() {
 
                         <div className='tool_fine_tuning'>
                             {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
-                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool} setImgs={setImgs} storedFabrics={storedFabrics} setStoredFabrics={setStoredFabrics}/>
+                                <EditObjOptions
+                                    canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool}
+                                    setImgs={setImgs} namedFabrics={namedFabrics} setNamedFabrics={setNamedFabrics}
+                                    currentRoom={currentRoom} currentSide={currentSide}
+                                />
                             ) : (
                                 <>
                                     {selectedTool === 'frame' && (

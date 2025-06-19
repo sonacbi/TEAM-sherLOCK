@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import './EditEventItem.css';
 
-export default function EditEventItem({ event, index, eventValues, storedFabrics, onChange, onRemove }) {
+export default function EditEventItem({ event, index, eventValues, namedFabrics, onChange, onRemove }) {
     const eventKey = Object.keys(event)[0];
     const eventData = eventValues?.[eventKey]; // Optional chaining
 
@@ -9,19 +10,43 @@ export default function EditEventItem({ event, index, eventValues, storedFabrics
         return null; // 또는 fallback UI
     }
 
+    const [display, setDisplay] = useState(eventData.name == eventValues.changeObj.name);
+    const [displayFrom, setDisplayFrom] = useState(false);
+    const [displayTo, setDisplayTo] = useState(false);
+    const [changeFrom, setChangeFrom] = useState(event?.changeObj?.from);
+    const [changeTo, setChangeTo] = useState(event?.changeObj?.to);
+
     const eventName = eventData.name;
     const eventColor = eventData.color;
 
-    const FoundFabricName = ({name}) => {
+    const thinkToChange = (eventName, data) => {
+        if (eventName == 'from') {
+            setChangeFrom(data);
+            onChange({ changeObj: { from: data, to: changeFrom }});
+        }
+        else if (eventName == 'to') {
+            setChangeTo(data);
+            onChange({ changeObj: { from: changeTo, to: data }});
+        }
+        else onChange({ [eventName]: data });
+    }
+
+    const FoundFabricName = ({fabricName, eventName}) => {
+        const [keyword, setKeyword] = useState('');
+        const filteredFabrics = namedFabrics.filter(fabric =>
+            fabric.name.toLowerCase().includes(keyword.toLowerCase())
+        );
         return(
-            <div className='fabricName-box'>
+            <div className={`fabricName-box ${display && 'show'}`}>
                 <ul className='fabricName-list'>
                     <li className='fabricName-search'>
-                        <input type="text"/>
+                        <input type="text" value={keyword} onChange={e => setKeyword(e.target.value)}/>
                         <span>🔍</span>
                     </li>
-                    {storedFabrics.map((data, index) => {return(
-                    <li key={index} className={`fabricName-item ${name==data.name && 'selected'}`} style={{}}>
+                    {filteredFabrics.length === 0 ? (<div>객체가 없습니다</div>) 
+                    :
+                    filteredFabrics.map((data, index) => {return(
+                    <li key={index} className={`fabricName-item ${fabricName==data.name && 'selected'}`} onClick={() => thinkToChange(eventName, data)}>
                         {data.name}
                         <span>#{data.id}</span>
                     </li>
@@ -61,50 +86,70 @@ export default function EditEventItem({ event, index, eventValues, storedFabrics
                 )}
                 {eventName === eventValues.appearObj.name && (
                     <>
-                        <div className='object_appear'>
+                        <div className='object_appear have-fabricName'>
                             <label>
-                                이름 : <input value={event.appearObj?.name} onChange={e => onChange({ appearObj: { name: e.target.value } })} />
+                                <p>이름 : </p>
+                                <input value={event.appearObj?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
                             </label>
-                            <FoundFabricName name={event.appearObj?.name}/>
+                            <FoundFabricName fabricName={event.appearObj?.name} eventName='appearObj'/>
                         </div>
                     </>
                 )}
                 {eventName === eventValues.hideObj.name && (
                     <>
-                        <div className='object_hide'>
-                            <p>이름 : </p>
-                            <input value={event.hideObj?.name} onChange={e => onChange({ hideObj: { name: e.target.value } })} />
+                        <div className='object_hide have-fabricName'>
+                            <label>
+                                <p>이름 : </p>
+                                <input value={event.hideObj?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                            </label>
+                            <FoundFabricName fabricName={event.hideObj?.name} eventName='hideObj'/>
                         </div>
                     </>
                 )}
                 {eventName === eventValues.removeObj.name && (
                     <>
-                        <div className='object_remove'>
-                            <p>이름 : </p>
-                            <input value={event.removeObj?.name} onChange={e => onChange({ removeObj: { name: e.target.value } })} />
+                        <div className='object_remove have-fabricName'>
+                            <label>
+                                <p>이름 : </p>
+                                <input value={event.removeObj?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                            </label>
+                            <FoundFabricName fabricName={event.removeObj?.name} eventName='removeObj'/>
                         </div>
                     </>
                 )}
                 {eventName === eventValues.changeObj.name && (
                     <>  
                         <div className='object_change'>
-                            <div className='before_name'>
-                                <p>기존 이름 : </p>
-                                <input value={event.changeObj?.from} onChange={e => onChange({ changeObj: { from: e.target.value, to: event.changeObj?.to } })} />
+                            <div className='before_name have-fabricName'>
+                                <label>
+                                    <p>기존 이름 : </p>
+                                    <input value={changeFrom?.name} onClick={()=>setDisplayFrom(prev=>!prev)} readOnly/>
+                                </label>
+                                <div style={{display: `${displayFrom ? 'none' : ''}`}}>
+                                <FoundFabricName fabricName={changeFrom?.name} eventName='from'/>
+                                </div>
                             </div>
 
-                            <div className='after_name'>
-                                <p>바꿀 이름 : </p>
-                                <input value={event.changeObj?.to} onChange={e => onChange({ changeObj: { from: event.changeObj?.from, to: e.target.value } })} />
+                            <div className='after_name have-fabricName'>
+                                <label>
+                                    <p>바꿀 이름 : </p>
+                                    <input value={changeTo?.name} onClick={()=>setDisplayTo(prev=>!prev)} readOnly/>
+                                </label>
+                                <div style={{display: `${displayTo ? 'none' : ''}`}}>
+                                <FoundFabricName fabricName={changeTo?.name} eventName='to'/>
+                                </div>
                             </div>
                         </div>
                     </>
                 )}
                 {eventName === eventValues.getItem.name && (
                     <>
-                        <div className='object_getItem'>
-                            <p>이름: </p>
-                            <input value={event.getItem?.name} onChange={e => onChange({ getItem: { name: e.target.value } })} />
+                        <div className='object_getItem have-fabricName'>
+                            <label>
+                                <p>이름: </p>
+                                <input value={event.getItem?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                            </label>
+                            <FoundFabricName fabricName={event.getItem?.name} eventName='getItem'/>
                         </div>
                     </>
                 )}
