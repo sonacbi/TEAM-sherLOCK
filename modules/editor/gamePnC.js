@@ -48,13 +48,19 @@ class Fabric extends ClassVersion {
     }
 }
 // 이벤트
+const namedFabric = {
+    id: "",
+    name: "",
+    room: null,
+    side: null,
+};
 const GameEventType = {
     move: { room: 0, side: 0 },
-    appearObj: { name: "" },
-    hideObj: { name: "" },
-    removeObj: { name: "" },
-    changeObj: { from: "", to: "" },
-    getItem: { name: "" },
+    appearObj: Object.assign({}, namedFabric),
+    hideObj: Object.assign({}, namedFabric),
+    removeObj: Object.assign({}, namedFabric),
+    changeObj: { from: Object.assign({}, namedFabric), to: Object.assign({}, namedFabric) },
+    getItem: Object.assign({}, namedFabric),
     dropItem: { name: "" },
     startTime: { name: "" },
     endTime: { name: "" },
