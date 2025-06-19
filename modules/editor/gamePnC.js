@@ -56,11 +56,11 @@ const namedFabric = {
 };
 const GameEventType = {
     move: { room: 0, side: 0 },
-    appearObj: Object.assign({}, namedFabric),
-    hideObj: Object.assign({}, namedFabric),
-    removeObj: Object.assign({}, namedFabric),
-    changeObj: { from: Object.assign({}, namedFabric), to: Object.assign({}, namedFabric) },
-    getItem: Object.assign({}, namedFabric),
+    appearObj: { id: "" },
+    hideObj: { id: "" },
+    removeObj: { id: "" },
+    changeObj: { from: { id: "" }, to: { id: "" } },
+    getItem: { id: "" },
     dropItem: { name: "" },
     startTime: { name: "" },
     endTime: { name: "" },
@@ -84,4 +84,4 @@ class Item extends ClassVersion {
         this.fabric = new Fabric(Object.assign(Object.assign({}, fabric), { option: { name: name } }));
     }
 }
-export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, GameEventType, Item };
+export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, namedFabric, GameEventType, Item };

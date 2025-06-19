@@ -91,11 +91,11 @@ const namedFabric = {
 };
 const GameEventType = {
     move: { room: 0, side: 0 },
-    appearObj: { ...namedFabric },
-    hideObj: { ...namedFabric },
-    removeObj: { ...namedFabric },
-    changeObj: { from: { ...namedFabric }, to: { ...namedFabric } },
-    getItem: { ...namedFabric },
+    appearObj: { id: "" },
+    hideObj: { id: "" },
+    removeObj: { id: "" },
+    changeObj: { from: { id: "" }, to: { id: "" } },
+    getItem: { id: "" },
     dropItem: { name: "" },
     startTime: { name: "" },
     endTime: { name: "" },
@@ -140,4 +140,4 @@ class Item extends ClassVersion {
     }
 }
 
-export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, GameEventType, Item }
+export { ClassVersion, GamePnC, Room, Side, Frame, Fabric, namedFabric, GameEventType, Item }
