@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode'; // 유저 정보 디코딩
 
 import './RoomInfo.css';
 import { useTitleByteHandler, useThumbnailUpload, getByteLength, validateScription, validatePlaytime } from './RoomInfo_validate';
+import { GameInfo } from '../../../modules/game-modules';
 
 import Room_thumbnail_basic_img from '../../assets/images/RoomInfo/Room_thumbnail_basic_img.png';
 import Room_theme_horror_img from '../../assets/images/MainPage_img/horror_icon.png'
@@ -14,15 +15,15 @@ import limited_icon from '../../assets/images/RoomInfo/limited_icon.png';
 import creator_profile from '../../assets/images/Profile/ex_user_profile.png';
 
 
-function RoomInfo() {
+function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
   // 타이틀
   const maxBytes = 100;
-  const [title, setTitle] = useState('');
-  const [byteLength, setByteLength] = useState(0);
+  const [title, setTitle] = useState(gameInfo?.title ?? '');
+  const [byteLength, setByteLength] = useState(new TextEncoder().encode(title).length);
   const [titleMessage, setTitleMessage] = useState(`0 / ${maxBytes} bytes 사용 중`);
 
   // 썸네일
-  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailSrc, setThumbnailSrc] = useState(thumbnail && URL.createObjectURL(thumbnail));
   const [thumbnailMessage, setThumbnailMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showConfirmButtons, setShowConfirmButtons] = useState(false);
@@ -31,21 +32,21 @@ function RoomInfo() {
   const modalTimeoutRef = useRef(null); 
 
   // 소개글
-  const [ inputScript, setInputScript ] = useState('');
+  const [ inputScript, setInputScript ] = useState(gameInfo?.description ?? '');
   const [ scriptMessage, setScriptMessage ] = useState('');
   const maxScriptByte = 1000;
-  const [ scriptByteLength, setScriptByteLength ] = useState(0);
+  const [ scriptByteLength, setScriptByteLength ] = useState(new TextEncoder().encode(inputScript).length);
 
   // 난이도
-  const [selectedDifficulty, setSelectedDifficulty ] = useState(null);
+  const [selectedDifficulty, setSelectedDifficulty ] = useState(gameInfo?.difficulty ?? null);
   const [ difficultyMessage, setDifficultyMessage ] = useState('');
   
   // 예상소요시간
-  const [playtimeHour, setPlaytimeHour] = useState('');
-  const [playtimeMin, setPlaytimeMin] = useState('');
+  const [playtimeHour, setPlaytimeHour] = useState((gameInfo?.playTime - gameInfo?.playTime % 60) / 60 || '');
+  const [playtimeMin, setPlaytimeMin] = useState(gameInfo?.playTime % 60 || '');
   const [playtimeMessage, setPlaytimeMessage] = useState('');
   
-  const [selectedTheme, setSelectedTheme] = useState(null);
+  const [selectedTheme, setSelectedTheme] = useState(gameInfo?.theme ?? null);
   const [ themeMessage, setThemeMessage ] = useState('');
 
   const [userToken, setUserToken] = useState(null); // 사용자 토큰 상태
@@ -64,7 +65,7 @@ function RoomInfo() {
     crime: '범죄',
   };
 
-  const [selectedVisibility, setSelectedVisibility] = React.useState(''); // 기본값은 빈값으로 설정
+  const [selectedVisibility, setSelectedVisibility] = React.useState(gameInfo?.visibility ?? ''); // 기본값은 빈값으로 설정
   const [ visibilityMessage, setVisibilityMessage ] = useState('');
 
   // 유효성 검사 통과 못하면 이쪽으로 시선 집중(포커스)
@@ -104,7 +105,7 @@ function RoomInfo() {
 
   // 썸네일 유효성 검사
   const { handleImageUpload, handleAcceptCompression, handleRejectCompression,
-  } = useThumbnailUpload(thumbnail, setThumbnail, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef);
+  } = useThumbnailUpload(setThumbnail, thumbnailSrc, setThumbnailSrc, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef);
   
   
   const handleDifficultyClick = (level) => {
@@ -135,7 +136,7 @@ function RoomInfo() {
     }
 
     // 썸네일 검사
-    if (!thumbnail) {
+    if (!thumbnailSrc) {
       console.log("코드 체크");
       setThumbnailMessage("썸네일 이미지를 업로드해주세요.");
       setModalFadeOut(false);
@@ -211,7 +212,7 @@ function RoomInfo() {
     }
 
     // 공개 여부 검사
-    if (!['public', 'limited', 'private'].includes(selectedVisibility)) {
+    if (!['public', 'unlisted', 'private'].includes(selectedVisibility)) {
       setVisibilityMessage('공개여부를 선택해주세요.');
       visibilityRef.current?.focus();
       return;
@@ -219,6 +220,18 @@ function RoomInfo() {
       setVisibilityMessage(''); // 통과 시 메시지 초기화
     }
 
+    setGameInfo(prev => new GameInfo({
+      ...prev,
+      type: 'PnC',
+      userId: userToken?.user_id,
+      title: title,
+      thumbnail: thumbnail.name,
+      description: inputScript,
+      difficulty: selectedDifficulty,
+      playTime: playtimeHour * 60 + playtimeMin,
+      theme: selectedTheme,
+      visibility: selectedVisibility,
+    }))
     // 여기서 실제 저장 API 호출 등 수행 (백엔드 업무)
     alert('저장 완료!');
     /* 저장데이터를 정련할 일련의 코드 만들어주시면 될 것 같아요.*/
@@ -242,7 +255,7 @@ function RoomInfo() {
           </div>
 
           <div className='Room_thumbnail_img_button'>
-            <div className={`Room_thumbnail_img_wrap ${thumbnail ? 'has-thumbnail' : ''}`}>
+            <div className={`Room_thumbnail_img_wrap ${thumbnailSrc ? 'has-thumbnail' : ''}`}>
               {showModal && (
                 <div className="modal_overlay">
                   <div className="modal_box">
@@ -262,15 +275,15 @@ function RoomInfo() {
                 />
               )}
 
-              {!thumbnail && (
+              {!thumbnailSrc && (
                 <div className='Room_thumbnail_basic_wrap'>
                   <img id='Room_thumbnail_basic_img' src={Room_thumbnail_basic_img} alt='Room_thumbnail_basic_img' />
                   <h5>* 380 X 480 이상</h5>
                 </div>
               )}
 
-              {thumbnail && (
-                <img id='Room_thumbnail_img' src={thumbnail} alt='Room_thumbnail_img' />
+              {thumbnailSrc && (
+                <img id='Room_thumbnail_img' src={thumbnailSrc} alt='Room_thumbnail_img' />
               )}
             </div>
 
@@ -460,8 +473,8 @@ function RoomInfo() {
                 <img id='limited_icon' src={limited_icon} alt='limited_icon' />
               </div>
 
-              <input type='radio' name='visibility' value='limited'
-              checked={selectedVisibility === 'limited'} 
+              <input type='radio' name='visibility' value='unlisted'
+              checked={selectedVisibility === 'unlisted'} 
               onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
               <p>일부공개</p>
             </div>

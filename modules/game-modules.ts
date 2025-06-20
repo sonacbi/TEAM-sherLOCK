@@ -48,6 +48,7 @@ enum Visibility {
 }
 class GameInfo {
     id:             string;         // 아이디
+    userId:         string;         // 유저 아이디
     title:          string;         // 제목
     thumbnail:      string;         // 게임 썸네일 주소
     theme:          Theme;          // 테마
@@ -60,7 +61,8 @@ class GameInfo {
     isHiddenStage:  boolean;        // 히든 스테이지 여부
 
     constructor({
-        id = null,
+        id,
+        userId = '',
         title = '',
         thumbnail = '',
         theme = Theme.horror,
@@ -73,6 +75,7 @@ class GameInfo {
         isHiddenStage = false
     }) {
         this.id = id;
+        this.userId = userId;
         this.title = title;
         this.thumbnail = thumbnail;
         this.theme = theme;

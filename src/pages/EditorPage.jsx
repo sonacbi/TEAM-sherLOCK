@@ -6,8 +6,7 @@ import SaveToServer from '../components/Editor/SaveToServer';
 import EditObjOptions from '../components/Editor/EditObjOptions';
 import RoomInfo from '../components/RoomInfo/RoomInfo';
 
-import { GamePnC, Room, Side } from '../../modules/editor/gamePnC';
-import { GameInfo } from '../../modules/game-modules';
+import { GamePnC, Room } from '../../modules/editor/gamePnC';
 import '../styles/EditorPage.css';
 
 import logo from '../assets/images/logo/footer_logo.png'
@@ -54,10 +53,11 @@ function EditorPage() {
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const [sideImgSrcs, setSideImgSrcs] = useState([['']]);
-    const [gameInfo, setGameInfo] = useState(new GameInfo({type: "PnC"}));
-    const [thumbnail, setThumbnail] = useState(new File([], ''));
+    const [gameInfo, setGameInfo] = useState(null);
+    const [thumbnail, setThumbnail] = useState(null);
     const [imgs, setImgs] = useState([]);
     const [imageSrcs, setImageSrcs] = useState([]);
+    const [namedFabrics, setNamedFabrics] = useState([]);
     const [addTextTrigger, setAddTextTrigger] = useState(0);
     const [addShapeTrigger, setAddShapeTrigger] = useState('');
     const [addImageFile, setAddImageFile] = useState(null);
@@ -526,8 +526,8 @@ function EditorPage() {
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
-                        {showRoomInfo && <RoomInfo />}
-                        <label>제목: ???</label>
+                        {showRoomInfo && <RoomInfo gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} setThumbnail={setThumbnail}/>}
+                        <label>제목: {gameInfo?.title ?? '???'}</label>
                     </div>
 
                     <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs}/>
@@ -574,7 +574,11 @@ function EditorPage() {
 
                         <div className='tool_fine_tuning'>
                             {selectedObject && selectedObject.name !== 'SherLockRoomController' ? (
-                                <EditObjOptions canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool} setImgs={setImgs}/>
+                                <EditObjOptions
+                                    canvasInstance={canvasInstance} selectedObject={selectedObject} selectedTool={selectedTool}
+                                    setImgs={setImgs} namedFabrics={namedFabrics} setNamedFabrics={setNamedFabrics}
+                                    currentRoom={currentRoom} currentSide={currentSide}
+                                />
                             ) : (
                                 <>
                                     {selectedTool === 'frame' && (

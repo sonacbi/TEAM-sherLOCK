@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import * as fabric from 'fabric';
+import fs from 'fs'
 
 import { GamePnC } from '../../modules/editor/gamePnC';
 import { loadGameZip } from '../../modules/editor/handleGame';
 import '../styles/PlayPage.css';
+import { useParams } from 'react-router-dom';
 
 function PlayPage() {
     const canvasRef = useRef(null);
@@ -13,6 +15,7 @@ function PlayPage() {
     const [imgs, setImgs] = useState([]);
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
     const [gameZip, setGameZip] = useState(null);
+    const { id } = useParams();
 
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
@@ -97,6 +100,7 @@ function PlayPage() {
                                 strokeWidth: opt.strokeWidth,
                                 stroke: opt.stroke,
                                 strokeUniform: opt.strokeUniform,
+                                id: opt.id,
                                 name: opt.name,
                                 shapeType: opt.shapeType,
                                 gameEvent: opt.gameEvent,
@@ -115,7 +119,7 @@ function PlayPage() {
                             fabricObj = new fabric.Circle(baseProps);
                             break;
                         case "image":
-                            const foundImg = imgs.find(img => img.name === opt.name);
+                            const foundImg = imgs.find(img => img.name === opt.imgName);
                             if (!foundImg) {
                                 console.warn('이미지 소스를 찾을 수 없습니다.', opt.name);
                                 return resolve();
@@ -248,6 +252,21 @@ function PlayPage() {
         })
         canvas.renderAll();
     }
+
+    useEffect(() => {
+        if(id) {
+            fetch(`http://localhost:4000/game/${id}/zip`)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], "game.zip", { type: "application/zip" });
+                setGameZip(file); // loadGameZip에서 처리
+                console.log('게임 zip 파일 불러옴');
+            })
+            .catch(error => {
+                console.error('게임 파일 불러오는 중 오류 발생', error);
+            });
+        }
+    }, [id]);
 
     useEffect(() => {
         if(gameZip) loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);

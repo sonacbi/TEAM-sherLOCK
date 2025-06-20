@@ -9,7 +9,7 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
         const zip = new JSZip();
         // ZIP에 파일 추가
         zip.file("game.json", JSON.stringify(game, null, 2));
-        zip.file(thumbnail.name, thumbnail);
+        if (thumbnail) zip.file(thumbnail.name, thumbnail);
         imgs.map(data => {
             zip.file(data.name, data)
         })
@@ -21,6 +21,10 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
     };
 
     async function uploadFilesToServer() {
+        if (!gameInfo) {
+            alert("방탈출 정보가 비어 있어 저장이 취소됩니다.")
+            return;
+        }
         const formData = new FormData();
         const zip = new JSZip();
         // zip.file("game.json", JSON.stringify(game), null, 2);

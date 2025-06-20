@@ -461,7 +461,7 @@ useEffect(() => {
 
         const res = await fetch(`http://localhost:4000/games/${theme}?limit=${games.length + 50}&offset=${0}&search_keyword=${searchWord.current}&filter=${filter}&difficulty=${difficulty.current}`);
         const datas = await res.json();
-        console.log('가져온 게임들: ', datas);
+        // console.log('가져온 게임들: ', datas);
 
         setGames(datas); // 게임 리스트 업데이트
         // setGames(prev => {
@@ -471,7 +471,7 @@ useEffect(() => {
         //     ]
         // })
 
-        console.log('games:',games)
+        // console.log('games:',games)
     }, [games.length, selectedSort.current, searchWord.current, difficulty.current, isAnimating, theme]);
 
     const searchGames = async (w, s, d) => {
@@ -557,7 +557,7 @@ useEffect(() => {
                 if (isAnimating) return;
     
                 if (entries[0].isIntersecting) {
-                    console.log("좌측에서 랜더링됨");
+                    // console.log("좌측에서 랜더링됨");
                     loadMoreGames();
                 }
             },
@@ -605,7 +605,7 @@ useEffect(() => {
             if (scrollWidth - scrollPosition - containerWidth < 200) {
                 if (!isAnimating) {
                     loadMoreGames();
-                    console.log("우측에서 랜더링됨");
+                    // console.log("우측에서 랜더링됨");
                 }
             }
     
@@ -1012,7 +1012,7 @@ useEffect(() => {
                                                 <div className='theme_door' onClick={() => {setGameInfo(data); setRoomNumberState(roomNumber); setShowGameInfo(true)}}>
                                                     <img
                                                         id='theme_door_img'
-                                                        src={`../../server/games/${data.game_id}/${data.thumbnail}`}
+                                                        src={`../../server/games/${data.type == 'PnC' ? 'PnC/' : ''}${data.game_id}/${data.thumbnail}`}
                                                         alt={`theme_door_img_${data.thumbnail}`}
                                                     />
                                                     <div className='theme_door_data'>

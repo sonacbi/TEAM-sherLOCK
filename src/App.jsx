@@ -21,7 +21,7 @@ function App() {
         <Route path="/Theme/:theme" element={<ThemePage />} />
         <Route path='/Theme/workspace' element={<Workspace/>} />
         <Route path='/Theme/Editor' element={<EditorPage/>} />
-        <Route path='/Theme/:theme/Play' element={<PlayPage/>} />
+        <Route path='/Theme/:theme/Play/:id' element={<PlayPage/>} />
       </Routes>
     </Router>
   );

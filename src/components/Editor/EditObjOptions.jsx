@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { v4 as uuidv4 } from 'uuid';
+import { customAlphabet } from "nanoid";
 
 import EditEventItem from "./EditEventItem";
 import { GameEventType } from "../../../modules/editor/gamePnC";
@@ -20,7 +21,7 @@ import italic from '../../assets/images/EditorPage_img/italic.png';
 import bold from '../../assets/images/EditorPage_img/bold.png';
 
 
-export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs}) {
+export default function EditObjOptions({canvasInstance, selectedObject, selectedTool, setImgs, namedFabrics, setNamedFabrics, currentRoom, currentSide}) {
     const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
     const [optionStyle, setOptionStyle] = useState(foundFabric);
     const [activeTab, setActiveTab] = useState("attribute"); // "attribute" 또는 "event"
@@ -99,7 +100,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             explain: "딜레이 후 행동 이벤트"
         },
     };
-
     const editOption = (event, option) => {
         const foundFabric = canvasInstance.current.getObjects().find(obj => obj === selectedObject);
         if(!foundFabric) return;
@@ -111,8 +111,31 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
         switch (option) {
             case 'name':
-                foundFabric.name = value;
+                // 이름이 비어 있거나 지웠다면, id도 없앰
+                if (!value && value.length <= 0) {
+                    const filtered = namedFabrics.filter(item => item.id !== foundFabric.id);
+                    setNamedFabrics(filtered);
+                    setOptionStyle(prev => ({...prev, id: undefined}));
+                    foundFabric.id = undefined;
+                }
+                // 이름이 있지만 id가 없다면, 숫자+문자+8자로 이루어진 id 부여
+                else if (!foundFabric.id) {
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                    const nanoid = customAlphabet(alphabet, 8);
+                    const id = nanoid();
+                    setNamedFabrics(prev => [...prev, {id, name: value, room: currentRoom, side: currentSide}]);
+                    setOptionStyle(prev => ({...prev, id: id}));
+                    foundFabric.id = id;
+                }
+                // 이름이 비어 있든, 존재하든 그대로 값 전달
+                setNamedFabrics(prev => {
+                    const index = prev.findIndex(item => item.id === foundFabric.id);
+                    if (!prev[index]) return prev;
+                    prev[index].name = value;
+                    return prev;
+                })
                 setOptionStyle(prev => ({...prev, name: value}));
+                foundFabric.name = value;
                 break;
             case 'fill':
                 foundFabric.fill = value;
@@ -305,18 +328,23 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
             {activeTab === "attribute" && (
                 <>
-                    {activeObject?.type !== "image" && activeObject?.type !== "activeselection" && (
+                    {activeObject?.type !== "activeselection" && (
                         <div className="default_attribute">
+                            {optionStyle?.id && (
+                                <p className="object_id">ID - #{optionStyle.id}</p>
+                            )}
                             <div className="object_name">
                                 <h4>이름 : </h4>
                                 <input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
                             </div>
 
                             <div className="object_color_line">
+                                {activeObject?.type !== "image" && (
                                 <div className="color">
                                     <h4>색</h4>
                                     <input type="color" value={optionStyle.fill} onChange={e => editOption(e, "fill")}/>
                                 </div>
+                                )}
 
                                 <div className="line_color">
                                     <h4>윤곽선</h4>
@@ -486,6 +514,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                                                         event={event}
                                                         index={index}
                                                         eventValues={eventValues}
+                                                        namedFabrics={namedFabrics}
                                                         onChange={(updatedEvent) => {
                                                         const newEvents = [...eventList];
                                                         newEvents[index] = {
