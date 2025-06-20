@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import './EditEventItem.css';
 
+import event_search_icon from '../../assets/images/ThemePage_img/search_icon.png';
+
 export default function EditEventItem({ event, index, eventValues, namedFabrics, onChange, onRemove }) {
     const eventKey = Object.keys(event)[0];
     const eventData = eventValues?.[eventKey]; // Optional chaining
@@ -28,21 +30,35 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
         const filteredFabrics = namedFabrics.filter(fabric =>
             fabric.name.toLowerCase().includes(keyword.toLowerCase())
         );
+
+        const sortedFabrics = [...filteredFabrics].sort((a, b) => {
+            if (a.id === fabricId) return -1;
+            if (b.id === fabricId) return 1;
+            return 0;
+        });
+
         return(
             <div className={`fabricName-box ${display && 'show'}`}>
                 <ul className='fabricName-list'>
                     <li className='fabricName-search'>
+                        <img id='event_search_icon' src={event_search_icon} alt='event_search_icon' />
                         <input type="text" value={keyword} onChange={e => setKeyword(e.target.value)}/>
-                        <span>🔍</span>
                     </li>
-                    {filteredFabrics.length === 0 ? (<div>객체가 없습니다</div>) 
+                    {filteredFabrics.length === 0 ? (<div className='no_object'>객체가 없습니다.</div>) 
                     :
-                    filteredFabrics.map((data, index) => {return(
-                    <li key={index} className={`fabricName-item ${fabricId==data.id && 'selected'}`} onClick={() => thinkToChange(eventName, {id: data.id})}>
-                        {data.name}
-                        <span>#{data.id}</span>
-                    </li>
-                    )})}
+                    <div className='fabricName-item-wrap'>
+                        {sortedFabrics.map((data, index) => (
+                            <li
+                            key={index}
+                            className={`fabricName-item ${fabricId === data.id ? 'selected' : ''}`}
+                            onClick={() => thinkToChange(eventName, { id: data.id })}
+                            >
+                            {data.name}
+                            <span>#{data.id}</span>
+                            </li>
+                        ))}
+                    </div>
+                    }
                 </ul>
             </div>
         )
@@ -138,7 +154,7 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                     <>
                         <div className='object_getItem have-fabricName'>
                             <label>
-                                <p>이름: </p>
+                                <p>이름 : </p>
                                 <input value={namedFabrics.find(item => item.id == event.getItem?.id)?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
                             </label>
                             <FoundFabricName fabricId={event.getItem?.id} eventName='getItem'/>
@@ -147,9 +163,12 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
                 )}
                 {eventName === eventValues.dropItem.name && (
                     <>
-                        <div className='object_dropItem'>
-                            <p>이름: </p>
-                            <input value={event.dropItem?.name} onChange={e => onChange({ dropItem: { name: e.target.value } })} />
+                        <div className='object_dropItem have-fabricName'>
+                            <label>
+                                <p>이름 : </p>
+                                <input value={namedFabrics.find(item => item.id == event.dropItem?.id)?.name} onClick={()=>setDisplay(prev=>!prev)} readOnly/>
+                            </label>
+                            <FoundFabricName fabricId={event.dropItem?.id} eventName='dropItem'/>
                         </div>
                     </>
                 )}

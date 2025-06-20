@@ -56,15 +56,12 @@
 }
 
 .fabricName-box {
-    width: 100%;
-    max-width: 160px;
-    min-width: 80px;
+    width: 160px;
     margin-left: auto;
-    padding: 5px 10px;
-    overflow-x: hidden;
+    padding: 10px;
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+    border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     display: none;
@@ -74,11 +71,9 @@
 }
 
 .fabricName-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    max-height: 150px;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .fabricName-search {
@@ -87,42 +82,61 @@
     padding: 5px 8px;
     background-color: rgba(255, 255, 255, 0.15);
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    overflow-x: hidden; /* ✅ 가로 스크롤 방지 */
+    border-radius: 10px;
+}
+
+.fabricName-search img {
+    width: 15px;
+    opacity: 0.3;
 }
 
 .fabricName-search input {
-    flex: 1;
+    width: 110px;
     border: none;
     background: transparent;
     color: white;
     padding: 4px 6px;
     font-size: 14px;
-    min-width: 0; /* ✅ flex 아이템이 가로로 넘치는 걸 방지 */
-    box-sizing: border-box;
-}
-
-.fabricName-search span {
-    margin-left: 8px;
-    font-size: 16px;
-    flex-shrink: 0; /* ✅ 아이콘 줄어들지 않게 고정 */
-}
-
-.fabricName-search input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
 }
 
 .fabricName-search input:focus {
     outline: none;
 }
 
+.no_object {
+    font-size: 14px;
+    text-align: center;
+}
+
+.fabricName-item-wrap {
+    max-height: 159px;
+    overflow-y: auto;
+    padding: 0 5px;
+}
+
+.fabricName-item-wrap::-webkit-scrollbar {
+    width: 8px;
+    margin-right: 10px;
+}
+
+.fabricName-item-wrap::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.fabricName-item-wrap::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
 .fabricName-item {
     padding: 8px 10px;
     font-size: 14px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    border-radius: 5px;
 }
 
 .fabricName-item:hover {
@@ -143,13 +157,13 @@
 .have-fabricName {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 5px;
 }
 
 .have-fabricName label {
     display: flex;
     align-items: center;
-    gap: 15px;
+    width: 100%;
 }
 
 .have-fabricName input {
@@ -186,13 +200,7 @@
     align-items: center;
 }
 
-.object_appear > input, .object_hide > input, .object_remove > input, .object_getItem > input, .object_dropItem > input {
-    height: 25px;
-    width: 160px;
-    padding: 5px;
-    margin-left: auto;
-}
-.have-fabricName input {
+.have-fabricName > label > input {
     height: 25px;
     width: 160px;
     padding: 5px;
@@ -206,10 +214,13 @@
 
 .before_name, .after_name {
     display: flex;
-    align-items: center;
 }
 
-.before_name > input, .after_name > input {
+.before_name .fabricName-box, .after_name .fabricName-box {
+    width: 130px;
+}
+
+.before_name > label > input, .after_name > label > input {
     width: 130px;
     height: 25px;
     margin-left: auto;
