@@ -1,6 +1,6 @@
-import express from 'express'
+import express from 'express';
 import db from '../../db/db.js';
-import fs from 'fs'
+import fs from 'fs';
 
 const router = express.Router();
 
@@ -16,8 +16,11 @@ router.get("/:game_id", async (req, res) => {
 })
 router.get("/:game_id/zip", async (req, res) => {
   const gameId = req.params.game_id;
+  if (!fs.existsSync(`server/games/PnC/${gameId}/game.zip`)) {
+    return res.status(404).send('파일이 존재하지 않습니다.');
+  }
   try {
-    const readStream = fs.createReadStream(`server/games/${gameId}/game.zip`);
+    const readStream = fs.createReadStream(`server/games/PnC/${gameId}/game.zip`);
     res.setHeader('Content-Type', 'application/zip');
     readStream.pipe(res);
   } catch (err) {

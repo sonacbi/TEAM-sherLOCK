@@ -77,7 +77,7 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
     setShowLoading(true);
 
     setTimeout(() => {
-      navigate(`/Theme/${theme}/Play`); // 3초 후 PlayPage로 이동
+      navigate(`/Theme/${theme}/Play/${gameInfo.game_id}`); // 3초 후 PlayPage로 이동
     }, 3000);  // 3000ms = 3초
   };
 
@@ -139,7 +139,8 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
 
                 <div className='door_creator'>
                   <h4>제작:</h4>
-                  <h4>승혀기</h4>
+                  {/* <h4>승혀기</h4> */}
+                  <h4>{gameInfo?.user_id ?? '승혀기'}</h4>
                 </div>
 
                 <div className='door_date_created'>

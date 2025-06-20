@@ -373,7 +373,7 @@ function EditorPage() {
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
                         {showRoomInfo && <RoomInfo gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} setThumbnail={setThumbnail}/>}
-                        <label>제목: ???</label>
+                        <label>제목: {gameInfo?.title ?? '???'}</label>
                     </div>
 
                     <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs}/>
