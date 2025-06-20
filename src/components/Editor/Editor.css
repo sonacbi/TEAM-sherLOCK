@@ -34,7 +34,7 @@
 .room_area_scroll {
     display: flex;
     padding: 5px 10px;
-    gap: 20px;
+    
     /* 자식 요소들이 제 영역 확보 */
     flex-wrap: nowrap; /* 한 줄로 유지 */
 
@@ -52,6 +52,10 @@
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     margin-top: 5px;
+}
+
+.room_area .room:not(:last-child) {
+    margin-right: 10px;
 }
 
 .room_area_scroll > button {
@@ -129,7 +133,6 @@
     align-items: center;
     border-radius: 5px;
     padding: 0 10px;
-    gap: 20px;
 }
 
 .side_area > button {
@@ -161,6 +164,10 @@
     /* background-color: white; */
     position: relative;
     border-radius: 5px;
+}
+
+.room_area .side_wrap:not(:last-child) {
+    margin-right: 20px;
 }
 
 .side.selected {

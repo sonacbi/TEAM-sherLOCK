@@ -880,7 +880,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
             <div className='room_area'>
                 <div className='room_window' ref={scrollRef} onWheel={onWheel}>
                     <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="room" type="room">
+                    <Droppable droppableId="room" type="room" direction="horizontal">
                         {(provided) => (
                         <div
                             className='room_area_scroll'
@@ -910,7 +910,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
                                     </div>
 
                                     {openedRooms.includes(roomIndex) && (
-                                    <Droppable droppableId={`side-${roomIndex}`} type="side">
+                                    <Droppable droppableId={`side-${roomIndex}`} type="side" direction="horizontal">
                                         {(provided) => (
                                         <div
                                             className='side_area'
