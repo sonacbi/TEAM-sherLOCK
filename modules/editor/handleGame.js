@@ -41,7 +41,13 @@ const handleSide = (canvas) => {
                     imgName: data?.imgName,
                     type: data?.type,
                     shapeType: data?.shapeType,
-                    gameEvent: data?.gameEvent
+                    gameEvent: data?.gameEvent,
+
+                    selectable: data?.selectable,
+                    evented: data?.evented,
+                    opacity: data?.opacity,
+                    visible: data?.visible,
+                    inputWall: data?.inputWall,
                 },
             })
         );
