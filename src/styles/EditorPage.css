@@ -124,11 +124,44 @@
     width: 35px;
 }
 
+.zzzzz {
+    opacity: 0;
+    margin-top: 50px;
+}
+
+.zzzzz:hover {
+    opacity: 1;
+}
+
 .tool_fine_tuning {
     width: 80%;
     background-color: #434343;
     padding: 10px;
     color: white;
+}
+
+.text_fine_tuning {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.text_type_wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.text_type_wrap > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+    background-color: #2d2d2d;
+    border-radius: 10px;
+    color: #C0C0C0;
+    cursor: pointer;
 }
 
 .default_shape, .bubble {

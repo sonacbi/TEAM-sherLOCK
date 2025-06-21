@@ -43,6 +43,7 @@ import wall_center_img from '../assets/images/EditorPage_img/wall_center_img.png
 import wall_bottom_img from '../assets/images/EditorPage_img/wall_bottom_img.png';
 import wall_top_img from '../assets/images/EditorPage_img/wall_top_img.png';
 import frame_trash from '../assets/images/EditorPage_img/trash.png';
+import apple from '../assets/images/EditorPage_img/apple.png';
 
 
 function EditorPage() {
@@ -111,8 +112,14 @@ function EditorPage() {
         }
     }, []);
 
-    const handleAddTextBox = () => {
+    const [textSize, setTextSize] = useState('');
+
+    const handleAddTextBox = (size) => {
+        setTextSize(size);
         setAddTextTrigger(Date.now());
+    };
+
+    const handleSelectTextTool = () => {
         setSelectedTool('text');
     };
     
@@ -517,7 +524,7 @@ function EditorPage() {
 
     return (
         <>
-            <div className='EditorPage_wrap'>
+            <div className='EditorPage_wrap'>   
                 <header className='Editor_header'>
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
@@ -541,7 +548,7 @@ function EditorPage() {
                                 <p>프레임</p>
                             </div>
 
-                            <div className={`text_area ${selectedTool === 'text' ? 'active' : ''}`} onClick={handleAddTextBox}>
+                            <div className={`text_area ${selectedTool === 'text' ? 'active' : ''}`} onClick={handleSelectTextTool}>
                                 <img id='text_icon' src={text_icon} alt='text_icon' />
                                 <p>텍스트</p>
                             </div>
@@ -570,6 +577,8 @@ function EditorPage() {
                                 <img id='event_icon' src={event_icon} alt='event_icon' />
                                 <p>이벤트</p>
                             </div>
+
+                            <a href='https://www.gamesaien.com/game/fruit_box_a/' className='zzzzz'><img id='apple' src={apple} alt='apple' /></a>
                         </div>
 
                         <div className='tool_fine_tuning'>
@@ -587,7 +596,24 @@ function EditorPage() {
 
                                     {selectedTool === 'text' && (
                                         <div className='text_fine_tuning'>
-                                            <h2>텍스트 세부조정</h2>
+                                            <label>텍스트 종류</label>
+
+                                            <div className='text_type_wrap'>
+                                                <div className='textbox_big' onClick={() => handleAddTextBox('big')}>
+                                                    <h1>큰 텍스트 추가</h1>
+                                                    <h2>+</h2>
+                                                </div>
+                                                
+                                                <div className='textbox_middle' onClick={() => handleAddTextBox('middle')}>
+                                                    <h3>중간 텍스트 추가</h3>
+                                                    <h2>+</h2>
+                                                </div>
+
+                                                <div className='textbox_small' onClick={() => handleAddTextBox('small')}>
+                                                    <h5>작은 텍스트 추가</h5>
+                                                    <h2>+</h2>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
 
@@ -663,19 +689,19 @@ function EditorPage() {
 
                                     {selectedTool === 'timer' && (
                                         <div className='timer_fine_tuning'>
-                                            <h2>타이머 세부조정</h2>
+                                            <h2 style={{textAlign: "center"}}>* 타이머 공사중 *</h2>
                                         </div>
                                     )}
 
                                     {selectedTool === 'hint' && (
                                         <div className='hint_fine_tuning'>
-                                            <h2>힌트 세부조정</h2>
+                                            <h2 style={{textAlign: "center"}}>* 힌트 공사중 *</h2>
                                         </div>
                                     )}
                                     
                                     {selectedTool === 'event' && (
                                         <div className='event_fine_tuning'>
-                                            <h2>이벤트 세부조정</h2>
+                                            <h2 style={{textAlign: "center"}}>* 이벤트 공사중 *</h2>
                                         </div>
                                     )}
                                 </>
@@ -686,6 +712,7 @@ function EditorPage() {
                     <Editor
                         handleDrop={handleDrop}
                         addTextTrigger={addTextTrigger}
+                        textSize={textSize}
                         addShapeTrigger={addShapeTrigger}
                         setAddImageFile={setAddImageFile}
                         addImageFile={addImageFile}

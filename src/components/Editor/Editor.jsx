@@ -15,7 +15,7 @@ import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspect
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
 
-function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
+function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
     const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
@@ -147,11 +147,11 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
         canvasInstance.current = canvas;
 
         // 초기 textbox 추가
-        const textbox = new fabric.Textbox('텍스트를 입력하세요.', {
+        const textbox = new fabric.Textbox('셜LOCK 에디터', {
             ...controlStyle,
             fontSize: 50,
             fill: '#333333',
-            width: 450,
+            width: 340,
             editable: true,
             strokeWidth: 0,
             perPixelTargetFind: false,
@@ -229,7 +229,7 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     // ---------------------------------------------------------------(section)
     // 랜더링 준비되면 추가버튼 활성화 -------------------------------(section 6) 
     useEffect(() => {
-        if (isReady) addTextBox();
+        if (isReady) addTextBox(textSize);
     }, [addTextTrigger]);
 
     useEffect(() => {
@@ -265,15 +265,23 @@ function Editor({ handleDrop, addTextTrigger, addShapeTrigger, setAddImageFile, 
     //                           -------------------------------------(section 6)
 
     // 텍스트 추가  --------------------------------------------------(section 7)
-    const addTextBox = () => {
+    const addTextBox = (size) => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
-        const textbox = new fabric.Textbox('새 텍스트', {
+        const textStyleMap = {
+            big: { fontSize: 60, width: 240, label: '큰 텍스트' },
+            middle: { fontSize: 40, width: 200, label: '중간 텍스트' },
+            small: { fontSize: 24, width: 120, label: '작은 텍스트' },
+        };
+
+        const { fontSize, width, label } = textStyleMap[size] || { fontSize: 40, width: 160, label: '새 텍스트' };
+
+        const textbox = new fabric.Textbox(label, {
             ...controlStyle,
-            fontSize: 40,
+            fontSize,
             fill: '#333333',
-            width: 160,
+            width,
             editable: true,
             strokeWidth: 0,
             perPixelTargetFind: false,
