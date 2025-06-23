@@ -24,6 +24,7 @@ export function useWallHoverHandler({
   // 이전 호버한 벽 정보
   const preHoveredWall = useRef(null);
   const latestImageUrl = useRef('');
+  const latestImageName = useRef('');
 
   const draggingImage = useRef(null);
 
@@ -43,6 +44,9 @@ export function useWallHoverHandler({
           
           const src = movingObj.getSrc ? movingObj.getSrc() : movingObj.imageUrl;
           latestImageUrl.current = src;  // 최신 값을 useRef로 저장
+
+          // ✅ 파일 이름 저장
+          latestImageName.current = movingObj.imageName || '';  // ← 여기 추가!
 
           // 현재 호버중인 벽이 있고, 그 벽에 이미지가 이미 확정되어 있다면 변경 막기
           const currentWall = hoveredWallLocal.current;
@@ -95,6 +99,7 @@ export function useWallHoverHandler({
         newPerspective[room][side][wall.wallType] = {
           vertices: vertices,
           imageUrl: latestImageUrl.current || '',
+          imageName: latestImageName.current || '',  // ✅ 여기에 제대로 저장!
           currentRoom: room,
           currentSide: side,
         };
@@ -174,7 +179,7 @@ export function useWallHoverHandler({
                   ...(prev[currentRoom] || {}),
                   [currentSide]: {
                     ...((prev[currentRoom] && prev[currentRoom][currentSide]) || {}),
-                    [prevWallType]: { vertices: [], imageUrl: '' }
+                    [prevWallType]: { vertices: [], imageUrl: '', imageName: '' }
                   }
                 }
               };
@@ -261,6 +266,7 @@ export function useWallHoverHandler({
       newPerspective[room][side][wallType] = {
         vertices: [],
         imageUrl: '',
+        imageName: '',
         currentRoom: room,
         currentSide: side,
       };

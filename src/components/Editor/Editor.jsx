@@ -111,9 +111,9 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         });
     }
 
-    if (process.env.NODE_ENV === 'development' && hoveredWall) {
-        console.log('[useMemo] items:', result);
-    }
+    // if (process.env.NODE_ENV === 'development' && hoveredWall) {
+        // console.log('[useMemo] items:', result);
+    // }
 
     return result;
     }, [perspective]);
@@ -578,12 +578,24 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             const newData = new GamePnC(prev);
             newData.room[currentRoom].side[currentSide].fabric = updatedFabric;
             const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
-            if (roomController) newData.room[currentRoom].side[currentSide].frame = {
-                x: Number(roomController.left.toFixed(2)),
-                y: Number(roomController.top.toFixed(2)),
-                width: Number(roomController.getScaledWidth().toFixed(2)),
-                height: Number(roomController.getScaledHeight().toFixed(2)),
-                edge: game.room[currentRoom].side[currentSide]?.frame?.edge ?? roomController.edge,
+            if (roomController) {
+                const wallObj = perspectiveRef.current?.[currentRoom]?.[currentSide] ?? {}; // ✅ 조회용 필드 추가
+                const directions = ['front', 'top', 'left', 'right', 'bottom']; // ✅ 조회용 필드 추가
+                
+                newData.room[currentRoom].side[currentSide].frame = {
+                    x: Number(roomController.left.toFixed(2)),
+                    y: Number(roomController.top.toFixed(2)),
+                    width: Number(roomController.getScaledWidth().toFixed(2)),
+                    height: Number(roomController.getScaledHeight().toFixed(2)),
+                    edge: game.room[currentRoom].side[currentSide]?.frame?.edge ?? roomController.edge,
+
+                    // ✅ edgeImg 필드 추가
+                    edgeImg: directions.map(dir => {
+                        const wall = wallObj[dir];
+                        return wall?.imageName ?? '';
+                    }),
+                };
+                
             }
             return newData;
         });
@@ -595,7 +607,8 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             });
             return newData;
         });
-    }, [canvasInstance, canvasRef, currentSide, currentRoom, game, setGame, setSideImgSrcs]);
+
+    }, [canvasInstance, canvasRef, currentSide, currentRoom, game, setGame, setSideImgSrcs, perspectiveRef, imgs]);
 
     const debouncedSave = debounce(() => {
         setTimeout(() => {
@@ -678,7 +691,8 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         scaleX: width / imgElement.width,
                         scaleY: height / imgElement.height,
                         imgName: addImageFile.name,
-                        imageUrl: e.target.result // 배경 랜더링용
+                        imageUrl: e.target.result, // 배경 랜더링용
+                        imageName: addImageFile.name //
                     });
 
                     canvasInstance.current.add(fabricImage);
