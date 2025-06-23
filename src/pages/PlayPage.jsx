@@ -7,6 +7,7 @@ import { GamePnC } from '../../modules/editor/gamePnC';
 import { loadGameZip } from '../../modules/editor/handleGame';
 import '../styles/PlayPage.css';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function PlayPage() {
     const canvasRef = useRef(null);
@@ -18,6 +19,7 @@ function PlayPage() {
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const { id } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
@@ -398,8 +400,17 @@ function PlayPage() {
 
     return (
         <div className='PlayPage_wrap'>
-            <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div>
-            <canvas ref={canvasRef} width={1100} height={650}></canvas>
+            {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
+
+            <div className='playgame_wrap'>
+                <div className='top_menu_wrap'>
+                    <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
+                </div>
+
+                <div className='canvas_wrap'>
+                    <canvas ref={canvasRef} width={1100} height={650}></canvas>
+                </div>
+            </div>
         </div>
     );
 }

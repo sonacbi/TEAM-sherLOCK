@@ -2,4 +2,32 @@
     height: 100dvh;
     width: 100dvw;
     background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.playgame_wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 1100px;
+    width: 95%;
+}
+
+.top_menu_wrap {
+    color: white;
+}
+
+.top_menu_wrap > h3 {
+    cursor: pointer;
+}
+
+.top_menu_wrap > h3:hover {
+    opacity: 0.7;
+}
+
+.canvas_wrap {
+    background-color: white;
 }
