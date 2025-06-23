@@ -108,10 +108,10 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
                             gameEvent: opt.gameEvent,
                             perPixelTargetFind: false,
 
-                            selectable: data?.selectable,
-                            evented: data?.evented,
-                            opacity: data?.opacity,
-                            visible: data?.visible,
+                            selectable: opt?.selectable,
+                            evented: opt?.evented,
+                            opacity: opt?.opacity,
+                            visible: opt?.visible,
                         });
                         break;
 
