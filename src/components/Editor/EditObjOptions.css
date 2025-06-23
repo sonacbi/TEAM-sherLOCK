@@ -5,13 +5,13 @@
 }
 
 .object_select {
-    background-color: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     /* border: 1px dashed white; */
     display: flex;
     padding: 10px;
     align-items: center;
     gap: 10px;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .object_select > p:nth-child(2) {
@@ -86,9 +86,9 @@
     gap: 10px;
     padding: 10px 10px;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     color: #C0C0C0;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .object_name > input {
@@ -244,7 +244,8 @@
     border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: transparent;
+    border: 0.1rem solid rgb(68, 68, 68);
     color: #C0C0C0;
 }
 
@@ -253,7 +254,7 @@
 }
 
 .textbox_fontstyle > select > option {
-    background-color: rgb(90, 90, 90);
+    background-color: rgb(43, 43, 43);
 }
 
 .background_size_wrap {
@@ -380,9 +381,9 @@
     width: 100%;
     padding: 20px 15px;
     text-align: center;
-    border: 1px dashed #ddd;
+    border: 0.1rem solid rgb(68, 68, 68);
     border-radius: 13px;
-    background-color: rgba(255, 255, 255, 0.16);
+    background-color: transparent;
     color: white;
     font-size: medium;
 }
@@ -393,11 +394,11 @@
 
 .event_option {
     position: absolute;
-    background-color: rgb(102, 102, 102);
+    background-color: rgb(43, 43, 43);
     width: 100%;
     border-radius: 10px;
     margin-top: 5px;
-    border: 1px dashed white;
+    border: 0.1rem solid rgb(68, 68, 68);
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -410,7 +411,7 @@
     padding: 5px;
     border-radius: 5px;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.15);
+    background-color: #1d1d1d;
     cursor: pointer;
 }
 

@@ -8,9 +8,10 @@
 
 .Editor_header {
     height: 10%;
-    background-color: black;
+    background-color: rgb(43, 43, 43);
     display: flex;
     align-items: center;
+    border-bottom: 0.1rem solid rgb(68, 68, 68);
 }
 
 .Editor_header h3 {
@@ -20,9 +21,10 @@
 }
 
 .Editor_header #logo {
-    opacity: 0.4;
+    opacity: 0.7;
     width: 120px;
     margin-left: 20px;
+    margin-top: 6px;
 }
 
 .room_status_title {
@@ -39,10 +41,10 @@
 
 .room_status_button {
     color: white;
-    background-color: rgb(57, 57, 57);
     padding: 5px 10px;
     border-radius: 5px;
     cursor: pointer;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .save_canvas_button {
@@ -52,7 +54,7 @@
 
 .save_submit {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     margin-right: 15px;
     color: white;
 }
@@ -63,11 +65,12 @@
 }
 
 .save_button {
-    background-color: rgb(127, 127, 127);
     width: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 0.1rem solid rgb(68, 68, 68);
+    padding-left: 3px;
 }
 
 #save_icon {
@@ -76,7 +79,9 @@
 
 .submit_button {
     padding: 5px 20px;
-    background-color: rgb(93, 180, 93);
+    background-color: rgb(24, 201, 92);
+    color: black;
+    font-weight: bold;
 }
 
 .Editor_header h3:hover, .room_status_button:hover,
@@ -96,7 +101,7 @@
 
 .default_tool {
     width: 20%;
-    background-color: #2d2d2d;
+    background-color: rgb(43, 43, 43);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -114,10 +119,13 @@
     width: 60px;
     height: 75px;
     border-radius: 10px;
+    opacity: 0.3;
+    gap: 5px;
+    font-weight: bold;
 }
 
 .default_tool > div.active {
-    background-color: rgba(255, 255, 255, 0.2);
+    opacity: 1;
 }
 
 .default_tool > div > img {
@@ -135,9 +143,11 @@
 
 .tool_fine_tuning {
     width: 80%;
-    background-color: #434343;
+    background-color: rgb(43, 43, 43);
     padding: 10px;
     color: white;
+    border-right: 0.1rem solid rgb(68, 68, 68);
+    border-left: 0.1rem solid rgb(68, 68, 68);
 }
 
 .text_fine_tuning {
@@ -158,10 +168,11 @@
     justify-content: space-between;
     align-items: center;
     padding: 5px 15px;
-    background-color: #2d2d2d;
+    background-color: #1d1d1dad;
     border-radius: 10px;
     color: #C0C0C0;
     cursor: pointer;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .default_shape, .bubble {
@@ -174,12 +185,13 @@
 
 .default_shape_wrap, .bubble_wrap {
     padding: 10px;
-    background-color: #2d2d2d;
+    background-color: #1d1d1dad;
     border-radius: 10px;
     display: flex;
     gap: 15px;
     justify-content: center;
     flex-wrap: wrap;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .default_shape_wrap img, .bubble_wrap img {
@@ -196,9 +208,10 @@
 }
 
 .img_list_wrap {
-    background-color: #2d2d2d;
+    background-color: #1d1d1dad;
     border-radius: 10px;
     padding: 10px;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .img_list {
@@ -251,7 +264,8 @@
 }
 
 .img_box {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgb(43, 43, 43);
+    border: 0.1rem solid rgb(68, 68, 68);
     border-radius: 5px;
     padding: 10px;
     display: flex;
@@ -269,9 +283,11 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: rgb(93, 180, 93);
+    background-color: rgb(24, 201, 92);
     padding: 5px;
     border-radius: 5px;
+    color: black;
+    font-weight: bold;
 }
 
 .picture_addButton:hover {
@@ -287,9 +303,10 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     margin-top: 10px;
-    background-color: #2d2d2d;
+    background-color: #1d1d1dad;
     border-radius: 10px;
     padding: 10px;
+    border: 0.1rem solid rgb(68, 68, 68);
 }
 
 .basic_frame, .edge_frame, .corridor_frame {
@@ -319,7 +336,7 @@
 }
 
 .frame_wall_header {
-    background-color: rgba(255, 255, 255, 0.15);
+    border: 0.1rem solid rgb(68, 68, 68);
     border-radius: 10px;
     display: flex;
     padding: 10px;
@@ -470,7 +487,7 @@
 
 .Editor_screen {
     width: 80%;
-    background-color: #2d2d2d;
+    background-color: #1d1d1d;
 }
 
 .screen_area {
