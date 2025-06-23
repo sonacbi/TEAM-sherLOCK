@@ -242,6 +242,14 @@ function EditorPage() {
         .catch((err) => console.error('이미지 읽기 실패', err));
     }, [imgs]);
 
+    useEffect(() => {
+        setGame(prev => {
+            prev.namedFabrics = namedFabrics;
+            return prev;
+        });
+        console.log(namedFabrics)
+    }, [namedFabrics]);
+
     const toggleRoomInfo = () => {
         setShowRoomInfo(prev => !prev);
     };
@@ -721,7 +729,7 @@ function EditorPage() {
                         edgeFrameState={edgeFrameState}
                         editorOffset={editorOffset}
                         setEdgeFrameState={setEdgeFrameState}
-                        saveTool={{game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs}}
+                        saveTool={{game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics}}
                         gameZip={gameZip} setGameZip={setGameZip}
                         selectedTool={selectedTool}
                         canvases={{canvasRef, canvasInstance}}

@@ -4,7 +4,7 @@ import * as fabric from 'fabric';
 /**
  * Delete 키로 선택된 오브젝트 제거
  */
-export const useDeleteKeyHandler = (canvasInstance, isReady, setImgs) => {
+export const useDeleteKeyHandler = (canvasInstance, isReady, setImgs, game, setNamedFabrics) => {
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
@@ -14,23 +14,35 @@ export const useDeleteKeyHandler = (canvasInstance, isReady, setImgs) => {
                 const activeObject = canvas.getActiveObject();
 
                 const tryRemoveImage = (obj) => {
-                    if (obj.type === 'image' && obj.name) {
+                    if (obj.type === 'image' && obj.imgName) {
                         const allObjects = canvas.getObjects();
-                        const sameNameImages = allObjects.filter(o => o.type === 'image' && o.name === obj.name);
+                        const sameNameImages = allObjects.filter(o => o.type === 'image' && o.imgName === obj.imgName);
                         // 같은 이름을 가진 이미지가 하나뿐일 때만 이미지 목록에서도 삭제
-                        if (sameNameImages.length === 1) setImgs(prevImgs => prevImgs.filter(img => img.name !== obj.name));
+                        if (sameNameImages.length === 1) setImgs(prevImgs => prevImgs.filter(img => img.name !== obj.imgName));
                     }
                 };
+                const tryRemoveNamedFabric = (obj) => {
+                    if (obj.id && obj.name) {
+                        setNamedFabrics(prev => {
+                            const newData = prev;
+                            newData.find(named => named.id == obj.id && named.name == obj.name).location.forEach((location, index) => {
+                                game.room[location.room].side[location.side].fabric.find()
+                            })
+                        })
+                    }
+                }
 
                 if (activeObject) {
                     if (activeObject instanceof fabric.ActiveSelection) {
                         activeObject.forEachObject(obj => {
                             tryRemoveImage(obj);
                             canvas.remove(obj)
+                            // tryRemoveNamedFabric(obj);
                         });
                     } else {
                         tryRemoveImage(activeObject);
                         canvas.remove(activeObject);
+                        // tryRemoveNamedFabric(obj);
                     }
                     canvas.discardActiveObject();
                     canvas.renderAll();
@@ -132,7 +144,7 @@ export const useCopyNPaste = (canvasInstance, controlStyle) => {
             if (e.key === 'c' || e.key === 'C') {
                 const activeObject = canvas.getActiveObject();
                 if (activeObject) {
-                    activeObject.clone(['name', 'gameEvent', 'shapeType', 'perPixelTargetFind']).then(clonedObj => clipboardRef.current = clonedObj);
+                    activeObject.clone(['name', 'id', 'gameEvent', 'imgName', 'shapeType', 'perPixelTargetFind']).then(clonedObj => clipboardRef.current = clonedObj);
                     e.preventDefault();
                 }
             }
@@ -142,7 +154,7 @@ export const useCopyNPaste = (canvasInstance, controlStyle) => {
                 const clipboard = clipboardRef.current;
                 if (!clipboard) return;
 
-                clipboard.clone(['name', 'gameEvent', 'shapeType', 'perPixelTargetFind']).then(async (clonedObj) => {
+                clipboard.clone(['name', 'id', 'gameEvent', 'imgName', 'shapeType', 'perPixelTargetFind']).then(async (clonedObj) => {
                     canvas.discardActiveObject();
 
                     clonedObj.set({
@@ -150,7 +162,9 @@ export const useCopyNPaste = (canvasInstance, controlStyle) => {
                         left: clonedObj.left + 15,
                         top: clonedObj.top + 15,
                         name: clipboard.name,
+                        id: clipboard.id,
                         gameEvent: clipboard.gameEvent,
+                        imgName: clipboard.imgName,
                         perPixelTargetFind: clipboard.perPixelTargetFind,
                     });
 

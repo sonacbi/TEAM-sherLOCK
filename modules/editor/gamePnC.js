@@ -6,11 +6,27 @@ class ClassVersion {
 ClassVersion.this_version = "0.0.1"; // 버전
 // 포인트 앤 클릭 게임
 class GamePnC extends ClassVersion {
-    constructor({ room = [new Room({})], }) {
+    constructor({ namedFabrics, room = [new Room({})], }) {
         super();
+        this.namedFabrics = namedFabrics;
         this.room = room.map(data => new Room(data));
     }
 }
+// 이름이 부여된 fabric 객체
+class namedFabric extends ClassVersion {
+    constructor({ id = "", name = "", location = [
+        {
+            room: null,
+            side: null,
+        },
+    ] }) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.location = location;
+    }
+}
+;
 // 방
 class Room extends ClassVersion {
     constructor({ name = '', timeLimit = 0, isOpened = true, side = [new Side({})] }) {
@@ -31,13 +47,15 @@ class Side extends ClassVersion {
 }
 // 방의 골자
 class Frame extends ClassVersion {
-    constructor({ x = 220, y = 120, width = 220 + 440, height = 120 + 330, edge = [170, 240, 240, 150], }) {
+    constructor({ x = 220, y = 120, width = 220 + 440, height = 120 + 330, edge = [170, 240, 240, 150], edgeImg = ['', '', '', '', ''], // 앞, ↑, ←, →, ↓
+     }) {
         super();
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.edge = edge;
+        this.edgeImg = edgeImg;
     }
 }
 // 도형
@@ -48,12 +66,6 @@ class Fabric extends ClassVersion {
     }
 }
 // 이벤트
-const namedFabric = {
-    id: "",
-    name: "",
-    room: null,
-    side: null,
-};
 const GameEventType = {
     move: { room: 0, side: 0 },
     appearObj: { id: "" },

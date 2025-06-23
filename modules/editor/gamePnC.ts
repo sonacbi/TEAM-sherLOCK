@@ -5,14 +5,39 @@ class ClassVersion {
 
 // 포인트 앤 클릭 게임
 class GamePnC extends ClassVersion {
+    namedFabrics: Object[];
     room: Room[];
     constructor({
+        namedFabrics,
         room = [new Room({})],
     }) {
         super();
+        this.namedFabrics = namedFabrics;
         this.room = room.map(data => new Room(data));
     }
 }
+
+// 이름이 부여된 fabric 객체
+class namedFabric extends ClassVersion {
+    id: string;
+    name: string;
+    location: Object[];
+    constructor({
+        id = "",
+        name = "",
+        location = [
+            {
+                room: null,
+                side: null,
+            },
+        ]
+    }) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.location = location;
+    }
+};
 
 // 방
 class Room extends ClassVersion {
@@ -55,12 +80,14 @@ class Frame extends ClassVersion {
     width: number;
     height: number;
     edge: number[];
+    edgeImg: string[];
     constructor({
         x = 220,
         y = 120,
         width = 220 + 440,
         height = 120 + 330,
         edge = [170, 240, 240, 150],
+        edgeImg = ['', '', '', '', ''], // 앞, ↑, ←, →, ↓
     }) {
         super();
         this.x = x;
@@ -68,6 +95,7 @@ class Frame extends ClassVersion {
         this.width = width;
         this.height = height;
         this.edge = edge;
+        this.edgeImg = edgeImg;
     }
 }
 
@@ -83,12 +111,6 @@ class Fabric extends ClassVersion {
 }
 
 // 이벤트
-const namedFabric = {
-    id: "",
-    name: "",
-    room: null,
-    side: null,
-};
 const GameEventType = {
     move: { room: 0, side: 0 },
     appearObj: { id: "" },

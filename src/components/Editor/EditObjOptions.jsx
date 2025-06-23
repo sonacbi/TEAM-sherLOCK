@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import * as fabric from 'fabric';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { v4 as uuidv4 } from 'uuid';
 import { customAlphabet } from "nanoid";
 
 import EditEventItem from "./EditEventItem";
-import { GameEventType } from "../../../modules/editor/gamePnC";
+import { GameEventType, namedFabric } from "../../../modules/editor/gamePnC";
 import "./EditObjOptions.css"
 
 import trash from '../../assets/images/EditorPage_img/trash.png';
@@ -121,9 +122,9 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 // 이름이 있지만 id가 없다면, 숫자+문자+8자로 이루어진 id 부여
                 else if (!foundFabric.id) {
                     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                    const nanoid = customAlphabet(alphabet, 8);
+                    const nanoid = customAlphabet(alphabet, 6);
                     const id = nanoid();
-                    setNamedFabrics(prev => [...prev, {id, name: value, room: currentRoom, side: currentSide}]);
+                    setNamedFabrics(prev => [...prev, new namedFabric({id, name: value, location: [{room: currentRoom, side: currentSide}]})]);
                     setOptionStyle(prev => ({...prev, id: id}));
                     foundFabric.id = id;
                 }
@@ -266,17 +267,27 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
 
         const activeObjects = canvas.getActiveObjects(); // 항상 배열로 처리
 
+        const tryRemoveImage = (obj) => {
+            if (obj.type === 'image' && obj.imgName) {
+                const allObjects = canvas.getObjects();
+                const sameNameImages = allObjects.filter(o => o.type === 'image' && o.imgName === obj.imgName);
+                // 같은 이름을 가진 이미지가 하나뿐일 때만 이미지 목록에서도 삭제
+                if (sameNameImages.length === 1) setImgs(prevImgs => prevImgs.filter(img => img.name !== obj.imgName));
+            }
+        };
+
         if (!activeObjects || activeObjects.length === 0) return;
 
         activeObjects.forEach(obj => {
-            if (obj.type === 'image' && obj.name && setImgs) {
-                const allObjects = canvas.getObjects();
-                const sameNameImages = allObjects.filter(o => o.type === 'image' && o.name === obj.name);
-                if (sameNameImages.length === 1) {
-                    setImgs(prev => prev.filter(img => img.name !== obj.name));
-                }
+            if (activeObject instanceof fabric.ActiveSelection) {
+                activeObject.forEachObject(obj => {
+                    tryRemoveImage(obj);
+                    canvas.remove(obj)
+                });
+            } else {
+                tryRemoveImage(activeObject);
+                canvas.remove(activeObject);
             }
-            canvas.remove(obj);
         });
 
         canvas.discardActiveObject();

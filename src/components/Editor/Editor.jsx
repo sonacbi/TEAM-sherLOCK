@@ -16,7 +16,7 @@ import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
 
 function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
-    const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs} = saveTool;
+    const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
@@ -600,7 +600,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     const debouncedSave = debounce(() => {
         setTimeout(() => {
             saveCanvasToSide();
-        }, 100);
+        }, 1);
     }, 300);
 
     useEffect(() => {
@@ -704,7 +704,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
     // 이미지 추가 ---------------------------------------------------(section 11)
     // delete --------------------------------------------------------(section 12)
-    useDeleteKeyHandler(canvasInstance, isReady, setImgs);
+    useDeleteKeyHandler(canvasInstance, isReady, setImgs, game, setNamedFabrics);
     // ---------------------------------------------------------------(section 12)
     // zoom in zoom out ----------------------------------------------(section 13)
     useCanvasZoom(canvasInstance, isReady);
