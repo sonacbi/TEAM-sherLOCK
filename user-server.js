@@ -12,6 +12,9 @@ import authRoutes from './modules/routes/authRoutes.js';
 // notice : 공지사항 관련 라우트
 import noticeRoute from './modules/routes/notice.js';
 
+// 유저 정보 라우트 추가
+import userRoute from './modules/routes/userRoute.js';
+
 const app = express();
 app.use(express.json());
 
@@ -34,6 +37,8 @@ app.use(bodyParser.json()); // post 해석
 app.use('/auth', authRoutes);
 // 2. 공지사항 관련 라우트
 app.use('/api/notices', noticeRoute);
+// 3. 유저 검색용 라우트
+app.use('/api/user', userRoute);
 
 /* ---------------------------------------------------------------------- */
 

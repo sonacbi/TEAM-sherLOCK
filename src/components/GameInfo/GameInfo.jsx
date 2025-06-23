@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import './GameInfo.css';
@@ -29,6 +29,7 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
   const GameInfo_difficulty = 3;
   const [activeTab, setActiveTab] = useState('introduction');
   const [isPlayClicked, setIsPlayClicked] = useState(false);
+  const [creatorName, setCreatorName] = useState(null); // ✅ 제작자 닉네임 상태 추가
 
   // 테마별 이미지 매핑
   const GameInfo_backgroundMap = {
@@ -55,6 +56,26 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
   const GameInfo_roomImage = GameInfo_roomMap[theme] || horror_GameInfo_room;
   const GameInfo_starImage = GameInfo_starMap[theme] || horror_GameInfo_rating_star;
   const GameInfo_difficultyImage = GameInfo_difficultyMap[theme] || horror_GameInfo_difficulty;
+
+    // 유저 id기반으로 닉네임 반환
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (!gameInfo?.user_id) return;
+      try {
+        const res = await fetch(`http://localhost:5000/api/user/${gameInfo.user_id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCreatorName(data.user_name); // ✅ 상태에 저장
+        } else {
+          console.warn('사용자 정보 없음');
+        }
+      } catch (err) {
+        console.error('유저 닉네임 가져오기 실패:', err);
+      }
+    };
+
+    fetchUserName();
+  }, [gameInfo?.user_id]); // ✅ user_id가 바뀔 때마다 호출
 
   // theme 없거나 배경 이미지 없으면 렌더링 안함
   if (!theme || !GameInfo_backgroundImage) return null;
@@ -140,7 +161,7 @@ function GameInfo({ gameInfo, roomNumber, setShowGameInfo, setShowLoading, setLo
                 <div className='door_creator'>
                   <h4>제작:</h4>
                   {/* <h4>승혀기</h4> */}
-                  <h4>{gameInfo?.user_id ?? '승혀기'}</h4>
+                  <h4>{creatorName ?? '승혀기'}</h4>
                 </div>
 
                 <div className='door_date_created'>
