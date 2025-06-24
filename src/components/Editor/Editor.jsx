@@ -136,9 +136,13 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     // ---------------------------------------------------------------(section 2) ?
     // 캔버스 랜더링 기본값 세팅 -------------------------------------(section 4) ?
     useEffect(() => {
+        const parent = canvasRef.current.parentElement;
+        const width = parent.clientWidth;
+        const height = parent.clientHeight;
+
         const canvas = new fabric.Canvas(canvasRef.current, {
-            width: 1100,
-            height: 650,
+            width,
+            height,
             backgroundColor: 'transparent',
             selection: true,
             selectionColor: 'rgba(169, 219, 120, 0.3)',
@@ -207,7 +211,22 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         });
 
         setIsReady(true);
-        return () => canvas.dispose();
+
+        // 창 크기 변경 시 캔버스 리사이즈
+        const handleResize = () => {
+            const newWidth = parent.clientWidth;
+            const newHeight = parent.clientHeight;
+            canvas.setWidth(newWidth);
+            canvas.setHeight(newHeight);
+            canvas.renderAll();
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            canvas.dispose();
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
     //                           -------------------------------------(section 5)
     // 처음 텍스트도 저장되게
@@ -774,9 +793,9 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         >
             <div className='screen_area'>
                 <div className='screen'>
-                    <div ref={containerRef} style={{ position: 'relative', width: 1100, height: 650 }}>
+                    <div ref={containerRef} style={{ position: 'relative', height: '100%' }}>
                         <canvas
-                            ref={canvasRef} id="my-canvas" width={1100} height={650}
+                            ref={canvasRef} id="my-canvas"
                             style={{ position: 'absolute', top: 0, left: 0, zIndex: 2,}}
                         />
 
@@ -787,14 +806,12 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                                     style={{
                                         position: 'absolute',
                                         top: 0, left: 0,
-                                        width: 1100, height: 650,
                                         pointerEvents: 'none',
                                         zIndex: 1,
                                     }}
                                 >
                                     {isPerspectiveRender && (<WebGLPerspectiveComponent
                                         items={[{ imageUrl: wall.imageUrl, vertices: wall.vertices, wallType, }]}
-                                        width={1100} height={650}
                                     />)}
                                 </div>
                             ))
@@ -807,7 +824,6 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                                 style={{
                                 position: 'absolute',
                                 top: 0, left: 0,
-                                width: 1100, height: 650,
                                 pointerEvents: 'none',
                                 zIndex: 2, opacity: 0.7,
                                 }}

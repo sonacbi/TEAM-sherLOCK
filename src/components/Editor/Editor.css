@@ -65,6 +65,11 @@
     font-size: 40px;
 }
 
+.side_area > button:hover,
+.room_area_scroll > button:hover {
+    background-color: rgb(53, 53, 53);
+}
+
 .stage_wrap {
     min-width: 150px;
     height: 100px;
@@ -97,9 +102,7 @@
     opacity: 0.7;
 }
 
-.room_area_scroll > button:hover,
-.stageIndex_delete > button:hover,
-.side_area > button:hover {
+.stageIndex_delete > button:hover {
     opacity: 1;
 }
 
