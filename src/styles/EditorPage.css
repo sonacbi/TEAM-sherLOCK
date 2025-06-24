@@ -96,7 +96,7 @@
 
 .Editor_tool {
     min-width: 384px;
-    max-width: 384px;
+    max-width: 20%;
     display: flex;
 }
 
