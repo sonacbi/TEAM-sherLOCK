@@ -9,6 +9,9 @@ import '../styles/PlayPage.css';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
+import playgame_hint_icon from '../assets/images/EditorPage_img/hint_icon.png';
+import inventory_icon from '../assets/images/PlayPage_img/inventory_icon.png';
+
 function PlayPage() {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
@@ -370,6 +373,26 @@ function PlayPage() {
         });
     }
 
+    const TimerComponent = () => {
+        const [timeElapsed, setTimeElapsed] = useState(0); // 0초부터 시작
+
+        useEffect(() => {
+            const timer = setInterval(() => {
+            setTimeElapsed(prev => prev + 1);
+            }, 1000);
+
+            return () => clearInterval(timer); // 언마운트 시 정리
+        }, []);
+
+        const formatTime = (seconds) => {
+            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            return `${m} : ${s}`;
+        };
+
+        return (<p>{formatTime(timeElapsed)}</p>);
+    };
+
     useEffect(() => {
         if(id) {
             fetch(`http://localhost:4000/game/${id}/zip`)
@@ -402,12 +425,36 @@ function PlayPage() {
             {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
 
             <div className='playgame_wrap'>
-                <div className='top_menu_wrap'>
+                <div className='playgame_header'>
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
+                </div>
+
+                <div className='top_menu_wrap'>
+                    <div className='stage_name'>
+                        <h3>스테이지 {currentRoom+1}</h3>
+
+                        {game.room[currentRoom].name.length === 0 || <h3 className='stage_title'>{game.room[currentRoom].name}</h3>}
+                    </div>
+                    
+                    <div className='playgame_timer'>
+                        <TimerComponent />
+                    </div>
                 </div>
 
                 <div className='canvas_wrap'>
                     <canvas ref={canvasRef} width={1100} height={650}></canvas>
+                </div>
+
+                <div className='bottom_menu_wrap'>
+                    <div className='bottom_menu_button'>
+                        <div className='hint_menu_button'>
+                            <img id='playgame_hint_icon' src={playgame_hint_icon} alt='playgame_hint_icon' />
+                        </div>
+
+                        <div className='inventory_menu_button'>
+                            <img id='inventory_icon' src={inventory_icon} alt='inventory_icon' />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

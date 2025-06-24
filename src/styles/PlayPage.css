@@ -1,10 +1,9 @@
 .PlayPage_wrap {
     height: 100dvh;
     width: 100dvw;
-    background-color: black;
+    background-color: #1d1d1d;
     display: flex;
     justify-content: center;
-    align-items: center;
     gap: 5px;
 }
 
@@ -16,16 +15,66 @@
     width: 95%;
 }
 
-.top_menu_wrap {
+.playgame_header > h3 {
+    cursor: pointer;
+    width: fit-content;
     color: white;
+    margin: 40px 0;
 }
 
-.top_menu_wrap > h3 {
+.playgame_header > h3:hover {
+    opacity: 0.7;
+}
+
+.top_menu_wrap {
+    color: rgb(169, 169, 169);
+    display: flex;
+}
+
+.stage_name {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.stage_name > .stage_title {
+    padding: 5px 20px;
+    border-radius: 10rem;
+    background-color: rgb(54, 54, 54);
+}
+
+.playgame_timer {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.playgame_timer > p {
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.bottom_menu_button {
+    display: flex;
+    gap: 10px;
+}
+
+.bottom_menu_button > div {
+    padding: 8px;
+    border: 0.1rem solid rgb(68, 68, 68);
+    background-color: rgb(54, 54, 54);
+    border-radius: 10px;
     cursor: pointer;
 }
 
-.top_menu_wrap > h3:hover {
-    opacity: 0.7;
+.bottom_menu_button > div:hover {
+    opacity: 0.6;
+}
+
+.hint_menu_button > img,
+.inventory_menu_button > img {
+    width: 30px;
+    opacity: 0.6;
 }
 
 .canvas_wrap {
