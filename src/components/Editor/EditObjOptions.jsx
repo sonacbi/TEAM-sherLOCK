@@ -124,7 +124,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                     const nanoid = customAlphabet(alphabet, 6);
                     const id = nanoid();
-                    setNamedFabrics(prev => [...prev, new namedFabric({id, name: value, location: [{room: currentRoom, side: currentSide}]})]);
+                    setNamedFabrics(prev => [...prev, new namedFabric({id, name: value, room: currentRoom, side: currentSide})]);
                     setOptionStyle(prev => ({...prev, id: id}));
                     foundFabric.id = id;
                 }
@@ -133,7 +133,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                     const index = prev.findIndex(item => item.id === foundFabric.id);
                     if (!prev[index]) return prev;
                     prev[index].name = value;
-                    return prev;
+                    return [...prev];
                 })
                 setOptionStyle(prev => ({...prev, name: value}));
                 foundFabric.name = value;
@@ -275,6 +275,11 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 if (sameNameImages.length === 1) setImgs(prevImgs => prevImgs.filter(img => img.name !== obj.imgName));
             }
         };
+        const tryRemoveNamedFabric = (obj) => {
+            if (obj.id && obj.name) {
+                setNamedFabrics(prev => prev.filter(named => named.id !== obj.id && named.name !== obj.name));
+            }
+        }
 
         if (!activeObjects || activeObjects.length === 0) return;
 
@@ -283,10 +288,12 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 activeObject.forEachObject(obj => {
                     tryRemoveImage(obj);
                     canvas.remove(obj)
+                    tryRemoveNamedFabric(obj);
                 });
             } else {
                 tryRemoveImage(activeObject);
                 canvas.remove(activeObject);
+                tryRemoveNamedFabric(activeObject);
             }
         });
 

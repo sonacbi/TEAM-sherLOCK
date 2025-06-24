@@ -259,6 +259,7 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
             canvas.add(data)
         })
     });
+    canvas.discardActiveObject();
     canvas.renderAll();
 };
 

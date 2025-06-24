@@ -455,7 +455,7 @@ useEffect(() => {
         let filter;
         if (selectedSort.current == FilterSetting.rating_desc) filter = "created_at";
         else if (selectedSort.current == FilterSetting.rating_asc) filter = "created_at";
-        else if (selectedSort.current == FilterSetting.latest_desc) filter = "created_at";
+        else if (selectedSort.current == FilterSetting.latest_desc) filter = "created_at DESC";
         else if (selectedSort.current == FilterSetting.play_desc) filter = "play_count DESC";
         else if (selectedSort.current == FilterSetting.play_asc) filter = "play_count ASC";
 

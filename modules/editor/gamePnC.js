@@ -14,16 +14,12 @@ class GamePnC extends ClassVersion {
 }
 // 이름이 부여된 fabric 객체
 class namedFabric extends ClassVersion {
-    constructor({ id = "", name = "", location = [
-        {
-            room: null,
-            side: null,
-        },
-    ] }) {
+    constructor({ id = "", name = "", room = null, side = null, }) {
         super();
         this.id = id;
         this.name = name;
-        this.location = location;
+        this.room = room;
+        this.side = side;
     }
 }
 ;

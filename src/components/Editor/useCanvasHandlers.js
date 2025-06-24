@@ -23,12 +23,7 @@ export const useDeleteKeyHandler = (canvasInstance, isReady, setImgs, game, setN
                 };
                 const tryRemoveNamedFabric = (obj) => {
                     if (obj.id && obj.name) {
-                        setNamedFabrics(prev => {
-                            const newData = prev;
-                            newData.find(named => named.id == obj.id && named.name == obj.name).location.forEach((location, index) => {
-                                game.room[location.room].side[location.side].fabric.find()
-                            })
-                        })
+                        setNamedFabrics(prev => prev.filter(named => named.id !== obj.id && named.name !== obj.name));
                     }
                 }
 
@@ -36,13 +31,13 @@ export const useDeleteKeyHandler = (canvasInstance, isReady, setImgs, game, setN
                     if (activeObject instanceof fabric.ActiveSelection) {
                         activeObject.forEachObject(obj => {
                             tryRemoveImage(obj);
-                            canvas.remove(obj)
-                            // tryRemoveNamedFabric(obj);
+                            if (obj.name !== "SherLockRoomController") canvas.remove(obj)
+                            tryRemoveNamedFabric(obj);
                         });
                     } else {
                         tryRemoveImage(activeObject);
-                        canvas.remove(activeObject);
-                        // tryRemoveNamedFabric(obj);
+                        if (activeObject.name !== "SherLockRoomController") canvas.remove(activeObject);
+                        tryRemoveNamedFabric(activeObject);
                     }
                     canvas.discardActiveObject();
                     canvas.renderAll();
@@ -144,7 +139,7 @@ export const useCopyNPaste = (canvasInstance, controlStyle) => {
             if (e.key === 'c' || e.key === 'C') {
                 const activeObject = canvas.getActiveObject();
                 if (activeObject) {
-                    activeObject.clone(['name', 'id', 'gameEvent', 'imgName', 'shapeType', 'perPixelTargetFind']).then(clonedObj => clipboardRef.current = clonedObj);
+                    activeObject.clone(['gameEvent', 'imgName', 'shapeType', 'perPixelTargetFind']).then(clonedObj => clipboardRef.current = clonedObj);
                     e.preventDefault();
                 }
             }
@@ -154,15 +149,13 @@ export const useCopyNPaste = (canvasInstance, controlStyle) => {
                 const clipboard = clipboardRef.current;
                 if (!clipboard) return;
 
-                clipboard.clone(['name', 'id', 'gameEvent', 'imgName', 'shapeType', 'perPixelTargetFind']).then(async (clonedObj) => {
+                clipboard.clone(['gameEvent', 'imgName', 'shapeType', 'perPixelTargetFind']).then(async (clonedObj) => {
                     canvas.discardActiveObject();
 
                     clonedObj.set({
                         ...controlStyle,
                         left: clonedObj.left + 15,
                         top: clonedObj.top + 15,
-                        name: clipboard.name,
-                        id: clipboard.id,
                         gameEvent: clipboard.gameEvent,
                         imgName: clipboard.imgName,
                         perPixelTargetFind: clipboard.perPixelTargetFind,

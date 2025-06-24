@@ -21,21 +21,19 @@ class GamePnC extends ClassVersion {
 class namedFabric extends ClassVersion {
     id: string;
     name: string;
-    location: Object[];
+    room: null;
+    side: null;
     constructor({
         id = "",
         name = "",
-        location = [
-            {
-                room: null,
-                side: null,
-            },
-        ]
+        room = null,
+        side = null,
     }) {
         super();
         this.id = id;
         this.name = name;
-        this.location = location;
+        this.room = room;
+        this.side = side;
     }
 };
 

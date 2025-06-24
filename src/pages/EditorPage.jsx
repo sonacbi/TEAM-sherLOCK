@@ -247,7 +247,6 @@ function EditorPage() {
             prev.namedFabrics = namedFabrics;
             return prev;
         });
-        console.log(namedFabrics)
     }, [namedFabrics]);
 
     const toggleRoomInfo = () => {
