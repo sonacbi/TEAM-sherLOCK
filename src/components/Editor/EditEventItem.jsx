@@ -80,14 +80,14 @@ export default function EditEventItem({ event, index, eventValues, namedFabrics,
 
                             <div className='stage_move'>
                                 <p>스테이지</p>
-                                <input type="number" min={0} max={99} value={event.move?.room} onChange={e => onChange({ move: { room: Number(e.target.value), side: event.move?.side } })} />
+                                <input type="number" min={1} max={99} value={(event.move?.room ?? 0) + 1} onChange={e => onChange({ move: { room: Number(e.target.value)-1 , side: event.move?.side } })} />
                             </div>
 
                             <p>/</p>
 
                             <div className='cut_move'>
                                 <p>컷</p>
-                                <input type="number" min={0} max={99} value={event.move?.side} onChange={e => onChange({ move: { room: event.move?.room, side: Number(e.target.value) } })} />
+                                <input type="number" min={1} max={99} value={(event.move?.side ?? 0) + 1} onChange={e => onChange({ move: { room: event.move?.room, side: Number(e.target.value)-1 } })} />
                             </div>
                         </div>
                     </>
