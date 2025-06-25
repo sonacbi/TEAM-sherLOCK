@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import JSZip from 'jszip';
 import * as fabric from 'fabric';
 import fs from 'fs'
@@ -21,6 +21,8 @@ function PlayPage() {
     const [gameZip, setGameZip] = useState(null);
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
+    const [isCanvasReady, setIsCanvasReady] = useState(false);
+    const urlCache = useRef({}); // name -> objectURL
     const { id } = useParams();
     const navigate = useNavigate();
     // 최종 저장된 이미지와 꼭짓점
@@ -37,7 +39,12 @@ function PlayPage() {
         })
         canvasInstance.current = canvas;
 
-        return () => canvas.dispose();
+        setIsCanvasReady(true);
+
+        return () => {
+            canvas.dispose();
+            setIsCanvasReady(false);
+        };
     }, [])
 
     const executeGameEvent = (event) => {
@@ -413,14 +420,31 @@ function PlayPage() {
         currentRoom,
         currentSide,
         game,
-        imgs);
+        imgs,
+        isCanvasReady // 추가 인자로 캔버스 준비 여부 전달해서 훅 내에서 체크 가능하도록 수정 가능
+    );
 
 
 
-    const getImageUrlByName = (imageName) => {
-        const foundImgFile = imgs.find(file => file.name === imageName);
-        return foundImgFile ? URL.createObjectURL(foundImgFile) : '';
-    };
+    const getImageUrlByName = useCallback((imageName) => {
+        if (!imageName) return '';
+        if (urlCache.current[imageName]) return urlCache.current[imageName];
+
+        const found = imgs.find(file => file.name === imageName);
+        if (found) {
+            const url = URL.createObjectURL(found);
+            urlCache.current[imageName] = url;
+            return url;
+        }
+        return '';
+    }, [imgs]);
+
+        // 페이지 unload 시 메모리 정리
+        useEffect(() => {
+        return () => {
+            Object.values(urlCache.current).forEach(url => URL.revokeObjectURL(url));
+        };
+    }, []);
 
     return (
         <div className='PlayPage_wrap'>
@@ -438,31 +462,33 @@ function PlayPage() {
                             style={{ position: 'absolute', top: 0, left: 0, zIndex: 2 }}
                         />
 
-                        {/* Wall 복원용 WebGL 렌더링 */}
-                        {perspective[currentRoom]?.[currentSide] &&
+                        {/* 캔버스 준비됐을 때만 WebGL 렌더링 */}
+                            {isCanvasReady && perspective[currentRoom]?.[currentSide] &&
                             Object.entries(perspective[currentRoom][currentSide]).map(([wallType, wall]) => (
                                 <div
-                                    key={`${wallType}-${currentRoom}-${currentSide}`}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0, left: 0,
-                                        width: 1100, height: 650,
-                                        pointerEvents: 'none',
-                                        zIndex: 1,
-                                    }}
+                                key={`${wallType}-${currentRoom}-${currentSide}`}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: 1100,
+                                    height: 650,
+                                    pointerEvents: 'none',
+                                    zIndex: 1,
+                                }}
                                 >
-                                    <WebGLPerspectiveComponent
-                                        items={[{
-                                            imageUrl: getImageUrlByName(wall.imageName), // ✅ 변환
-                                            vertices: wall.vertices,
-                                            wallType
-                                        }]}
-                                        width={1100}
-                                        height={650}
-                                    />
+                                <WebGLPerspectiveComponent
+                                    items={[{
+                                    imageUrl: getImageUrlByName(wall.imageName),
+                                    vertices: wall.vertices,
+                                    wallType,
+                                    }]}
+                                    width={1100}
+                                    height={650}
+                                />
                                 </div>
                             ))
-                        }
+                            }
                     </div>
                 </div>
 
