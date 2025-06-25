@@ -55,6 +55,25 @@ const useSyncPerspective = (
             bottom: edgeArray[3] || 0,
           };
 
+          const frameEdge = (!frame && !edgeArray) ? [
+              { x: frontPosition.left - frameEdgeWeight.left,                     y: frontPosition.top - frameEdgeWeight.top },
+              { x: frontPosition.left + frontSize.width + frameEdgeWeight.right,  y: frontPosition.top - frameEdgeWeight.top },
+              { x: frontPosition.left + frontSize.width + frameEdgeWeight.right,  y: frontPosition.top + frontSize.height + frameEdgeWeight.bottom },
+              { x: frontPosition.left - frameEdgeWeight.left,                     y: frontPosition.top + frontSize.height + frameEdgeWeight.bottom }
+          ] : [
+              { x: 220 - frameEdgeWeight.left,        y: 120 - frameEdgeWeight.top },
+              { x: 220 + 660 + frameEdgeWeight.right, y: 120 - frameEdgeWeight.top },
+              { x: 220 + 660 + frameEdgeWeight.right, y: 120 + 420 + frameEdgeWeight.bottom },
+              { x: 220 - frameEdgeWeight.left,        y: 120 + 420 + frameEdgeWeight.bottom }
+          ];
+
+          const frontEdge = [
+              { x: frontPosition.left, y: frontPosition.top },
+              { x: frontPosition.left + frontSize.width, y: frontPosition.top },
+              { x: frontPosition.left + frontSize.width, y: frontPosition.top + frontSize.height },
+              { x: frontPosition.left, y: frontPosition.top + frontSize.height }
+          ];
+
           for (let i = 0; i < directions.length; i++) {
             const dir = directions[i];
             const imageName = edgeImgArray[i];
@@ -88,37 +107,37 @@ const useSyncPerspective = (
 
               case 'top':
                 vertices = [
-                  new fabric.Point(frontPosition.left - frameEdgeWeight.left, frontPosition.top - frameEdgeWeight.top),
-                  new fabric.Point(frontPosition.left + frontSize.width + frameEdgeWeight.right, frontPosition.top - frameEdgeWeight.top),
-                  new fabric.Point(frontPosition.left + frontSize.width, frontPosition.top),
-                  new fabric.Point(frontPosition.left, frontPosition.top),
+                  new fabric.Point(frameEdge[0]),
+                  new fabric.Point(frameEdge[1]),
+                  new fabric.Point(frontEdge[1]),
+                  new fabric.Point(frontEdge[0]),
                 ];
                 break;
 
               case 'left':
                 vertices = [
-                  new fabric.Point(frontPosition.left - frameEdgeWeight.left, frontPosition.top - frameEdgeWeight.top),
-                  new fabric.Point(frontPosition.left, frontPosition.top),
-                  new fabric.Point(frontPosition.left, frontPosition.top + frontSize.height),
-                  new fabric.Point(frontPosition.left - frameEdgeWeight.left, frontPosition.top + frontSize.height + frameEdgeWeight.bottom),
+                  new fabric.Point(frameEdge[0]),
+                  new fabric.Point(frontEdge[0]),
+                  new fabric.Point(frontEdge[3]),
+                  new fabric.Point(frameEdge[3]),
                 ];
                 break;
 
               case 'right':
                 vertices = [
-                  new fabric.Point(frontPosition.left + frontSize.width, frontPosition.top),
-                  new fabric.Point(frontPosition.left + frontSize.width + frameEdgeWeight.right, frontPosition.top - frameEdgeWeight.top),
-                  new fabric.Point(frontPosition.left + frontSize.width + frameEdgeWeight.right, frontPosition.top + frontSize.height + frameEdgeWeight.bottom),
-                  new fabric.Point(frontPosition.left + frontSize.width, frontPosition.top + frontSize.height),
+                  new fabric.Point(frontEdge[1]),
+                  new fabric.Point(frameEdge[1]),
+                  new fabric.Point(frameEdge[2]),
+                  new fabric.Point(frontEdge[2]),
                 ];
                 break;
 
               case 'bottom':
                 vertices = [
-                  new fabric.Point(frontPosition.left - frameEdgeWeight.left, frontPosition.top + frontSize.height),
-                  new fabric.Point(frontPosition.left + frontSize.width + frameEdgeWeight.right, frontPosition.top + frontSize.height),
-                  new fabric.Point(frontPosition.left + frontSize.width + frameEdgeWeight.right, frontPosition.top + frontSize.height + frameEdgeWeight.bottom),
-                  new fabric.Point(frontPosition.left - frameEdgeWeight.left, frontPosition.top + frontSize.height + frameEdgeWeight.bottom),
+                  new fabric.Point(frontEdge[3]),
+                  new fabric.Point(frontEdge[2]),
+                  new fabric.Point(frameEdge[2]),
+                  new fabric.Point(frameEdge[3]),
                 ];
                 break;
             }
