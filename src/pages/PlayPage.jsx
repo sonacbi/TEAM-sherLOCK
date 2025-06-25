@@ -26,6 +26,7 @@ function PlayPage() {
     const [currentSide, setCurrentSide] = useState(0);
     const [isCanvasReady, setIsCanvasReady] = useState(false);
     const urlCache = useRef({}); // name -> objectURL
+    const [imageUrls, setImageUrls] = useState({});
     const { id } = useParams();
     const navigate = useNavigate();
     // 최종 저장된 이미지와 꼭짓점
@@ -415,8 +416,8 @@ function PlayPage() {
     }, [isReadyToLoad]);
 
 
-        // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
-        useSyncPerspective(canvasInstance,
+    // 프레임 렌더링용
+    useSyncPerspective(canvasInstance,
         getWallsFromCanvas,
         getWallVertices,
         setPerspective,
@@ -427,20 +428,56 @@ function PlayPage() {
         isCanvasReady // 추가 인자로 캔버스 준비 여부 전달해서 훅 내에서 체크 가능하도록 수정 가능
     );
 
+        // 이미지 리사이즈 함수 (Promise 반환)
+        const resizeImage = (file, maxWidth = 500) => new Promise((resolve) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                const scale = Math.min(maxWidth / img.width, 1);
+                if (scale === 1) {
+                URL.revokeObjectURL(url);
+                resolve(file);
+                return;
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(blob => {
+                const resizedFile = new File([blob], file.name, { type: file.type });
+                URL.revokeObjectURL(url);
+                resolve(resizedFile);
+                }, file.type);
+            };
+            img.src = url;
+        });
 
+        useEffect(() => {
+        if (!isCanvasReady || !perspective[currentRoom]?.[currentSide]) return;
 
-    const getImageUrlByName = useCallback((imageName) => {
+        const walls = perspective[currentRoom][currentSide];
+        const imageNames = Object.values(walls).map(w => w.imageName).filter(Boolean);
+
+        (async () => {
+            for (const name of imageNames) {
+            if (!urlCache.current[name]) {
+                const file = imgs.find(f => f.name === name);
+                if (!file) continue;
+                const resizedFile = await resizeImage(file);
+                const resizedUrl = URL.createObjectURL(resizedFile);
+                urlCache.current[name] = resizedUrl;
+            }
+            }
+            setImageUrls({ ...urlCache.current }); // 상태 업데이트 트리거
+        })();
+        }, [imgs, perspective, currentRoom, currentSide, isCanvasReady]);
+
+        const getImageUrlByName = useCallback((imageName) => {
         if (!imageName) return '';
-        if (urlCache.current[imageName]) return urlCache.current[imageName];
+        return urlCache.current[imageName] || '';
+        }, []);
 
-        const found = imgs.find(file => file.name === imageName);
-        if (found) {
-            const url = URL.createObjectURL(found);
-            urlCache.current[imageName] = url;
-            return url;
-        }
-        return '';
-    }, [imgs]);
 
         // 페이지 unload 시 메모리 정리
         useEffect(() => {
@@ -451,7 +488,7 @@ function PlayPage() {
 
     return (
         <div className='PlayPage_wrap'>
-            {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
+            <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
             <div className='playgame_wrap'>
                 <div className='playgame_header'>
@@ -493,14 +530,16 @@ function PlayPage() {
                                 }}
                                 >
                                 <WebGLPerspectiveComponent
+                                    key={wall.imageName} // 변경하지 않음
                                     items={[{
-                                    imageUrl: getImageUrlByName(wall.imageName),
-                                    vertices: wall.vertices,
-                                    wallType,
+                                        imageUrl: getImageUrlByName(wall.imageName),
+                                        vertices: wall.vertices,
+                                        wallType,
                                     }]}
                                     width={1100}
                                     height={650}
                                 />
+
                                 </div>
                             ))
                             }
