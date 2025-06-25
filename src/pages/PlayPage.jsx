@@ -8,6 +8,7 @@ import { loadGameZip } from '../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from '../components/Editor/PerspectiveFrame/WebGLPerspectiveComponent'
 import { getWallsFromCanvas, getWallVertices  } from '../components/Editor/PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './useSyncPerspective';
+import useImageResizeWorker from './work/useImageResizeWorker';
 import '../styles/PlayPage.css';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -25,8 +26,10 @@ function PlayPage() {
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const [isCanvasReady, setIsCanvasReady] = useState(false);
-    const urlCache = useRef({}); // name -> objectURL
+    const resizeImage = useImageResizeWorker();
     const [imageUrls, setImageUrls] = useState({});
+    const urlCache = React.useRef({});
+    const [areWallImagesReady, setAreWallImagesReady] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
     // 최종 저장된 이미지와 꼭짓점
@@ -427,58 +430,45 @@ function PlayPage() {
         imgs,
         isCanvasReady // 추가 인자로 캔버스 준비 여부 전달해서 훅 내에서 체크 가능하도록 수정 가능
     );
+    
 
-        // 이미지 리사이즈 함수 (Promise 반환)
-        const resizeImage = (file, maxWidth = 500) => new Promise((resolve) => {
-            const img = new Image();
-            const url = URL.createObjectURL(file);
-            img.onload = () => {
-                const scale = Math.min(maxWidth / img.width, 1);
-                if (scale === 1) {
-                URL.revokeObjectURL(url);
-                resolve(file);
-                return;
-                }
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob(blob => {
-                const resizedFile = new File([blob], file.name, { type: file.type });
-                URL.revokeObjectURL(url);
-                resolve(resizedFile);
-                }, file.type);
-            };
-            img.src = url;
-        });
+useEffect(() => {
+  if (!isCanvasReady || !perspective[currentRoom]?.[currentSide]) return;
 
-        useEffect(() => {
-        if (!isCanvasReady || !perspective[currentRoom]?.[currentSide]) return;
+  setAreWallImagesReady(false);
 
-        const walls = perspective[currentRoom][currentSide];
-        const imageNames = Object.values(walls).map(w => w.imageName).filter(Boolean);
+  const walls = perspective[currentRoom][currentSide];
+  const imageNames = Object.values(walls).map(w => w.imageName).filter(Boolean);
 
-        (async () => {
-            for (const name of imageNames) {
-            if (!urlCache.current[name]) {
-                const file = imgs.find(f => f.name === name);
-                if (!file) continue;
-                const resizedFile = await resizeImage(file);
-                const resizedUrl = URL.createObjectURL(resizedFile);
-                urlCache.current[name] = resizedUrl;
-            }
-            }
-            setImageUrls({ ...urlCache.current }); // 상태 업데이트 트리거
-        })();
-        }, [imgs, perspective, currentRoom, currentSide, isCanvasReady]);
+  (async () => {
+    for (const name of imageNames) {
+      const file = imgs.find(f => f.name === name);
+      if (!file) continue;
+      const cacheKey = `${name}_${file.lastModified}`;
+      if (!urlCache.current[cacheKey]) {
+        const resizedFile = await resizeImage(file, 500);
+        const resizedUrl = URL.createObjectURL(resizedFile);
+        urlCache.current[cacheKey] = resizedUrl;
+      }
+    }
 
-        const getImageUrlByName = useCallback((imageName) => {
+    // 새 객체로 복사해서 상태 업데이트
+    setImageUrls({ ...urlCache.current });
+    setAreWallImagesReady(true);
+  })();
+
+  // 디버그 로그는 필요시 유지
+  console.log("img list", imgs.map(f => [f.name, f.size]));
+  console.log("wall imageNames", imageNames);
+  console.log("cached URLs", urlCache.current);
+
+}, [imgs, perspective, currentRoom, currentSide, isCanvasReady]);
+
+
+    const getImageUrlByName = (imageName) => {
         if (!imageName) return '';
         return urlCache.current[imageName] || '';
-        }, []);
-
-
+    };
         // 페이지 unload 시 메모리 정리
         useEffect(() => {
         return () => {
@@ -514,12 +504,19 @@ function PlayPage() {
                             style={{ position: 'absolute', top: 0, left: 0, zIndex: 2 }}
                         />
 
-                        {/* 캔버스 준비됐을 때만 WebGL 렌더링 */}
-                            {isCanvasReady && perspective[currentRoom]?.[currentSide] &&
-                            Object.entries(perspective[currentRoom][currentSide]).map(([wallType, wall]) => (
+                        {isCanvasReady && areWallImagesReady && perspective[currentRoom]?.[currentSide] &&
+                            Object.entries(perspective[currentRoom][currentSide]).map(([wallType, wall]) => {
+                                const file = imgs.find(f => f.name === wall.imageName);
+                                const cacheKey = file ? `${wall.imageName}_${file.lastModified}` : wall.imageName;
+                                const imageUrl = imageUrls[cacheKey] || '';
+                                const key = `${cacheKey}_${wallType}`; // wallType 포함한 고유 key
+
+                                console.log('💡 wallType:', wallType, '→ cacheKey:', cacheKey, '→ imageUrl:', imageUrl);
+
+                                return (
                                 <div
-                                key={`${wallType}-${currentRoom}-${currentSide}`}
-                                style={{
+                                    key={key} // 소문자 k로 수정, 변수명 정확히 반영
+                                    style={{
                                     position: 'absolute',
                                     top: 0,
                                     left: 0,
@@ -527,22 +524,22 @@ function PlayPage() {
                                     height: 650,
                                     pointerEvents: 'none',
                                     zIndex: 1,
-                                }}
+                                    }}
                                 >
-                                <WebGLPerspectiveComponent
-                                    key={wall.imageName} // 변경하지 않음
+                                    <WebGLPerspectiveComponent
+                                    key={key} // 동일 key로 맞춰줌 (중복 방지 목적)
                                     items={[{
-                                        imageUrl: getImageUrlByName(wall.imageName),
+                                        imageUrl,
                                         vertices: wall.vertices,
                                         wallType,
                                     }]}
                                     width={1100}
                                     height={650}
-                                />
-
+                                    />
                                 </div>
-                            ))
-                            }
+                                );
+                            })
+                        }
                     </div>
                 </div>
 
