@@ -212,6 +212,7 @@
     border-radius: 10px;
     padding: 10px;
     border: 0.1rem solid rgb(68, 68, 68);
+    max-height: 90%;
 }
 
 .img_list {
@@ -259,7 +260,7 @@
 .img_list.grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    max-height: 720px;
+    max-height: 100%;
     padding: 10px;
 }
 

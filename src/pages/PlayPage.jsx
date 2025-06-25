@@ -373,26 +373,6 @@ function PlayPage() {
         });
     }
 
-    const TimerComponent = () => {
-        const [timeElapsed, setTimeElapsed] = useState(0); // 0초부터 시작
-
-        useEffect(() => {
-            const timer = setInterval(() => {
-            setTimeElapsed(prev => prev + 1);
-            }, 1000);
-
-            return () => clearInterval(timer); // 언마운트 시 정리
-        }, []);
-
-        const formatTime = (seconds) => {
-            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-            const s = String(seconds % 60).padStart(2, '0');
-            return `${m} : ${s}`;
-        };
-
-        return (<p>{formatTime(timeElapsed)}</p>);
-    };
-
     useEffect(() => {
         if(id) {
             fetch(`http://localhost:4000/game/${id}/zip`)
@@ -437,7 +417,7 @@ function PlayPage() {
                     </div>
                     
                     <div className='playgame_timer'>
-                        <TimerComponent />
+                        <TimerComponent currentRoom={currentRoom} />
                     </div>
                 </div>
 
@@ -462,3 +442,26 @@ function PlayPage() {
 }
 
 export default PlayPage;
+
+const TimerComponent = ({ currentRoom }) => {
+    const [timeElapsed, setTimeElapsed] = useState(0);
+
+    useEffect(() => {
+        setTimeElapsed(0); // 스테이지 바뀌면 초기화
+    }, [currentRoom]);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeElapsed(prev => prev + 1);
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatTime = (seconds) => {
+        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const s = String(seconds % 60).padStart(2, '0');
+        return `${m} : ${s}`;
+    };
+
+    return (<p>{formatTime(timeElapsed)}</p>);
+};
