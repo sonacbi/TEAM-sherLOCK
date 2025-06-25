@@ -592,7 +592,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                     // ✅ edgeImg 필드 추가
                     edgeImg: directions.map(dir => {
                         const wall = wallObj[dir];
-                        return wall?.imageName ?? '';
+                        return wall?.imgName ?? '';
                     }),
                 };
                 
@@ -692,7 +692,6 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         scaleY: height / imgElement.height,
                         imgName: addImageFile.name,
                         imageUrl: e.target.result, // 배경 랜더링용
-                        imageName: addImageFile.name //
                     });
 
                     canvasInstance.current.add(fabricImage);
