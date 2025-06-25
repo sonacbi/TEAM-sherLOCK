@@ -16,7 +16,6 @@
     width: 350px;
     border-radius: 10px;
     transform: translate(-50%, -50%);
-    background-color: #2727275a;
 }
 
 .Sign_up .Sign_up_content .header_logo {
@@ -116,8 +115,9 @@
 
 .sherlock .birth_input p {
     color: white;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
+    width: 51px;
 }
 
 .error_text, .warning_text {
