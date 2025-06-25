@@ -5,6 +5,9 @@ import fs from 'fs'
 
 import { GamePnC } from '../../modules/editor/gamePnC';
 import { loadGameZip } from '../../modules/editor/handleGame';
+import WebGLPerspectiveComponent from '../components/Editor/PerspectiveFrame/WebGLPerspectiveComponent'
+import { getWallsFromCanvas, getWallVertices  } from '../components/Editor/PerspectiveFrame/perspectiveBackground';
+import useSyncPerspective from './useSyncPerspective';
 import '../styles/PlayPage.css';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +23,10 @@ function PlayPage() {
     const [currentSide, setCurrentSide] = useState(0);
     const { id } = useParams();
     const navigate = useNavigate();
+    // 최종 저장된 이미지와 꼭짓점
+    const [perspective, setPerspective] = useState({});
+    const perspectiveRef = useRef(perspective);
+    useEffect(() => { perspectiveRef.current = perspective }, [perspective]);
 
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
@@ -397,6 +404,24 @@ function PlayPage() {
         if(isReadyToLoad) loadGamePlay(0,0);
     }, [isReadyToLoad]);
 
+
+        // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
+        useSyncPerspective(canvasInstance,
+        getWallsFromCanvas,
+        getWallVertices,
+        setPerspective,
+        currentRoom,
+        currentSide,
+        game,
+        imgs);
+
+
+
+    const getImageUrlByName = (imageName) => {
+        const foundImgFile = imgs.find(file => file.name === imageName);
+        return foundImgFile ? URL.createObjectURL(foundImgFile) : '';
+    };
+
     return (
         <div className='PlayPage_wrap'>
             {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
@@ -407,8 +432,40 @@ function PlayPage() {
                 </div>
 
                 <div className='canvas_wrap'>
-                    <canvas ref={canvasRef} width={1100} height={650}></canvas>
+                    <div style={{ position: 'relative', width: 1100, height: 650 }}>
+                        {/* 캔버스 */}
+                        <canvas ref={canvasRef} width={1100} height={650}
+                            style={{ position: 'absolute', top: 0, left: 0, zIndex: 2 }}
+                        />
+
+                        {/* Wall 복원용 WebGL 렌더링 */}
+                        {perspective[currentRoom]?.[currentSide] &&
+                            Object.entries(perspective[currentRoom][currentSide]).map(([wallType, wall]) => (
+                                <div
+                                    key={`${wallType}-${currentRoom}-${currentSide}`}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0, left: 0,
+                                        width: 1100, height: 650,
+                                        pointerEvents: 'none',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    <WebGLPerspectiveComponent
+                                        items={[{
+                                            imageUrl: getImageUrlByName(wall.imageName), // ✅ 변환
+                                            vertices: wall.vertices,
+                                            wallType
+                                        }]}
+                                        width={1100}
+                                        height={650}
+                                    />
+                                </div>
+                            ))
+                        }
+                    </div>
                 </div>
+
             </div>
         </div>
     );
