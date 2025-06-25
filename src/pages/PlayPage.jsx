@@ -420,65 +420,66 @@ function PlayPage() {
 
 
     // 프레임 렌더링용
-    useSyncPerspective(canvasInstance,
-        getWallsFromCanvas,
-        getWallVertices,
-        setPerspective,
-        currentRoom,
-        currentSide,
+    useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective,
+        currentRoom, currentSide,
         game,
-        imgs,
-        isCanvasReady // 추가 인자로 캔버스 준비 여부 전달해서 훅 내에서 체크 가능하도록 수정 가능
+        imgs, isCanvasReady // 추가 인자로 캔버스 준비 여부 전달해서 훅 내에서 체크 가능하도록 수정 가능
     );
     
 
-useEffect(() => {
-  if (!isCanvasReady || !perspective[currentRoom]?.[currentSide]) return;
+    useEffect(() => {
+        // --- 워커(Worker)란? ---
+        // 워커는 메인 스레드와 별개로 동작하는 백그라운드 스레드입니다.
+        // 무거운 이미지 리사이징 작업을 워커에서 처리하여
+        // UI가 버벅이지 않고 부드럽게 동작하도록 도와줍니다.
+        //
+        // 이 useEffect는 캔버스와 시점 정보가 준비되면
+        // 벽에 필요한 이미지들을 찾아 워커를 통해 리사이징하고,
+        // Blob URL로 캐싱하여 렌더링에 사용합니다.
+        
+        if (!isCanvasReady || !perspective[currentRoom]?.[currentSide]) return;
 
-  setAreWallImagesReady(false);
+        setAreWallImagesReady(false);
 
-  const walls = perspective[currentRoom][currentSide];
-  const imageNames = Object.values(walls).map(w => w.imageName).filter(Boolean);
+        const walls = perspective[currentRoom][currentSide];
+        const imageNames = Object.values(walls).map(w => w.imageName).filter(Boolean);
 
-  (async () => {
-    for (const name of imageNames) {
-      const file = imgs.find(f => f.name === name);
-      if (!file) continue;
-      const cacheKey = `${name}_${file.lastModified}`;
-      if (!urlCache.current[cacheKey]) {
-        const resizedFile = await resizeImage(file, 500);
-        const resizedUrl = URL.createObjectURL(resizedFile);
-        urlCache.current[cacheKey] = resizedUrl;
-      }
-    }
+        (async () => {
+            for (const name of imageNames) {
+            const file = imgs.find(f => f.name === name);
+            if (!file) continue;
+            const cacheKey = `${name}_${file.lastModified}`;
+            if (!urlCache.current[cacheKey]) {
+                // 워커에게 이미지 리사이징 요청 (비동기)
+                const resizedFile = await resizeImage(file, 500);
+                // 리사이징된 이미지를 브라우저 메모리 URL로 생성하여 캐시에 저장
+                const resizedUrl = URL.createObjectURL(resizedFile);
+                urlCache.current[cacheKey] = resizedUrl;
+            }
+            }
 
-    // 새 객체로 복사해서 상태 업데이트
-    setImageUrls({ ...urlCache.current });
-    setAreWallImagesReady(true);
-  })();
+            setImageUrls({ ...urlCache.current });
+            setAreWallImagesReady(true);
+        })();
 
-  // 디버그 로그는 필요시 유지
-  console.log("img list", imgs.map(f => [f.name, f.size]));
-  console.log("wall imageNames", imageNames);
-  console.log("cached URLs", urlCache.current);
+        // console.log("img list", imgs.map(f => [f.name, f.size]));
+        // console.log("wall imageNames", imageNames);
+        // console.log("cached URLs", urlCache.current);
 
-}, [imgs, perspective, currentRoom, currentSide, isCanvasReady]);
+    }, [imgs, perspective, currentRoom, currentSide, isCanvasReady]);
 
-
-    const getImageUrlByName = (imageName) => {
-        if (!imageName) return '';
-        return urlCache.current[imageName] || '';
-    };
-        // 페이지 unload 시 메모리 정리
-        useEffect(() => {
+    useEffect(() => {
+        // 페이지가 닫히거나 컴포넌트가 언마운트 될 때
+        // Blob URL을 해제하여 메모리 누수 방지
         return () => {
             Object.values(urlCache.current).forEach(url => URL.revokeObjectURL(url));
         };
     }, []);
 
+
     return (
         <div className='PlayPage_wrap'>
-            <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div>
+            {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
 
             <div className='playgame_wrap'>
                 <div className='playgame_header'>
