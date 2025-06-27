@@ -416,7 +416,7 @@ function EditorPage() {
 
                             {activeWall === 'center' && (
                                 <div className='wall_center_ft'>
-                                    <p>* 공사중 *</p>
+                                    <p>* 개발중 *</p>
                                 </div>
                             )}
 
@@ -696,19 +696,19 @@ function EditorPage() {
 
                                     {selectedTool === 'timer' && (
                                         <div className='timer_fine_tuning'>
-                                            <h2 style={{textAlign: "center"}}>* 타이머 공사중 *</h2>
+                                            <h2 style={{textAlign: "center"}}>* 타이머 개발중 *</h2>
                                         </div>
                                     )}
 
                                     {selectedTool === 'hint' && (
                                         <div className='hint_fine_tuning'>
-                                            <h2 style={{textAlign: "center"}}>* 힌트 공사중 *</h2>
+                                            <h2 style={{textAlign: "center"}}>* 힌트 개발중 *</h2>
                                         </div>
                                     )}
                                     
                                     {selectedTool === 'event' && (
                                         <div className='event_fine_tuning'>
-                                            <h2 style={{textAlign: "center"}}>* 이벤트 공사중 *</h2>
+                                            <h2 style={{textAlign: "center"}}>* 이벤트 개발중 *</h2>
                                         </div>
                                     )}
                                 </>

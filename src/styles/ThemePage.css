@@ -727,10 +727,6 @@
     .ranking_container #ranker_1_100>li, .ranking_container #ranker_1_100>.rank-scroll>ul>li{ height: 32px; }
 
     .ranking_container #ranker_1_100 { height : 280px; }
-
-    .rank-scroll {
-
-    }
     
     .theme_hit { gap : 0%; margin-right : 2%; margin-left : 2%; }
     .theme_door_hit1 ,.theme_door_hit2 ,.theme_door_hit3 {width: 300px; height : 460px; position:relative;}
