@@ -1,3 +1,8 @@
+
+
+// 에디터 전체 레이아웃, UI 및 에디터 최상위 컴포넌트 (하위 컴포넌트: Editor, EditObjOption 등 )
+
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 

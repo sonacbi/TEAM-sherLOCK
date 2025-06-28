@@ -1,3 +1,8 @@
+
+
+// 에디터 캔버스(에디터 편집 기능 및 객체 생성, 추가, 수정, 삭제) 및 Stage 컴포넌트
+
+
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import * as fabric from 'fabric';
 import debounce from 'lodash/debounce';

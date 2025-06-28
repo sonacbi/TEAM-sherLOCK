@@ -1,3 +1,8 @@
+
+
+// 객체 속성 편집 컴포넌트
+
+
 import React, { useEffect, useState } from "react";
 import * as fabric from 'fabric';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';

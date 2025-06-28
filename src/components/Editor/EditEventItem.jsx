@@ -1,3 +1,8 @@
+
+
+// 객체 이벤트 속성 편집 컴포넌트
+
+
 import { useState } from 'react';
 import './EditEventItem.css';
 
