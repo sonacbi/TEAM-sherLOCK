@@ -107,7 +107,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
         setOptionStyle(foundFabric);
         
         let value = event.target.value;
-        const numberOptions = ['strokeWidth', 'fontSize'];
+        const numberOptions = ['scaleX', 'scaleY', 'left', 'top', 'strokeWidth', 'fontSize'];
         if(numberOptions.includes(option)) value = Number(value);
 
         switch (option) {
@@ -137,6 +137,22 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 })
                 setOptionStyle(prev => ({...prev, name: value}));
                 foundFabric.name = value;
+                break;
+            case 'scaleX':
+                foundFabric.scaleX = value;
+                setOptionStyle(prev => ({...prev, scaleX: value}));
+                break;
+            case 'scaleY':
+                foundFabric.scaleY = value;
+                setOptionStyle(prev => ({...prev, scaleY: value}));
+                break;
+            case 'left':
+                foundFabric.left = value;
+                setOptionStyle(prev => ({...prev, left: value}));
+                break;
+            case 'top':
+                foundFabric.top = value;
+                setOptionStyle(prev => ({...prev, top: value}));
                 break;
             case 'fill':
                 foundFabric.fill = value;
@@ -354,6 +370,13 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                             <div className="object_name">
                                 <h4>이름 : </h4>
                                 <input type="text" value={optionStyle.name || ''} onChange={e => editOption(e, "name")}/>
+                            </div>
+
+                            <div>
+                                <div><input type="number" step={0.001} value={Number(optionStyle.scaleX)} onChange={e => editOption(e, "scaleX")}/></div>
+                                <div><input type="number" step={0.001} value={Number(optionStyle.scaleY)} onChange={e => editOption(e, "scaleY")}/></div>
+                                <div><input type="number" value={Number(optionStyle.left)} onChange={e => editOption(e, "left")}/></div>
+                                <div><input type="number" value={Number(optionStyle.top)} onChange={e => editOption(e, "top")}/></div>
                             </div>
 
                             <div className="object_color_line">
