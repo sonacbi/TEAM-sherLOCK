@@ -6,7 +6,7 @@ const handleSide = (canvas) => {
     const updatedFabric = [];
 
     canvas._objects.forEach((data) => {
-        if (data.name == 'SherLockRoomController' || data.name == 'SherLockRoomFrame') return; // 프레임은 저장 안 됨
+        if (data?.name == 'SherLockRoomController' || data?.name == 'SherLockRoomFrame') return; // 프레임은 저장 안 됨
         updatedFabric.push(
             new Fabric({
                 name: data?.name,
@@ -16,8 +16,8 @@ const handleSide = (canvas) => {
                     width: Number(data?.width.toFixed(2)),
                     height: Number(data?.height.toFixed(2)),
                     angle: Number(data?.angle.toFixed(2)),
-                    scaleX: Number(data?.scaleX.toFixed(2)),
-                    scaleY: Number(data?.scaleY.toFixed(2)),
+                    scaleX: Number(Number(data?.scaleX ?? 1).toFixed(3)),
+                    scaleY: Number(Number(data?.scaleY ?? 1).toFixed(3)),
                     originX: data?.originX,
                     originY: data?.originY,
                     radius: data?.radius,
@@ -277,17 +277,20 @@ const loadGame = async (game, setCurrentRoom, handleCurrentSide, setSideImgSrcs)
     // let roomIndex = 0;
     // setInterval(() => {
     //     setCurrentRoom(roomIndex);
-    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
-    //     game.room[roomIndex].side.forEach((sideData, sideIndex) => {
-    //         handleCurrentSide(sideIndex, sideData);
-    //     })
+    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, []]);
+    //     // game.room[roomIndex].side.forEach((sideData, sideIndex) => {
+    //     //     handleCurrentSide(roomIndex, sideIndex, sideData);
+    //     // })
     //     if (roomIndex < game.room.length) roomIndex++;
     //     else return;
     // }, 1000)
+    game.room.forEach((_, index) => {
+        if (index > 0) setSideImgSrcs(prev => [...prev, []]);
+    })
     console.log('loadGame 공사 중...🛠️')
 }
 
-const loadGameZip = async (file, setGame, setImgs, setIsReadyToLoad) => {
+const loadGameZip = async (file, setGame, setImgs, setNamedFabrics, setIsReadyToLoad) => {
     if (file && file.name.endsWith('.zip')) {
         const zip = await JSZip.loadAsync(file);
         let gameData;
@@ -314,6 +317,7 @@ const loadGameZip = async (file, setGame, setImgs, setIsReadyToLoad) => {
     
         setGame(gameData);
         setImgs(imgFiles);
+        setNamedFabrics(gameData.namedFabrics);
         setIsReadyToLoad(true);
     } else {
         console.warn(`${file.name} 이 파일은 존재하지 않거나 zip 파일이 아닙니다`);

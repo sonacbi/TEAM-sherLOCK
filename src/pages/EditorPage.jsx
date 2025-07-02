@@ -154,6 +154,7 @@ function EditorPage() {
         if (!file || !file.type.startsWith('image/')) return;
 
         setImgs(prev => {
+            // const isDuplicate = prev.find(f => 
             const isDuplicate = prev.some(f => 
                 f.name === file.name &&
                 f.size === file.size &&
@@ -218,8 +219,8 @@ function EditorPage() {
     };
 
     const removeFrame = () => {
-        const target1 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
-        const target2 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController')
+        const target1 = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomFrame');
+        const target2 = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController')
         if (target1) canvasInstance.current.remove(target1);
         if (target2) canvasInstance.current.remove(target2);
         game.room[currentRoom].side[currentSide].frame = null;
@@ -265,8 +266,8 @@ function EditorPage() {
     };
 
     const EdgeFramePage = () => {
-        const roomController = canvasInstance.current?.getObjects().find(obj => obj.name === 'SherLockRoomController'); 
-        const edge = game.room[currentRoom].side[currentSide]?.frame?.edge;
+        const roomController = canvasInstance.current?.getObjects().find(obj => obj?.name === 'SherLockRoomController'); 
+        const edge = game.room[currentRoom]?.side[currentSide]?.frame?.edge;
         const [tempEdges, setTempEdges] = useState(() => edge ? [...edge] : [120, 220, 220, 110]);
         const [inputEdges, setInputEdges] = useState(() => edge ? edge.map(v => v.toString()) : ["120", "220", "220", "110"]);
 

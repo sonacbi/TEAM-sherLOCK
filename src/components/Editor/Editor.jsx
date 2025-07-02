@@ -326,7 +326,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         const canvas = canvasInstance.current;
         if (!canvas) return;
         
-        const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+        const target = canvas.getObjects().find(obj => obj?.name === 'SherLockRoomFrame');
         if (target) canvas.remove(target);
         
         const roomFrame = createRoomFrame(
@@ -334,7 +334,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         );
 
         canvas.add(roomFrame);
-        if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
+        if (!canvas.getObjects().find(obj => obj?.name === 'SherLockRoomController')) {
             const roomController = new fabric.Rect({
                 ...controlStyle,
                 fill: 'rgba(255, 0, 0, 0.2)',
@@ -359,12 +359,12 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             canvas.sendObjectToBack(roomController);
         }
 
-        const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        const roomController = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController');
         const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
 
         // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
         if (!currentWalls['front']?.imageUrl) {
-            const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
+            const frontWall = roomFrame.getObjects?.().find(obj => obj?.wallType === 'front');
                 if (frontWall) {
                 // roomController도 보이게 설정
                 roomController.set({
@@ -577,7 +577,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         setGame(prev => {
             const newData = new GamePnC(prev);
             newData.room[currentRoom].side[currentSide].fabric = updatedFabric;
-            const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+            const roomController = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController');
             if (roomController) {
                 const wallObj = perspectiveRef.current?.[currentRoom]?.[currentSide] ?? {}; // ✅ 조회용 필드 추가
                 const directions = ['front', 'top', 'left', 'right', 'bottom']; // ✅ 조회용 필드 추가
@@ -620,7 +620,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
-        const roomController = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        const roomController = canvas.getObjects().find(obj => obj?.name === 'SherLockRoomController');
         if (!roomController) return;
 
         // 'frame' 선택일 때만 selectable 활성화
@@ -645,7 +645,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     }, [isReadyToLoad, game]);
     useEffect(() => {
         if (isReady && gameZip) {
-            loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);
+            loadGameZip(gameZip, setGame, setImgs, setNamedFabrics, setIsReadyToLoad);
         }
     }, [gameZip]);
     // 이미지 추가 ---------------------------------------------------(section 11)
@@ -862,7 +862,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                                                         onClick={() => handleCurrentSide(roomIndex, sideIndex, sideData)}
                                                         style={{ position: 'relative', zIndex: 2 }}
                                                     >
-                                                        {sideImgSrcs[roomIndex][sideIndex] && (
+                                                        {sideImgSrcs[roomIndex]?.[sideIndex] && (
                                                         <img src={sideImgSrcs[roomIndex][sideIndex]} width={90} height={55} />
                                                         )}
                                                         <button
