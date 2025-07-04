@@ -78,7 +78,6 @@ function PlayPage() {
                     foundObj.set({
                         opacity: 1, visible: true,
                     });
-                    canvas.renderAll();
                 }
                 break;
             case "hideObj":
@@ -96,7 +95,6 @@ function PlayPage() {
                     foundObj.set({
                         opacity: 0, visible: false,
                     });
-                    canvas.renderAll();
                 }
                 break;
             case "removeObj":
@@ -157,7 +155,6 @@ function PlayPage() {
                             if (newObj) {
                                 newObj.set({left, top})
                                 canvas.add(newObj);
-                                canvas.renderAll();
                             }
                         }
                     }
@@ -202,6 +199,7 @@ function PlayPage() {
         await Promise.all(promises).then(fabrics => {
             fabrics.forEach(data => {
                 data.selectable = false;
+                if (!data) console.warn('게임 데이터가 비정상적이거나, 데이터 읽기를 실패했습니다.');
                 if (data.gameEvent) {
                     data.on('mouseup', () => {
                         data.gameEvent.forEach((eventData, eventIndex) => {
@@ -212,7 +210,7 @@ function PlayPage() {
                 canvas.add(data);
             })
         })
-        canvas.renderAll();
+        canvas.requestRenderAll();
     }
 
     const makeFabric = async (opt) => {
@@ -279,24 +277,16 @@ function PlayPage() {
                             return resolve();
                         }
     
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            const imgElement = new Image();
-                            imgElement.src = e.target.result;
-                            imgElement.onload = () => {
-                                fabricObj = new fabric.Image(imgElement, baseProps);
-                                resolve(fabricObj);
-                            };
-                            imgElement.onerror = () => {
-                                console.error('이미지 로드 실패');
-                                resolve();
-                            };
+                        const imgElement = new Image();
+                        imgElement.src = URL.createObjectURL(foundImg);
+                        imgElement.onload = () => {
+                            fabricObj = new fabric.Image(imgElement, baseProps);
+                            resolve(fabricObj);
                         };
-                        reader.onerror = function () {
-                            console.error('파일 읽기 실패');
+                        imgElement.onerror = () => {
+                            console.error('fabric 이미지 로드 실패');
                             resolve();
                         };
-                        reader.readAsDataURL(foundImg);
                         break;
                     case "polygon":
                         switch (opt.shapeType) {

@@ -138,25 +138,17 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
                             return resolve(); // 계속 진행
                         }
 
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const imgElement = new Image();
-                            imgElement.src = e.target.result;
-                            imgElement.onload = () => {
-                                shape = new fabric.Image(imgElement, baseProps);
-                                resolve(shape);
-                            };
-                            imgElement.onerror = () => {
-                                console.error('이미지 로드 실패');
-                                resolve();
-                            };
+                        const imgElement = new Image();
+                        imgElement.src = URL.createObjectURL(foundImg);
+                        imgElement.onload = () => {
+                            shape = new fabric.Image(imgElement, baseProps);
+                            resolve(shape);
                         };
-                        reader.onerror = () => {
-                            console.error('파일 읽기 실패');
+                        imgElement.onerror = () => {
+                            console.error('fabric 이미지 로드 실패');
                             resolve();
                         };
-                        reader.readAsDataURL(foundImg);
-                        return; // 조기 리턴 (reader.onload 기다림)
+                        break;
                     }
 
                     case "polygon": {
@@ -260,7 +252,7 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
         })
     });
     canvas.discardActiveObject();
-    canvas.renderAll();
+    canvas.requestRenderAll();
 };
 
 const loadGame = async (game, setCurrentRoom, handleCurrentSide, setSideImgSrcs) => {

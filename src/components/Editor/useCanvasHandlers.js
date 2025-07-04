@@ -40,7 +40,7 @@ export const useDeleteKeyHandler = (canvasInstance, isReady, setImgs, game, setN
                         tryRemoveNamedFabric(activeObject);
                     }
                     canvas.discardActiveObject();
-                    canvas.renderAll();
+                    canvas.requestRenderAll();
                 }
             }
         };
@@ -67,7 +67,7 @@ export const useCanvasZoom = (canvasInstance, isReady) => {
             zoom = Math.min(Math.max(zoom, 0.5), 5);
 
             canvas.zoomToPoint({ x: e.offsetX, y: e.offsetY }, zoom);
-            canvas.renderAll();
+            canvas.requestRenderAll();
         };
 
         const upperCanvas = canvas.upperCanvasEl;

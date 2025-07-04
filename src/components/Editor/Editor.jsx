@@ -16,7 +16,7 @@ import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
 
 function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
-    const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics} = saveTool;
+    const {game, setGame, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
@@ -203,7 +203,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                 width: textbox.width * scaleX,
                 height: textbox.height * scaleY,
             });
-            canvas.renderAll();
+            canvas.requsetRenderAll();
         });
 
         setIsReady(true);
@@ -292,7 +292,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         textbox.setCoords();
         canvas.add(textbox);
         canvas.setActiveObject(textbox);
-        canvas.renderAll();
+        canvas.requestRenderAll();
 
         textbox.on('scaling', () => {
             const scaleX = textbox.scaleX;
@@ -304,7 +304,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                 width: textbox.width * scaleX,
                 height: textbox.height * scaleY,
             });
-            canvas.renderAll();
+            canvas.requestRenderAll();
         });
     };
     // ---------------------------------------------------------------(section 7)
@@ -318,7 +318,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
         canvas.add(shape);
         canvas.setActiveObject(shape);
-        canvas.renderAll();
+        canvas.requestRenderAll();
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
@@ -391,7 +391,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         // roomFrame을 캔버스 맨 뒤로 보내고 전체 다시 렌더링
         canvas.sendObjectToBack(roomFrame);
         
-        canvas.renderAll();
+        canvas.requestRenderAll();
 
         return () => { roomController.off('modified', handleModified); };
     };
@@ -634,7 +634,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             roomController.moveCursor = 'default';
         }
 
-        canvas.renderAll();
+        canvas.requestRenderAll();
     }, [selectedTool]);
 
     useEffect(() => {
@@ -696,7 +696,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
-                    canvasInstance.current.renderAll();
+                    canvasInstance.current.requestRenderAll();
 
                     // ✅ 여기서 비워주기
                     setAddImageFile(null);

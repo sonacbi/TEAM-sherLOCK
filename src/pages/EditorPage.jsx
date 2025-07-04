@@ -50,7 +50,6 @@ function EditorPage() {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [game, setGame] = useState(new GamePnC({}));
-    const [room, setRoom] = useState(new Room({}));
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const [sideImgSrcs, setSideImgSrcs] = useState([['']]);
@@ -729,7 +728,7 @@ function EditorPage() {
                         edgeFrameState={edgeFrameState}
                         editorOffset={editorOffset}
                         setEdgeFrameState={setEdgeFrameState}
-                        saveTool={{game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics}}
+                        saveTool={{game, setGame, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics}}
                         gameZip={gameZip} setGameZip={setGameZip}
                         selectedTool={selectedTool}
                         canvases={{canvasRef, canvasInstance}}
