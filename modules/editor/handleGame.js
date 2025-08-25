@@ -28,7 +28,7 @@ const handleSide = (canvas) => {
                     textBackgroundColor: data?.textBackgroundColor,
                     textLines: data?.textLines,
                     fontFamily: data?.fontFamily,
-                    fontSize: data?.fontSize,
+                    fontSize: (data?.type=="textbox") && Number(data?.fontSize.toFixed(2)),
                     fontStyle: data?.fontStyle,
                     fontWeight: data?.fontWeight,
                     underline: data?.underline,
