@@ -203,7 +203,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                 width: textbox.width * scaleX,
                 height: textbox.height * scaleY,
             });
-            canvas.requsetRenderAll();
+            canvas.requestRenderAll();
         });
 
         setIsReady(true);

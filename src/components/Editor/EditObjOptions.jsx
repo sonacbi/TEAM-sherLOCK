@@ -107,7 +107,7 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
         setOptionStyle(foundFabric);
         
         let value = event.target.value;
-        const numberOptions = ['scaleX', 'scaleY', 'left', 'top', 'strokeWidth', 'fontSize'];
+        const numberOptions = ['left', 'top', 'angle', 'width', 'height', 'scaleX', 'scaleY', 'strokeWidth', 'fontSize'];
         if(numberOptions.includes(option)) value = Number(value);
 
         switch (option) {
@@ -138,14 +138,6 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                 setOptionStyle(prev => ({...prev, name: value}));
                 foundFabric.name = value;
                 break;
-            case 'scaleX':
-                foundFabric.scaleX = value;
-                setOptionStyle(prev => ({...prev, scaleX: value}));
-                break;
-            case 'scaleY':
-                foundFabric.scaleY = value;
-                setOptionStyle(prev => ({...prev, scaleY: value}));
-                break;
             case 'left':
                 foundFabric.left = value;
                 setOptionStyle(prev => ({...prev, left: value}));
@@ -153,6 +145,26 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
             case 'top':
                 foundFabric.top = value;
                 setOptionStyle(prev => ({...prev, top: value}));
+                break;
+            case 'angle':
+                foundFabric.angle = value;
+                setOptionStyle(prev => ({...prev, angle: value}));
+                break;
+            case 'width':
+                foundFabric.width = value;
+                setOptionStyle(prev => ({...prev, width: value}));
+                break;
+            case 'height':
+                foundFabric.height = value;
+                setOptionStyle(prev => ({...prev, height: value}));
+                break;
+            case 'scaleX':
+                foundFabric.scaleX = value;
+                setOptionStyle(prev => ({...prev, scaleX: value}));
+                break;
+            case 'scaleY':
+                foundFabric.scaleY = value;
+                setOptionStyle(prev => ({...prev, scaleY: value}));
                 break;
             case 'fill':
                 foundFabric.fill = value;
@@ -373,10 +385,38 @@ export default function EditObjOptions({canvasInstance, selectedObject, selected
                             </div>
 
                             <div>
-                                <div><input type="number" step={0.001} value={Number(optionStyle.scaleX)} onChange={e => editOption(e, "scaleX")}/></div>
-                                <div><input type="number" step={0.001} value={Number(optionStyle.scaleY)} onChange={e => editOption(e, "scaleY")}/></div>
-                                <div><input type="number" value={Number(optionStyle.left)} onChange={e => editOption(e, "left")}/></div>
-                                <div><input type="number" value={Number(optionStyle.top)} onChange={e => editOption(e, "top")}/></div>
+                                <div className="object_position">
+                                    <div>
+                                        <h4>가로</h4>
+                                        <input type="number" value={Number(optionStyle.left)} onChange={e => editOption(e, "left")}/>
+                                    </div>
+                                    <div>
+                                        <h4>세로</h4>
+                                        <input type="number" value={Number(optionStyle.top)} onChange={e => editOption(e, "top")}/>
+                                    </div>
+                                    <div>
+                                        <h4>회전</h4>
+                                        <input type="number" value={Number(optionStyle.angle)} onChange={e => editOption(e, "angle")}/>
+                                    </div>
+                                </div>
+                                <div className="object_size">
+                                    <div>
+                                        <h4>너비</h4>
+                                        <input type="number" value={Number(optionStyle.width)} onChange={e => editOption(e, "width")}/>
+                                    </div>
+                                    <div>
+                                        <h4>높이</h4>
+                                        <input type="number" value={Number(optionStyle.height)} onChange={e => editOption(e, "height")}/>
+                                    </div>
+                                    <div>
+                                        <h4>scaleX</h4>
+                                        <input type="number" step={0.01} value={Number(optionStyle.scaleX)} onChange={e => editOption(e, "scaleX")}/>
+                                    </div>
+                                    <div>
+                                        <h4>scaleY</h4>
+                                        <input type="number" step={0.01} value={Number(optionStyle.scaleY)} onChange={e => editOption(e, "scaleY")}/>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="object_color_line">
