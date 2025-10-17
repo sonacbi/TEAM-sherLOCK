@@ -71,6 +71,7 @@
     align-items: center;
     border: 0.1rem solid rgb(68, 68, 68);
     padding-left: 3px;
+    margin-left: 50px;
 }
 
 #save_icon {

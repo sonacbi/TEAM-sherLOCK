@@ -1,18 +1,21 @@
 .Loading_wrap {
     position: absolute;
-    width: 100dvw;
-    height: 100dvh;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.838);
+    inset: 0;
+    background-color: rgba(0,0,0,0.8);
     z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* SherAI 전용 로딩 페이드 인 효과 */
+.sherai_loading {
+    opacity: 0;
+    animation: sheraiFadeIn 0.5s ease forwards;
 }
 
 .Loading_content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: static;
 }
 
 .Loading_line_lock {
@@ -65,5 +68,16 @@
     }
     100% {
         transform: translate(-50%, -45%);
+    }
+}
+
+@keyframes sheraiFadeIn {
+    from {
+        opacity: 0;
+        background-color: rgba(0, 0, 0, 0);
+    }
+    to {
+        opacity: 1;
+        background-color: rgba(0, 0, 0);
     }
 }

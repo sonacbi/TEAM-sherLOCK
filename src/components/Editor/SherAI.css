@@ -1,0 +1,259 @@
+.sher_ai_button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 50px;
+    cursor: pointer;
+    border: 0.1rem solid rgb(68, 68, 68);
+    background: linear-gradient(135deg, #000000, #828282);
+}
+
+.sher_ai_button:hover {
+    opacity: 0.7;
+}
+
+#sher_ai_img {
+    height: 25px;   
+}
+
+.sher_ai_button > p {
+    color: white;
+    font-family: 'Gugi', sans-serif;
+}
+
+.sher_ai_wrap {
+    position: fixed; /* 화면 전체 기준으로 고정 */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); /* 어두운 배경 */
+    display: flex;
+    justify-content: center; /* 가로 중앙 */
+    align-items: center; /* 세로 중앙 */
+    z-index: 1000; /* 다른 요소 위로 */
+}
+
+.sher_ai_content {
+    position: relative;
+    background: #222222;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    border-radius: 50px;
+    overflow: hidden;
+    width: 1100px;
+    height: 630px;
+    border: 0.1rem solid rgb(68, 68, 68);
+}
+
+#sher_ai_background {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.sher_ai_prompt {
+    width: 100%;
+    height: 100%;
+    color: white;
+    position: relative;
+    display: flex;
+}
+
+.sher_ai_prompt > .explanation_wrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 20px;
+}
+
+.explanation_content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.explanation_sherai {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.explanation_sherai > img {
+    width: 60px;
+}
+
+.explanation_sherai > h1 {
+    font-family: 'Gugi', sans-serif;
+    font-size: 40px;
+    padding-top: 5px;
+    text-transform: uppercase;
+    background: linear-gradient(
+        to right,
+        #444 0%,
+        #fff 25%,
+        #888 50%,
+        #fff 75%,
+        #444 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 300% auto;
+    animation: shine 5s linear infinite;
+}
+
+.explanation_text > p {
+    font-size: 15px;
+}
+
+.sher_ai_prompt > .prompt {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: end;
+}
+
+.prompt_exit {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    padding: 10px;
+    border-radius: 50px;
+    background-color: #2e2e2e;
+    height: 40px;
+    cursor: pointer;
+}
+
+.disabled_exit {
+    opacity: 0.3;
+    pointer-events: none; /* hover 효과 완전 차단 */
+}
+
+.prompt_exit:hover {
+    opacity: 0.7;
+}
+
+#prompt_X {
+    width: 20px;
+    opacity: 0.3;
+}
+
+.prompt_content {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+    gap: 50px;
+}
+
+.prompt_content > h1 {
+    padding: 0 40px;
+}
+
+.prompt_inputbox {
+    position: relative;
+    width: 500px;
+    height: 300px;
+    background-color: white;
+    border-radius: 40px;
+    display: flex;
+}
+
+.prompt_inputbox > .Loading_wrap {
+    background-color: black;
+    border-radius: 35px;
+}
+
+.prompt_button {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.prompt_button > h2 {
+    background-color: #2e2e2e;
+    width: fit-content;
+    padding: 10px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.prompt_button > p {
+    position: absolute;
+    top: 16px;
+    background-color: #2e2e2e;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.prompt_button > h2:hover, .prompt_button > p:hover {
+    opacity: 0.8;
+}
+
+.prompt_input {
+    flex: 5;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 25px;
+    padding-left: 5px;
+}
+
+.prompt_input > textarea {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    border: 0;
+    font-size: 17px;
+    font-family: sans-serif;
+    resize: none;
+}
+
+.prompt_input > textarea::placeholder {
+    font-size: 17px;
+    color: rgb(179, 179, 179);
+}
+
+.prompt_input > textarea:focus {
+    outline: none;
+}
+
+.prompt_input > textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.prompt_input > textarea::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+}
+
+.prompt_input > textarea::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.4);
+    border-radius: 4px;
+}
+
+@keyframes shine {
+    0% {
+        background-position: 0% center;
+    }
+    100% {
+        background-position: 300% center;
+    }
+}
+
+@font-face {
+  font-family: 'Gugi';
+  src: url('../../assets/fonts/Gugi/Gugi-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

@@ -4,6 +4,8 @@ import { GameInfo } from "../../../modules/game-modules";
 
 import save_icon from '../../assets/images/EditorPage_img/save_icon.png';
 
+import SherAI from './SherAI';
+
 export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, imgs}) {
     function saveFilesToLocal() {
         const zip = new JSZip();
@@ -65,6 +67,7 @@ export default function SaveToServer({game, gameInfo, setGameInfo, thumbnail, im
     
     return(
         <div className='save_submit'>
+            <SherAI />
             <p className='save_button' title='저장하기' onClick={saveFilesToLocal}>
                 <img id='save_icon' src={save_icon} alt='save_icon' />
             </p>
