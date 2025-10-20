@@ -614,7 +614,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         setTimeout(() => {
             saveCanvasToSide();
         }, 1);
-    }, 300);
+    }, 50);
 
     useEffect(() => {
         const canvas = canvasInstance.current;
@@ -639,8 +639,9 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
     useEffect(() => {
         if (isReadyToLoad && game) {
-            loadGame(game, setCurrentRoom, handleCurrentSide, setSideImgSrcs);
+            loadGame(game, handleCurrentSide, sideImgSrcs, setSideImgSrcs);
             setIsReadyToLoad(false);
+            console.log('game\n', game)
         }
     }, [isReadyToLoad, game]);
     useEffect(() => {
@@ -648,6 +649,9 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             loadGameZip(gameZip, setGame, setImgs, setNamedFabrics, setIsReadyToLoad);
         }
     }, [gameZip]);
+    useEffect(()=> {
+        console.log('sideImgSrcs', sideImgSrcs);
+    }, [sideImgSrcs])
     // 이미지 추가 ---------------------------------------------------(section 11)
     useEffect(() => {
         if (isReady && addImageFile) {

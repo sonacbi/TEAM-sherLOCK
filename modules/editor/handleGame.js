@@ -255,31 +255,27 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
     canvas.requestRenderAll();
 };
 
-const loadGame = async (game, setCurrentRoom, handleCurrentSide, setSideImgSrcs) => {
-    // game.room.forEach((roomData, roomIndex) => {
-    //     setCurrentRoom(roomIndex);
-    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
-    //     roomData.side.forEach((sideData, sideIndex) => {
-    //         handleCurrentSide(sideIndex, sideData)
-    //     })
-    // })
-    // setCurrentRoom(0);
-    // handleCurrentSide(0, game.room[0].side[0]);
+const loadGame = async (game, handleCurrentSide, sideImgSrcs, setSideImgSrcs) => {
+    // loadGame 공사 중...🛠️
 
-    // let roomIndex = 0;
-    // setInterval(() => {
-    //     setCurrentRoom(roomIndex);
-    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, []]);
-    //     // game.room[roomIndex].side.forEach((sideData, sideIndex) => {
-    //     //     handleCurrentSide(roomIndex, sideIndex, sideData);
-    //     // })
-    //     if (roomIndex < game.room.length) roomIndex++;
-    //     else return;
-    // }, 1000)
+    // sideImgSrcs 고장 안 나게 side(=stage) 추가하는 코드
     game.room.forEach((_, index) => {
         if (index > 0) setSideImgSrcs(prev => [...prev, []]);
     })
-    console.log('loadGame 공사 중...🛠️')
+
+    // 화면에 띄우고 다음 화면 띄우기만 하는 코드
+    // sideImgSrcs에 저장하는 코드는 Editor.jsx 파일의 saveCanvasToSide 함수에 있음
+    for (const [roomIndex, roomData] of game.room.entries()) {
+        for (const [sideIndex, sideData] of roomData.side.entries()) {
+            handleCurrentSide(roomIndex, sideIndex, sideData);
+            // await waitForImageData(() => sideImgSrcs, roomIndex, sideIndex);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            // await new Promise(resolve => {
+            //     handleCurrentSide(roomIndex, sideIndex, sideData, resolve);
+            // });
+        }
+    }
+    handleCurrentSide(0, 0, game.room[0].side[0]);
 }
 
 const loadGameZip = async (file, setGame, setImgs, setNamedFabrics, setIsReadyToLoad) => {
