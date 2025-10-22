@@ -61,7 +61,7 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
 
     if (side.frame) {
         const { x, y, width, height, edge } = side.frame;
-        addFrame(x, y, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef);
+        addFrame(canvas, x, y, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef);
     }
 
     const promises = side.fabric.map((fabricData) => {
@@ -268,11 +268,7 @@ const loadGame = async (game, handleCurrentSide, sideImgSrcs, setSideImgSrcs) =>
     for (const [roomIndex, roomData] of game.room.entries()) {
         for (const [sideIndex, sideData] of roomData.side.entries()) {
             handleCurrentSide(roomIndex, sideIndex, sideData);
-            // await waitForImageData(() => sideImgSrcs, roomIndex, sideIndex);
             await new Promise(resolve => setTimeout(resolve, 400));
-            // await new Promise(resolve => {
-            //     handleCurrentSide(roomIndex, sideIndex, sideData, resolve);
-            // });
         }
     }
     handleCurrentSide(0, 0, game.room[0].side[0]);

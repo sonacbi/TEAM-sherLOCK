@@ -7,6 +7,7 @@ import ThemePage from './pages/ThemePage';
 import Workspace from './pages/Workspace';
 import PlayPage from './pages/PlayPage';
 import EditorPage from './pages/EditorPage';
+import Temp from './pages/Temp';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path='/Theme/workspace' element={<Workspace/>} />
         <Route path='/Theme/Editor' element={<EditorPage/>} />
         <Route path='/Theme/:theme/Play/:id' element={<PlayPage/>} />
+        <Route path="/temp" element={<Temp></Temp>} />
       </Routes>
     </Router>
   );
