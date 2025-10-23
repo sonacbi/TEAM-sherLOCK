@@ -9,7 +9,7 @@ import sher_ai_background from '../../assets/images/EditorPage_img/sher_ai_backg
 import explanation_sherai_img from '../../assets/images/EditorPage_img/explanation_sherai_img.png';
 import prompt_X from '../../assets/images/Sign/X.png';
 
-function SherAI() {
+function SherAI({setGameZip}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,6 +25,14 @@ function SherAI() {
   const [prompt, setPrompt] = useState('');
   const [loadingMessage, setLoadingMessage] = useState('프롬프트 분석 중...');
 
+  const messages = [
+    { progress : 'analyzing', text: '프롬프트 분석 중...', duration: 3000 },
+    { progress : 'designing', text: '스토리 구조 설계 중...', duration: 6000 },
+    { progress : 'creating', text: '스테이지 생성 중...', duration: 12000 },
+    { progress : 'checking', text: '점검 중...', duration: 3000 },
+    { progress : 'completing', text: '곧 생성이 완료됩니다.', duration: 4000 },
+  ];
+
   const handleExampleClick = () => {
     const nextIndex = (exampleIndex + 1) % examples.length;
     setExampleIndex(nextIndex);
@@ -32,31 +40,41 @@ function SherAI() {
   };
 
   const handleGenerate = () => {
+    const time = messages.reduce((sum, msg)=>sum+msg.duration, 0)
+    console.log('time',time)
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
       setIsOpen(false);
       setPrompt('');
       setExampleIndex(0);
-    }, 25000); // 25초 뒤 로딩 종료 (테스트용)
+    }, time); // 25초 뒤 로딩 종료 (테스트용)
   };
+
+  const getAIGame = async() => {
+    await fetch(`http://localhost:4000/ai_game?prompt=${prompt}`)
+    .then(res => res.blob())
+    .then(blob => {
+        const file = new File([blob], "game.zip", { type: "application/zip" });
+        setGameZip(file); // loadGameZip에서 처리
+    })
+    .catch(error => {
+        console.error('게임 파일 불러오는 중 오류 발생', error);
+    });
+  }
 
   useEffect(() => {
     if (isLoading) {
-      const messages = [
-        { text: '프롬프트 분석 중...', duration: 3000 },
-        { text: '스토리 구조 설계 중...', duration: 5000 },
-        { text: '스테이지 생성 중...', duration: 10000 },
-        { text: '점검 중...', duration: 3000 },
-        { text: '곧 생성이 완료됩니다.', duration: 4000 },
-      ];
-
       let index = 0;
       setLoadingMessage(messages[index].text);
 
       const changeMessage = () => {
         index++;
         if (index < messages.length) {
+          if (messages[index].progress === 'creating') {
+            // setGameZip()
+            getAIGame();
+          }
           setLoadingMessage(messages[index].text);
           setTimeout(changeMessage, messages[index].duration);
         }

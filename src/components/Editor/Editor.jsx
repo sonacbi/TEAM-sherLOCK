@@ -33,7 +33,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     const [openedRooms, setOpenedRooms] = useState([0]);
     // 미리보기 캡쳐용 3개
     const [isReadyToShow, setIsReadyToShow] = useState(false);
-    const [tempCanvasArr, setTempCanvasArr] = useState(Array.from({ length: 5 }, () => null));
+    const [tempCanvasArr, setTempCanvasArr] = useState(Array.from({ length: 3 }, () => null));
     const [remainingScenes, setRemainingScenes] = useState([]);
 
     const currentRoomRef = useRef(currentRoom);
@@ -613,7 +613,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             const newData = [ ...prev ];
             newData[currentRoom][currentSide] = canvasRef.current.toDataURL({
                 format: 'jpeg',
-                quality: 0.1,
+                quality: 0.4,
             });
             return newData;
         });
@@ -703,9 +703,9 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             loadGameZip(gameZip, setGame, setImgs, setNamedFabrics, setIsReadyToLoad);
         }
     }, [gameZip]);
-    useEffect(()=> {
-        console.log('sideImgSrcs', sideImgSrcs);
-    }, [sideImgSrcs])
+    // useEffect(()=> {
+    //     console.log('sideImgSrcs', sideImgSrcs);
+    // }, [sideImgSrcs])
     // 이미지 추가 ---------------------------------------------------(section 11)
     useEffect(() => {
         if (isReady && addImageFile) {

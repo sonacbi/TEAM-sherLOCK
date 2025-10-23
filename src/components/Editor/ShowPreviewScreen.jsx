@@ -178,13 +178,13 @@ function ShowPreviewScreen ({canvas, canvasData, canvasIndex, remainingScenes, i
         tempCanvas.current.requestRenderAll();
         
         // 충분한 대기 시간
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 400));
 
         if (!tempCanvas.current) return;
 
         const dataURL = tempCanvas.current.toDataURL({
             format: 'jpeg',
-            quality: 0.8,
+            quality: 0.4,
         });
 
         setSideImgSrcs(prev => {

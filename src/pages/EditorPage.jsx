@@ -541,7 +541,7 @@ function EditorPage() {
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
 
-                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
+                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
@@ -549,7 +549,7 @@ function EditorPage() {
                         <label>제목: {gameInfo?.title ?? '???'}</label>
                     </div>
 
-                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} imgs={imgs}/>
+                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} setGameZip={setGameZip} thumbnail={thumbnail} imgs={imgs}/>
                 </header>
 
                 <div className='Editor_content'>
