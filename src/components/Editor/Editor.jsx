@@ -19,9 +19,10 @@ import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
+import ShowPreviewScreen from './ShowPreviewScreen';
 
 function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
-    const {game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics} = saveTool;
+    const {game, setGame, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
     const [angle, setAngle] = useState(0);
@@ -30,6 +31,10 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     const isDragging = useRef(false); // React 훅에서 드래그 상태 저장용 useRef
     const [isReadyToLoad, setIsReadyToLoad] = useState(false);
     const [openedRooms, setOpenedRooms] = useState([0]);
+    // 미리보기 캡쳐용 3개
+    const [isReadyToShow, setIsReadyToShow] = useState(false);
+    const [tempCanvasArr, setTempCanvasArr] = useState(Array.from({ length: 5 }, () => null));
+    const [remainingScenes, setRemainingScenes] = useState([]);
 
     const currentRoomRef = useRef(currentRoom);
     const currentSideRef = useRef(currentSide);
@@ -62,65 +67,65 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     const [isPerspectiveRender, setIsPerspectiveRender] = useState(true);
     useEffect(() => { // selectedSide가 null이 아니고, currentRoom과 매칭되면만 렌더링 ON
         if (selectedSide && selectedSide.roomIndex === currentRoom) { setIsPerspectiveRender(true);
-        } else { setIsPerspectiveRender(false); } }, [selectedSide, currentRoom]
-    );
+        } else { setIsPerspectiveRender(false); }
+    }, [selectedSide, currentRoom]);
 
     // perspectiveWalls를 벽 객체 배열로 관리
     const perspectiveWalls = React.useMemo(() => {
-    if (!perspective) return [];
+        if (!perspective) return [];
 
-    const wall_room = String(currentRoomRef.current);
-    const wall_side = String(currentSideRef.current);
+        const wall_room = String(currentRoomRef.current);
+        const wall_side = String(currentSideRef.current);
 
-    // perspective 구조:
-    // {
-    //   [roomId]: {
-    //     [sideId]: {
-    //       [wallType]: { imageUrl, vertices, ... }
-    //     }
-    //   }
-    // }
+        // perspective 구조:
+        // {
+        //   [roomId]: {
+        //     [sideId]: {
+        //       [wallType]: { imageUrl, vertices, ... }
+        //     }
+        //   }
+        // }
 
-    // perspective에 있는 방 개수 혹은 현재 방 번호+1 중 큰 값으로 방 개수 고정
-    const totalRooms = Math.max(Object.keys(perspective).length, Number(wall_room) + 1);
+        // perspective에 있는 방 개수 혹은 현재 방 번호+1 중 큰 값으로 방 개수 고정
+        const totalRooms = Math.max(Object.keys(perspective).length, Number(wall_room) + 1);
 
-    const result = [];
+        const result = [];
 
-    for (let i = 0; i < totalRooms; i++) {
-        const roomId = String(i);
-        const sides = perspective[roomId] || {}; // 데이터가 없으면 빈 객체
+        for (let i = 0; i < totalRooms; i++) {
+            const roomId = String(i);
+            const sides = perspective[roomId] || {}; // 데이터가 없으면 빈 객체
 
-        // 현재 방이라도 모든 side를 포함하도록 수정
-        const filteredSides = {};
+            // 현재 방이라도 모든 side를 포함하도록 수정
+            const filteredSides = {};
 
-        Object.entries(sides).forEach(([sideId, walls]) => {
-        // 모든 side를 넣음
-        filteredSides[sideId] = { ...walls };
-        });
+            Object.entries(sides).forEach(([sideId, walls]) => {
+            // 모든 side를 넣음
+            filteredSides[sideId] = { ...walls };
+            });
 
-        // side가 아예 없으면 기본값으로 side_0 빈 객체 삽입
-        if (Object.keys(filteredSides).length === 0) {
-        filteredSides['0'] = {};
+            // side가 아예 없으면 기본값으로 side_0 빈 객체 삽입
+            if (Object.keys(filteredSides).length === 0) {
+            filteredSides['0'] = {};
+            }
+
+            // 각 room 객체는 다음과 같은 형태로 리턴됨:
+            // {
+            //   currentRoom: "0",
+            //   0: { front: {...}, top: {...}, ... },
+            //   1: { ... },
+            //   ...
+            // }
+            result.push({
+            currentRoom: roomId,
+            ...filteredSides,
+            });
         }
 
-        // 각 room 객체는 다음과 같은 형태로 리턴됨:
-        // {
-        //   currentRoom: "0",
-        //   0: { front: {...}, top: {...}, ... },
-        //   1: { ... },
-        //   ...
+        // if (process.env.NODE_ENV === 'development' && hoveredWall) {
+            // console.log('[useMemo] items:', result);
         // }
-        result.push({
-        currentRoom: roomId,
-        ...filteredSides,
-        });
-    }
 
-    // if (process.env.NODE_ENV === 'development' && hoveredWall) {
-        // console.log('[useMemo] items:', result);
-    // }
-
-    return result;
+        return result;
     }, [perspective]);
 
     // -------------------------------------------------------------- (section 1) (정다정)
@@ -208,7 +213,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                 width: textbox.width * scaleX,
                 height: textbox.height * scaleY,
             });
-            canvas.renderAll();
+            canvas.requestRenderAll();
         });
 
         setIsReady(true);
@@ -247,13 +252,13 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         if (!isReady) return;
         switch (addFrameTrigger.type) {
             case 'basic':
-                addFrame(280, 80, 500, 360, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
+                addFrame(canvasInstance.current, 280, 80, 500, 360, [170, 240, 240, 150], currentRoomRef, currentSideRef, perspectiveRef);
                 break;
             case 'edge':
-                addFrame(530, -10, 640, 120+300, [170, 225, 240, 120], currentRoomRef, currentSideRef, perspectiveRef);
+                addFrame(canvasInstance.current, 530, -10, 640, 120+300, [170, 225, 240, 120], currentRoomRef, currentSideRef, perspectiveRef);
                 break;
             case 'corridor':
-                addFrame(450, 50, 130, 180, [330, 225, 225, 110], currentRoomRef, currentSideRef, perspectiveRef);                
+                addFrame(canvasInstance.current, 450, 50, 130, 180, [330, 225, 225, 110], currentRoomRef, currentSideRef, perspectiveRef);                
                 break;
             default:
                 console.warn('존재하지 않는 형식입니다');
@@ -297,7 +302,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         textbox.setCoords();
         canvas.add(textbox);
         canvas.setActiveObject(textbox);
-        canvas.renderAll();
+        canvas.requestRenderAll();
 
         textbox.on('scaling', () => {
             const scaleX = textbox.scaleX;
@@ -309,7 +314,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                 width: textbox.width * scaleX,
                 height: textbox.height * scaleY,
             });
-            canvas.renderAll();
+            canvas.requestRenderAll();
         });
     };
     // ---------------------------------------------------------------(section 7)
@@ -323,15 +328,14 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
         canvas.add(shape);
         canvas.setActiveObject(shape);
-        canvas.renderAll();
+        canvas.requestRenderAll();
     };
     // ---------------------------------------------------------------(section 8)
     // 프레임 추가  --------------------------------------------------(section 9)
-    const addFrame = (left, top, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef) => {
-        const canvas = canvasInstance.current;
+    const addFrame = (canvas, left, top, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef) => {
         if (!canvas) return;
         
-        const target = canvas.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
+        const target = canvas.getObjects().find(obj => obj?.name === 'SherLockRoomFrame');
         if (target) canvas.remove(target);
         
         const roomFrame = createRoomFrame(
@@ -339,7 +343,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         );
 
         canvas.add(roomFrame);
-        if (!canvas.getObjects().find(obj => obj.name === 'SherLockRoomController')) {
+        if (!canvas.getObjects().find(obj => obj?.name === 'SherLockRoomController')) {
             const roomController = new fabric.Rect({
                 ...controlStyle,
                 fill: 'rgba(255, 0, 0, 0.2)',
@@ -351,7 +355,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             });
             roomController.setControlVisible('mtr', false);
 
-            const makeFrame = () => addFrame(roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), game.room[currentRoom].side[currentSide]?.frame?.edge ?? roomController.edge, currentRoomRef, currentSideRef, perspectiveRef);
+            const makeFrame = () => addFrame(canvas, roomController.left, roomController.top, roomController.getScaledWidth(), roomController.getScaledHeight(), game.room[currentRoom].side[currentSide]?.frame?.edge ?? roomController.edge, currentRoomRef, currentSideRef, perspectiveRef);
 
             roomController.on('moving', makeFrame);
             roomController.on('scaling', makeFrame);
@@ -364,12 +368,13 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             canvas.sendObjectToBack(roomController);
         }
 
-        const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        const roomController = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController');
         const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
 
+        if (!roomController || !currentWalls) return;
         // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
         if (!currentWalls['front']?.imageUrl) {
-            const frontWall = roomFrame.getObjects?.().find(obj => obj.wallType === 'front');
+            const frontWall = roomFrame.getObjects?.().find(obj => obj?.wallType === 'front');
                 if (frontWall) {
                 // roomController도 보이게 설정
                 roomController.set({
@@ -396,7 +401,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         // roomFrame을 캔버스 맨 뒤로 보내고 전체 다시 렌더링
         canvas.sendObjectToBack(roomFrame);
         
-        canvas.renderAll();
+        canvas.requestRenderAll();
 
         return () => { roomController.off('modified', handleModified); };
     };
@@ -582,7 +587,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         setGame(prev => {
             const newData = new GamePnC(prev);
             newData.room[currentRoom].side[currentSide].fabric = updatedFabric;
-            const roomController = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController');
+            const roomController = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController');
             if (roomController) {
                 const wallObj = perspectiveRef.current?.[currentRoom]?.[currentSide] ?? {}; // ✅ 조회용 필드 추가
                 const directions = ['front', 'top', 'left', 'right', 'bottom']; // ✅ 조회용 필드 추가
@@ -619,13 +624,13 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         setTimeout(() => {
             saveCanvasToSide();
         }, 1);
-    }, 300);
+    }, 50);
 
     useEffect(() => {
         const canvas = canvasInstance.current;
         if (!canvas) return;
 
-        const roomController = canvas.getObjects().find(obj => obj.name === 'SherLockRoomController');
+        const roomController = canvas.getObjects().find(obj => obj?.name === 'SherLockRoomController');
         if (!roomController) return;
 
         // 'frame' 선택일 때만 selectable 활성화
@@ -639,20 +644,68 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             roomController.moveCursor = 'default';
         }
 
-        canvas.renderAll();
+        canvas.requestRenderAll();
     }, [selectedTool]);
 
+    // 초기화
+    useEffect(() => {
+        if (!isReadyToShow) return;
+        
+        const newSideImgSrcs = game.room.map(room => 
+            Array(room.side.length).fill('')
+        );
+        setSideImgSrcs(newSideImgSrcs);
+        handleCurrentSide(0, 0, game.room[0].side[0]);
+
+        // 모든 side 데이터를 큐에 넣음
+        const allScenes = [];
+        for (const [roomIndex, roomData] of game.room.entries()) {
+            for (const [sideIndex, sideData] of roomData.side.entries()) {
+                allScenes.push({ roomIndex, sideIndex, sideData, progress: 'preparing' });
+            }
+        }
+        setRemainingScenes(allScenes);
+    }, [isReadyToShow]);
+
+    // 슬롯 채우기 로직
+    useEffect(() => {
+        if (!isReadyToShow) return;
+        if (remainingScenes.length === 0) return;
+
+        const newArr = [...tempCanvasArr];
+        const queue = [...remainingScenes];
+        let hasChanges = false;
+
+        // progress가 'done'인 자리를 찾아서 새 데이터로 교체
+        for (let i = 0; i < tempCanvasArr.length && remainingScenes.length > 0; i++) {
+            if (newArr[i] === null || newArr[i]?.progress === 'done') {
+                newArr[i] = queue.shift();
+                hasChanges = true;
+            }
+        }
+
+        // 변경사항이 있을 때만 state 업데이트
+        if (hasChanges) {
+            setTempCanvasArr(newArr);
+            setRemainingScenes(queue);
+        }
+    }, [remainingScenes, tempCanvasArr, isReadyToShow]);
     useEffect(() => {
         if (isReadyToLoad && game) {
-            loadGame(game, setCurrentRoom, handleCurrentSide, setSideImgSrcs);
+            // loadGame(game, handleCurrentSide, sideImgSrcs, setSideImgSrcs);
             setIsReadyToLoad(false);
+            setIsReadyToShow(true);
+            console.log('game\n', game)
         }
     }, [isReadyToLoad, game]);
     useEffect(() => {
         if (isReady && gameZip) {
-            loadGameZip(gameZip, setGame, setImgs, setIsReadyToLoad);
+            loadGameZip(gameZip, setGame, setImgs, setNamedFabrics, setIsReadyToLoad);
         }
     }, [gameZip]);
+    useEffect(()=> {
+        console.log('sideImgSrcs', sideImgSrcs);
+    }, [sideImgSrcs])
     // 이미지 추가 ---------------------------------------------------(section 11)
     useEffect(() => {
         if (isReady && addImageFile) {
@@ -701,7 +754,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
-                    canvasInstance.current.renderAll();
+                    canvasInstance.current.requestRenderAll();
 
                     // ✅ 여기서 비워주기
                     setAddImageFile(null);
@@ -867,7 +920,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                                                         onClick={() => handleCurrentSide(roomIndex, sideIndex, sideData)}
                                                         style={{ position: 'relative', zIndex: 2 }}
                                                     >
-                                                        {sideImgSrcs[roomIndex][sideIndex] && (
+                                                        {sideImgSrcs[roomIndex]?.[sideIndex] && (
                                                         <img src={sideImgSrcs[roomIndex][sideIndex]} width={90} height={55} />
                                                         )}
                                                         <button
@@ -911,6 +964,36 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         <button onClick={handleAddGameRoom}>+</button>
                     </div>
                 </div>
+            </div>
+
+            <div style={{
+                position: 'fixed', bottom: 0, left: 0,
+                zIndex: -9999, background: 'white',
+            }}>
+                {isReadyToShow && tempCanvasArr.map((canvasData, canvasIndex) => {
+                    if (canvasData === null) return (
+                        <div key={canvasIndex} style={{display: 'inline-block', width: 90, height: 55, background: '#ba1717ff'}}>
+                            빈 슬롯 {canvasIndex}
+                        </div>
+                    );
+
+                    return (
+                        <ShowPreviewScreen
+                            key={canvasIndex}
+                            canvas={{
+                                width: canvasInstance.current.width,
+                                height: canvasInstance.current.height,
+                            }}
+                            canvasData={canvasData}
+                            canvasIndex={canvasIndex}
+                            remainingScenes={remainingScenes}
+                            imgs={imgs}
+                            setSideImgSrcs={setSideImgSrcs}
+                            setTempCanvasArr={setTempCanvasArr}
+                        />
+                    );
+                })}
+                {remainingScenes.length !== 0 && <div>대기 중: {remainingScenes.length}</div>}
             </div>
         </div>
     );

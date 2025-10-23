@@ -114,6 +114,65 @@
     border-bottom: 1px dashed #C0C0C0;
 }
 
+/* 객체 위치 */
+.object_position {
+    display: flex;
+    justify-content: center;
+    color: #C0C0C0;
+    gap: 25px;
+}
+.object_position div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+.object_position input {
+    width: 70px;
+    height: 30px;
+    padding: 5px;
+    color: #C0C0C0;
+    background-color: transparent;
+    border: 0.1rem solid rgb(68, 68, 68);
+    border-radius: 7px;
+    outline: 0;
+}
+.object_position input::-webkit-inner-spin-button,
+.object_position input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+/* 객체 크기 */
+.object_size {
+    display: flex;
+    justify-content: center;
+    padding-top: 15px;
+    padding-bottom: 20px;
+    color: #C0C0C0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    gap: 10px;
+}
+.object_size div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+.object_size input {
+    width: 65px;
+    height: 30px;
+    padding: 5px;
+    color: #C0C0C0;
+    background-color: transparent;
+    border: 0.1rem solid rgb(68, 68, 68);
+    border-radius: 7px;
+    outline: 0;
+}
+.object_size input::-webkit-inner-spin-button,
+.object_size input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
 .object_color_line {
     display: flex;
     justify-content: center;

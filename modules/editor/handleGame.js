@@ -6,7 +6,7 @@ const handleSide = (canvas) => {
     const updatedFabric = [];
 
     canvas._objects.forEach((data) => {
-        if (data.name == 'SherLockRoomController' || data.name == 'SherLockRoomFrame') return; // 프레임은 저장 안 됨
+        if (data?.name == 'SherLockRoomController' || data?.name == 'SherLockRoomFrame') return; // 프레임은 저장 안 됨
         updatedFabric.push(
             new Fabric({
                 name: data?.name,
@@ -16,8 +16,8 @@ const handleSide = (canvas) => {
                     width: Number(data?.width.toFixed(2)),
                     height: Number(data?.height.toFixed(2)),
                     angle: Number(data?.angle.toFixed(2)),
-                    scaleX: Number(data?.scaleX.toFixed(2)),
-                    scaleY: Number(data?.scaleY.toFixed(2)),
+                    scaleX: Number(data?.scaleX.toFixed(3)),
+                    scaleY: Number(data?.scaleY.toFixed(3)),
                     originX: data?.originX,
                     originY: data?.originY,
                     radius: data?.radius,
@@ -28,7 +28,7 @@ const handleSide = (canvas) => {
                     textBackgroundColor: data?.textBackgroundColor,
                     textLines: data?.textLines,
                     fontFamily: data?.fontFamily,
-                    fontSize: data?.fontSize,
+                    fontSize: (data?.type=="textbox") && Number(data?.fontSize.toFixed(2)),
                     fontStyle: data?.fontStyle,
                     fontWeight: data?.fontWeight,
                     underline: data?.underline,
@@ -61,7 +61,7 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
 
     if (side.frame) {
         const { x, y, width, height, edge } = side.frame;
-        addFrame(x, y, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef);
+        addFrame(canvas, x, y, width, height, edge, currentRoomRef, currentSideRef, perspectiveRef);
     }
 
     const promises = side.fabric.map((fabricData) => {
@@ -138,25 +138,17 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
                             return resolve(); // 계속 진행
                         }
 
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const imgElement = new Image();
-                            imgElement.src = e.target.result;
-                            imgElement.onload = () => {
-                                shape = new fabric.Image(imgElement, baseProps);
-                                resolve(shape);
-                            };
-                            imgElement.onerror = () => {
-                                console.error('이미지 로드 실패');
-                                resolve();
-                            };
+                        const imgElement = new Image();
+                        imgElement.src = URL.createObjectURL(foundImg);
+                        imgElement.onload = () => {
+                            shape = new fabric.Image(imgElement, baseProps);
+                            resolve(shape);
                         };
-                        reader.onerror = () => {
-                            console.error('파일 읽기 실패');
+                        imgElement.onerror = () => {
+                            console.error('fabric 이미지 로드 실패');
                             resolve();
                         };
-                        reader.readAsDataURL(foundImg);
-                        return; // 조기 리턴 (reader.onload 기다림)
+                        break;
                     }
 
                     case "polygon": {
@@ -260,34 +252,29 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
         })
     });
     canvas.discardActiveObject();
-    canvas.renderAll();
+    canvas.requestRenderAll();
 };
 
-const loadGame = async (game, setCurrentRoom, handleCurrentSide, setSideImgSrcs) => {
-    // game.room.forEach((roomData, roomIndex) => {
-    //     setCurrentRoom(roomIndex);
-    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
-    //     roomData.side.forEach((sideData, sideIndex) => {
-    //         handleCurrentSide(sideIndex, sideData)
-    //     })
-    // })
-    // setCurrentRoom(0);
-    // handleCurrentSide(0, game.room[0].side[0]);
+const loadGame = async (game, handleCurrentSide, sideImgSrcs, setSideImgSrcs) => {
+    // loadGame 공사 중...🛠️
 
-    // let roomIndex = 0;
-    // setInterval(() => {
-    //     setCurrentRoom(roomIndex);
-    //     roomIndex > 0 && setSideImgSrcs(prev => [...prev, ['']]);
-    //     game.room[roomIndex].side.forEach((sideData, sideIndex) => {
-    //         handleCurrentSide(sideIndex, sideData);
-    //     })
-    //     if (roomIndex < game.room.length) roomIndex++;
-    //     else return;
-    // }, 1000)
-    console.log('loadGame 공사 중...🛠️')
+    // sideImgSrcs 고장 안 나게 side(=stage) 추가하는 코드
+    game.room.forEach((_, index) => {
+        if (index > 0) setSideImgSrcs(prev => [...prev, []]);
+    })
+
+    // 화면에 띄우고 다음 화면 띄우기만 하는 코드
+    // sideImgSrcs에 저장하는 코드는 Editor.jsx 파일의 saveCanvasToSide 함수에 있음
+    for (const [roomIndex, roomData] of game.room.entries()) {
+        for (const [sideIndex, sideData] of roomData.side.entries()) {
+            handleCurrentSide(roomIndex, sideIndex, sideData);
+            await new Promise(resolve => setTimeout(resolve, 400));
+        }
+    }
+    handleCurrentSide(0, 0, game.room[0].side[0]);
 }
 
-const loadGameZip = async (file, setGame, setImgs, setIsReadyToLoad) => {
+const loadGameZip = async (file, setGame, setImgs, setNamedFabrics, setIsReadyToLoad) => {
     if (file && file.name.endsWith('.zip')) {
         const zip = await JSZip.loadAsync(file);
         let gameData;
@@ -314,6 +301,7 @@ const loadGameZip = async (file, setGame, setImgs, setIsReadyToLoad) => {
     
         setGame(gameData);
         setImgs(imgFiles);
+        setNamedFabrics(gameData.namedFabrics);
         setIsReadyToLoad(true);
     } else {
         console.warn(`${file.name} 이 파일은 존재하지 않거나 zip 파일이 아닙니다`);

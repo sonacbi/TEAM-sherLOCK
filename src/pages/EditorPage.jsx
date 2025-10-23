@@ -55,7 +55,6 @@ function EditorPage() {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
     const [game, setGame] = useState(new GamePnC({}));
-    const [room, setRoom] = useState(new Room({}));
     const [currentRoom, setCurrentRoom] = useState(0);
     const [currentSide, setCurrentSide] = useState(0);
     const [sideImgSrcs, setSideImgSrcs] = useState([['']]);
@@ -159,6 +158,7 @@ function EditorPage() {
         if (!file || !file.type.startsWith('image/')) return;
 
         setImgs(prev => {
+            // const isDuplicate = prev.find(f => 
             const isDuplicate = prev.some(f => 
                 f.name === file.name &&
                 f.size === file.size &&
@@ -223,8 +223,8 @@ function EditorPage() {
     };
 
     const removeFrame = () => {
-        const target1 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomFrame');
-        const target2 = canvasInstance.current.getObjects().find(obj => obj.name === 'SherLockRoomController')
+        const target1 = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomFrame');
+        const target2 = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController')
         if (target1) canvasInstance.current.remove(target1);
         if (target2) canvasInstance.current.remove(target2);
         game.room[currentRoom].side[currentSide].frame = null;
@@ -270,8 +270,8 @@ function EditorPage() {
     };
 
     const EdgeFramePage = () => {
-        const roomController = canvasInstance.current?.getObjects().find(obj => obj.name === 'SherLockRoomController'); 
-        const edge = game.room[currentRoom].side[currentSide]?.frame?.edge;
+        const roomController = canvasInstance.current?.getObjects().find(obj => obj?.name === 'SherLockRoomController'); 
+        const edge = game.room[currentRoom]?.side[currentSide]?.frame?.edge;
         const [tempEdges, setTempEdges] = useState(() => edge ? [...edge] : [120, 220, 220, 110]);
         const [inputEdges, setInputEdges] = useState(() => edge ? edge.map(v => v.toString()) : ["120", "220", "220", "110"]);
 
@@ -541,7 +541,7 @@ function EditorPage() {
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
 
-                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
+                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div>
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
@@ -733,7 +733,7 @@ function EditorPage() {
                         edgeFrameState={edgeFrameState}
                         editorOffset={editorOffset}
                         setEdgeFrameState={setEdgeFrameState}
-                        saveTool={{game, setGame, room, setRoom, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics}}
+                        saveTool={{game, setGame, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics}}
                         gameZip={gameZip} setGameZip={setGameZip}
                         selectedTool={selectedTool}
                         canvases={{canvasRef, canvasInstance}}
