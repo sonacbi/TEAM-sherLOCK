@@ -366,6 +366,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         const roomController = canvasInstance.current.getObjects().find(obj => obj?.name === 'SherLockRoomController');
         const currentWalls = perspectiveRef.current?.[currentRoomRef.current]?.[currentSideRef.current] ?? {};
 
+        if (!roomController || !currentWalls) return;
         // 🔽 front 벽에 이미지가 없다면 자동으로 front 벽 그리기
         if (!currentWalls['front']?.imageUrl) {
             const frontWall = roomFrame.getObjects?.().find(obj => obj?.wallType === 'front');
@@ -640,68 +641,50 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
 
         canvas.requestRenderAll();
     }, [selectedTool]);
-    
-    // useEffect(() => {
-    //     if (isReadyToShow) {
-    //         game.room.forEach((_, index) => {
-    //             if (index > 0) setSideImgSrcs(prev => [...prev, []]);
-    //         });
-            
-    //         for (const [roomIndex, roomData] of game.room.entries()) {
-    //             for (const [sideIndex, sideData] of roomData.side.entries()) {
-    //                 setTempCanvasArr(prev => {
-    //                     const newData = [...prev];
-    //                     const index = prev.indexOf(null);
-    //                     if (index !== -1) {
-    //                         newData[index] = {roomIndex, sideIndex, sideData};
-    //                     }
-    //                     console.log('gii', newData)
-    //                     return newData;
-    //                 });
-    //             }
-    //         }
 
-    //         if (tempCanvasArr.every(item => item === null)) setIsReadyToShow(false);
-    //     }
-    // }, [isReadyToShow, tempCanvasArr]);
     // 초기화
     useEffect(() => {
         if (!isReadyToShow) return;
+        
+        const newSideImgSrcs = game.room.map(room => 
+            Array(room.side.length).fill('')
+        );
+        setSideImgSrcs(newSideImgSrcs);
+        handleCurrentSide(0, 0, game.room[0].side[0]);
 
         // 모든 side 데이터를 큐에 넣음
         const allScenes = [];
         for (const [roomIndex, roomData] of game.room.entries()) {
             for (const [sideIndex, sideData] of roomData.side.entries()) {
-                allScenes.push({ roomIndex, sideIndex, sideData });
+                allScenes.push({ roomIndex, sideIndex, sideData, progress: 'preparing' });
             }
         }
-        console.log('allScenes', allScenes)
         setRemainingScenes(allScenes);
     }, [isReadyToShow]);
 
     // 슬롯 채우기 로직
     useEffect(() => {
-        if (!isReady) return;
-        setTempCanvasArr(prev => {
-            const newArr = [...prev];
-            const queue = [...remainingScenes];
-            let i = 0;
+        if (!isReadyToShow) return;
+        if (remainingScenes.length === 0) return;
 
-            // 빈 자리가 있고, remainingScenes가 남아 있다면 채우기
-            while (i < newArr.length && remainingScenes.length > 0) {
-                if (newArr[i] === null) {
-                    newArr[i] = queue.shift(); // 큐에서 하나 꺼내기
-                }
-                i++;
+        const newArr = [...tempCanvasArr];
+        const queue = [...remainingScenes];
+        let hasChanges = false;
+
+        // progress가 'done'인 자리를 찾아서 새 데이터로 교체
+        for (let i = 0; i < tempCanvasArr.length && remainingScenes.length > 0; i++) {
+            if (newArr[i] === null || newArr[i]?.progress === 'done') {
+                newArr[i] = queue.shift();
+                hasChanges = true;
             }
+        }
 
-            // 남은 큐 업데이트
-            // if (queue.length !== remainingScenes.length) {
-            //     setRemainingScenes(queue);
-            // }
-            return newArr;
-        });
-    }, [remainingScenes]); // 큐가 바뀔 때마다 채워줌
+        // 변경사항이 있을 때만 state 업데이트
+        if (hasChanges) {
+            setTempCanvasArr(newArr);
+            setRemainingScenes(queue);
+        }
+    }, [remainingScenes, tempCanvasArr, isReadyToShow]);
     useEffect(() => {
         if (isReadyToLoad && game) {
             // loadGame(game, handleCurrentSide, sideImgSrcs, setSideImgSrcs);
@@ -978,19 +961,35 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                 </div>
             </div>
 
-            {isReadyToShow && tempCanvasArr.map((canvasData, canvasIndex) => {
-                console.log(canvasIndex, 'canvasData', canvasData);
-                if (!canvasData) return null;
-                return(
-                    <ShowPreviewScreen
-                        key={canvasIndex}
-                        canvas={{width: canvasInstance.current.width, height: canvasInstance.current.height, background: canvasInstance.current.background}}
-                        currentRoom={canvasData.roomIndex} currentSide={canvasData.sideIndex} canvasIndex={canvasIndex}
-                        setSideImgSrcs={setSideImgSrcs} setTempCanvasArr={setTempCanvasArr}
-                        loadCanvasArgs={[imgs, canvasData.sideData, controlStyle, addFrame, currentRoomRef, currentSideRef, perspectiveRef]}
-                    />
-                )
-            })}
+            <div style={{
+                position: 'fixed', bottom: 0, left: 0,
+                zIndex: -9999, background: 'white',
+            }}>
+                {isReadyToShow && tempCanvasArr.map((canvasData, canvasIndex) => {
+                    if (canvasData === null) return (
+                        <div key={canvasIndex} style={{display: 'inline-block', width: 90, height: 55, background: '#ba1717ff'}}>
+                            빈 슬롯 {canvasIndex}
+                        </div>
+                    );
+
+                    return (
+                        <ShowPreviewScreen
+                            key={canvasIndex}
+                            canvas={{
+                                width: canvasInstance.current.width,
+                                height: canvasInstance.current.height,
+                            }}
+                            canvasData={canvasData}
+                            canvasIndex={canvasIndex}
+                            remainingScenes={remainingScenes}
+                            imgs={imgs}
+                            setSideImgSrcs={setSideImgSrcs}
+                            setTempCanvasArr={setTempCanvasArr}
+                        />
+                    );
+                })}
+                {remainingScenes.length !== 0 && <div>대기 중: {remainingScenes.length}</div>}
+            </div>
         </div>
     );
 }

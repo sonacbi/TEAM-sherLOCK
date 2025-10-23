@@ -112,6 +112,18 @@ function Temp () {
         {progress: 'preparing', num: 7, width: 70, height: 40, backgroundColor: 'green',},
         {progress: 'preparing', num: 8, width: 90, height: 40, backgroundColor: 'purple',},
         {progress: 'preparing', num: 9, width: 40, height: 40, backgroundColor: 'orange',},
+        {progress: 'preparing', num: 10, width: 130, height: 40, backgroundColor: '#6606cc',},
+        {progress: 'preparing', num: 11, width: 150, height: 40, backgroundColor: '#6626cc',},
+        {progress: 'preparing', num: 12, width: 140, height: 40, backgroundColor: '#6646cc',},
+        {progress: 'preparing', num: 13, width: 120, height: 40, backgroundColor: '#6666cc',},
+        {progress: 'preparing', num: 14, width: 140, height: 40, backgroundColor: '#6686cc',},
+        {progress: 'preparing', num: 15, width: 110, height: 40, backgroundColor: '#66a6cc',},
+        {progress: 'preparing', num: 16, width: 160, height: 40, backgroundColor: '#66c6cc',},
+        {progress: 'preparing', num: 17, width: 130, height: 40, backgroundColor: '#66e6cc',},
+        {progress: 'preparing', num: 18, width: 120, height: 40, backgroundColor: '#66ffcc',},
+        {progress: 'preparing', num: 19, width: 150, height: 40, backgroundColor: '#96ffcc',},
+        {progress: 'preparing', num: 20, width: 110, height: 40, backgroundColor: '#c6ffcc',},
+        {progress: 'preparing', num: 21, width: 130, height: 40, backgroundColor: '#f6ffcc',},
 
     ];
 
@@ -127,7 +139,7 @@ function Temp () {
         let hasChanges = false;
 
         // progress가 'done'인 자리를 찾아서 새 데이터로 교체
-        for (let i = 0; i < newArr.length && queue.length > 0; i++) {
+        for (let i = 0; i < canvasArr.length && remainingScenes.length > 0; i++) {
             if (newArr[i] === null || newArr[i]?.progress === 'done') {
                 newArr[i] = queue.shift();
                 hasChanges = true;
@@ -139,7 +151,7 @@ function Temp () {
             setCanvasArr(newArr);
             setRemainingScenes(queue);
         }
-    }, [remainingScenes, canvasArr, isReady]);
+    }, [remainingScenes, canvasArr]);
 
     return(
         <>
@@ -147,8 +159,7 @@ function Temp () {
         <button onClick={()=>setRemainingScenes([...game])}>버튼</button>
 
         <h2>캔버스 데이터</h2>
-        {canvasArr.map((data, index) => {
-            if (!isReady) return null;
+        {isReady && canvasArr.map((data, index) => {
             if (data === null) {
                 return (
                     <div key={index} style={{margin: '20px', width: '60px', height: '40px', backgroundColor: 'gray'}}>빈칸</div>
@@ -156,7 +167,7 @@ function Temp () {
             }
 
             return(
-                <TCanvas key={`cv${index}`} data={data} index={index} setImgs={setImgs} remainingScenes={remainingScenes} setCanvasArr={setCanvasArr}/>
+                <TCanvas key={`cv${index}`} data={data} index={index} setImgs={setImgs} remainingScenes={remainingScenes} canvasArr={canvasArr} setCanvasArr={setCanvasArr}/>
             )
         })}
 
@@ -169,19 +180,14 @@ function Temp () {
     )
 }
 
-function TCanvas({data, index, setImgs, remainingScenes, setCanvasArr}) {
-    const [isReady, setIsReady] = useState(false);
+function TCanvas({data, index, setImgs, remainingScenes, canvasArr, setCanvasArr}) {
     const canvas = useRef(null);
     const canvasRef = useRef(null);
     const hasRendered = useRef(false);
-
-    useEffect(() => {
-        setIsReady(true);
-    }, []);
     
     useEffect(() => {
-        if (data === null) return;
-        if (data.progress === 'done') return; // done이면 실행 안 함
+        if (data === null || data === undefined) return;
+        if (data.progress === 'done' && remainingScenes.length === 0) return; // done이면 실행 안 함
         if (hasRendered.current) return; // 이미 렌더링했으면 실행 안 함
         // if (remainingScenes.length === 0) {
         //     console.log('대기 중인 씬 없음');
@@ -203,18 +209,17 @@ function TCanvas({data, index, setImgs, remainingScenes, setCanvasArr}) {
         
         // setImgs(prev => [...prev, canvas.current.toDataURL({
         //     format: 'jpeg',
-        //     quality: 0.1,
+        //     quality: 0.5,
         // })]);
         setImgs(prev => {
             const newData = [...prev];
             newData[data.num] = canvas.current.toDataURL({
                 format: 'jpeg',
-                quality: 0.1,
+                quality: 0.5,
             })
             return newData;
         });
         return () => {
-            
             setCanvasArr(prev => {
                 const newData = [...prev];
                 // progress를 done으로 표시 (이게 트리거가 됨)
@@ -227,7 +232,10 @@ function TCanvas({data, index, setImgs, remainingScenes, setCanvasArr}) {
     }, [data]);
 
     return (
-        <canvas ref={canvasRef} width={data?.width || 900} height={data?.height || 60} className={`cv${index}`} style={{border: '1px dashed black'}}></canvas>
+        <>
+        {/* {remainingScenes.length > 0 && <canvas ref={canvasRef} width={data?.width || 900} height={data?.height || 60} className={`cv${index}`} style={{border: '1px dashed black'}}></canvas>} */}
+        <canvas ref={canvasRef} width={data?.width || 900} height={data?.height || 60} className={`cv${index}`} style={{border: '1px dashed black', display: remainingScenes.length > 0 && 'none'}}></canvas>
+        </>
     )
 }
 
