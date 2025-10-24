@@ -86,14 +86,13 @@ const useSyncPerspective = (
 
         DIRECTIONS.forEach((wallType, idx) => {
           allPromises.push((async () => {
-            let dataUrl = null;
             const imgName = side.frame.edgeImg?.[idx] || null;
 
             if (imgName && !dataUrlCache.current[imgName]) {
               const file = imgs.find(f => f.name === imgName);
               if (file) dataUrlCache.current[imgName] = await loadImageDataUrl(file);
             }
-            dataUrl = dataUrlCache.current[imgName] || null;
+            const dataUrl = dataUrlCache.current[imgName] || null;
 
             const vertices = wallType === 'front'
               ? frontEdge.map(p => new fabric.Point(p.x, p.y))
@@ -107,6 +106,7 @@ const useSyncPerspective = (
               _room: roomId,
               _side: sideId,
               _frameEdge: frameEdge,
+              dataUrl, // polygon 자체에도 저장
             });
 
             return { polygon, roomId, sideId, wallType, imgName, vertices, dataUrl };
@@ -115,35 +115,32 @@ const useSyncPerspective = (
       });
     });
 
-    // polygon 모두 생성 후 canvas에 추가
     const results = await Promise.all(allPromises);
     results.forEach(({ polygon, vertices }) => {
       polygon.set({ points: vertices });
       polygon.dirty = true;
       canvas.add(polygon);
     });
-    canvas.requestRenderAll(); // 여기서 첫 렌더링 반영
+    canvas.requestRenderAll();
 
-    // vertices 상태 반영
     if (isReadyToLoad) {
       const newState = {};
-      results.forEach(({ roomId, sideId, wallType, imgName, vertices }) => {
+      results.forEach(({ roomId, sideId, wallType, imgName, vertices, dataUrl }) => {
         if (!newState[roomId]) newState[roomId] = {};
         if (!newState[roomId][sideId]) newState[roomId][sideId] = {};
         newState[roomId][sideId][wallType] = {
           imageName: imgName,
-          imageUrl: dataUrlCache.current[imgName],
+          imageUrl: dataUrl,
           vertices,
         };
       });
       setPerspective(prev => ({ ...prev, ...newState }));
       onLoadComplete?.(newState);
-
     }
   }, [canvasInstance, game, imgs, setPerspective, isReadyToLoad, onLoadComplete]);
 
   // -------------------------------------
-  // 4-2) canvas 이벤트로 vertices 업데이트
+  // 4-2) canvas 이벤트로 vertices 및 imageUrl 업데이트
   // -------------------------------------
   const updatePerspectiveVertices = useCallback(() => {
     if (updateTimeout.current) clearTimeout(updateTimeout.current);
@@ -160,23 +157,16 @@ const useSyncPerspective = (
           const vertices = getWallVertices(wall);
           if (!vertices.length) return;
 
-          if (isReadyToLoad) {
-            const roomId = wall._room;
-            const sideId = wall._side;
-            if (!updated[roomId]) updated[roomId] = {};
-            if (!updated[roomId][sideId]) updated[roomId][sideId] = {};
-            updated[roomId][sideId][wallType] = {
-              ...(updated[roomId][sideId][wallType] || {}),
-              vertices: [...vertices],
-            };
-          } else {
-            if (!updated[currentRoom]) updated[currentRoom] = {};
-            if (!updated[currentRoom][currentSide]) updated[currentRoom][currentSide] = {};
-            updated[currentRoom][currentSide][wallType] = {
-              ...(updated[currentRoom][currentSide][wallType] || {}),
-              vertices: [...vertices],
-            };
-          }
+          const roomId = isReadyToLoad ? wall._room : currentRoom;
+          const sideId = isReadyToLoad ? wall._side : currentSide;
+          if (!updated[roomId]) updated[roomId] = {};
+          if (!updated[roomId][sideId]) updated[roomId][sideId] = {};
+
+          updated[roomId][sideId][wallType] = {
+            ...(updated[roomId][sideId][wallType] || {}),
+            vertices: [...vertices],
+            imageUrl: wall.dataUrl || (updated[roomId][sideId][wallType]?.imageUrl || null),
+          };
         });
         return updated;
       });
