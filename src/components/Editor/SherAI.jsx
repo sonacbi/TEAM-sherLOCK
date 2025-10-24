@@ -27,9 +27,10 @@ function SherAI({setGameZip}) {
 
   const messages = [
     { progress : 'analyzing', text: '프롬프트 분석 중...', duration: 3000 },
-    { progress : 'designing', text: '스토리 구조 설계 중...', duration: 6000 },
-    { progress : 'creating', text: '스테이지 생성 중...', duration: 12000 },
-    { progress : 'checking', text: '점검 중...', duration: 3000 },
+    { progress : 'designing', text: '스토리 구조 설계 중...', duration: 5000 },
+    { progress : 'drawing', text: '이미지 그리는 중...', duration: 6000 },
+    { progress : 'creating', text: '스테이지 생성 중...', duration: 10000 },
+    { progress : 'checking', text: '점검 중...', duration: 2000 },
     { progress : 'completing', text: '곧 생성이 완료됩니다.', duration: 4000 },
   ];
 
@@ -51,7 +52,8 @@ function SherAI({setGameZip}) {
     }, time); // 25초 뒤 로딩 종료 (테스트용)
   };
 
-  const getAIGame = async() => {
+  const getAIGame = async(index) => {
+    await fetch(`http://localhost:4000/ai_game/${messages[index].progress}?prompt=${prompt}`)
     await fetch(`http://localhost:4000/ai_game?prompt=${prompt}`)
     .then(res => res.blob())
     .then(blob => {
@@ -73,7 +75,7 @@ function SherAI({setGameZip}) {
         if (index < messages.length) {
           if (messages[index].progress === 'creating') {
             // setGameZip()
-            getAIGame();
+            getAIGame(index);
           }
           setLoadingMessage(messages[index].text);
           setTimeout(changeMessage, messages[index].duration);
