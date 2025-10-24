@@ -796,12 +796,16 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
     });
 
         // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
-        useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective, currentRoom, currentSide);
+        useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective, currentRoom, currentSide,
+            isReadyToLoad ? game : null,
+            isReadyToLoad ? imgs : null,
+            isReadyToLoad );
 
         // 미리보기용 구성
         const roomKey = Number(currentRoom);
+        const sideKey = Number(currentSide); // 현재 선택된 사이드 기준
 
-        const previewItems = Object.entries(previewPerspective?.[roomKey]?.[0] || {})
+        const previewItems = Object.entries(previewPerspective?.[roomKey]?.[sideKey] || {})
         .filter(([_, wall]) => wall.imageUrl)
         .map(([wallType, wall]) => ({
             wallType,
