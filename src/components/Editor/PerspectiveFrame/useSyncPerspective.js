@@ -2,16 +2,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import * as fabric from 'fabric';
 
-// -------------------------------------
-// 1) 벽 방향 정의
-// -------------------------------------
 const DIRECTIONS = ['front', 'top', 'left', 'right', 'bottom'];
 
-// -------------------------------------
-// 2) vertices 생성 헬퍼 (frameEdge 절대 참조)
-// -------------------------------------
 function createVertices(dir, frameEdge) {
-  const [tl, tr, br, bl] = frameEdge; // top-left, top-right, bottom-right, bottom-left
+  const [tl, tr, br, bl] = frameEdge;
   switch (dir) {
     case 'front': return [tl, tr, br, bl].map(p => new fabric.Point(p.x, p.y));
     case 'top': return [tl, tr, tr, tl].map(p => new fabric.Point(p.x, p.y));
@@ -22,41 +16,39 @@ function createVertices(dir, frameEdge) {
   }
 }
 
-// -------------------------------------
-// 3) 커스텀 훅 정의
-// -------------------------------------
 const useSyncPerspective = (
-  canvasInstance,        // fabric.Canvas ref
-  getWallsFromCanvas,    // canvas에서 벽 객체 가져오는 함수
-  getWallVertices,       // polygon 객체에서 vertices 가져오는 함수
-  setPerspective,        // React state setter
+  canvasInstance,
+  getWallsFromCanvas,
+  getWallVertices,
+  setPerspective,
   currentRoom,
   currentSide,
-  game,                  // game 데이터
-  imgs,                  // 이미지 파일 리스트
-  isReadyToLoad,         // 초기 로딩 완료 여부
-  onLoadComplete         // 초기 로딩 완료 콜백
+  game,
+  imgs,
+  isReadyToLoad,
+  onLoadComplete
 ) => {
-  const firstUpdateDone = useRef(false); // 첫 렌더 강제 갱신 체크
-  const dataUrlCache = useRef({});       // 이미지 DataURL 캐시
+  const firstUpdateDone = useRef(false);
+  const dataUrlCache = useRef({});
 
-  // -------------------------------------
-  // 4-1) 모든 room/side 초기화
-  // -------------------------------------
   const initializeAllRoomsFromGame = useCallback(async () => {
     const canvas = canvasInstance.current;
     if (!canvas || !game?.room || !imgs?.length) return;
 
     const allPromises = [];
 
-    Object.entries(game.room).forEach(([roomId, room]) => {
-      Object.entries(room.side).forEach(([sideId, side]) => {
+    // -------------------------------------
+    // Room 단위 변환 구조
+    // -------------------------------------
+    const perspectiveState = game.room.map((room, roomIdx) => {
+      const roomObj = {};
+      room.side.forEach((side, sideIdx) => {
         const frame = side.frame || {};
         const frontPos = { left: frame.x ?? 220, top: frame.y ?? 120 };
         const frontSize = { width: frame.width ?? 660, height: frame.height ?? 420 };
         const edgeArray = frame.edge || [];
+        const edgeImg = frame.edgeImg || [];
 
-        // 4-1-1) frameEdge 계산
         const frameEdge = [
           { x: frontPos.left - (edgeArray[1] || 0), y: frontPos.top - (edgeArray[0] || 0) },
           { x: frontPos.left + frontSize.width + (edgeArray[2] || 0), y: frontPos.top - (edgeArray[0] || 0) },
@@ -64,7 +56,6 @@ const useSyncPerspective = (
           { x: frontPos.left - (edgeArray[1] || 0), y: frontPos.top + frontSize.height + (edgeArray[3] || 0) },
         ];
 
-        // 4-1-2) front polygon 좌표
         const frontEdge = [
           { x: frontPos.left, y: frontPos.top },
           { x: frontPos.left + frontSize.width, y: frontPos.top },
@@ -72,12 +63,19 @@ const useSyncPerspective = (
           { x: frontPos.left, y: frontPos.top + frontSize.height },
         ];
 
-        // 4-1-3) 각 방향별 polygon 생성
+        // 각 방향별 초기 wall 데이터
+        const sideData = {};
         DIRECTIONS.forEach((wallType, idx) => {
-          allPromises.push((async () => {
-            const imgName = side.frame.edgeImg?.[idx] || null;
+          sideData[wallType] = {
+            vertices: wallType === 'front'
+              ? frontEdge.map(p => new fabric.Point(p.x, p.y))
+              : createVertices(wallType, frameEdge),
+            imageUrl: edgeImg[idx] || null,
+          };
 
-            // 이미지 파일이 존재하고 캐시에 없으면 읽어서 저장
+          // polygon 생성
+          allPromises.push((async () => {
+            const imgName = edgeImg[idx] || null;
             if (imgName && !dataUrlCache.current[imgName]) {
               const file = imgs.find(f => f.name === imgName);
               if (file) {
@@ -90,32 +88,31 @@ const useSyncPerspective = (
             }
 
             const dataUrl = dataUrlCache.current[imgName] || null;
+            const vertices = sideData[wallType].vertices;
 
-            const vertices = wallType === 'front'
-              ? frontEdge.map(p => new fabric.Point(p.x, p.y))
-              : createVertices(wallType, frameEdge);
-
-            // polygon 생성
             const polygon = new fabric.Polygon(vertices, {
               fill: 'rgba(0,0,0,0)',
               selectable: false,
               evented: false,
               wallType,
-              _room: roomId,
-              _side: sideId,
+              _room: roomIdx,
+              _side: sideIdx,
               _frameEdge: frameEdge,
               dataUrl,
             });
 
-            return { polygon, roomId, sideId, wallType, vertices, dataUrl };
+            return { polygon, roomId: roomIdx, sideId: sideIdx, wallType, vertices, dataUrl };
           })());
         });
+
+        roomObj[sideIdx] = sideData;
       });
+      roomObj.currentRoom = String(roomIdx);
+      return roomObj;
     });
 
     const results = await Promise.all(allPromises);
 
-    // canvas에 polygon 추가
     results.forEach(({ polygon, vertices }) => {
       polygon.set({ points: vertices });
       polygon.dirty = true;
@@ -123,12 +120,9 @@ const useSyncPerspective = (
     });
     canvas.requestRenderAll();
 
-    // -------------------------------------
-    // 4-1-4) 첫 렌더링 강제 갱신
-    // -------------------------------------
     if (!firstUpdateDone.current) {
       firstUpdateDone.current = true;
-      setPerspective(prev => ({ ...prev })); // React state 갱신 트리거
+      setPerspective(perspectiveState);
       onLoadComplete?.(results);
     } else if (isReadyToLoad) {
       const newState = {};
@@ -141,9 +135,6 @@ const useSyncPerspective = (
     }
   }, [canvasInstance, game, imgs, setPerspective, isReadyToLoad, onLoadComplete]);
 
-  // -------------------------------------
-  // 4-2) 캔버스 이벤트로 perspective 갱신
-  // -------------------------------------
   useEffect(() => {
     const canvas = canvasInstance.current;
     if (!canvas) return;
@@ -174,15 +165,12 @@ const useSyncPerspective = (
       });
     };
 
-    // 최초 초기화
     initializeAllRoomsFromGame().catch(console.error);
 
-    // canvas 이벤트 등록
     canvas.on('object:added', update);
     canvas.on('object:modified', update);
     canvas.on('object:removed', update);
 
-    // cleanup
     return () => {
       canvas.off('object:added', update);
       canvas.off('object:modified', update);
