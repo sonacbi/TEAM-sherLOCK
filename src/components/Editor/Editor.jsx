@@ -747,6 +747,13 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         height = height * ratio;
                     }
 
+                    // 현재 room/side 정보 가져오기
+                    const room = currentRoomRef.current;
+                    const side = currentSideRef.current;
+                    const wallType = hoveredWallLocal.current?.wallType || ''; // 호버된 벽 없으면 빈값
+
+                    console.log('[ADD IMAGE] room:', room, 'side:', side, 'wallType:', wallType, 'file:', addImageFile.name);
+
                     // const fabricImage = new fabric.Image(warpedCanvas, {
                     const fabricImage = new fabric.Image(imgElement, {
                         ...controlStyle,
@@ -756,11 +763,21 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         scaleY: height / imgElement.height,
                         imgName: addImageFile.name,
                         imageUrl: e.target.result, // 배경 랜더링용
+                        currentRoom: room,           // 🔹 room 정보 - 멀티룸/멀티사이드
+                        currentSide: side,           // 🔹 side 정보 - 멀티룸/멀티사이드
+                        inputWall: wallType,         // 🔹 wallType - 멀티룸/멀티사이드
                     });
 
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
                     canvasInstance.current.requestRenderAll();
+
+                    // 🔹 디버깅용 코드 (객체 속성 추적용)
+                    // console.log('[ADD IMAGE] Fabric object properties:', {
+                    //     currentRoom: fabricImage.currentRoom,
+                    //     currentSide: fabricImage.currentSide,
+                    //     inputWall: fabricImage.inputWall,
+                    // });
 
                     // ✅ 여기서 비워주기
                     setAddImageFile(null);

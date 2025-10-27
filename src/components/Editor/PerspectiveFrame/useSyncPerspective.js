@@ -31,17 +31,17 @@ const useSyncPerspective = (
   const firstUpdateDone = useRef(false);
   const dataUrlCache = useRef({});
 
+  // -------------------------------------
+  // Room 단위 전체 초기화
+  // -------------------------------------
   const initializeAllRoomsFromGame = useCallback(async () => {
     const canvas = canvasInstance.current;
     if (!canvas || !game?.room || !imgs?.length) return;
 
     const allPromises = [];
+    const perspectiveState = game.room.map(() => ({}));
 
-    // -------------------------------------
-    // Room 단위 변환 구조
-    // -------------------------------------
-    const perspectiveState = game.room.map((room, roomIdx) => {
-      const roomObj = {};
+    game.room.forEach((room, roomIdx) => {
       room.side.forEach((side, sideIdx) => {
         const frame = side.frame || {};
         const frontPos = { left: frame.x ?? 220, top: frame.y ?? 120 };
@@ -63,78 +63,75 @@ const useSyncPerspective = (
           { x: frontPos.left, y: frontPos.top + frontSize.height },
         ];
 
-        // 각 방향별 초기 wall 데이터
-        const sideData = {};
+        if (!perspectiveState[roomIdx][sideIdx]) perspectiveState[roomIdx][sideIdx] = {};
+
+        // -------------------------------------
+        // 각 면(DIRECTIONS)별 polygon 생성
+        // -------------------------------------
         DIRECTIONS.forEach((wallType, idx) => {
-          sideData[wallType] = {
-            vertices: wallType === 'front'
-              ? frontEdge.map(p => new fabric.Point(p.x, p.y))
-              : createVertices(wallType, frameEdge),
-            imageUrl: edgeImg[idx] || null,
-          };
+          const imgName = edgeImg[idx] || null;
+          const vertices = wallType === 'front'
+            ? frontEdge.map(p => new fabric.Point(p.x, p.y))
+            : createVertices(wallType, frameEdge);
 
-          // polygon 생성
-          allPromises.push((async () => {
-            const imgName = edgeImg[idx] || null;
-            if (imgName && !dataUrlCache.current[imgName]) {
-              const file = imgs.find(f => f.name === imgName);
-              if (file) {
-                dataUrlCache.current[imgName] = await new Promise(r => {
-                  const reader = new FileReader();
-                  reader.onload = () => r(reader.result);
-                  reader.readAsDataURL(file);
-                });
+          allPromises.push(
+            (async () => {
+              let dataUrl = null;
+              if (imgName) {
+                if (!dataUrlCache.current[imgName]) {
+                  const file = imgs.find(f => f.name === imgName);
+                  if (file) {
+                    dataUrlCache.current[imgName] = await new Promise(r => {
+                      const reader = new FileReader();
+                      reader.onload = () => r(reader.result);
+                      reader.readAsDataURL(file);
+                    });
+                  }
+                }
+                dataUrl = dataUrlCache.current[imgName] || null;
               }
-            }
 
-            const dataUrl = dataUrlCache.current[imgName] || null;
-            const vertices = sideData[wallType].vertices;
+              perspectiveState[roomIdx][sideIdx][wallType] = {
+                vertices,
+                imageUrl: dataUrl, // ✅ dataURL 포함
+              };
 
-            const polygon = new fabric.Polygon(vertices, {
-              fill: 'rgba(0,0,0,0)',
-              selectable: false,
-              evented: false,
-              wallType,
-              _room: roomIdx,
-              _side: sideIdx,
-              _frameEdge: frameEdge,
-              dataUrl,
-            });
+              // Polygon은 나중에 한 번에 canvas에 추가
+              const polygon = new fabric.Polygon(vertices, {
+                fill: 'rgba(0,0,0,0)',
+                selectable: false,
+                evented: false,
+                wallType,
+                _room: roomIdx,
+                _side: sideIdx,
+                _frameEdge: frameEdge,
+                dataUrl,
+              });
 
-            return { polygon, roomId: roomIdx, sideId: sideIdx, wallType, vertices, dataUrl };
-          })());
+              return polygon;
+            })()
+          );
         });
-
-        roomObj[sideIdx] = sideData;
       });
-      roomObj.currentRoom = String(roomIdx);
-      return roomObj;
     });
 
-    const results = await Promise.all(allPromises);
-
-    results.forEach(({ polygon, vertices }) => {
-      polygon.set({ points: vertices });
-      polygon.dirty = true;
-      canvas.add(polygon);
-    });
+    // -------------------------------------
+    // 모든 Polygon 생성 완료 후 한 번에 추가
+    // -------------------------------------
+    const polygons = await Promise.all(allPromises);
+    polygons.forEach(p => canvas.add(p));
     canvas.requestRenderAll();
 
     if (!firstUpdateDone.current) {
       firstUpdateDone.current = true;
-      setPerspective(perspectiveState);
-      onLoadComplete?.(results);
-    } else if (isReadyToLoad) {
-      const newState = {};
-      results.forEach(({ roomId, sideId, wallType, vertices, dataUrl }) => {
-        if (!newState[roomId]) newState[roomId] = {};
-        if (!newState[roomId][sideId]) newState[roomId][sideId] = {};
-        newState[roomId][sideId][wallType] = { vertices, imageUrl: dataUrl };
-      });
-      setPerspective(prev => ({ ...prev, ...newState }));
+      setPerspective(perspectiveState); // ✅ data:~ 포함된 상태로 저장됨
+      onLoadComplete?.(polygons);
     }
-  }, [canvasInstance, game, imgs, setPerspective, isReadyToLoad, onLoadComplete]);
+  }, [canvasInstance, game, imgs, setPerspective, onLoadComplete]);
 
+  // -------------------------------------
+  // Canvas 객체 변경 감시
+  // -------------------------------------
   useEffect(() => {
     const canvas = canvasInstance.current;
     if (!canvas) return;

@@ -256,25 +256,79 @@ export const restoreWallVisualStyle = (wall, wallType, canvas) => {
     }
 };
 
-// 이미지 제거 및 복원
-export const restoreImageToPointer = (canvas, pointer, wallType) => {
-    const imageObj = canvas.getObjects().find(obj => obj.type === 'image' && obj.inputWall === wallType);
-    if (!imageObj) return;
+// 이미지 제거 및 복원 (room/side/wallType 기준)
+export const restoreImageToPointer = (canvas, pointer, wallType, room, side) => {
+    if (!canvas) return;
 
-    const scaledWidth = imageObj.width * imageObj.scaleX;
-    const scaledHeight = imageObj.height * imageObj.scaleY;
+    const roomVal = room?.current ?? room;
+    const sideVal = side?.current ?? side;
 
+    // 1️⃣ 정확 일치 우선 검색
+    let imageObj = canvas.getObjects().find(obj => {
+        if (obj.type !== 'image') return false;
+        const objRoom = obj.currentRoom?.current ?? obj.currentRoom;
+        const objSide = obj.currentSide?.current ?? obj.currentSide;
+        return (
+            String(obj.inputWall) === String(wallType) &&
+            String(objRoom) === String(roomVal) &&
+            String(objSide) === String(sideVal)
+        );
+    });
+
+    // 2️⃣ room/side 없는 fallback
+    if (!imageObj) {
+        imageObj = canvas.getObjects().find(obj => {
+            if (obj.type !== 'image') return false;
+            const objRoom = obj.currentRoom?.current ?? obj.currentRoom;
+            const objSide = obj.currentSide?.current ?? obj.currentSide;
+            return (
+                String(obj.inputWall) === String(wallType) &&
+                (!objRoom || !objSide)
+            );
+        });
+    }
+
+    // 3️⃣ wallType만 맞는 fallback
+    if (!imageObj) {
+        imageObj = canvas.getObjects().find(
+            obj => obj.type === 'image' && String(obj.inputWall) === String(wallType)
+        );
+    }
+
+    if (!imageObj) {
+        console.warn('[RESTORE] No image object found to restore for wallType:', wallType);
+        return;
+    }
+
+    // 🔹 성능 최적화를 위한 사전 계산
+    const scaleX = imageObj.scaleX || 1;
+    const scaleY = imageObj.scaleY || 1;
+    const scaledWidth = imageObj.width * scaleX;
+    const scaledHeight = imageObj.height * scaleY;
+    const left = pointer.x - scaledWidth / 2;
+    const top = pointer.y - scaledHeight / 2;
+
+    // 🔹 속성 한번에 적용 (set → renderAll 사이 딜레이 제거)
     imageObj.set({
-        left: pointer.x - scaledWidth / 2,
-        top: pointer.y - scaledHeight / 2,
+        left,
+        top,
         selectable: true,
         evented: true,
         opacity: 1,
         visible: true,
-        inputWall: '',
+        inputWall: '', // 초기화
     });
 
+    // 🔹 setCoords 생략 시 일부 좌표 반영 안 되므로 즉시 호출
     imageObj.setCoords();
-    canvas.discardActiveObject();
-    canvas.setActiveObject(imageObj);
+
+    // 🔹 기존 렌더 큐 대기 없이 바로 렌더링 (속도 향상)
+    canvas.requestRenderAll(); // renderAll보다 프레임 지연 적음
+
+    // 🔹 선택 처리도 비동기 큐로 (프레임 블로킹 방지)
+    requestAnimationFrame(() => {
+        canvas.discardActiveObject();
+        canvas.setActiveObject(imageObj);
+        canvas.renderAll(); // 보장용
+    });
 };
