@@ -16,6 +16,7 @@ import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveCompon
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect, useCopyNPaste } from './useCanvasHandlers';
 import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
+import useClearPolygonsAfterLoad from './PerspectiveFrame/useClearPolygonsAfterLoad';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
@@ -391,6 +392,11 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             if (wallData?.imageUrl) {
                 obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
             }
+
+            // ❗ 커스텀 속성 추가 (매칭용)
+            obj.wallType = obj.wallType;               // 'front', 'top' 등
+            obj.currentRoom = currentRoomRef.current; // 현재 방 ID
+            obj.currentSide = currentSideRef.current; // 현재 사이드 ID
         });
 
         // front 벽에 이미지 있을 경우 컨트롤러 숨김 처리
@@ -795,11 +801,21 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         setIsPerspectiveUpdated, // 캡쳐 이벤트
     });
 
+    const [isLoadComplete, setIsLoadComplete] = useState(false);
+
         // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
         useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective, currentRoom, currentSide,
             isReadyToLoad ? game : null,
             isReadyToLoad ? imgs : null,
-            isReadyToLoad );
+            isReadyToLoad, 
+            () => {
+                setIsLoadComplete(true);      // 불러오기 끝나면 상태 true
+                console.log("작업물 체크");   // 확인용 로그
+            }
+            );
+
+        // 불러오기 끝난 후 확정된 벽 폴리건 선/채우기 제거
+        useClearPolygonsAfterLoad(canvasInstance, perspectiveRef, isLoadComplete);
 
         // 미리보기용 구성
         const roomKey = Number(currentRoom);
