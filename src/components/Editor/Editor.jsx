@@ -16,6 +16,7 @@ import WebGLPerspectiveComponent from './PerspectiveFrame/WebGLPerspectiveCompon
 import { getShapeByType } from './getShapeByType';
 import { useDeleteKeyHandler, useCanvasZoom, useCanvasClickDeselect, useCopyNPaste } from './useCanvasHandlers';
 import { useWallHoverHandler } from './PerspectiveFrame/useWallHoverhandler';
+import useClearPolygonsAfterLoad from './PerspectiveFrame/useClearPolygonsAfterLoad';
 import { getWallsFromCanvas, getWallVertices } from './PerspectiveFrame/perspectiveBackground';
 import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
@@ -391,6 +392,11 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             if (wallData?.imageUrl) {
                 obj.set({ fill: 'rgba(255,255,255,0)', stroke: 'rgba(255,255,255,0)' });
             }
+
+            // ❗ 커스텀 속성 추가 (매칭용)
+            obj.wallType = obj.wallType;               // 'front', 'top' 등
+            obj.currentRoom = currentRoomRef.current; // 현재 방 ID
+            obj.currentSide = currentSideRef.current; // 현재 사이드 ID
         });
 
         // front 벽에 이미지 있을 경우 컨트롤러 숨김 처리
@@ -741,6 +747,13 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         height = height * ratio;
                     }
 
+                    // 현재 room/side 정보 가져오기
+                    const room = currentRoomRef.current;
+                    const side = currentSideRef.current;
+                    const wallType = hoveredWallLocal.current?.wallType || ''; // 호버된 벽 없으면 빈값
+
+                    console.log('[ADD IMAGE] room:', room, 'side:', side, 'wallType:', wallType, 'file:', addImageFile.name);
+
                     // const fabricImage = new fabric.Image(warpedCanvas, {
                     const fabricImage = new fabric.Image(imgElement, {
                         ...controlStyle,
@@ -750,11 +763,21 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
                         scaleY: height / imgElement.height,
                         imgName: addImageFile.name,
                         imageUrl: e.target.result, // 배경 랜더링용
+                        currentRoom: room,           // 🔹 room 정보 - 멀티룸/멀티사이드
+                        currentSide: side,           // 🔹 side 정보 - 멀티룸/멀티사이드
+                        inputWall: wallType,         // 🔹 wallType - 멀티룸/멀티사이드
                     });
 
                     canvasInstance.current.add(fabricImage);
                     canvasInstance.current.setActiveObject(fabricImage);
                     canvasInstance.current.requestRenderAll();
+
+                    // 🔹 디버깅용 코드 (객체 속성 추적용)
+                    // console.log('[ADD IMAGE] Fabric object properties:', {
+                    //     currentRoom: fabricImage.currentRoom,
+                    //     currentSide: fabricImage.currentSide,
+                    //     inputWall: fabricImage.inputWall,
+                    // });
 
                     // ✅ 여기서 비워주기
                     setAddImageFile(null);
@@ -795,13 +818,27 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
         setIsPerspectiveUpdated, // 캡쳐 이벤트
     });
 
+    const [isLoadComplete, setIsLoadComplete] = useState(false);
+
         // 프레임 컨트롤러 조작시 자동으로 꼭지점 재계산
-        useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective, currentRoom, currentSide);
+        useSyncPerspective(canvasInstance, getWallsFromCanvas, getWallVertices, setPerspective, currentRoom, currentSide,
+            isReadyToLoad ? game : null,
+            isReadyToLoad ? imgs : null,
+            isReadyToLoad, 
+            () => {
+                setIsLoadComplete(true);      // 불러오기 끝나면 상태 true
+                console.log("작업물 체크");   // 확인용 로그
+            }
+            );
+
+        // 불러오기 끝난 후 확정된 벽 폴리건 선/채우기 제거
+        useClearPolygonsAfterLoad(canvasInstance, perspectiveRef, isLoadComplete);
 
         // 미리보기용 구성
         const roomKey = Number(currentRoom);
+        const sideKey = Number(currentSide); // 현재 선택된 사이드 기준
 
-        const previewItems = Object.entries(previewPerspective?.[roomKey]?.[0] || {})
+        const previewItems = Object.entries(previewPerspective?.[roomKey]?.[sideKey] || {})
         .filter(([_, wall]) => wall.imageUrl)
         .map(([wallType, wall]) => ({
             wallType,

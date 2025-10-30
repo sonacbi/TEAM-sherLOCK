@@ -141,7 +141,22 @@ const loadCanvas = async (canvas, imgs, side, controlStyle, addFrame, currentRoo
                         const imgElement = new Image();
                         imgElement.src = URL.createObjectURL(foundImg);
                         imgElement.onload = () => {
-                            shape = new fabric.Image(imgElement, baseProps);
+                            shape = new fabric.Image(imgElement, {
+                                ...baseProps,
+                                currentRoom: currentRoomRef.current,  // 🔹 멀티룸-멀티사이드 추적용
+                                currentSide: currentSideRef.current,  // 🔹 멀티룸-멀티사이드 추적용
+                                inputWall: opt.inputWall || '', // 🔹 멀티룸-멀티사이드 추적용
+                            });
+                            // 디버깅용 -- (기록용이므로 지우셔도 무방)
+                            // console.log(`[${currentRoomRef.current}-${currentSideRef.current}] Fabric image loaded:`, {
+                            //     imgName: opt.imgName,
+                            //     currentRoom: shape.currentRoom,
+                            //     currentSide: shape.currentSide,
+                            //     inputWall: shape.inputWall,
+                            //     width: shape.width,
+                            //     height: shape.height,
+                            // });
+
                             resolve(shape);
                         };
                         imgElement.onerror = () => {

@@ -86,7 +86,20 @@ function ShowPreviewScreen ({canvas, canvasData, canvasIndex, remainingScenes, i
                                     ...baseProps,
                                     selectable: false,
                                     evented: false,
+                                    // 🔹 currentRoom / currentSide / inputWall 추가
+                                    currentRoom: data.roomIndex,
+                                    currentSide: data.sideIndex,
+                                    inputWall: opt.inputWall || '',
                                 });
+
+                                // console.log(`[${canvasIndex}] Fabric image loaded:`, {
+                                //     imgName: opt.imgName,
+                                //     currentRoom: shape.currentRoom,
+                                //     currentSide: shape.currentSide,
+                                //     inputWall: shape.inputWall,
+                                //     width: shape.width,
+                                //     height: shape.height,
+                                // });
                                 resolve(shape);
                             };
                             
