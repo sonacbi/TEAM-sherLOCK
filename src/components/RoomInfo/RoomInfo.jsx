@@ -15,7 +15,7 @@ import limited_icon from '../../assets/images/RoomInfo/limited_icon.png';
 import creator_profile from '../../assets/images/Profile/ex_user_profile.png';
 
 
-function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
+function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail, setIsDirty}) {
   // 타이틀
   const maxBytes = 100;
   const [title, setTitle] = useState(gameInfo?.title ?? '');
@@ -101,21 +101,23 @@ function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
   const {
     handleTitle,
     handleTitleBlur,
-  } = useTitleByteHandler(100, title, setTitle, byteLength, setByteLength, titleMessage, setTitleMessage );
+  } = useTitleByteHandler(100, title, setTitle, byteLength, setByteLength, titleMessage, setTitleMessage, setIsDirty );
 
   // 썸네일 유효성 검사
   const { handleImageUpload, handleAcceptCompression, handleRejectCompression,
-  } = useThumbnailUpload(setThumbnail, thumbnailSrc, setThumbnailSrc, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef);
+  } = useThumbnailUpload(setThumbnail, thumbnailSrc, setThumbnailSrc, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef, setIsDirty);
   
   
   const handleDifficultyClick = (level) => {
     setSelectedDifficulty(level);
     setDifficultyMessage(''); // 선택하면 메시지 지우기
+    setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
   };
 
   const handleThemeClick = (theme) => {
     setSelectedTheme(theme);
     setThemeMessage(''); // 선택하면 메시지 지우기
+    setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
   };
 
   const handleSubmit = (e) => {
@@ -326,6 +328,8 @@ function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
               setInputScript(value);
               setScriptByteLength(bytes);
               setScriptMessage(validateScription(value));
+
+              setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
             }}
             onBlur={() => {
               if (!validateScription(inputScript)) {
@@ -379,6 +383,7 @@ function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
                   setPlaytimeHour(onlyNumbers === '' ? '' : Number(onlyNumbers));
                   const msg = validatePlaytime(onlyNumbers === '' ? '' : Number(onlyNumbers), playtimeMin);
                   setPlaytimeMessage(msg);
+                  setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
                 }}
 
               />
@@ -464,7 +469,7 @@ function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
               
               <input type='radio' name='visibility' value='public'
               checked={selectedVisibility === 'public'} 
-              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
+              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); setIsDirty(true); }} ></input>
               <p>공개</p>
             </div>
 
@@ -475,7 +480,7 @@ function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
 
               <input type='radio' name='visibility' value='unlisted'
               checked={selectedVisibility === 'unlisted'} 
-              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
+              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); setIsDirty(true); }} ></input>
               <p>일부공개</p>
             </div>
 
@@ -486,7 +491,7 @@ function RoomInfo({gameInfo, setGameInfo, thumbnail, setThumbnail}) {
 
               <input type='radio' name='visibility' value='private'
               checked={selectedVisibility === 'private'} 
-              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); }} ></input>
+              onChange={(e) => { setSelectedVisibility(e.target.value); setVisibilityMessage(''); setIsDirty(true); }} ></input>
               <p>비공개</p>
             </div>
           </div>

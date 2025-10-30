@@ -6,7 +6,7 @@ import save_icon from '../../assets/images/EditorPage_img/save_icon.png';
 
 import SherAI from './SherAI';
 
-export default function SaveToServer({game, gameInfo, setGameInfo, setGameZip, thumbnail, imgs}) {
+export default function SaveToServer({game, gameInfo, setGameInfo, setGameZip, thumbnail, imgs, setIsDirty}) {
     function saveFilesToLocal() {
         const zip = new JSZip();
         // ZIP에 파일 추가
@@ -20,6 +20,8 @@ export default function SaveToServer({game, gameInfo, setGameInfo, setGameZip, t
         zip.generateAsync({ type: 'blob' }).then((content) => {
             saveAs(content, 'game.zip');
         });
+
+        setIsDirty(false); // 임시 저장 성공. 플러그 해제
     };
 
     async function uploadFilesToServer() {
@@ -60,6 +62,7 @@ export default function SaveToServer({game, gameInfo, setGameInfo, setGameZip, t
             });
             const data = await res.json();
             console.log("서버 응답:", data);
+            setIsDirty(false); // 서버 저장 성공. 플러그 해제
         } catch (error) {
             console.error("업로드 실패:", error);
         }

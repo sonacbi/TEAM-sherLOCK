@@ -4,12 +4,13 @@
 
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useBeforeUnload } from 'react-router-dom';
 
 import Editor from '../components/Editor/Editor';
 import SaveToServer from '../components/Editor/SaveToServer';
 import EditObjOptions from '../components/Editor/EditObjOptions';
 import RoomInfo from '../components/RoomInfo/RoomInfo';
+import useNavigationGuard from "./hook/useNavigationGuard";
 
 import { GamePnC, Room } from '../../modules/editor/gamePnC';
 import '../styles/EditorPage.css';
@@ -50,7 +51,6 @@ import wall_top_img from '../assets/images/EditorPage_img/wall_top_img.png';
 import frame_trash from '../assets/images/EditorPage_img/trash.png';
 import apple from '../assets/images/EditorPage_img/apple.png';
 
-
 function EditorPage() {
     const canvasRef = useRef(null);
     const canvasInstance = useRef(null);
@@ -84,6 +84,16 @@ function EditorPage() {
 
     const [selectedFrameType, setSelectedFrameType] = useState(null);
 
+    // React Router 이동 방지
+    const [isDirty, setIsDirty] = useState(false);
+
+    useNavigationGuard(isDirty, null, () => {
+        console.log("사용자가 이동을 허용했습니다");
+    });
+    
+    // 새로고침/창닫기 시 경고
+    useBeforeUnload( isDirty ? (event) => event.preventDefault() : null );
+    
     const handleFrameTypeClick = (type) => {
         setSelectedFrameType(type);
         setAddFrameTrigger({ modified: Date.now(), type });
@@ -92,10 +102,12 @@ function EditorPage() {
         setTimeout(() => {
             setSelectedFrameType(null);
         }, 500);
+
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     const [activeWall, setActiveWall] = useState(null);
-
+    
     const handleWallClick = (wall) => {
         setActiveWall(prev => (prev === wall ? null : wall));
     };
@@ -105,22 +117,23 @@ function EditorPage() {
     };
 
     // 디버깅용 보정치 체크 (- 삭제예정 -)
-    const editorContainerRef = useRef(null);
-    const [editorOffset, setEditorOffset] = useState({ left: 0, top: 0 });
+    // const editorContainerRef = useRef(null);
+    // const [editorOffset, setEditorOffset] = useState({ left: 0, top: 0 });
 
-    useEffect(() => {
-        if (editorContainerRef.current) {
-        const rect = editorContainerRef.current.getBoundingClientRect();
-        setEditorOffset({ left: rect.left, top: rect.top });
-        console.log('Editor container offset:', rect.left, rect.top);
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (editorContainerRef.current) {
+    //     const rect = editorContainerRef.current.getBoundingClientRect();
+    //     setEditorOffset({ left: rect.left, top: rect.top });
+    //     console.log('Editor container offset:', rect.left, rect.top);
+    //     }
+    // }, []);
 
     const [textSize, setTextSize] = useState('');
 
     const handleAddTextBox = (size) => {
         setTextSize(size);
         setAddTextTrigger(Date.now());
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     const handleSelectTextTool = () => {
@@ -147,6 +160,7 @@ function EditorPage() {
         setTimeout(() => {
             setAddShapeTrigger(shape); // 선택한 도형 설정
         }, 0);
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     const handleAddImage = () => {
@@ -172,6 +186,8 @@ function EditorPage() {
 
         // 같은 파일 다시 선택 가능하게 하기 → 자식 컴퍼넌트로 이동
         // setTimeout(() => setAddImageFile(null), 0);
+
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
     
     // 버튼 클릭 -> input 열기
@@ -188,6 +204,7 @@ function EditorPage() {
 
         // ✅ 핵심: input value를 수동으로 비워서 같은 파일도 연속 선택 가능하게 함
         e.target.value = '';
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     // 드래그 앤 드롭 : ✅ 버튼과 완전히 동일하게 1개씩 처리
@@ -200,6 +217,7 @@ function EditorPage() {
                 processImageFile(imageFile);
             }
         }
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     const handleAddTimer = () => {
@@ -228,6 +246,8 @@ function EditorPage() {
         if (target1) canvasInstance.current.remove(target1);
         if (target2) canvasInstance.current.remove(target2);
         game.room[currentRoom].side[currentSide].frame = null;
+
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     }
 
     useEffect(()=>console.log('imgs',imgs), [imgs])
@@ -541,15 +561,15 @@ function EditorPage() {
                     <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
                     <img id='logo' src={logo} alt='logo' />
 
-                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => setGameZip(event.target.files[0])}/></div> */}
+                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => {setGameZip(event.target.files[0]); setIsDirty(true);}}/></div>
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
-                        {showRoomInfo && <RoomInfo gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} setThumbnail={setThumbnail}/>}
+                        {showRoomInfo && <RoomInfo gameInfo={gameInfo} setGameInfo={setGameInfo} thumbnail={thumbnail} setThumbnail={setThumbnail} setIsDirty={setIsDirty}/>}
                         <label>제목: {gameInfo?.title ?? '???'}</label>
                     </div>
 
-                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} setGameZip={setGameZip} thumbnail={thumbnail} imgs={imgs}/>
+                    <SaveToServer game={game} gameInfo={gameInfo} setGameInfo={setGameInfo} setGameZip={setGameZip} thumbnail={thumbnail} imgs={imgs} setIsDirty={setIsDirty}/> {/* 저장시 dirty 해제 */}
                 </header>
 
                 <div className='Editor_content'>
@@ -731,12 +751,13 @@ function EditorPage() {
                         addFrameTrigger={addFrameTrigger} 
                         onObjectSelect={setSelectedObject}
                         edgeFrameState={edgeFrameState}
-                        editorOffset={editorOffset}
+                        // editorOffset={editorOffset}
                         setEdgeFrameState={setEdgeFrameState}
                         saveTool={{game, setGame, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics}}
                         gameZip={gameZip} setGameZip={setGameZip}
                         selectedTool={selectedTool}
                         canvases={{canvasRef, canvasInstance}}
+                        setIsDirty={setIsDirty} // 플러그
                     />
                 </div>
             </div>

@@ -22,7 +22,7 @@ import useSyncPerspective from './PerspectiveFrame/useSyncPerspective';
 import PerspectiveSVG from './PerspectiveSVG'; // 룸정보 - 사이드 배경 렌더링용
 import ShowPreviewScreen from './ShowPreviewScreen';
 
-function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases }) {
+function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddImageFile, addImageFile, addFrameTrigger, edgeFrameState, setEdgeFrameState, saveTool, gameZip, onObjectSelect, selectedTool, canvases, setIsDirty }) {
     const {game, setGame, currentRoom, setCurrentRoom, currentSide, setCurrentSide, sideImgSrcs, setSideImgSrcs, imgs, setImgs, setNamedFabrics} = saveTool;
     const {canvasRef, canvasInstance} = canvases;
     const [isReady, setIsReady] = useState(false);
@@ -432,6 +432,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             ...prev, room: [...prev.room, new Room({})]
         })));
         setSideImgSrcs(prev => [...prev, ['']]);
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     }
 
     const handleAddGameSide = (roomIndex) => {
@@ -445,6 +446,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             newData[roomIndex].push('');
             return newData;
         })
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     }
 
     const handleDeleteGameRoom = (roomSide) => {
@@ -500,6 +502,8 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             setIsPerspectiveUpdated(true); // 벽 미리보기 렌더링
             return adjustedPerspective;
         });
+
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     const handleDeleteGameSide = (deletedIndex) => {
@@ -563,6 +567,7 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             };
         });
 
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     };
 
     const handleShowRoom = (roomIndex) => {
@@ -586,6 +591,8 @@ function Editor({ handleDrop, addTextTrigger, textSize, addShapeTrigger, setAddI
             newData.room[roomIndex].name = name;
             return new GamePnC(newData);
         })
+
+        setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
     }
 
     const saveCanvasToSide = useCallback(() => {

@@ -7,7 +7,7 @@ import { GamePnC } from '../../modules/editor/gamePnC';
 import { loadGameZip } from '../../modules/editor/handleGame';
 import WebGLPerspectiveComponent from '../components/Editor/PerspectiveFrame/WebGLPerspectiveComponent'
 import { getWallsFromCanvas, getWallVertices  } from '../components/Editor/PerspectiveFrame/perspectiveBackground';
-import useSyncPerspective from './useSyncPerspective';
+import useSyncPerspective from './hook/useSyncPerspective';
 import useImageResizeWorker from './work/useImageResizeWorker';
 import '../styles/PlayPage.css';
 import { useParams } from 'react-router-dom';

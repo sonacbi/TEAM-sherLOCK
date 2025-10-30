@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 
-export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength, setByteLength, titleMessage, setTitleMessage) => {
+export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength, setByteLength, titleMessage, setTitleMessage, setIsDirty) => {
   const getByteLength = (str) => new TextEncoder().encode(str).length;
 
   const handleTitle = (e) => {
@@ -37,6 +37,8 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
     setByteLength(bytes);
     setTitleMessage(`${maxBytes}byte를 넘길 수 없습니다.`);
   }
+
+  setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
 };
 
 
@@ -54,7 +56,7 @@ export const useTitleByteHandler = (maxBytes = 100, title, setTitle, byteLength,
 };
 
 export const useThumbnailUpload =
-(setThumbnail, thumbnailSrc, setThumbnailSrc, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef) => {
+(setThumbnail, thumbnailSrc, setThumbnailSrc, thumbnailMessage, setThumbnailMessage, showModal, setShowModal, showConfirmButtons, setShowConfirmButtons, modalFadeOut, setModalFadeOut, modalMessage, setModalMessage, modalTimeoutRef, setIsDirty) => {
 
   const compressedDataRef = useRef(null);
   const compressedDataUrlRef = useRef(null);
@@ -154,6 +156,8 @@ export const useThumbnailUpload =
       img.src = event.target.result;
     };
     reader.readAsDataURL(file);
+
+    setIsDirty(true); // ✅ 변경 발생 → Dirty 처리
   };
 
   const showAutoModal = (message) => {
