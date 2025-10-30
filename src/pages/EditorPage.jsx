@@ -84,13 +84,14 @@ function EditorPage() {
 
     const [selectedFrameType, setSelectedFrameType] = useState(null);
 
+    
     // React Router 이동 방지
     const [isDirty, setIsDirty] = useState(false);
-
-    useNavigationGuard(isDirty, null, () => {
+    const onConfirm = () => {
         console.log("사용자가 이동을 허용했습니다");
-    });
-    
+    };
+    const { exit } = useNavigationGuard(isDirty, setIsDirty, onConfirm);
+
     // 새로고침/창닫기 시 경고
     useBeforeUnload( isDirty ? (event) => event.preventDefault() : null );
     
@@ -558,10 +559,11 @@ function EditorPage() {
         <>
             <div className='EditorPage_wrap'>   
                 <header className='Editor_header'>
-                    <h3 onClick={() => navigate(-1)}>◀ EXIT</h3>
+                    <h3 onClick={exit}>◀ EXIT</h3>
+
                     <img id='logo' src={logo} alt='logo' />
 
-                    <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => {setGameZip(event.target.files[0]); setIsDirty(true);}}/></div>
+                    {/* <div style={{color: "white"}}>게임 불러오기<input type='file' accept='.zip' style={{backgroundColor: "red"}} onChange={(event) => {setGameZip(event.target.files[0]); setIsDirty(true);}}/></div> */}
 
                     <div className='room_status_title' ref={roomInfoRef}>
                         <p className='room_status_button' onClick={toggleRoomInfo}>방탈출 정보</p>
